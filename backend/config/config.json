@@ -1,0 +1,61 @@
+{
+  "development": {
+    "username": "tradeconnect_user",
+    "password": "your_secure_password",
+    "database": "tradeconnect_dev",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "dialect": "postgres",
+    "logging": true,
+    "pool": {
+      "max": 20,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+    },
+    "define": {
+      "timestamps": true,
+      "underscored": true
+    }
+  },
+  "test": {
+    "username": "tradeconnect_user",
+    "password": "your_secure_password",
+    "database": "tradeconnect_test",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "dialect": "postgres",
+    "logging": false,
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+    },
+    "define": {
+      "timestamps": true,
+      "underscored": true
+    }
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "logging": false,
+    "pool": {
+      "max": 50,
+      "min": 5,
+      "acquire": 30000,
+      "idle": 10000
+    },
+    "define": {
+      "timestamps": true,
+      "underscored": true
+    },
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  }
+}
