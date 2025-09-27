@@ -29,6 +29,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { User } from '../models/User';
+import { Session } from '../models/Session';
 
 /**
  * Controlador para manejo de autenticación y autorización
@@ -549,19 +550,6 @@ export class AuthController {
    */
   async enable2FA(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          message: 'Datos de entrada inválidos',
-          error: 'VALIDATION_ERROR',
-          details: errors.array(),
-          timestamp: new Date().toISOString()
-        });
-        return;
-      }
-
-      const { method, phoneNumber, emailAddress, verificationCode } = req.body;
       const userId = req.user?.id;
 
       if (!userId) {
@@ -574,13 +562,19 @@ export class AuthController {
         return;
       }
 
-      // TODO: Implementar lógica de habilitación 2FA en authService
-      res.status(HTTP_STATUS.NOT_IMPLEMENTED).json({
-        success: false,
-        message: 'Funcionalidad no implementada aún',
-        error: 'NOT_IMPLEMENTED',
-        timestamp: new Date().toISOString()
-      });
+      const clientInfo = {
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown'
+      };
+
+      const result = await authService.enable2FA(userId, clientInfo);
+
+      const statusCode = result.success ? HTTP_STATUS.OK :
+        result.error === 'EMAIL_NOT_VERIFIED' ? HTTP_STATUS.BAD_REQUEST :
+        result.error === '2FA_ALREADY_ENABLED' ? HTTP_STATUS.BAD_REQUEST :
+        HTTP_STATUS.INTERNAL_SERVER_ERROR;
+
+      res.status(statusCode).json(result);
 
     } catch (error) {
       logger.error('Error en enable 2FA controller:', error);
@@ -638,13 +632,41 @@ export class AuthController {
         return;
       }
 
-      // TODO: Implementar lógica de verificación 2FA en authService
-      res.status(HTTP_STATUS.NOT_IMPLEMENTED).json({
-        success: false,
-        message: 'Funcionalidad no implementada aún',
-        error: 'NOT_IMPLEMENTED',
-        timestamp: new Date().toISOString()
-      });
+      // Buscar sesión para obtener userId
+      const session = await Session.findBySessionId(sessionId);
+      if (!session) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Sesión inválida',
+          error: 'INVALID_SESSION',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const isValid = await authService.verify2FA(session.userId, code);
+
+      if (isValid) {
+        // Marcar sesión como autenticada con 2FA
+        await session.update({ loginMethod: '2fa' });
+
+        res.status(HTTP_STATUS.OK).json({
+          success: true,
+          message: 'Código 2FA verificado exitosamente',
+          data: {
+            sessionId,
+            requires2FA: false
+          },
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Código 2FA inválido',
+          error: 'INVALID_2FA_CODE',
+          timestamp: new Date().toISOString()
+        });
+      }
 
     } catch (error) {
       logger.error('Error en verify 2FA controller:', error);
@@ -713,13 +735,19 @@ export class AuthController {
         return;
       }
 
-      // TODO: Implementar lógica de deshabilitación 2FA en authService
-      res.status(HTTP_STATUS.NOT_IMPLEMENTED).json({
-        success: false,
-        message: 'Funcionalidad no implementada aún',
-        error: 'NOT_IMPLEMENTED',
-        timestamp: new Date().toISOString()
-      });
+      const clientInfo = {
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown'
+      };
+
+      const result = await authService.disable2FA(userId, password, clientInfo);
+
+      const statusCode = result.success ? HTTP_STATUS.OK :
+        result.error === 'INVALID_CREDENTIALS' ? HTTP_STATUS.UNAUTHORIZED :
+        result.error === '2FA_NOT_ENABLED' ? HTTP_STATUS.BAD_REQUEST :
+        HTTP_STATUS.INTERNAL_SERVER_ERROR;
+
+      res.status(statusCode).json(result);
 
     } catch (error) {
       logger.error('Error en disable 2FA controller:', error);
@@ -1021,6 +1049,42 @@ export class AuthController {
   // ====================================================================
   // MÉTODOS DE 2FA ADICIONALES
   // ====================================================================
+
+  /**
+   * Enviar código OTP para 2FA
+   */
+  async sendOTPCode(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const clientInfo = {
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown'
+      };
+
+      const result = await authService.sendOTPCode(userId, clientInfo);
+      res.status(HTTP_STATUS.OK).json(result);
+
+    } catch (error) {
+      logger.error('Error enviando código OTP:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
 
   /**
    * Obtener códigos de respaldo 2FA

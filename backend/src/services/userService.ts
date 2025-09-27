@@ -327,6 +327,7 @@ export class UserService {
         isEmailVerified: true, // Los usuarios creados por admin están verificados
         isActive: true,
         is2FAEnabled: false,
+        otpAttempts: 0,
         failedLoginAttempts: 0,
         isAccountLocked: false,
         marketingAccepted: false,

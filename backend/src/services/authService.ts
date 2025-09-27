@@ -427,6 +427,7 @@ export class AuthService {
         isEmailVerified: false,
         isActive: true,
         is2FAEnabled: false,
+        otpAttempts: 0,
         failedLoginAttempts: 0,
         isAccountLocked: false,
         timezone: 'America/Guatemala',
@@ -820,6 +821,222 @@ export class AuthService {
   }
 
   // ====================================================================
+  // MÉTODOS DE AUTENTICACIÓN DE DOS FACTORES (2FA)
+  // ====================================================================
+
+  /**
+   * Habilita 2FA para un usuario
+   */
+  async enable2FA(userId: number, clientInfo: {
+    ipAddress: string;
+    userAgent: string;
+  }): Promise<ApiResponse<{ message: string }>> {
+    try {
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return {
+          success: false,
+          message: 'Usuario no encontrado',
+          error: AuthErrorCode.USER_NOT_FOUND,
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      if (!user.isEmailVerified) {
+        return {
+          success: false,
+          message: 'Debe verificar su email antes de habilitar 2FA',
+          error: 'EMAIL_NOT_VERIFIED',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      if (user.is2FAEnabled) {
+        return {
+          success: false,
+          message: '2FA ya está habilitado',
+          error: '2FA_ALREADY_ENABLED',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Habilitar 2FA
+      user.is2FAEnabled = true;
+      await user.save();
+
+      await this.logSecurityEvent('2fa_enabled', {
+        userId,
+        email: user.email,
+        ipAddress: clientInfo.ipAddress,
+        userAgent: clientInfo.userAgent
+      });
+
+      return {
+        success: true,
+        message: 'Autenticación de dos factores habilitada exitosamente',
+        data: {
+          message: '2FA ha sido habilitado. Ahora necesitarás códigos OTP enviados por email para iniciar sesión.'
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error enabling 2FA:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Deshabilita 2FA para un usuario
+   */
+  async disable2FA(userId: number, password: string, clientInfo: {
+    ipAddress: string;
+    userAgent: string;
+  }): Promise<ApiResponse<{ message: string }>> {
+    try {
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return {
+          success: false,
+          message: 'Usuario no encontrado',
+          error: AuthErrorCode.USER_NOT_FOUND,
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar contraseña actual
+      const isPasswordValid = await user.validatePassword(password);
+      if (!isPasswordValid) {
+        return {
+          success: false,
+          message: 'Contraseña incorrecta',
+          error: AuthErrorCode.INVALID_CREDENTIALS,
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      if (!user.is2FAEnabled) {
+        return {
+          success: false,
+          message: '2FA no está habilitado',
+          error: '2FA_NOT_ENABLED',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Deshabilitar 2FA y limpiar datos OTP
+      user.is2FAEnabled = false;
+      user.otpCode = undefined;
+      user.otpExpires = undefined;
+      user.otpAttempts = 0;
+      await user.save();
+
+      await this.logSecurityEvent('2fa_disabled', {
+        userId,
+        email: user.email,
+        ipAddress: clientInfo.ipAddress,
+        userAgent: clientInfo.userAgent
+      });
+
+      return {
+        success: true,
+        message: 'Autenticación de dos factores deshabilitada exitosamente',
+        data: {
+          message: '2FA ha sido deshabilitado. Ya no necesitarás códigos OTP para iniciar sesión.'
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error disabling 2FA:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Genera y envía código OTP para 2FA
+   */
+  async sendOTPCode(userId: number, clientInfo: {
+    ipAddress: string;
+    userAgent: string;
+  }): Promise<ApiResponse<{ message: string; expiresIn: number }>> {
+    try {
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return {
+          success: false,
+          message: 'Usuario no encontrado',
+          error: AuthErrorCode.USER_NOT_FOUND,
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      if (!user.is2FAEnabled) {
+        return {
+          success: false,
+          message: '2FA no está habilitado para este usuario',
+          error: '2FA_NOT_ENABLED',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Generar código OTP de 6 dígitos
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Establecer expiración (5 minutos)
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+      // Guardar código en la base de datos
+      user.otpCode = otpCode;
+      user.otpExpires = expiresAt;
+      user.otpAttempts = 0;
+      await user.save();
+
+      // Enviar código por email
+      await emailService.sendOTP(user.email, {
+        firstName: user.firstName,
+        otpCode
+      });
+
+      await this.logSecurityEvent('2fa_code_sent', {
+        userId,
+        email: user.email,
+        ipAddress: clientInfo.ipAddress,
+        userAgent: clientInfo.userAgent
+      });
+
+      return {
+        success: true,
+        message: 'Código OTP enviado exitosamente',
+        data: {
+          message: 'Se ha enviado un código de verificación a tu email',
+          expiresIn: 300 // 5 minutos en segundos
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error sending OTP code:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  // ====================================================================
   // MÉTODOS DE VERIFICACIÓN DE EMAIL
   // ====================================================================
 
@@ -1197,10 +1414,45 @@ export class AuthService {
   /**
    * Verifica código 2FA
    */
-  private async verify2FA(userId: number, code: string): Promise<boolean> {
-    // TODO: Implementar verificación 2FA con TwoFactorAuth model
-    // Por ahora retorna true para testing
-    return true;
+  async verify2FA(userId: number, code: string): Promise<boolean> {
+    try {
+      const user = await User.findByPk(userId);
+      if (!user || !user.is2FAEnabled) {
+        return false;
+      }
+
+      // Verificar si el código ha expirado
+      if (!user.otpCode || !user.otpExpires || new Date() > user.otpExpires) {
+        return false;
+      }
+
+      // Verificar el código
+      if (user.otpCode !== code) {
+        // Incrementar contador de intentos fallidos
+        user.otpAttempts += 1;
+
+        // Bloquear OTP después de 3 intentos fallidos
+        if (user.otpAttempts >= 3) {
+          user.otpCode = undefined;
+          user.otpExpires = undefined;
+          user.otpAttempts = 0;
+        }
+
+        await user.save();
+        return false;
+      }
+
+      // Código válido - limpiar datos OTP
+      user.otpCode = undefined;
+      user.otpExpires = undefined;
+      user.otpAttempts = 0;
+      await user.save();
+
+      return true;
+    } catch (error) {
+      logger.error('Error verifying 2FA:', error);
+      return false;
+    }
   }
 
   /**

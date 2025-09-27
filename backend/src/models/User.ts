@@ -51,6 +51,9 @@ export interface UserAttributes {
   isEmailVerified: boolean;
   isActive: boolean;
   is2FAEnabled: boolean;
+  otpCode?: string;
+  otpExpires?: Date;
+  otpAttempts: number;
   failedLoginAttempts: number;
   lastFailedLogin?: Date;
   isAccountLocked: boolean;
@@ -326,6 +329,25 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
     comment: 'Indica si 2FA está habilitado'
   })
   declare is2FAEnabled: boolean;
+
+  @Column({
+    type: DataType.STRING(6),
+    comment: 'Código OTP actual para 2FA'
+  })
+  declare otpCode?: string;
+
+  @Column({
+    type: DataType.DATE,
+    comment: 'Expiración del código OTP'
+  })
+  declare otpExpires?: Date;
+
+  @Default(0)
+  @Column({
+    type: DataType.INTEGER,
+    comment: 'Número de intentos fallidos de OTP'
+  })
+  declare otpAttempts: number;
 
   @Default(0)
   @Column({

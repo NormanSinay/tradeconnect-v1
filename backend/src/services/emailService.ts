@@ -14,6 +14,11 @@ interface PasswordResetData {
   resetUrl: string;
 }
 
+interface OTPData {
+  firstName: string;
+  otpCode: string;
+}
+
 class EmailService {
   private transporter: nodemailer.Transporter;
 
@@ -71,6 +76,33 @@ class EmailService {
       logger.info(`Password reset email sent to ${to}`);
     } catch (error) {
       logger.error('Error sending password reset email:', error);
+      throw error;
+    }
+  }
+
+  async sendOTP(to: string, data: OTPData): Promise<void> {
+    try {
+      const mailOptions = {
+        from: process.env.SMTP_FROM || 'noreply@tradeconnect.gt',
+        to,
+        subject: 'Código de verificación 2FA - TradeConnect',
+        html: `
+          <h1>Verificación de dos factores</h1>
+          <p>Hola ${data.firstName},</p>
+          <p>Tu código de verificación de dos factores es:</p>
+          <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px;">
+            ${data.otpCode}
+          </div>
+          <p>Este código expirará en 5 minutos.</p>
+          <p>Si no solicitaste este código, ignora este mensaje.</p>
+          <p style="color: #666; font-size: 12px;">TradeConnect - Plataforma E-commerce</p>
+        `
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      logger.info(`2FA OTP sent to ${to}`);
+    } catch (error) {
+      logger.error('Error sending 2FA OTP:', error);
       throw error;
     }
   }

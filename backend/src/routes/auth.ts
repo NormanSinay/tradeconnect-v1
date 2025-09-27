@@ -329,6 +329,25 @@ router.post('/2fa/enable', enable2FAValidation, authController.enable2FA);
  */
 router.post('/2fa/disable', disable2FAValidation, authController.disable2FA);
 
+/**
+ * @swagger
+ * /api/auth/2fa/send-otp:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Enviar código OTP para 2FA
+ *     description: Envía un código OTP por email para autenticación de dos factores
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Código OTP enviado exitosamente
+ *       400:
+ *         description: 2FA no habilitado
+ *       401:
+ *         description: No autorizado
+ */
+router.post('/2fa/send-otp', authController.sendOTPCode);
+
 // ====================================================================
 // RUTAS DE PERFIL DE USUARIO
 // ====================================================================
