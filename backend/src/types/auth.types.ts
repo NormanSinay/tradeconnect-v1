@@ -220,6 +220,30 @@ export interface UserUpdateData {
   cui?: string;
 }
 
+/**
+ * Interface para creación de usuario (admin)
+ */
+export interface CreateUserData {
+  /** Email del usuario */
+  email: string;
+  /** Contraseña del usuario */
+  password: string;
+  /** Nombre completo */
+  firstName: string;
+  /** Apellido completo */
+  lastName: string;
+  /** Teléfono del usuario */
+  phone?: string;
+  /** NIT guatemalteco */
+  nit?: string;
+  /** CUI guatemalteco */
+  cui?: string;
+  /** Rol del usuario */
+  role?: UserRole;
+  /** Indica si está activo */
+  isActive?: boolean;
+}
+
 // ====================================================================
 // INTERFACES DE SESIÓN
 // ====================================================================

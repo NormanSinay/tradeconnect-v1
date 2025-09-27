@@ -329,4 +329,403 @@ router.post('/2fa/enable', enable2FAValidation, authController.enable2FA);
  */
 router.post('/2fa/disable', disable2FAValidation, authController.disable2FA);
 
+// ====================================================================
+// RUTAS DE PERFIL DE USUARIO
+// ====================================================================
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   get:
+ *     tags: [Authentication]
+ *     summary: Obtener perfil del usuario autenticado
+ *     description: Obtiene información completa del perfil del usuario
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil obtenido exitosamente
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/profile', authController.getProfile);
+
+/**
+ * @swagger
+ * /api/auth/profile/avatar:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Subir avatar del usuario
+ *     description: Sube una nueva imagen de avatar para el usuario
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: Archivo de imagen del avatar
+ *     responses:
+ *       200:
+ *         description: Avatar subido exitosamente
+ *       400:
+ *         description: Archivo inválido
+ *       401:
+ *         description: No autorizado
+ */
+router.post('/profile/avatar', authController.uploadAvatar);
+
+/**
+ * @swagger
+ * /api/auth/profile/avatar:
+ *   delete:
+ *     tags: [Authentication]
+ *     summary: Eliminar avatar del usuario
+ *     description: Elimina la imagen de avatar actual del usuario
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Avatar eliminado exitosamente
+ *       401:
+ *         description: No autorizado
+ */
+router.delete('/profile/avatar', authController.deleteAvatar);
+
+// ====================================================================
+// RUTAS DE GESTIÓN DE SESIONES
+// ====================================================================
+
+/**
+ * @swagger
+ * /api/auth/sessions:
+ *   get:
+ *     tags: [Authentication]
+ *     summary: Listar sesiones activas
+ *     description: Obtiene todas las sesiones activas del usuario autenticado
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sesiones obtenidas exitosamente
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/sessions', authController.getUserSessions);
+
+/**
+ * @swagger
+ * /api/auth/sessions/terminate-others:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Terminar otras sesiones
+ *     description: Termina todas las sesiones activas excepto la actual
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Otras sesiones terminadas exitosamente
+ *       401:
+ *         description: No autorizado
+ */
+router.post('/sessions/terminate-others', authController.terminateOtherSessions);
+
+/**
+ * @swagger
+ * /api/auth/sessions/stats:
+ *   get:
+ *     tags: [Authentication]
+ *     summary: Obtener estadísticas de sesiones
+ *     description: Obtiene estadísticas de uso de sesiones (requiere permisos administrativos)
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Estadísticas obtenidas exitosamente
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ */
+router.get('/sessions/stats', authController.getSessionStats);
+
+// ====================================================================
+// RUTAS DE 2FA ADICIONALES
+// ====================================================================
+
+/**
+ * @swagger
+ * /api/auth/2fa/backup-codes:
+ *   get:
+ *     tags: [Authentication]
+ *     summary: Obtener códigos de respaldo 2FA
+ *     description: Obtiene los códigos de respaldo para autenticación de dos factores
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Códigos de respaldo obtenidos
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/2fa/backup-codes', authController.getBackupCodes);
+
+// ====================================================================
+// RUTAS DE ADMINISTRACIÓN DE USUARIOS
+// ====================================================================
+
+/**
+ * @swagger
+ * /api/auth/users:
+ *   get:
+ *     tags: [Authentication]
+ *     summary: Listar usuarios (admin)
+ *     description: Obtiene lista paginada de usuarios (requiere permisos administrativos)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Elementos por página
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Término de búsqueda
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *         description: Filtrar por rol
+ *     responses:
+ *       200:
+ *         description: Usuarios obtenidos exitosamente
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ */
+router.get('/users', authController.getUsers);
+
+/**
+ * @swagger
+ * /api/auth/users:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Crear usuario (admin)
+ *     description: Crea un nuevo usuario en el sistema (requiere permisos administrativos)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateUserRequest'
+ *     responses:
+ *       201:
+ *         description: Usuario creado exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ */
+router.post('/users', authController.createUser);
+
+/**
+ * @swagger
+ * /api/auth/users/{id}:
+ *   put:
+ *     tags: [Authentication]
+ *     summary: Actualizar usuario (admin)
+ *     description: Actualiza información de un usuario específico (requiere permisos administrativos)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateUserRequest'
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.put('/users/:id', [
+  param('id').isInt({ min: 1 }).withMessage('ID de usuario debe ser un número entero positivo')
+], authController.updateUser);
+
+/**
+ * @swagger
+ * /api/auth/users/{id}:
+ *   delete:
+ *     tags: [Authentication]
+ *     summary: Eliminar usuario (admin)
+ *     description: Elimina un usuario del sistema (soft delete, requiere permisos administrativos)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario
+ *     responses:
+ *       200:
+ *         description: Usuario eliminado exitosamente
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.delete('/users/:id', [
+  param('id').isInt({ min: 1 }).withMessage('ID de usuario debe ser un número entero positivo')
+], authController.deleteUser);
+
+/**
+ * @swagger
+ * /api/auth/users/{id}/audit:
+ *   get:
+ *     tags: [Authentication]
+ *     summary: Obtener auditoría de usuario (admin)
+ *     description: Obtiene el historial de auditoría de un usuario específico (requiere permisos administrativos)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Elementos por página
+ *     responses:
+ *       200:
+ *         description: Auditoría obtenida exitosamente
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.get('/users/:id/audit', [
+  param('id').isInt({ min: 1 }).withMessage('ID de usuario debe ser un número entero positivo')
+], authController.getUserAudit);
+
+// ====================================================================
+// RUTAS DE VALIDACIÓN GUATEMALA
+// ====================================================================
+
+/**
+ * @swagger
+ * /api/auth/validate/cui:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Validar CUI guatemalteco
+ *     description: Valida que un CUI tenga exactamente 13 dígitos
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - cui
+ *             properties:
+ *               cui:
+ *                 type: string
+ *                 description: CUI a validar
+ *                 example: "1234567890123"
+ *     responses:
+ *       200:
+ *         description: CUI válido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "CUI válido"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     cui:
+ *                       type: string
+ *                       example: "1234567890123"
+ *                     isValid:
+ *                       type: boolean
+ *                       example: true
+ *       400:
+ *         description: CUI inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "CUI debe tener exactamente 13 dígitos"
+ *                 error:
+ *                   type: string
+ *                   example: "INVALID_CUI_FORMAT"
+ */
+router.post('/validate/cui', [
+  body('cui')
+    .notEmpty()
+    .withMessage('CUI es requerido')
+    .isLength({ min: 13, max: 13 })
+    .withMessage('CUI debe tener exactamente 13 dígitos')
+    .isNumeric()
+    .withMessage('CUI debe contener solo números')
+], authController.validateCui);
+
 export default router;

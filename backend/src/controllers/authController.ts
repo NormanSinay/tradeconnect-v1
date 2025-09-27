@@ -10,16 +10,25 @@
 import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { authService } from '../services/authService';
-import { 
-  LoginCredentials, 
-  RegisterData, 
-  ChangePasswordData, 
+import { userService } from '../services/userService';
+import { sessionService } from '../services/sessionService';
+import {
+  LoginCredentials,
+  RegisterData,
+  ChangePasswordData,
   ResetPasswordData,
-  AuthenticatedRequest 
+  AuthenticatedRequest,
+  AuthUser,
+  CreateUserData,
+  UserUpdateData
 } from '../types/auth.types';
-import { HTTP_STATUS } from '../utils/constants';
+import { HTTP_STATUS, PERMISSIONS } from '../utils/constants';
 import { logger } from '../utils/logger';
 import { ApiResponse } from '../types/global.types';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { User } from '../models/User';
 
 /**
  * Controlador para manejo de autenticación y autorización
@@ -791,6 +800,550 @@ export class AuthController {
 
     } catch (error) {
       logger.error('Error en change password controller:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // ====================================================================
+  // MÉTODOS DE PERFIL DE USUARIO
+  // ====================================================================
+
+  /**
+   * Obtener perfil del usuario autenticado
+   */
+  async getProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await userService.getUserProfile(userId);
+
+      const statusCode = result.success ? HTTP_STATUS.OK : HTTP_STATUS.NOT_FOUND;
+      res.status(statusCode).json(result);
+
+    } catch (error) {
+      logger.error('Error obteniendo perfil:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Subir avatar del usuario
+   */
+  async uploadAvatar(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      // TODO: Implementar subida de archivos con multer
+      res.status(HTTP_STATUS.NOT_IMPLEMENTED).json({
+        success: false,
+        message: 'Funcionalidad no implementada aún',
+        error: 'NOT_IMPLEMENTED',
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error subiendo avatar:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Eliminar avatar del usuario
+   */
+  async deleteAvatar(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await userService.updateUserProfile(userId, { avatar: undefined }, {
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown'
+      });
+
+      const statusCode = result.success ? HTTP_STATUS.OK : HTTP_STATUS.INTERNAL_SERVER_ERROR;
+      res.status(statusCode).json(result);
+
+    } catch (error) {
+      logger.error('Error eliminando avatar:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // ====================================================================
+  // MÉTODOS DE GESTIÓN DE SESIONES
+  // ====================================================================
+
+  /**
+   * Obtener sesiones activas del usuario
+   */
+  async getUserSessions(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await authService.getUserSessions(userId);
+      res.status(HTTP_STATUS.OK).json(result);
+
+    } catch (error) {
+      logger.error('Error obteniendo sesiones:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Terminar otras sesiones del usuario
+   */
+  async terminateOtherSessions(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      const currentSessionId = req.sessionId;
+
+      if (!userId || !currentSessionId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await authService.terminateAllOtherSessions(userId, currentSessionId);
+      res.status(HTTP_STATUS.OK).json(result);
+
+    } catch (error) {
+      logger.error('Error terminando otras sesiones:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Obtener estadísticas de sesiones
+   */
+  async getSessionStats(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Verificar permisos administrativos
+      const userPermissions = req.user?.permissions || [];
+      const hasPermission = userPermissions.includes(PERMISSIONS.VIEW_AUDIT_LOGS);
+
+      if (!hasPermission) {
+        res.status(HTTP_STATUS.FORBIDDEN).json({
+          success: false,
+          message: 'Permisos insuficientes',
+          error: 'FORBIDDEN',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await sessionService.getSessionStats();
+      res.status(HTTP_STATUS.OK).json(result);
+
+    } catch (error) {
+      logger.error('Error obteniendo estadísticas de sesiones:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // ====================================================================
+  // MÉTODOS DE 2FA ADICIONALES
+  // ====================================================================
+
+  /**
+   * Obtener códigos de respaldo 2FA
+   */
+  async getBackupCodes(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      // TODO: Implementar obtención de códigos de respaldo
+      res.status(HTTP_STATUS.NOT_IMPLEMENTED).json({
+        success: false,
+        message: 'Funcionalidad no implementada aún',
+        error: 'NOT_IMPLEMENTED',
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error obteniendo códigos de respaldo:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // ====================================================================
+  // MÉTODOS DE ADMINISTRACIÓN DE USUARIOS
+  // ====================================================================
+
+  /**
+   * Listar usuarios (admin)
+   */
+  async getUsers(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Verificar permisos administrativos
+      const userPermissions = req.user?.permissions || [];
+      const hasPermission = userPermissions.includes(PERMISSIONS.READ_USER);
+
+      if (!hasPermission) {
+        res.status(HTTP_STATUS.FORBIDDEN).json({
+          success: false,
+          message: 'Permisos insuficientes',
+          error: 'FORBIDDEN',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const { page, limit, search, role, isActive } = req.query;
+
+      const filters = {
+        page: page ? parseInt(page as string) : 1,
+        limit: limit ? parseInt(limit as string) : 20,
+        search: search as string,
+        role: role as string,
+        isActive: isActive ? isActive === 'true' : undefined
+      };
+
+      const result = await userService.getUsers(filters);
+      res.status(HTTP_STATUS.OK).json(result);
+
+    } catch (error) {
+      logger.error('Error obteniendo usuarios:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Crear usuario (admin)
+   */
+  async createUser(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Verificar permisos administrativos
+      const userPermissions = req.user?.permissions || [];
+      const hasPermission = userPermissions.includes(PERMISSIONS.CREATE_USER);
+
+      if (!hasPermission) {
+        res.status(HTTP_STATUS.FORBIDDEN).json({
+          success: false,
+          message: 'Permisos insuficientes',
+          error: 'FORBIDDEN',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          error: 'VALIDATION_ERROR',
+          details: errors.array(),
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userData: CreateUserData = req.body;
+      const result = await userService.createUser(userData);
+
+      const statusCode = result.success ? HTTP_STATUS.CREATED : HTTP_STATUS.BAD_REQUEST;
+      res.status(statusCode).json(result);
+
+    } catch (error) {
+      logger.error('Error creando usuario:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Actualizar usuario (admin)
+   */
+  async updateUser(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Verificar permisos administrativos
+      const userPermissions = req.user?.permissions || [];
+      const hasPermission = userPermissions.includes(PERMISSIONS.UPDATE_USER);
+
+      if (!hasPermission) {
+        res.status(HTTP_STATUS.FORBIDDEN).json({
+          success: false,
+          message: 'Permisos insuficientes',
+          error: 'FORBIDDEN',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          error: 'VALIDATION_ERROR',
+          details: errors.array(),
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = parseInt(req.params.id);
+      const updateData: UserUpdateData = req.body;
+
+      const result = await userService.updateUser(userId, updateData, req.user?.id || 0);
+
+      const statusCode = result.success ? HTTP_STATUS.OK :
+        result.error === 'USER_NOT_FOUND' ? HTTP_STATUS.NOT_FOUND :
+        HTTP_STATUS.BAD_REQUEST;
+
+      res.status(statusCode).json(result);
+
+    } catch (error) {
+      logger.error('Error actualizando usuario:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Eliminar usuario (admin)
+   */
+  async deleteUser(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Verificar permisos administrativos
+      const userPermissions = req.user?.permissions || [];
+      const hasPermission = userPermissions.includes(PERMISSIONS.DELETE_USER);
+
+      if (!hasPermission) {
+        res.status(HTTP_STATUS.FORBIDDEN).json({
+          success: false,
+          message: 'Permisos insuficientes',
+          error: 'FORBIDDEN',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = parseInt(req.params.id);
+      const result = await userService.deleteUser(userId, req.user?.id || 0);
+
+      const statusCode = result.success ? HTTP_STATUS.OK :
+        result.error === 'USER_NOT_FOUND' ? HTTP_STATUS.NOT_FOUND :
+        HTTP_STATUS.BAD_REQUEST;
+
+      res.status(statusCode).json(result);
+
+    } catch (error) {
+      logger.error('Error eliminando usuario:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Obtener auditoría de usuario (admin)
+   */
+  async getUserAudit(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Verificar permisos administrativos
+      const userPermissions = req.user?.permissions || [];
+      const hasPermission = userPermissions.includes(PERMISSIONS.VIEW_USER_AUDIT);
+
+      if (!hasPermission) {
+        res.status(HTTP_STATUS.FORBIDDEN).json({
+          success: false,
+          message: 'Permisos insuficientes',
+          error: 'FORBIDDEN',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = parseInt(req.params.id);
+      const { page, limit } = req.query;
+
+      const pagination = {
+        page: page ? parseInt(page as string) : 1,
+        limit: limit ? parseInt(limit as string) : 20
+      };
+
+      const result = await userService.getUserAudit(userId, pagination);
+      res.status(HTTP_STATUS.OK).json(result);
+
+    } catch (error) {
+      logger.error('Error obteniendo auditoría de usuario:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // ====================================================================
+  // MÉTODOS DE VALIDACIÓN GUATEMALA
+  // ====================================================================
+
+  /**
+   * Validar CUI guatemalteco
+   */
+  async validateCui(req: Request, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'CUI debe tener exactamente 13 dígitos',
+          error: 'INVALID_CUI_FORMAT',
+          details: errors.array(),
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const { cui } = req.body;
+
+      // Validar formato básico (ya validado por express-validator)
+      const isValidFormat = /^\d{13}$/.test(cui);
+
+      if (!isValidFormat) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'CUI debe tener exactamente 13 dígitos',
+          error: 'INVALID_CUI_FORMAT',
+          data: { cui, isValid: false },
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      // Verificar si ya está registrado
+      const existingUser = await User.findOne({
+        where: { cui },
+        paranoid: false
+      });
+
+      const isAvailable = !existingUser;
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: isAvailable ? 'CUI válido y disponible' : 'CUI válido pero ya registrado',
+        data: {
+          cui,
+          isValid: true,
+          isAvailable
+        },
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error validando CUI:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Error interno del servidor',

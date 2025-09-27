@@ -14,6 +14,7 @@ import { AuditLog } from '../models/AuditLog';
 import { UserProfile, UserUpdateData } from '../types/auth.types';
 import { ApiResponse } from '../types/global.types';
 import { logger } from '../utils/logger';
+import { Op } from 'sequelize';
 
 /**
  * Servicio para manejo de operaciones de usuario
@@ -577,6 +578,68 @@ export class UserService {
 
     } catch (error) {
       logger.error('Error obteniendo estadísticas de usuarios:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Obtiene auditoría de un usuario específico
+   */
+  async getUserAudit(
+    userId: number,
+    pagination: { page?: number; limit?: number }
+  ): Promise<ApiResponse<{
+    logs: any[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  }>> {
+    try {
+      const { page = 1, limit = 20 } = pagination;
+      const offset = (page - 1) * limit;
+
+      const { rows: logs, count: total } = await AuditLog.findAndCountAll({
+        where: {
+          [Op.or]: [
+            { userId },
+            { resourceId: userId.toString() }
+          ]
+        },
+        limit,
+        offset,
+        order: [['createdAt', 'DESC']],
+        attributes: [
+          'id', 'action', 'resource', 'resourceId', 'oldValues',
+          'newValues', 'ipAddress', 'userAgent', 'severity',
+          'status', 'createdAt'
+        ]
+      });
+
+      return {
+        success: true,
+        message: 'Auditoría de usuario obtenida exitosamente',
+        data: {
+          logs,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+          }
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error obteniendo auditoría de usuario:', error);
       return {
         success: false,
         message: 'Error interno del servidor',
