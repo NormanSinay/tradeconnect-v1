@@ -4,6 +4,7 @@
  * @author TradeConnect Team
  */
 
+import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -16,6 +17,15 @@ import { testRedisConnection } from './config/redis';
 import sequelize from './config/database';
 import { requestLogger, errorLogger } from './middleware/logging.middleware';
 import { successResponse, errorResponse } from './utils/common.utils';
+
+// Importar rutas
+import authRoutes from './routes/auth';
+import userRoutes from './routes/users';
+import sessionRoutes from './routes/sessions';
+
+// Importar middleware de seguridad
+import { generalLimiter, authLimiter } from './middleware/rateLimiting';
+import { basicSecurity, publicSecurity, protectedSecurity } from './middleware/security';
 
 const app = express();
 const PORT = config.PORT;
@@ -48,6 +58,19 @@ app.use(cors({
 }));
 
 app.use(compression());
+
+// ====================================================================
+// MIDDLEWARES DE SEGURIDAD Y RATE LIMITING
+// ====================================================================
+
+// Rate limiting general
+app.use(generalLimiter);
+
+// Middleware de seguridad básico
+app.use(basicSecurity);
+
+// Rate limiting específico para autenticación
+app.use('/api/auth', authLimiter);
 
 // ====================================================================
 // MIDDLEWARES DE PARSING
@@ -205,6 +228,19 @@ app.get('/info', (req, res) => {
     }
   }, 'System information retrieved successfully'));
 });
+
+// ====================================================================
+// RUTAS DE LA API
+// ====================================================================
+
+// Rutas de autenticación
+app.use('/api/auth', authRoutes);
+
+// Rutas de usuarios
+app.use('/api/users', userRoutes);
+
+// Rutas de sesiones
+app.use('/api/sessions', sessionRoutes);
 
 // ====================================================================
 // MANEJO DE ERRORES 404

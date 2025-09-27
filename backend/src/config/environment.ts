@@ -47,6 +47,11 @@ export const config = {
     password: process.env.FEL_PASSWORD
   },
   
+  // App
+  app: {
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
+  },
+
   // Logging
   logging: {
     level: process.env.LOG_LEVEL || 'debug',
