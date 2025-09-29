@@ -16,7 +16,7 @@ module.exports = {
         unique: true,
         comment: 'Nombre técnico del permiso'
       },
-      displayName: {
+      display_name: {
         type: Sequelize.STRING(150),
         allowNull: false,
         comment: 'Nombre visible del permiso'
@@ -36,25 +36,25 @@ module.exports = {
         allowNull: false,
         comment: 'Acción permitida sobre el recurso'
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true,
         comment: 'Indica si el permiso está activo'
       },
-      isSystem: {
+      is_system: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
         comment: 'Indica si es un permiso del sistema (no eliminable)'
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         comment: 'Fecha de creación'
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -76,11 +76,11 @@ module.exports = {
       name: 'permissions_action_index'
     });
 
-    await queryInterface.addIndex('permissions', ['isActive'], {
+    await queryInterface.addIndex('permissions', ['is_active'], {
       name: 'permissions_is_active_index'
     });
 
-    await queryInterface.addIndex('permissions', ['isSystem'], {
+    await queryInterface.addIndex('permissions', ['is_system'], {
       name: 'permissions_is_system_index'
     });
   },

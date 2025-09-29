@@ -10,7 +10,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      userId: {
+      user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -26,7 +26,7 @@ module.exports = {
         allowNull: true,
         comment: 'Secret para TOTP'
       },
-      backupCodes: {
+      backup_codes: {
         type: Sequelize.TEXT,
         allowNull: true,
         comment: 'Códigos de respaldo hasheados (JSON)'
@@ -37,51 +37,51 @@ module.exports = {
         defaultValue: 'totp',
         comment: 'Método de 2FA utilizado'
       },
-      phoneNumber: {
+      phone_number: {
         type: Sequelize.STRING(20),
         allowNull: true,
         comment: 'Número de teléfono para SMS 2FA'
       },
-      emailAddress: {
+      email_address: {
         type: Sequelize.STRING(255),
         allowNull: true,
         comment: 'Email alternativo para 2FA'
       },
-      isEnabled: {
+      is_enabled: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
         comment: 'Indica si 2FA está habilitado'
       },
-      isLocked: {
+      is_locked: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
         comment: 'Indica si está bloqueado por intentos fallidos'
       },
-      failedAttempts: {
+      failed_attempts: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 0,
         comment: 'Número de intentos fallidos'
       },
-      lastUsedAt: {
+      last_used_at: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Última vez que se usó 2FA'
       },
-      lockedUntil: {
+      locked_until: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha hasta la que está bloqueado'
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         comment: 'Fecha de creación'
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -90,12 +90,12 @@ module.exports = {
     });
 
     // Índices
-    await queryInterface.addIndex('two_factor_auth', ['userId'], {
+    await queryInterface.addIndex('two_factor_auth', ['user_id'], {
       unique: true,
       name: 'two_factor_auth_user_id_unique'
     });
 
-    await queryInterface.addIndex('two_factor_auth', ['isEnabled'], {
+    await queryInterface.addIndex('two_factor_auth', ['is_enabled'], {
       name: 'two_factor_auth_is_enabled_index'
     });
 
@@ -103,7 +103,7 @@ module.exports = {
       name: 'two_factor_auth_method_index'
     });
 
-    await queryInterface.addIndex('two_factor_auth', ['isLocked'], {
+    await queryInterface.addIndex('two_factor_auth', ['is_locked'], {
       name: 'two_factor_auth_is_locked_index'
     });
   },

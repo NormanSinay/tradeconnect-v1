@@ -37,7 +37,7 @@ export const config = {
   
   // Encriptación
   encryption: {
-    key: process.env.ENCRYPTION_KEY || 'your-32-character-key-here'
+    key: process.env.ENCRYPTION_KEY || '9d3a42cb733dce131f2ee6fcc64b324d22fa0a725087f6f7f039149112b61a75698d8b98f6f209764ffef5085030d759994dbb66573a4dc29c9e003cdfe3adb4'
   },
   
   // FEL Guatemala

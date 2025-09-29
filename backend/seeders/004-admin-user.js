@@ -9,18 +9,18 @@ module.exports = {
     const adminUser = {
       email: 'admin@tradeconnect.gt',
       password: await bcrypt.hash('Admin123!', 12), // Contraseña hasheada
-      firstName: 'Super',
-      lastName: 'Administrador',
+      first_name: 'Super',
+      last_name: 'Administrador',
       phone: '+502 1234-5678',
       nit: '12345678-9',
       cui: '1234567890101',
-      isEmailVerified: true,
-      isActive: true,
-      is2FAEnabled: false,
+      is_email_verified: true,
+      is_active: true,
+      is_2fa_enabled: false,
       timezone: 'America/Guatemala',
       locale: 'es',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     };
 
     // Insertar usuario administrador
@@ -37,12 +37,12 @@ module.exports = {
 
     if (superAdminRole && superAdminRole.length > 0) {
       await queryInterface.bulkInsert('user_roles', [{
-        userId: userId,
-        roleId: superAdminRole[0].id,
-        isActive: true,
+        user_id: userId,
+        role_id: superAdminRole[0].id,
+        is_active: true,
         reason: 'Usuario administrador por defecto',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }], {});
     }
 

@@ -10,7 +10,7 @@ module.exports = {
     );
 
     const permissions = await queryInterface.sequelize.query(
-      'SELECT id, name FROM permissions WHERE "isActive" = true',
+      'SELECT id, name FROM permissions WHERE is_active = true',
       { type: Sequelize.QueryTypes.SELECT }
     );
 

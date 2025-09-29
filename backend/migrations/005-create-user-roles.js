@@ -10,7 +10,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      userId: {
+      user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -21,7 +21,7 @@ module.exports = {
         onDelete: 'CASCADE',
         comment: 'ID del usuario'
       },
-      roleId: {
+      role_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -32,7 +32,7 @@ module.exports = {
         onDelete: 'CASCADE',
         comment: 'ID del rol'
       },
-      assignedBy: {
+      assigned_by: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
@@ -43,12 +43,12 @@ module.exports = {
         onDelete: 'SET NULL',
         comment: 'ID del usuario que asignó el rol'
       },
-      expiresAt: {
+      expires_at: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha de expiración del rol (opcional)'
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true,
@@ -59,13 +59,13 @@ module.exports = {
         allowNull: true,
         comment: 'Razón de la asignación'
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         comment: 'Fecha de creación'
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -74,35 +74,35 @@ module.exports = {
     });
 
     // Índices
-    await queryInterface.addIndex('user_roles', ['userId'], {
+    await queryInterface.addIndex('user_roles', ['user_id'], {
       name: 'user_roles_user_id_index'
     });
 
-    await queryInterface.addIndex('user_roles', ['roleId'], {
+    await queryInterface.addIndex('user_roles', ['role_id'], {
       name: 'user_roles_role_id_index'
     });
 
-    await queryInterface.addIndex('user_roles', ['assignedBy'], {
+    await queryInterface.addIndex('user_roles', ['assigned_by'], {
       name: 'user_roles_assigned_by_index'
     });
 
-    await queryInterface.addIndex('user_roles', ['isActive'], {
+    await queryInterface.addIndex('user_roles', ['is_active'], {
       name: 'user_roles_is_active_index'
     });
 
-    await queryInterface.addIndex('user_roles', ['expiresAt'], {
+    await queryInterface.addIndex('user_roles', ['expires_at'], {
       name: 'user_roles_expires_at_index'
     });
 
     // Índice único compuesto para evitar duplicados activos
-    await queryInterface.addIndex('user_roles', ['userId', 'roleId'], {
+    await queryInterface.addIndex('user_roles', ['user_id', 'role_id'], {
       unique: true,
-      where: { isActive: true },
+      where: { is_active: true },
       name: 'user_roles_user_role_active_unique'
     });
 
     // Índice compuesto para consultas comunes
-    await queryInterface.addIndex('user_roles', ['userId', 'isActive'], {
+    await queryInterface.addIndex('user_roles', ['user_id', 'is_active'], {
       name: 'user_roles_user_active_index'
     });
   },

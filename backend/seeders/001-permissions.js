@@ -8,676 +8,676 @@ module.exports = {
       // === GESTIÓN DE USUARIOS ===
       {
         name: 'create_user',
-        displayName: 'Crear Usuario',
+        display_name: 'Crear Usuario',
         description: 'Permite crear nuevos usuarios en el sistema',
         resource: 'user',
         action: 'create',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'read_user',
-        displayName: 'Ver Usuario',
+        display_name: 'Ver Usuario',
         description: 'Permite ver información de usuarios',
         resource: 'user',
         action: 'read',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'update_user',
-        displayName: 'Actualizar Usuario',
+        display_name: 'Actualizar Usuario',
         description: 'Permite actualizar información de usuarios',
         resource: 'user',
         action: 'update',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'delete_user',
-        displayName: 'Eliminar Usuario',
+        display_name: 'Eliminar Usuario',
         description: 'Permite eliminar usuarios del sistema',
         resource: 'user',
         action: 'delete',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_user_roles',
-        displayName: 'Gestionar Roles de Usuario',
+        display_name: 'Gestionar Roles de Usuario',
         description: 'Permite asignar y revocar roles a usuarios',
         resource: 'user',
         action: 'manage_roles',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_user_audit',
-        displayName: 'Ver Auditoría de Usuario',
+        display_name: 'Ver Auditoría de Usuario',
         description: 'Permite ver logs de auditoría de usuarios',
         resource: 'user',
         action: 'view_audit',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === GESTIÓN DE EVENTOS ===
       {
         name: 'create_event',
-        displayName: 'Crear Evento',
+        display_name: 'Crear Evento',
         description: 'Permite crear nuevos eventos',
         resource: 'event',
         action: 'create',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'read_event',
-        displayName: 'Ver Evento',
+        display_name: 'Ver Evento',
         description: 'Permite ver información de eventos',
         resource: 'event',
         action: 'read',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'update_event',
-        displayName: 'Actualizar Evento',
+        display_name: 'Actualizar Evento',
         description: 'Permite actualizar información de eventos',
         resource: 'event',
         action: 'update',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'delete_event',
-        displayName: 'Eliminar Evento',
+        display_name: 'Eliminar Evento',
         description: 'Permite eliminar eventos',
         resource: 'event',
         action: 'delete',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'publish_event',
-        displayName: 'Publicar Evento',
+        display_name: 'Publicar Evento',
         description: 'Permite publicar eventos para que sean visibles',
         resource: 'event',
         action: 'publish',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_event_capacity',
-        displayName: 'Gestionar Capacidad de Evento',
+        display_name: 'Gestionar Capacidad de Evento',
         description: 'Permite gestionar la capacidad y límites de eventos',
         resource: 'event',
         action: 'manage_capacity',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'duplicate_event',
-        displayName: 'Duplicar Evento',
+        display_name: 'Duplicar Evento',
         description: 'Permite duplicar eventos existentes',
         resource: 'event',
         action: 'duplicate',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === GESTIÓN DE SPEAKERS ===
       {
         name: 'create_speaker',
-        displayName: 'Crear Speaker',
+        display_name: 'Crear Speaker',
         description: 'Permite crear nuevos speakers',
         resource: 'speaker',
         action: 'create',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'read_speaker',
-        displayName: 'Ver Speaker',
+        display_name: 'Ver Speaker',
         description: 'Permite ver información de speakers',
         resource: 'speaker',
         action: 'read',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'update_speaker',
-        displayName: 'Actualizar Speaker',
+        display_name: 'Actualizar Speaker',
         description: 'Permite actualizar información de speakers',
         resource: 'speaker',
         action: 'update',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'delete_speaker',
-        displayName: 'Eliminar Speaker',
+        display_name: 'Eliminar Speaker',
         description: 'Permite eliminar speakers',
         resource: 'speaker',
         action: 'delete',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_speaker_contracts',
-        displayName: 'Gestionar Contratos de Speaker',
+        display_name: 'Gestionar Contratos de Speaker',
         description: 'Permite gestionar contratos y acuerdos con speakers',
         resource: 'speaker',
         action: 'manage_contracts',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === SISTEMA DE INSCRIPCIONES ===
       {
         name: 'create_registration',
-        displayName: 'Crear Inscripción',
+        display_name: 'Crear Inscripción',
         description: 'Permite crear nuevas inscripciones',
         resource: 'registration',
         action: 'create',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'read_registration',
-        displayName: 'Ver Inscripción',
+        display_name: 'Ver Inscripción',
         description: 'Permite ver información de inscripciones',
         resource: 'registration',
         action: 'read',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'update_registration',
-        displayName: 'Actualizar Inscripción',
+        display_name: 'Actualizar Inscripción',
         description: 'Permite actualizar información de inscripciones',
         resource: 'registration',
         action: 'update',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'delete_registration',
-        displayName: 'Eliminar Inscripción',
+        display_name: 'Eliminar Inscripción',
         description: 'Permite eliminar inscripciones',
         resource: 'registration',
         action: 'delete',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_group_registration',
-        displayName: 'Gestionar Inscripciones Grupales',
+        display_name: 'Gestionar Inscripciones Grupales',
         description: 'Permite gestionar inscripciones para grupos',
         resource: 'registration',
         action: 'manage_group',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === PROCESAMIENTO DE PAGOS ===
       {
         name: 'process_payment',
-        displayName: 'Procesar Pago',
+        display_name: 'Procesar Pago',
         description: 'Permite procesar transacciones de pago',
         resource: 'payment',
         action: 'process',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'refund_payment',
-        displayName: 'Reembolsar Pago',
+        display_name: 'Reembolsar Pago',
         description: 'Permite procesar reembolsos de pagos',
         resource: 'payment',
         action: 'refund',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_payments',
-        displayName: 'Ver Pagos',
+        display_name: 'Ver Pagos',
         description: 'Permite ver información de pagos',
         resource: 'payment',
         action: 'view',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_payment_methods',
-        displayName: 'Gestionar Métodos de Pago',
+        display_name: 'Gestionar Métodos de Pago',
         description: 'Permite gestionar métodos y configuraciones de pago',
         resource: 'payment',
         action: 'manage_methods',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_financial_reports',
-        displayName: 'Ver Reportes Financieros',
+        display_name: 'Ver Reportes Financieros',
         description: 'Permite ver reportes y análisis financieros',
         resource: 'payment',
         action: 'view_reports',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === FACTURACIÓN FEL ===
       {
         name: 'generate_invoice',
-        displayName: 'Generar Factura',
+        display_name: 'Generar Factura',
         description: 'Permite generar facturas electrónicas',
         resource: 'invoice',
         action: 'generate',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'cancel_invoice',
-        displayName: 'Anular Factura',
+        display_name: 'Anular Factura',
         description: 'Permite anular facturas electrónicas',
         resource: 'invoice',
         action: 'cancel',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_invoices',
-        displayName: 'Ver Facturas',
+        display_name: 'Ver Facturas',
         description: 'Permite ver información de facturas',
         resource: 'invoice',
         action: 'view',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_fel_config',
-        displayName: 'Gestionar Configuración FEL',
+        display_name: 'Gestionar Configuración FEL',
         description: 'Permite gestionar configuración de facturación electrónica',
         resource: 'invoice',
         action: 'manage_config',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'retry_fel_operations',
-        displayName: 'Reintentar Operaciones FEL',
+        display_name: 'Reintentar Operaciones FEL',
         description: 'Permite reintentar operaciones de facturación fallidas',
         resource: 'invoice',
         action: 'retry',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === PROMOCIONES Y DESCUENTOS ===
       {
         name: 'create_promotion',
-        displayName: 'Crear Promoción',
+        display_name: 'Crear Promoción',
         description: 'Permite crear nuevas promociones y descuentos',
         resource: 'promotion',
         action: 'create',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'read_promotion',
-        displayName: 'Ver Promoción',
+        display_name: 'Ver Promoción',
         description: 'Permite ver información de promociones',
         resource: 'promotion',
         action: 'read',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'update_promotion',
-        displayName: 'Actualizar Promoción',
+        display_name: 'Actualizar Promoción',
         description: 'Permite actualizar información de promociones',
         resource: 'promotion',
         action: 'update',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'delete_promotion',
-        displayName: 'Eliminar Promoción',
+        display_name: 'Eliminar Promoción',
         description: 'Permite eliminar promociones',
         resource: 'promotion',
         action: 'delete',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'apply_discount',
-        displayName: 'Aplicar Descuento',
+        display_name: 'Aplicar Descuento',
         description: 'Permite aplicar descuentos a inscripciones',
         resource: 'promotion',
         action: 'apply',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === CÓDIGOS QR Y ACCESO ===
       {
         name: 'generate_qr',
-        displayName: 'Generar Código QR',
+        display_name: 'Generar Código QR',
         description: 'Permite generar códigos QR para acceso',
         resource: 'qr',
         action: 'generate',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'validate_qr',
-        displayName: 'Validar Código QR',
+        display_name: 'Validar Código QR',
         description: 'Permite validar códigos QR de acceso',
         resource: 'qr',
         action: 'validate',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_access_control',
-        displayName: 'Gestionar Control de Acceso',
+        display_name: 'Gestionar Control de Acceso',
         description: 'Permite gestionar configuraciones de control de acceso',
         resource: 'qr',
         action: 'manage_access',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_attendance',
-        displayName: 'Ver Asistencia',
+        display_name: 'Ver Asistencia',
         description: 'Permite ver registros de asistencia',
         resource: 'qr',
         action: 'view_attendance',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === CERTIFICADOS ===
       {
         name: 'generate_certificate',
-        displayName: 'Generar Certificado',
+        display_name: 'Generar Certificado',
         description: 'Permite generar certificados de participación',
         resource: 'certificate',
         action: 'generate',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_certificate',
-        displayName: 'Ver Certificado',
+        display_name: 'Ver Certificado',
         description: 'Permite ver información de certificados',
         resource: 'certificate',
         action: 'view',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_certificate_templates',
-        displayName: 'Gestionar Plantillas de Certificado',
+        display_name: 'Gestionar Plantillas de Certificado',
         description: 'Permite gestionar plantillas de certificados',
         resource: 'certificate',
         action: 'manage_templates',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'verify_certificate',
-        displayName: 'Verificar Certificado',
+        display_name: 'Verificar Certificado',
         description: 'Permite verificar autenticidad de certificados',
         resource: 'certificate',
         action: 'verify',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === NOTIFICACIONES ===
       {
         name: 'send_notification',
-        displayName: 'Enviar Notificación',
+        display_name: 'Enviar Notificación',
         description: 'Permite enviar notificaciones a usuarios',
         resource: 'notification',
         action: 'send',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_email_templates',
-        displayName: 'Gestionar Plantillas de Email',
+        display_name: 'Gestionar Plantillas de Email',
         description: 'Permite gestionar plantillas de correos electrónicos',
         resource: 'notification',
         action: 'manage_templates',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_notification_logs',
-        displayName: 'Ver Logs de Notificaciones',
+        display_name: 'Ver Logs de Notificaciones',
         description: 'Permite ver logs de envío de notificaciones',
         resource: 'notification',
         action: 'view_logs',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === REPORTES Y ANALYTICS ===
       {
         name: 'view_reports',
-        displayName: 'Ver Reportes',
+        display_name: 'Ver Reportes',
         description: 'Permite ver reportes del sistema',
         resource: 'report',
         action: 'view',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'export_reports',
-        displayName: 'Exportar Reportes',
+        display_name: 'Exportar Reportes',
         description: 'Permite exportar reportes del sistema',
         resource: 'report',
         action: 'export',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_analytics',
-        displayName: 'Ver Analytics',
+        display_name: 'Ver Analytics',
         description: 'Permite ver análisis y métricas del sistema',
         resource: 'report',
         action: 'view_analytics',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_dashboards',
-        displayName: 'Gestionar Dashboards',
+        display_name: 'Gestionar Dashboards',
         description: 'Permite gestionar dashboards y visualizaciones',
         resource: 'report',
         action: 'manage_dashboards',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === CONFIGURACIÓN SISTEMA ===
       {
         name: 'manage_system_config',
-        displayName: 'Gestionar Configuración del Sistema',
+        display_name: 'Gestionar Configuración del Sistema',
         description: 'Permite gestionar configuraciones del sistema',
         resource: 'system',
         action: 'manage_config',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_audit_logs',
-        displayName: 'Ver Logs de Auditoría',
+        display_name: 'Ver Logs de Auditoría',
         description: 'Permite ver logs de auditoría del sistema',
         resource: 'system',
         action: 'view_audit',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manage_integrations',
-        displayName: 'Gestionar Integraciones',
+        display_name: 'Gestionar Integraciones',
         description: 'Permite gestionar integraciones con servicios externos',
         resource: 'system',
         action: 'manage_integrations',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
 
       // === WORKFLOWS ===
       {
         name: 'create_workflow',
-        displayName: 'Crear Workflow',
+        display_name: 'Crear Workflow',
         description: 'Permite crear nuevos workflows',
         resource: 'workflow',
         action: 'create',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'execute_workflow',
-        displayName: 'Ejecutar Workflow',
+        display_name: 'Ejecutar Workflow',
         description: 'Permite ejecutar workflows',
         resource: 'workflow',
         action: 'execute',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'view_workflow_history',
-        displayName: 'Ver Historial de Workflow',
+        display_name: 'Ver Historial de Workflow',
         description: 'Permite ver historial de ejecución de workflows',
         resource: 'workflow',
         action: 'view_history',
-        isActive: true,
-        isSystem: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
       }
     ];
 

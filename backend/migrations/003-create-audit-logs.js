@@ -10,7 +10,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      userId: {
+      user_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
@@ -31,27 +31,27 @@ module.exports = {
         allowNull: false,
         comment: 'Recurso afectado'
       },
-      resourceId: {
+      resource_id: {
         type: Sequelize.STRING(100),
         allowNull: true,
         comment: 'ID específico del recurso'
       },
-      oldValues: {
+      old_values: {
         type: Sequelize.TEXT,
         allowNull: true,
         comment: 'Valores anteriores (JSON)'
       },
-      newValues: {
+      new_values: {
         type: Sequelize.TEXT,
         allowNull: true,
         comment: 'Valores nuevos (JSON)'
       },
-      ipAddress: {
+      ip_address: {
         type: Sequelize.INET,
         allowNull: false,
         comment: 'Dirección IP del cliente'
       },
-      userAgent: {
+      user_agent: {
         type: Sequelize.TEXT,
         allowNull: false,
         comment: 'User-Agent del navegador'
@@ -78,13 +78,13 @@ module.exports = {
         allowNull: true,
         comment: 'Descripción del evento'
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         comment: 'Fecha de creación'
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -93,7 +93,7 @@ module.exports = {
     });
 
     // Índices
-    await queryInterface.addIndex('audit_logs', ['userId'], {
+    await queryInterface.addIndex('audit_logs', ['user_id'], {
       name: 'audit_logs_user_id_index'
     });
 
@@ -105,6 +105,10 @@ module.exports = {
       name: 'audit_logs_resource_index'
     });
 
+    await queryInterface.addIndex('audit_logs', ['resource_id'], {
+      name: 'audit_logs_resource_id_index'
+    });
+
     await queryInterface.addIndex('audit_logs', ['severity'], {
       name: 'audit_logs_severity_index'
     });
@@ -113,11 +117,11 @@ module.exports = {
       name: 'audit_logs_status_index'
     });
 
-    await queryInterface.addIndex('audit_logs', ['createdAt'], {
+    await queryInterface.addIndex('audit_logs', ['created_at'], {
       name: 'audit_logs_created_at_index'
     });
 
-    await queryInterface.addIndex('audit_logs', ['ipAddress'], {
+    await queryInterface.addIndex('audit_logs', ['ip_address'], {
       name: 'audit_logs_ip_address_index'
     });
 
@@ -126,7 +130,7 @@ module.exports = {
       name: 'audit_logs_resource_action_index'
     });
 
-    await queryInterface.addIndex('audit_logs', ['userId', 'createdAt'], {
+    await queryInterface.addIndex('audit_logs', ['user_id', 'created_at'], {
       name: 'audit_logs_user_created_at_index'
     });
   },

@@ -21,12 +21,12 @@ module.exports = {
         allowNull: false,
         comment: 'Contraseña hasheada'
       },
-      firstName: {
+      first_name: {
         type: Sequelize.STRING(50),
         allowNull: false,
         comment: 'Nombre del usuario'
       },
-      lastName: {
+      last_name: {
         type: Sequelize.STRING(50),
         allowNull: false,
         comment: 'Apellido del usuario'
@@ -51,109 +51,109 @@ module.exports = {
         allowNull: true,
         comment: 'CUI guatemalteco'
       },
-      isEmailVerified: {
+      is_email_verified: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
         comment: 'Indica si el email está verificado'
       },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true,
         comment: 'Indica si la cuenta está activa'
       },
-      is2FAEnabled: {
+      is_2fa_enabled: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
         comment: 'Indica si 2FA está habilitado'
       },
-      otpCode: {
+      otp_code: {
         type: Sequelize.STRING(6),
         allowNull: true,
         comment: 'Código OTP actual para 2FA'
       },
-      otpExpires: {
+      otp_expires: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Expiración del código OTP'
       },
-      otpAttempts: {
+      otp_attempts: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 0,
         comment: 'Número de intentos fallidos de OTP'
       },
-      failedLoginAttempts: {
+      failed_login_attempts: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 0,
         comment: 'Número de intentos fallidos de login'
       },
-      lastFailedLogin: {
+      last_failed_login: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha del último intento fallido de login'
       },
-      isAccountLocked: {
+      is_account_locked: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
         comment: 'Indica si la cuenta está bloqueada'
       },
-      accountLockedAt: {
+      account_locked_at: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha cuando se bloqueó la cuenta'
       },
-      lockExpiresAt: {
+      lock_expires_at: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha cuando expira el bloqueo'
       },
-      lastLoginAt: {
+      last_login_at: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha del último login exitoso'
       },
-      lastLoginIP: {
+      last_login_ip: {
         type: Sequelize.INET,
         allowNull: true,
         comment: 'IP del último login'
       },
-      passwordChangedAt: {
+      password_changed_at: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha del último cambio de contraseña'
       },
-      emailVerificationToken: {
+      email_verification_token: {
         type: Sequelize.STRING(255),
         allowNull: true,
         comment: 'Token para verificación de email'
       },
-      emailVerificationExpires: {
+      email_verification_expires: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Expiración del token de verificación de email'
       },
-      passwordResetToken: {
+      password_reset_token: {
         type: Sequelize.STRING(255),
         allowNull: true,
         comment: 'Token para reset de contraseña'
       },
-      passwordResetExpires: {
+      password_reset_expires: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Expiración del token de reset de contraseña'
       },
-      marketingAccepted: {
+      marketing_accepted: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
         comment: 'Aceptó emails de marketing'
       },
-      termsAcceptedAt: {
+      terms_accepted_at: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha de aceptación de términos y condiciones'
@@ -170,19 +170,19 @@ module.exports = {
         defaultValue: 'es',
         comment: 'Idioma preferido'
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         comment: 'Fecha de creación'
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         comment: 'Fecha de actualización'
       },
-      deletedAt: {
+      deleted_at: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha de eliminación (soft delete)'
@@ -205,15 +205,15 @@ module.exports = {
       name: 'users_cui_index'
     });
 
-    await queryInterface.addIndex('users', ['isActive'], {
+    await queryInterface.addIndex('users', ['is_active'], {
       name: 'users_is_active_index'
     });
 
-    await queryInterface.addIndex('users', ['lastLoginAt'], {
+    await queryInterface.addIndex('users', ['last_login_at'], {
       name: 'users_last_login_at_index'
     });
 
-    await queryInterface.addIndex('users', ['createdAt'], {
+    await queryInterface.addIndex('users', ['created_at'], {
       name: 'users_created_at_index'
     });
   },
