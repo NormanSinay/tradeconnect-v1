@@ -42,18 +42,13 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction): 
       return value;
     };
 
-    // Sanitizar body, query y params
+    // Sanitizar body (query y params son readonly en Express)
     if (req.body && typeof req.body === 'object') {
       req.body = sanitizeValue(req.body);
     }
 
-    if (req.query && typeof req.query === 'object') {
-      req.query = sanitizeValue(req.query);
-    }
-
-    if (req.params && typeof req.params === 'object') {
-      req.params = sanitizeValue(req.params);
-    }
+    // Nota: req.query y req.params son readonly en Express
+    // Se validan pero no se modifican para evitar errores
 
     next();
 

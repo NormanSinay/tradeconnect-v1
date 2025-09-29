@@ -29,9 +29,9 @@ export const config = {
   
   // JWT
   jwt: {
-    secret: process.env.JWT_SECRET || 'your-secret-key',
+    secret: process.env.JWT_SECRET || 'c0fcd5432f88e5fae798739e84b0893e4cef17338a57a60c48be11e3a2c837d458c6c2eb326577fcd66de2068ffb0ce038eb2eba4cc5cf9abb17e325b33620ed',
     expire: process.env.JWT_EXPIRE || '7d',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || '75f8318b3f1b2089fa01663ea389e741722cf7859d946f7d52189ff6417da32429aeae6c50f9198a8dbf91e27f70f88dde095ee6551f417230be7b6789466b47',
     refreshExpire: process.env.JWT_REFRESH_EXPIRE || '30d'
   },
   

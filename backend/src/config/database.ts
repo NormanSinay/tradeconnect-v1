@@ -3,7 +3,7 @@
  * @version 1.0.0
  */
 
-import { Sequelize } from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
 
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'tradeconnect_dev',

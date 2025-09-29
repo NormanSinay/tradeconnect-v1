@@ -18,6 +18,9 @@ import sequelize from './config/database';
 import { requestLogger, errorLogger } from './middleware/logging.middleware';
 import { successResponse, errorResponse } from './utils/common.utils';
 
+// Importar modelos (esto los registra con Sequelize)
+import './models';
+
 // Importar rutas
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
@@ -326,20 +329,20 @@ const startServer = async (): Promise<void> => {
     // Iniciar servidor
     const server = app.listen(PORT, () => {
       console.log(`
-╭─────────────────────────────────────────────────────────────╮
-│                                                             │
-│  🚀 TradeConnect Platform Server Started Successfully!     │
-│                                                             │
-│  📍 Environment: ${config.NODE_ENV.padEnd(44)} │
-│  🔗 URL: http://localhost:${PORT}${' '.repeat(33)} │
-│  📝 Health Check: http://localhost:${PORT}/health${' '.repeat(25)} │
-│  📊 System Info: http://localhost:${PORT}/info${' '.repeat(26)} │
-│  📚 API Documentation: http://localhost:${PORT}/api/docs${' '.repeat(19)} │
+╭─────────────────────────────────────────────────────────────────────────────╮
+│                                                                             │
+│  🚀 TradeConnect Platform Server Started Successfully!                      │
+│                                                                             │
+│  📍 Environment: ${config.NODE_ENV.padEnd(44)}                              │
+│  🔗 URL: http://localhost:${PORT}${' '.repeat(33)}                          │
+│  📝 Health Check: http://localhost:${PORT}/health${' '.repeat(25)}          │
+│  📊 System Info: http://localhost:${PORT}/info${' '.repeat(26)}             │
+│  📚 API Documentation: http://localhost:${PORT}/api/docs${' '.repeat(19)}   │
 │  ⏰ Started at: ${new Date().toISOString().padEnd(37)} │
-│                                                             │
-│  🎯 Ready to accept requests!                              │
-│                                                             │
-╰─────────────────────────────────────────────────────────────╯
+│                                                                              │
+│  🎯 Ready to accept requests!                                               │
+│                                                                             │
+╰─────────────────────────────────────────────────────────────────────────────╯
       `);
     });
     

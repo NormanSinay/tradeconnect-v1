@@ -58,6 +58,36 @@ export interface SessionAttributes {
  */
 export interface SessionCreationAttributes extends Omit<SessionAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
+@Table({
+  tableName: 'sessions',
+  modelName: 'Session',
+  timestamps: true,
+  underscored: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['session_id']
+    },
+    {
+      fields: ['user_id']
+    },
+    {
+      fields: ['ip_address']
+    },
+    {
+      fields: ['is_active']
+    },
+    {
+      fields: ['last_activity']
+    },
+    {
+      fields: ['expires_at']
+    },
+    {
+      fields: ['created_at']
+    }
+  ]
+})
 export class Session extends Model<SessionAttributes, SessionCreationAttributes> implements SessionAttributes {
   @PrimaryKey
   @AutoIncrement
