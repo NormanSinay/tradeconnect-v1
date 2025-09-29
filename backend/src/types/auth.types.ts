@@ -95,7 +95,7 @@ export interface AuthUser {
   /** Indica si el email está verificado */
   isEmailVerified: boolean;
   /** Indica si 2FA está habilitado */
-  is2FAEnabled: boolean;
+  is2faEnabled: boolean;
   /** Indica si el usuario está activo */
   isActive: boolean;
   /** Avatar del usuario (URL) */
@@ -185,7 +185,7 @@ export interface UserProfile {
   /** Indica si el email está verificado */
   isEmailVerified: boolean;
   /** Indica si 2FA está habilitado */
-  is2FAEnabled: boolean;
+  is2faEnabled: boolean;
   /** Indica si el usuario está activo */
   isActive: boolean;
   /** Última conexión */
@@ -371,7 +371,7 @@ export type SecurityEventType =
  */
 export interface UserSecuritySettings {
   /** Indica si 2FA está habilitado */
-  is2FAEnabled: boolean;
+  is2faEnabled: boolean;
   /** Intentos fallidos de login */
   failedLoginAttempts: number;
   /** Timestamp del último intento fallido */

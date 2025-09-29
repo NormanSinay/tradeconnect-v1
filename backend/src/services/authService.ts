@@ -161,7 +161,7 @@ import { Permission } from '../models/Permission';
  *         isEmailVerified:
  *           type: boolean
  *           example: true
- *         is2FAEnabled:
+ *         is2faEnabled:
  *           type: boolean
  *           example: false
  *         isActive:
@@ -270,7 +270,7 @@ export class AuthService {
       }
 
       // Verificar 2FA si está habilitado
-      if (user.is2FAEnabled) {
+      if (user.is2faEnabled) {
         if (!twoFactorCode) {
           return {
             success: false,
@@ -306,7 +306,7 @@ export class AuthService {
       const session = await this.createSession(user.id, {
         ipAddress,
         userAgent,
-        loginMethod: user.is2FAEnabled ? '2fa' : 'password',
+        loginMethod: user.is2faEnabled ? '2fa' : 'password',
         rememberMe: rememberMe || false
       });
 
@@ -426,7 +426,7 @@ export class AuthService {
         termsAcceptedAt: new Date(),
         isEmailVerified: false,
         isActive: true,
-        is2FAEnabled: false,
+        is2faEnabled: false,
         otpAttempts: 0,
         failedLoginAttempts: 0,
         isAccountLocked: false,
@@ -851,7 +851,7 @@ export class AuthService {
         };
       }
 
-      if (user.is2FAEnabled) {
+      if (user.is2faEnabled) {
         return {
           success: false,
           message: '2FA ya está habilitado',
@@ -861,7 +861,7 @@ export class AuthService {
       }
 
       // Habilitar 2FA
-      user.is2FAEnabled = true;
+      user.is2faEnabled = true;
       await user.save();
 
       await this.logSecurityEvent('2fa_enabled', {
@@ -920,7 +920,7 @@ export class AuthService {
         };
       }
 
-      if (!user.is2FAEnabled) {
+      if (!user.is2faEnabled) {
         return {
           success: false,
           message: '2FA no está habilitado',
@@ -930,7 +930,7 @@ export class AuthService {
       }
 
       // Deshabilitar 2FA y limpiar datos OTP
-      user.is2FAEnabled = false;
+      user.is2faEnabled = false;
       user.otpCode = undefined;
       user.otpExpires = undefined;
       user.otpAttempts = 0;
@@ -981,7 +981,7 @@ export class AuthService {
         };
       }
 
-      if (!user.is2FAEnabled) {
+      if (!user.is2faEnabled) {
         return {
           success: false,
           message: '2FA no está habilitado para este usuario',
@@ -1403,7 +1403,7 @@ export class AuthService {
       roles,
       permissions,
       isEmailVerified: user.isEmailVerified,
-      is2FAEnabled: user.is2FAEnabled,
+      is2faEnabled: user.is2faEnabled,
       isActive: user.isActive,
       avatar: user.avatar,
       lastLoginAt: user.lastLoginAt,
@@ -1417,7 +1417,7 @@ export class AuthService {
   async verify2FA(userId: number, code: string): Promise<boolean> {
     try {
       const user = await User.findByPk(userId);
-      if (!user || !user.is2FAEnabled) {
+      if (!user || !user.is2faEnabled) {
         return false;
       }
 

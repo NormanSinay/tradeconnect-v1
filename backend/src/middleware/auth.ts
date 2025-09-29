@@ -148,7 +148,7 @@ export const authenticateToken = async (
       roles,
       permissions,
       isEmailVerified: user.isEmailVerified,
-      is2FAEnabled: user.is2FAEnabled,
+      is2faEnabled: user.is2faEnabled,
       isActive: user.isActive,
       avatar: user.avatar,
       lastLoginAt: user.lastLoginAt,
@@ -371,7 +371,7 @@ export const require2FA = (
     return;
   }
 
-  if (!req.user.is2FAEnabled) {
+  if (!req.user.is2faEnabled) {
     res.status(HTTP_STATUS.FORBIDDEN).json({
       success: false,
       message: 'Se requiere autenticación de dos factores para esta acción',

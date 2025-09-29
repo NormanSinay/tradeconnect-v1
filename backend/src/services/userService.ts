@@ -59,7 +59,7 @@ export class UserService {
         cui: user.cui,
         isEmailVerified: user.isEmailVerified,
         isActive: user.isActive,
-        is2FAEnabled: user.is2FAEnabled,
+        is2faEnabled: user.is2faEnabled,
         timezone: user.timezone,
         locale: user.locale,
         roles: user.roles?.map(role => role.name) || [],
@@ -243,7 +243,7 @@ export class UserService {
         order: [['createdAt', 'DESC']],
         attributes: [
           'id', 'email', 'firstName', 'lastName', 'phone',
-          'isEmailVerified', 'isActive', 'is2FAEnabled',
+          'isEmailVerified', 'isActive', 'is2faEnabled',
           'lastLoginAt', 'createdAt', 'updatedAt'
         ]
       });
@@ -258,7 +258,7 @@ export class UserService {
         phone: user.phone,
         isEmailVerified: user.isEmailVerified,
         isActive: user.isActive,
-        is2FAEnabled: user.is2FAEnabled,
+        is2faEnabled: user.is2faEnabled,
         roles: user.roles?.map((r: any) => r.name) || [],
         lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt,
@@ -326,7 +326,7 @@ export class UserService {
         phone: userData.phone,
         isEmailVerified: true, // Los usuarios creados por admin están verificados
         isActive: true,
-        is2FAEnabled: false,
+        is2faEnabled: false,
         otpAttempts: 0,
         failedLoginAttempts: 0,
         isAccountLocked: false,
@@ -526,7 +526,7 @@ export class UserService {
       const totalUsers = await User.count();
       const activeUsers = await User.count({ where: { isActive: true } });
       const verifiedUsers = await User.count({ where: { isEmailVerified: true } });
-      const usersWith2FA = await User.count({ where: { is2FAEnabled: true } });
+      const usersWith2FA = await User.count({ where: { is2faEnabled: true } });
 
       // Usuarios por rol
       const roleStats = await UserRole.findAll({

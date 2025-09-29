@@ -102,7 +102,7 @@ export class UserController {
         cui: user.cui,
         isEmailVerified: user.isEmailVerified,
         isActive: user.isActive,
-        is2FAEnabled: user.is2FAEnabled,
+        is2faEnabled: user.is2faEnabled,
         timezone: user.timezone,
         locale: user.locale,
         roles: user.roles?.map(role => role.name) || [],
@@ -398,7 +398,7 @@ export class UserController {
         order: [['createdAt', 'DESC']],
         attributes: [
           'id', 'email', 'firstName', 'lastName', 'phone',
-          'isEmailVerified', 'isActive', 'is2FAEnabled',
+          'isEmailVerified', 'isActive', 'is2faEnabled',
           'lastLoginAt', 'createdAt', 'updatedAt'
         ]
       });
@@ -535,7 +535,7 @@ export class UserController {
         phone,
         isEmailVerified: true, // Los usuarios creados por admin están verificados
         isActive: true,
-        is2FAEnabled: false,
+        is2faEnabled: false,
         otpAttempts: 0,
         failedLoginAttempts: 0,
         isAccountLocked: false,

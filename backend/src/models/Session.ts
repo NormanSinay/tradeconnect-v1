@@ -147,6 +147,7 @@ export class Session extends Model<SessionAttributes, SessionCreationAttributes>
   @Default('Unknown OS')
   @Column({
     type: DataType.STRING(100),
+    field: "device_os",
     comment: 'Sistema operativo detectado'
   })
   declare deviceOS: string;

@@ -50,7 +50,7 @@ export interface UserAttributes {
   cui?: string;
   isEmailVerified: boolean;
   isActive: boolean;
-  is2FAEnabled: boolean;
+  is2faEnabled: boolean;
   otpCode?: string;
   otpExpires?: Date;
   otpAttempts: number;
@@ -60,7 +60,7 @@ export interface UserAttributes {
   accountLockedAt?: Date;
   lockExpiresAt?: Date;
   lastLoginAt?: Date;
-  lastLoginIP?: string;
+  lastLoginIp?: string;
   passwordChangedAt?: Date;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
@@ -133,7 +133,7 @@ export interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'cre
  *           type: boolean
  *           description: Si la cuenta está activa
  *           default: true
- *         is2FAEnabled:
+ *         is2faEnabled:
  *           type: boolean
  *           description: Si 2FA está habilitado
  *           default: false
@@ -326,9 +326,10 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   @Default(false)
   @Column({
     type: DataType.BOOLEAN,
+    field: "is_2fa_enabled",
     comment: 'Indica si 2FA está habilitado'
   })
-  declare is2FAEnabled: boolean;
+  declare is2faEnabled: boolean;
 
   @Column({
     type: DataType.STRING(6),
@@ -392,7 +393,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
     type: DataType.INET,
     comment: 'IP del último login'
   })
-  declare lastLoginIP?: string;
+  declare lastLoginIp?: string;
 
   @Column({
     type: DataType.DATE,
@@ -579,7 +580,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public async updateLastLogin(ipAddress?: string): Promise<void> {
     this.lastLoginAt = new Date();
     if (ipAddress) {
-      this.lastLoginIP = ipAddress;
+      this.lastLoginIp = ipAddress;
     }
     await this.save();
   }
@@ -679,7 +680,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
       cui: this.cui,
       isEmailVerified: this.isEmailVerified,
       isActive: this.isActive,
-      is2FAEnabled: this.is2FAEnabled,
+      is2faEnabled: this.is2faEnabled,
       lastLoginAt: this.lastLoginAt,
       timezone: this.timezone,
       locale: this.locale,

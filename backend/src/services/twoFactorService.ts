@@ -146,7 +146,7 @@ export class TwoFactorService {
       });
 
       // Actualizar usuario
-      user.is2FAEnabled = true;
+      user.is2faEnabled = true;
       await user.save();
 
       // Registrar en auditoría
@@ -219,7 +219,7 @@ export class TwoFactorService {
       }
 
       // Actualizar usuario
-      user.is2FAEnabled = false;
+      user.is2faEnabled = false;
       await user.save();
 
       // Registrar en auditoría
@@ -229,8 +229,8 @@ export class TwoFactorService {
         {
           userId,
           resourceId: userId.toString(),
-          oldValues: { is2FAEnabled: true },
-          newValues: { is2FAEnabled: false },
+          oldValues: { is2faEnabled: true },
+          newValues: { is2faEnabled: false },
           ipAddress: clientInfo.ipAddress,
           userAgent: clientInfo.userAgent
         }
@@ -518,7 +518,7 @@ export class TwoFactorService {
         await twoFactorAuth.disable();
       }
 
-      user.is2FAEnabled = false;
+      user.is2faEnabled = false;
       await user.save();
 
       // Registrar en auditoría
@@ -528,9 +528,9 @@ export class TwoFactorService {
         {
           userId: adminId,
           resourceId: userId.toString(),
-          oldValues: { is2FAEnabled: true },
+          oldValues: { is2faEnabled: true },
           newValues: {
-            is2FAEnabled: false,
+            is2faEnabled: false,
             reason,
             adminId
           },

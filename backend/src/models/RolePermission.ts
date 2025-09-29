@@ -151,6 +151,7 @@ export class RolePermission extends Model<RolePermissionAttributes, RolePermissi
   @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
+    field: "assigned_by",
     comment: 'ID del usuario que otorgó el permiso'
   })
   declare grantedBy?: number;
