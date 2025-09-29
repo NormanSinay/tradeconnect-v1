@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: tradeconnect_dev
       POSTGRES_USER: tradeconnect_user
-      POSTGRES_PASSWORD: your_secure_password
+      POSTGRES_PASSWORD: tradeconnect123
     ports:
       - "5432:5432"
     volumes:
@@ -15,7 +15,7 @@ services:
     image: redis:6-alpine
     ports:
       - "6379:6379"
-    command: redis-server --requirepass your_redis_password
+    command: redis-server --requirepass tradeconnect_redis_password
 
   mailhog:
     image: mailhog/mailhog

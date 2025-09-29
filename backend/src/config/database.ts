@@ -8,7 +8,7 @@ import { Sequelize } from 'sequelize';
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'tradeconnect_dev',
   process.env.DB_USER || 'tradeconnect_user',
-  process.env.DB_PASSWORD || 'password',
+  process.env.DB_PASSWORD || 'tradeconnect123',
   {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),

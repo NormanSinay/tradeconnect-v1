@@ -17,7 +17,7 @@ export const config = {
     port: parseInt(process.env.DB_PORT || '5432'),
     name: process.env.DB_NAME || 'tradeconnect_dev',
     user: process.env.DB_USER || 'tradeconnect_user',
-    password: process.env.DB_PASSWORD || 'password'
+    password: process.env.DB_PASSWORD || 'tradeconnect123'
   },
   
   // Redis

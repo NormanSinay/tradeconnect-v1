@@ -3,25 +3,14 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('user_roles', {
+    await queryInterface.createTable('role_permissions', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      userId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: 'users',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-        comment: 'ID del usuario'
-      },
-      roleId: {
+      role_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -32,7 +21,18 @@ module.exports = {
         onDelete: 'CASCADE',
         comment: 'ID del rol'
       },
-      assignedBy: {
+      permission_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'permissions',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+        comment: 'ID del permiso'
+      },
+      assigned_by: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
@@ -41,14 +41,9 @@ module.exports = {
         },
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
-        comment: 'ID del usuario que asignó el rol'
+        comment: 'ID del usuario que asignó el permiso'
       },
-      expiresAt: {
-        type: Sequelize.DATE,
-        allowNull: true,
-        comment: 'Fecha de expiración del rol (opcional)'
-      },
-      isActive: {
+      is_active: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: true,
@@ -59,55 +54,51 @@ module.exports = {
         allowNull: true,
         comment: 'Razón de la asignación'
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         comment: 'Fecha de creación'
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         comment: 'Fecha de actualización'
       }
     });
 
     // Índices
-    await queryInterface.addIndex('user_roles', ['userId'], {
-      name: 'user_roles_user_id_index'
+    await queryInterface.addIndex('role_permissions', ['role_id'], {
+      name: 'role_permissions_role_id_index'
     });
 
-    await queryInterface.addIndex('user_roles', ['roleId'], {
-      name: 'user_roles_role_id_index'
+    await queryInterface.addIndex('role_permissions', ['permission_id'], {
+      name: 'role_permissions_permission_id_index'
     });
 
-    await queryInterface.addIndex('user_roles', ['assignedBy'], {
-      name: 'user_roles_assigned_by_index'
+    await queryInterface.addIndex('role_permissions', ['assigned_by'], {
+      name: 'role_permissions_assigned_by_index'
     });
 
-    await queryInterface.addIndex('user_roles', ['isActive'], {
-      name: 'user_roles_is_active_index'
-    });
-
-    await queryInterface.addIndex('user_roles', ['expiresAt'], {
-      name: 'user_roles_expires_at_index'
+    await queryInterface.addIndex('role_permissions', ['is_active'], {
+      name: 'role_permissions_is_active_index'
     });
 
     // Índice único compuesto para evitar duplicados activos
-    await queryInterface.addIndex('user_roles', ['userId', 'roleId'], {
+    await queryInterface.addIndex('role_permissions', ['role_id', 'permission_id'], {
       unique: true,
-      where: { isActive: true },
-      name: 'user_roles_user_role_active_unique'
+      where: { is_active: true },
+      name: 'role_permissions_role_permission_active_unique'
     });
 
     // Índice compuesto para consultas comunes
-    await queryInterface.addIndex('user_roles', ['userId', 'isActive'], {
-      name: 'user_roles_user_active_index'
+    await queryInterface.addIndex('role_permissions', ['role_id', 'is_active'], {
+      name: 'role_permissions_role_active_index'
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('user_roles');
+    await queryInterface.dropTable('role_permissions');
   }
 };

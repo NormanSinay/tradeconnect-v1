@@ -5,12 +5,12 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     // Primero obtener los IDs de los roles y permisos
     const roles = await queryInterface.sequelize.query(
-      'SELECT id, name FROM roles WHERE isActive = true',
+      'SELECT id, name FROM roles WHERE is_active = true',
       { type: Sequelize.QueryTypes.SELECT }
     );
 
     const permissions = await queryInterface.sequelize.query(
-      'SELECT id, name FROM permissions WHERE isActive = true',
+      'SELECT id, name FROM permissions WHERE "isActive" = true',
       { type: Sequelize.QueryTypes.SELECT }
     );
 
@@ -32,12 +32,12 @@ module.exports = {
     const allPermissions = permissions.map(p => p.id);
     allPermissions.forEach(permissionId => {
       rolePermissions.push({
-        roleId: roleMap.super_admin,
-        permissionId,
-        isActive: true,
+        role_id: roleMap.super_admin,
+        permission_id: permissionId,
+        is_active: true,
         reason: 'Permisos completos para Super Administrador',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       });
     });
 
@@ -74,12 +74,12 @@ module.exports = {
     adminPermissions.forEach(permName => {
       if (permissionMap[permName]) {
         rolePermissions.push({
-          roleId: roleMap.admin,
-          permissionId: permissionMap[permName],
-          isActive: true,
+          role_id: roleMap.admin,
+          permission_id: permissionMap[permName],
+          is_active: true,
           reason: 'Permisos administrativos completos',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         });
       }
     });
@@ -113,12 +113,12 @@ module.exports = {
     managerPermissions.forEach(permName => {
       if (permissionMap[permName]) {
         rolePermissions.push({
-          roleId: roleMap.manager,
-          permissionId: permissionMap[permName],
-          isActive: true,
+          role_id: roleMap.manager,
+          permission_id: permissionMap[permName],
+          is_active: true,
           reason: 'Permisos de gestión de eventos y usuarios',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         });
       }
     });
@@ -148,12 +148,12 @@ module.exports = {
     operatorPermissions.forEach(permName => {
       if (permissionMap[permName]) {
         rolePermissions.push({
-          roleId: roleMap.operator,
-          permissionId: permissionMap[permName],
-          isActive: true,
+          role_id: roleMap.operator,
+          permission_id: permissionMap[permName],
+          is_active: true,
           reason: 'Permisos operativos básicos',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         });
       }
     });
@@ -175,12 +175,12 @@ module.exports = {
     userPermissions.forEach(permName => {
       if (permissionMap[permName]) {
         rolePermissions.push({
-          roleId: roleMap.user,
-          permissionId: permissionMap[permName],
-          isActive: true,
+          role_id: roleMap.user,
+          permission_id: permissionMap[permName],
+          is_active: true,
           reason: 'Permisos básicos de usuario registrado',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         });
       }
     });
@@ -204,12 +204,12 @@ module.exports = {
     speakerPermissions.forEach(permName => {
       if (permissionMap[permName]) {
         rolePermissions.push({
-          roleId: roleMap.speaker,
-          permissionId: permissionMap[permName],
-          isActive: true,
+          role_id: roleMap.speaker,
+          permission_id: permissionMap[permName],
+          is_active: true,
           reason: 'Permisos para expositores de eventos',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         });
       }
     });
@@ -231,12 +231,12 @@ module.exports = {
     participantPermissions.forEach(permName => {
       if (permissionMap[permName]) {
         rolePermissions.push({
-          roleId: roleMap.participant,
-          permissionId: permissionMap[permName],
-          isActive: true,
+          role_id: roleMap.participant,
+          permission_id: permissionMap[permName],
+          is_active: true,
           reason: 'Permisos mínimos para participantes',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         });
       }
     });
@@ -256,12 +256,12 @@ module.exports = {
     clientPermissions.forEach(permName => {
       if (permissionMap[permName]) {
         rolePermissions.push({
-          roleId: roleMap.client,
-          permissionId: permissionMap[permName],
-          isActive: true,
+          role_id: roleMap.client,
+          permission_id: permissionMap[permName],
+          is_active: true,
           reason: 'Permisos limitados para clientes externos',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         });
       }
     });

@@ -7,99 +7,99 @@ module.exports = {
     const roles = [
       {
         name: 'super_admin',
-        displayName: 'Super Administrador',
+        display_name: 'Super Administrador',
         description: 'Acceso total al sistema, incluyendo configuración de infraestructura',
-        isActive: true,
-        isSystem: true,
+        is_active: true,
+        is_system: true,
         level: 10,
         color: '#D32F2F',
         icon: 'shield-crown',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'admin',
-        displayName: 'Administrador',
+        display_name: 'Administrador',
         description: 'Administrador con acceso amplio al sistema',
-        isActive: true,
-        isSystem: true,
+        is_active: true,
+        is_system: true,
         level: 9,
         color: '#FF5722',
         icon: 'shield-admin',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'manager',
-        displayName: 'Gerente',
+        display_name: 'Gerente',
         description: 'Gerente con permisos de gestión de eventos y usuarios',
-        isActive: true,
-        isSystem: true,
+        is_active: true,
+        is_system: true,
         level: 7,
         color: '#FF9800',
         icon: 'briefcase',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'operator',
-        displayName: 'Operador',
+        display_name: 'Operador',
         description: 'Operador con permisos limitados de gestión',
-        isActive: true,
-        isSystem: true,
+        is_active: true,
+        is_system: true,
         level: 5,
         color: '#2196F3',
         icon: 'settings',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'user',
-        displayName: 'Usuario',
+        display_name: 'Usuario',
         description: 'Usuario regular del sistema',
-        isActive: true,
-        isSystem: true,
+        is_active: true,
+        is_system: true,
         level: 3,
         color: '#4CAF50',
         icon: 'user',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'speaker',
-        displayName: 'Speaker',
+        display_name: 'Speaker',
         description: 'Expositor o conferencista de eventos',
-        isActive: true,
-        isSystem: true,
+        is_active: true,
+        is_system: true,
         level: 4,
         color: '#9C27B0',
         icon: 'microphone',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'participant',
-        displayName: 'Participante',
+        display_name: 'Participante',
         description: 'Participante en eventos',
-        isActive: true,
-        isSystem: true,
+        is_active: true,
+        is_system: true,
         level: 2,
         color: '#607D8B',
         icon: 'user-group',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       },
       {
         name: 'client',
-        displayName: 'Cliente',
+        display_name: 'Cliente',
         description: 'Cliente externo',
-        isActive: true,
-        isSystem: true,
+        is_active: true,
+        is_system: true,
         level: 1,
         color: '#795548',
         icon: 'user-tie',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       }
     ];
 

@@ -8,7 +8,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { rateLimit, RateLimitRequestHandler } from 'express-rate-limit';
+import { rateLimit, RateLimitRequestHandler, ipKeyGenerator } from 'express-rate-limit';
 import { RedisStore } from 'rate-limit-redis';
 import { redis } from '../config/redis';
 import { RATE_LIMITS, HTTP_STATUS } from '../utils/constants';
@@ -38,10 +38,7 @@ export const generalLimiter: RateLimitRequestHandler = rateLimit({
     sendCommand: (command: string, ...args: string[]) => redis.call(command, ...args) as any,
     prefix: 'rl:global:'
   }),
-  keyGenerator: (req: Request) => {
-    // Usar IP como clave, pero permitir múltiples usuarios desde la misma IP
-    return req.ip || req.connection.remoteAddress || 'unknown';
-  },
+  keyGenerator: (req: Request) => ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown'),
   handler: async (req: Request, res: Response) => {
     // Log de rate limit excedido
     await securityService.logSecurityEvent('rate_limit_exceeded', {
@@ -89,7 +86,7 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
   keyGenerator: (req: Request) => {
     // Para login, usar email + IP para evitar bloqueo de usuarios legítimos
     const email = req.body?.email;
-    const ip = req.ip || req.connection.remoteAddress || 'unknown';
+    const ip = ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown');
     return email ? `${email}:${ip}` : ip;
   },
   handler: async (req: Request, res: Response) => {
@@ -137,7 +134,7 @@ export const passwordResetLimiter: RateLimitRequestHandler = rateLimit({
   }),
   keyGenerator: (req: Request) => {
     // Usar email para limitar por usuario
-    return req.body?.email || req.ip || req.connection.remoteAddress || 'unknown';
+    return req.body?.email || ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown');
   }
 });
 
@@ -163,7 +160,7 @@ export const paymentLimiter: RateLimitRequestHandler = rateLimit({
   keyGenerator: (req: Request) => {
     // Usar user ID si está autenticado, sino IP
     const userId = (req as any).user?.id;
-    return userId ? `user:${userId}` : req.ip || req.connection.remoteAddress || 'unknown';
+    return userId ? `user:${userId}` : ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown');
   }
 });
 
@@ -189,7 +186,7 @@ export const felLimiter: RateLimitRequestHandler = rateLimit({
   keyGenerator: (req: Request) => {
     // Usar user ID para limitar por usuario
     const userId = (req as any).user?.id;
-    return userId ? `user:${userId}` : req.ip || req.connection.remoteAddress || 'unknown';
+    return userId ? `user:${userId}` : ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown');
   }
 });
 
@@ -215,7 +212,7 @@ export const certificateLimiter: RateLimitRequestHandler = rateLimit({
   keyGenerator: (req: Request) => {
     // Usar user ID para limitar por usuario
     const userId = (req as any).user?.id;
-    return userId ? `user:${userId}` : req.ip || req.connection.remoteAddress || 'unknown';
+    return userId ? `user:${userId}` : ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown');
   }
 });
 
@@ -241,7 +238,7 @@ export const notificationLimiter: RateLimitRequestHandler = rateLimit({
   keyGenerator: (req: Request) => {
     // Usar user ID para limitar por usuario
     const userId = (req as any).user?.id;
-    return userId ? `user:${userId}` : req.ip || req.connection.remoteAddress || 'unknown';
+    return userId ? `user:${userId}` : ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown');
   }
 });
 
@@ -300,7 +297,7 @@ export const adaptiveLimiter = (
           sendCommand: (command: string, ...args: string[]) => redis.call(command, ...args) as any,
           prefix: 'rl:adaptive:'
         }),
-        keyGenerator: () => userId ? `user:${userId}` : ip
+        keyGenerator: () => userId ? `user:${userId}` : ipKeyGenerator(ip)
       });
 
       limiter(req, res, next);
@@ -475,7 +472,7 @@ export const privilegeBasedLimiter = (
           sendCommand: (command: string, ...args: string[]) => redis.call(command, ...args) as any,
           prefix: 'rl:privilege:'
         }),
-        keyGenerator: () => user?.id ? `user:${user.id}` : req.ip || req.connection.remoteAddress || 'unknown'
+        keyGenerator: () => user?.id ? `user:${user.id}` : ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown')
       });
 
       limiter(req, res, next);
@@ -518,7 +515,7 @@ export const createCustomLimiter = (options: {
       prefix: options.prefix || 'rl:custom:'
     }),
     keyGenerator: options.keyGenerator || ((req: Request) =>
-      req.ip || req.connection.remoteAddress || 'unknown'
+      ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown')
     )
   });
 };
