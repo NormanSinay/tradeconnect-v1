@@ -226,7 +226,7 @@ export class EventTemplate extends Model<EventTemplateAttributes, EventTemplateC
   @BelongsTo(() => User, 'createdBy')
   declare creator: User;
 
-  @HasMany(() => Event)
+  @HasMany(() => Event, 'eventTemplateId')
   declare events: Event[];
 
   // ====================================================================

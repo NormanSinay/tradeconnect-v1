@@ -34,6 +34,7 @@ import { EventStatus } from './EventStatus';
 import { EventRegistration } from './EventRegistration';
 import { EventMedia } from './EventMedia';
 import { EventDuplication } from './EventDuplication';
+import { EventTemplate } from './EventTemplate';
 
 /**
  * Atributos del modelo Evento
@@ -61,6 +62,7 @@ export interface EventAttributes {
   eventTypeId: number;
   eventCategoryId: number;
   eventStatusId: number;
+  eventTemplateId?: number;
   createdBy: number;
   publishedAt?: Date;
   cancelledAt?: Date;
@@ -415,6 +417,14 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
   })
   declare eventStatusId: number;
 
+  @ForeignKey(() => EventTemplate)
+  @Index
+  @Column({
+    type: DataType.INTEGER,
+    comment: 'Referencia a la plantilla usada para crear el evento (opcional)'
+  })
+  declare eventTemplateId?: number;
+
   @ForeignKey(() => User)
   @AllowNull(false)
   @Index
@@ -483,6 +493,9 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
 
   @BelongsTo(() => EventStatus)
   declare eventStatus: EventStatus;
+
+  @BelongsTo(() => EventTemplate)
+  declare eventTemplate: EventTemplate;
 
   @BelongsTo(() => User, 'createdBy')
   declare creator: User;

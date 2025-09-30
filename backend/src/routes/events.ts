@@ -404,8 +404,38 @@ router.put('/:id/status', authenticated, eventLimiter, eventIdValidation, [
     .withMessage('La razón debe tener entre 10 y 500 caracteres')
 ], eventController.updateEventStatus);
 
-// TODO: Implementar rutas para duplicación de eventos
-// router.post('/:id/duplicate', authenticated, eventLimiter, eventIdValidation, eventController.duplicateEvent);
+// Ruta para duplicar eventos
+router.post('/:id/duplicate', authenticated, createEditLimiter, eventIdValidation, [
+  body('title')
+    .optional()
+    .trim()
+    .isLength({ min: 3, max: 255 })
+    .withMessage('El título debe tener entre 3 y 255 caracteres'),
+  body('startDate')
+    .optional()
+    .isISO8601()
+    .withMessage('La fecha de inicio debe ser una fecha válida')
+    .custom((value) => {
+      if (value && new Date(value) <= new Date()) {
+        throw new Error('La fecha de inicio debe ser futura');
+      }
+      return true;
+    }),
+  body('endDate')
+    .optional()
+    .isISO8601()
+    .withMessage('La fecha de fin debe ser una fecha válida')
+    .custom((value, { req }) => {
+      if (value && req.body.startDate && new Date(value) <= new Date(req.body.startDate)) {
+        throw new Error('La fecha de fin debe ser posterior a la fecha de inicio');
+      }
+      return true;
+    }),
+  body('price')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('El precio debe ser un número positivo')
+], eventController.duplicateEvent);
 
 /**
  * @swagger

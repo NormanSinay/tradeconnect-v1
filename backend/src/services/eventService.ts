@@ -11,6 +11,7 @@ import { Event } from '../models/Event';
 import { EventType } from '../models/EventType';
 import { EventCategory } from '../models/EventCategory';
 import { EventStatus } from '../models/EventStatus';
+import { EventDuplication } from '../models/EventDuplication';
 import { EventRegistration } from '../models/EventRegistration';
 import { EventMedia } from '../models/EventMedia';
 import { User } from '../models/User';
@@ -752,6 +753,180 @@ export class EventService {
   }
 
   /**
+   * Obtiene eventos del usuario autenticado
+   */
+  async getUserEvents(userId: number, params: EventQueryParams = {}): Promise<ApiResponse<EventSearchResult>> {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        sortBy = 'createdAt',
+        sortOrder = 'DESC',
+        search,
+        filters = {}
+      } = params;
+
+      const offset = (page - 1) * limit;
+
+      // Construir filtros
+      const where: any = {
+        createdBy: userId
+      };
+
+      // Aplicar filtros adicionales
+      if (filters.eventTypeId) {
+        where.eventTypeId = filters.eventTypeId;
+      }
+      if (filters.eventCategoryId) {
+        where.eventCategoryId = filters.eventCategoryId;
+      }
+      if (filters.eventStatusId) {
+        where.eventStatusId = filters.eventStatusId;
+      }
+      if (filters.isVirtual !== undefined) {
+        where.isVirtual = filters.isVirtual;
+      }
+      if (filters.startDateFrom || filters.startDateTo) {
+        where.startDate = {};
+        if (filters.startDateFrom) where.startDate[Op.gte] = filters.startDateFrom;
+        if (filters.startDateTo) where.startDate[Op.lte] = filters.startDateTo;
+      }
+
+      // Búsqueda por texto
+      if (search) {
+        where[Op.or] = [
+          { title: { [Op.iLike]: `%${search}%` } },
+          { description: { [Op.iLike]: `%${search}%` } },
+          { shortDescription: { [Op.iLike]: `%${search}%` } }
+        ];
+      }
+
+      // Ordenamiento
+      const order: any[] = [];
+      switch (sortBy) {
+        case 'createdAt':
+          order.push(['createdAt', sortOrder]);
+          break;
+        case 'startDate':
+          order.push(['startDate', sortOrder]);
+          break;
+        case 'endDate':
+          order.push(['endDate', sortOrder]);
+          break;
+        case 'title':
+          order.push(['title', sortOrder]);
+          break;
+        case 'price':
+          order.push(['price', sortOrder]);
+          break;
+        default:
+          order.push(['createdAt', 'DESC']);
+      }
+
+      const { rows: events, count: total } = await Event.findAndCountAll({
+        where,
+        include: [
+          { model: EventType, as: 'eventType' },
+          { model: EventCategory, as: 'eventCategory' },
+          { model: EventStatus, as: 'eventStatus' }
+        ],
+        limit,
+        offset,
+        order,
+        distinct: true
+      });
+
+      const formattedEvents: AdminEvent[] = events.map(event => ({
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        shortDescription: event.shortDescription,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        location: event.location,
+        virtualLocation: event.virtualLocation,
+        isVirtual: event.isVirtual,
+        price: event.price,
+        currency: event.currency,
+        capacity: event.capacity,
+        registeredCount: event.registeredCount,
+        availableSpots: event.availableSpots || undefined,
+        minAge: event.minAge,
+        maxAge: event.maxAge,
+        tags: event.tags,
+        requirements: event.requirements,
+        agenda: event.agenda,
+        metadata: event.metadata,
+        eventTypeId: event.eventTypeId,
+        eventCategoryId: event.eventCategoryId,
+        eventStatusId: event.eventStatusId,
+        createdBy: event.createdBy,
+        eventType: event.eventType ? {
+          id: event.eventType.id,
+          name: event.eventType.name,
+          displayName: event.eventType.displayName,
+          description: event.eventType.description,
+          isActive: event.eventType.isActive
+        } : undefined as any,
+        eventCategory: event.eventCategory ? {
+          id: event.eventCategory.id,
+          name: event.eventCategory.name,
+          displayName: event.eventCategory.displayName,
+          description: event.eventCategory.description,
+          isActive: event.eventCategory.isActive
+        } : undefined as any,
+        eventStatus: event.eventStatus ? {
+          id: event.eventStatus.id,
+          name: event.eventStatus.name,
+          displayName: event.eventStatus.displayName,
+          description: event.eventStatus.description,
+          color: event.eventStatus.color,
+          isActive: event.eventStatus.isActive
+        } : undefined as any,
+        creator: event.creator ? {
+          id: event.creator.id,
+          firstName: event.creator.firstName,
+          lastName: event.creator.lastName,
+          fullName: event.creator.fullName,
+          avatar: event.creator.avatar || undefined
+        } : undefined as any,
+        publishedAt: event.publishedAt,
+        cancelledAt: event.cancelledAt,
+        cancellationReason: event.cancellationReason,
+        createdAt: event.createdAt,
+        updatedAt: event.updatedAt
+      }));
+
+      return {
+        success: true,
+        message: 'Eventos obtenidos exitosamente',
+        data: {
+          events: formattedEvents,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrevious: page > 1
+          },
+          filters
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error obteniendo eventos del usuario:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
    * Obtiene un evento por ID con relaciones completas
    */
   async getEventById(eventId: number, includePrivate: boolean = false): Promise<ApiResponse<DetailedEvent | PublicEvent>> {
@@ -1021,6 +1196,99 @@ export class EventService {
   // ====================================================================
   // EVENT EMITTER ACCESS
   // ====================================================================
+
+  /**
+   * Duplica un evento existente
+   */
+  async duplicateEvent(
+    eventId: number,
+    customizations: Partial<CreateEventData>,
+    duplicatedBy: number
+  ): Promise<ApiResponse<DetailedEvent>> {
+    try {
+      const originalEvent = await Event.findByPk(eventId, {
+        include: [
+          { model: EventType, as: 'eventType' },
+          { model: EventCategory, as: 'eventCategory' },
+          { model: EventStatus, as: 'eventStatus' }
+        ]
+      });
+
+      if (!originalEvent) {
+        return {
+          success: false,
+          message: 'Evento original no encontrado',
+          error: 'EVENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar permisos (solo el creador puede duplicar)
+      if (originalEvent.createdBy !== duplicatedBy) {
+        return {
+          success: false,
+          message: 'No tiene permisos para duplicar este evento',
+          error: 'INSUFFICIENT_PERMISSIONS',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Preparar datos del evento duplicado
+      const duplicatedData: CreateEventData = {
+        title: customizations.title || `Copia - ${originalEvent.title}`,
+        description: customizations.description || originalEvent.description,
+        shortDescription: customizations.shortDescription || originalEvent.shortDescription,
+        startDate: customizations.startDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Una semana después
+        endDate: customizations.endDate || new Date((customizations.startDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)).getTime() + (originalEvent.endDate.getTime() - originalEvent.startDate.getTime())),
+        location: customizations.location || originalEvent.location,
+        virtualLocation: customizations.virtualLocation || originalEvent.virtualLocation,
+        isVirtual: customizations.isVirtual !== undefined ? customizations.isVirtual : originalEvent.isVirtual,
+        price: customizations.price !== undefined ? customizations.price : originalEvent.price,
+        currency: customizations.currency || originalEvent.currency,
+        capacity: customizations.capacity || originalEvent.capacity,
+        minAge: customizations.minAge || originalEvent.minAge,
+        maxAge: customizations.maxAge || originalEvent.maxAge,
+        tags: customizations.tags || originalEvent.tags,
+        requirements: customizations.requirements || originalEvent.requirements,
+        agenda: customizations.agenda || originalEvent.agenda,
+        eventTypeId: customizations.eventTypeId || originalEvent.eventTypeId,
+        eventCategoryId: customizations.eventCategoryId || originalEvent.eventCategoryId,
+        eventStatusId: customizations.eventStatusId || (await this.getDefaultStatusId('draft'))
+      };
+
+      // Crear el evento duplicado
+      const result = await this.createEvent(duplicatedData, duplicatedBy);
+
+      if (result.success) {
+        // Registrar la duplicación
+        await EventDuplication.create({
+          sourceEventId: eventId,
+          duplicatedEventId: (result.data as DetailedEvent).id,
+          duplicatedBy,
+          modifications: customizations
+        });
+
+        // Emitir evento de duplicación
+        this.eventEmitter.emit('EventDuplicated', {
+          sourceEventId: eventId,
+          duplicatedEventId: (result.data as DetailedEvent).id,
+          duplicatedBy,
+          customizations
+        });
+      }
+
+      return result;
+
+    } catch (error) {
+      logger.error('Error duplicando evento:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
 
   /**
    * Obtiene el event emitter para registro de listeners

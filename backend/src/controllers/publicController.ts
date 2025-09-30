@@ -10,6 +10,7 @@
 import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import { eventService } from '../services/eventService';
+import { CertificateService } from '../services/certificateService';
 import { EventQueryParams } from '../types/event.types';
 import { HTTP_STATUS } from '../utils/constants';
 import { logger } from '../utils/logger';
@@ -465,20 +466,32 @@ export class PublicController {
         return;
       }
 
-      // TODO: Implementar verificación de certificados
-      // Por ahora retornamos una respuesta básica
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        message: 'Certificado válido',
-        data: {
-          isValid: true,
-          certificateHash: hash,
-          issuedAt: new Date().toISOString(),
-          eventTitle: 'Evento de ejemplo',
-          participantName: 'Juan Pérez'
-        },
-        timestamp: new Date().toISOString()
-      });
+      const verification = await CertificateService.verifyCertificate(hash);
+
+      if (verification.isValid) {
+        res.status(HTTP_STATUS.OK).json({
+          success: true,
+          message: 'Certificado válido',
+          data: {
+            isValid: verification.isValid,
+            certificate: verification.certificate,
+            event: verification.event,
+            participant: verification.participant,
+            verificationDetails: verification.verificationDetails
+          },
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          message: 'Certificado no encontrado o inválido',
+          data: {
+            isValid: verification.isValid,
+            verificationDetails: verification.verificationDetails
+          },
+          timestamp: new Date().toISOString()
+        });
+      }
 
     } catch (error) {
       logger.error('Error verificando certificado:', error);

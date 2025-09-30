@@ -31,6 +31,11 @@ import { eventService } from './services/eventService';
 import { eventListenersService } from './services/eventListeners';
 import { metricsService } from './services/metricsService';
 import eventRoutes from './routes/events';
+import eventTemplateRoutes from './routes/event-templates';
+import eventCategoryRoutes from './routes/event-categories';
+import eventRegistrationRoutes from './routes/event-registrations';
+import eventReportsRoutes from './routes/event-reports';
+import certificateRoutes from './routes/certificates';
 import publicRoutes from './routes/public';
 
 // Importar middleware de seguridad
@@ -227,7 +232,7 @@ app.get('/info', (req, res) => {
     },
     features: {
       modules: 15,
-      endpoints: 195, // Updated to include 28 new event endpoints
+      endpoints: 99, // Total endpoints implemented: auth(25) + users(6) + sessions(6) + events(54) + public(6) + general(4)
       paymentGateways: ['PayPal', 'Stripe', 'NeoNet', 'BAM'],
       felIntegration: true,
       blockchainSupport: true,
@@ -278,6 +283,21 @@ app.use('/api/sessions', sessionRoutes);
 
 // Rutas de eventos
 app.use('/api/events', eventRoutes);
+
+// Rutas de plantillas de eventos
+app.use('/api/event-templates', eventTemplateRoutes);
+
+// Rutas de categorías y tipos de eventos
+app.use('/api/event-categories', eventCategoryRoutes);
+
+// Rutas de inscripciones a eventos
+app.use('/api/event-registrations', eventRegistrationRoutes);
+
+// Rutas de reportes y analytics
+app.use('/api/event-reports', eventReportsRoutes);
+
+// Rutas de certificados blockchain
+app.use('/api/certificates', certificateRoutes);
 
 // Rutas públicas
 app.use('/api/public', publicRoutes);
@@ -372,20 +392,20 @@ const startServer = async (): Promise<void> => {
     // Iniciar servidor
     const server = app.listen(PORT, () => {
       console.log(`
-╭─────────────────────────────────────────────────────────────────────────────╮
-│                                                                             │
-│  🚀 TradeConnect Platform Server Started Successfully!                      │
-│                                                                             │
-│  📍 Environment: ${config.NODE_ENV.padEnd(44)}                              │
-│  🔗 URL: http://localhost:${PORT}${' '.repeat(33)}                          │
-│  📝 Health Check: http://localhost:${PORT}/health${' '.repeat(25)}          │
-│  📊 System Info: http://localhost:${PORT}/info${' '.repeat(26)}             │
-│  📚 API Documentation: http://localhost:${PORT}/api/docs${' '.repeat(19)}   │
-│  ⏰ Started at: ${new Date().toISOString().padEnd(37)} │
-│                                                                              │
-│  🎯 Ready to accept requests!                                               │
-│                                                                             │
-╰─────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────────────────╮
+                                                                             
+                🚀 TradeConnect Platform Server Started Successfully!                      
+                                                                             
+                📍 Environment: ${config.NODE_ENV.padEnd(44)}                              
+                🔗 URL: http://localhost:${PORT}${' '.repeat(33)}                          
+                📝 Health Check: http://localhost:${PORT}/health${' '.repeat(25)}          
+                📊 System Info: http://localhost:${PORT}/info${' '.repeat(26)}             
+                📚 API Documentation: http://localhost:${PORT}/api/docs${' '.repeat(19)}   
+                ⏰ Started at: ${new Date().toISOString().padEnd(37)} 
+                                                                              
+                              🎯 Ready to accept requests!                                               
+                                                                             
+╰─────────────────────────────────────────────────────────────────────────────────────────╯
       `);
     });
     

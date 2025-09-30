@@ -563,17 +563,151 @@ export class EventController {
         return;
       }
 
-      // TODO: Implementar método en eventService para obtener eventos del usuario
-      // Por ahora retornamos una respuesta básica
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        message: 'Funcionalidad en desarrollo',
-        data: [],
-        timestamp: new Date().toISOString()
-      });
+      // Extraer parámetros de consulta
+      const {
+        page = 1,
+        limit = 20,
+        status,
+        search,
+        sortBy,
+        sortOrder
+      } = req.query;
+
+      const validSortBy = ['startDate', 'endDate', 'title', 'price', 'createdAt', 'publishedAt'].includes(sortBy as string)
+        ? sortBy as 'startDate' | 'endDate' | 'title' | 'price' | 'createdAt' | 'publishedAt'
+        : 'createdAt';
+
+      const params: EventQueryParams = {
+        page: Number(page),
+        limit: Number(limit),
+        search: search as string,
+        sortBy: validSortBy,
+        sortOrder: (sortOrder as string)?.toUpperCase() as 'ASC' | 'DESC',
+        filters: {}
+      };
+
+      // Aplicar filtro de estado si se especifica
+      if (status) {
+        // Mapear nombres de estado comunes a IDs
+        const statusMapping: { [key: string]: number } = {
+          'draft': 1,      // Asumiendo IDs estándar
+          'published': 2,
+          'cancelled': 3,
+          'completed': 4
+        };
+
+        const statusId = statusMapping[status as string];
+        if (statusId) {
+          params.filters!.eventStatusId = statusId;
+        }
+      }
+
+      const result = await eventService.getUserEvents(userId, params);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
 
     } catch (error) {
       logger.error('Error obteniendo eventos del usuario:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/events/{id}/duplicate:
+   *   post:
+   *     tags: [Events]
+   *     summary: Duplicar evento
+   *     description: Crea una copia del evento especificado
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *     requestBody:
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               title:
+   *                 type: string
+   *                 description: Nuevo título para el evento duplicado
+   *               startDate:
+   *                 type: string
+   *                 format: date-time
+   *                 description: Nueva fecha de inicio
+   *               endDate:
+   *                 type: string
+   *                 format: date-time
+   *                 description: Nueva fecha de fin
+   *               price:
+   *                 type: number
+   *                 description: Nuevo precio
+   *     responses:
+   *       201:
+   *         description: Evento duplicado exitosamente
+   *       400:
+   *         description: Datos inválidos
+   *       401:
+   *         description: No autorizado
+   *       403:
+   *         description: Permisos insuficientes
+   *       404:
+   *         description: Evento no encontrado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async duplicateEvent(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const eventId = parseInt(id);
+
+      if (isNaN(eventId)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'ID de evento inválido',
+          error: 'INVALID_EVENT_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const customizations: Partial<CreateEventData> = req.body;
+
+      const result = await eventService.duplicateEvent(eventId, customizations, userId);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.CREATED).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error duplicando evento:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: 'Error interno del servidor',
