@@ -28,6 +28,8 @@ import {
   AutoIncrement
 } from 'sequelize-typescript';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { Op } from 'sequelize';
 import { UserRole } from '../utils/constants';
 import { Role } from './Role';
 import { UserRole as UserRoleModel } from './UserRole';
@@ -588,37 +590,18 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   }
 
   /**
-   * Genera un token seguro para verificaciones
-   */
-  public generateSecureToken(): string {
-    const crypto = require('crypto');
-    return crypto.randomBytes(32).toString('hex');
-  }
-
-  /**
-   * Establece token de verificación de email
+   * Genera un token de verificación de email
+   * Guarda el hash en DB, retorna el token plano para enviarlo al usuario
    */
   public async setEmailVerificationToken(): Promise<string> {
-    this.emailVerificationToken = this.generateSecureToken();
-    // Token válido por 24 horas
-    this.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await this.save();
-    return this.emailVerificationToken;
-  }
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
 
-  /**
-   * Verifica token de email
-   */
-  public validateEmailVerificationToken(token: string): boolean {
-    if (!this.emailVerificationToken || !this.emailVerificationExpires) {
-      return false;
-    }
-    
-    if (new Date() > this.emailVerificationExpires) {
-      return false;
-    }
-    
-    return this.emailVerificationToken === token;
+    this.emailVerificationToken = hashedToken;
+    this.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    await this.save();
+
+    return rawToken; // este se manda por correo, NO se guarda
   }
 
   /**
@@ -633,28 +616,17 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
 
   /**
    * Establece token de reset de contraseña
+   * Guarda el hash en DB, retorna el token plano para enviarlo al usuario
    */
   public async setPasswordResetToken(): Promise<string> {
-    this.passwordResetToken = this.generateSecureToken();
-    // Token válido por 1 hora
-    this.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+    
+    this.passwordResetToken = hashedToken;
+    this.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // Token válido por 1 hora
     await this.save();
-    return this.passwordResetToken;
-  }
-
-  /**
-   * Verifica token de reset de contraseña
-   */
-  public validatePasswordResetToken(token: string): boolean {
-    if (!this.passwordResetToken || !this.passwordResetExpires) {
-      return false;
-    }
     
-    if (new Date() > this.passwordResetExpires) {
-      return false;
-    }
-    
-    return this.passwordResetToken === token;
+    return rawToken; // este se manda por correo, NO se guarda
   }
 
   /**
@@ -723,29 +695,33 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
     return this.findOne(options);
   }
 
-  /**
-   * Busca usuario por token de verificación de email
+   /**
+   * Busca un usuario por token de verificación de email (seguro con hash)
    */
   static async findByEmailVerificationToken(token: string): Promise<User | null> {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
     return this.findOne({
       where: {
-        emailVerificationToken: token,
+        emailVerificationToken: hashedToken,
         emailVerificationExpires: {
-          $gt: new Date()
+          [Op.gt]: new Date() // que no haya expirado
         }
       }
     });
   }
 
   /**
-   * Busca usuario por token de reset de contraseña
+   * Busca usuario por token de reset de contraseña (seguro con hash)
    */
   static async findByPasswordResetToken(token: string): Promise<User | null> {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    
     return this.findOne({
       where: {
-        passwordResetToken: token,
+        passwordResetToken: hashedToken,
         passwordResetExpires: {
-          $gt: new Date()
+          [Op.gt]: new Date()
         }
       }
     });
