@@ -60,7 +60,7 @@
     "speakeasy": "^2.0.0",
     "twilio": "^5.9.0",
     "uuid": "^13.0.0",
-    "whatsapp-web.js": "^1.34.1",
+    "whatsapp-web.js": "^1.23.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {

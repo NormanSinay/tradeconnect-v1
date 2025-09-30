@@ -22,6 +22,8 @@ export interface ApiResponse<T = any> {
   data?: T;
   /** Mensaje de error (solo en respuestas de error) */
   error?: string;
+  /** Detalles adicionales del error o respuesta */
+  details?: any;
   /** Timestamp ISO de cuando se generó la respuesta */
   timestamp: string;
 }

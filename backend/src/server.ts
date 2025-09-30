@@ -26,6 +26,13 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import sessionRoutes from './routes/sessions';
 
+// Importar servicios para inicializar listeners
+import { eventService } from './services/eventService';
+import { eventListenersService } from './services/eventListeners';
+import { metricsService } from './services/metricsService';
+import eventRoutes from './routes/events';
+import publicRoutes from './routes/public';
+
 // Importar middleware de seguridad
 import { generalLimiter, authLimiter } from './middleware/rateLimiting';
 import { basicSecurity, publicSecurity, protectedSecurity } from './middleware/security';
@@ -126,7 +133,7 @@ app.get('/', (req, res) => {
       documentation: '/api/docs',
       modules: [
         'Authentication & Users',
-        'Events Management',
+        'Events Management (CORE)',
         'Registration System',
         'Payment Processing',
         'FEL Integration',
@@ -220,7 +227,7 @@ app.get('/info', (req, res) => {
     },
     features: {
       modules: 15,
-      endpoints: 167,
+      endpoints: 195, // Updated to include 28 new event endpoints
       paymentGateways: ['PayPal', 'Stripe', 'NeoNet', 'BAM'],
       felIntegration: true,
       blockchainSupport: true,
@@ -229,6 +236,31 @@ app.get('/info', (req, res) => {
       hybridEvents: true
     }
   }, 'System information retrieved successfully'));
+});
+
+/**
+ * @swagger
+ * /metrics:
+ *   get:
+ *     summary: Métricas de performance del sistema
+ *     description: Obtiene métricas detalladas de performance del sistema
+ *     tags: [System]
+ *     responses:
+ *       200:
+ *         description: Métricas obtenidas exitosamente
+ */
+app.get('/metrics', async (req, res) => {
+  try {
+    const metrics = metricsService.getAllMetrics();
+
+    // Verificar umbrales y loggear si es necesario
+    metricsService.checkThresholds();
+
+    res.json(successResponse(metrics, 'System metrics retrieved successfully'));
+  } catch (error) {
+    console.error('Error getting metrics:', error);
+    res.status(500).json(errorResponse('Error retrieving metrics'));
+  }
 });
 
 // ====================================================================
@@ -243,6 +275,12 @@ app.use('/api/users', userRoutes);
 
 // Rutas de sesiones
 app.use('/api/sessions', sessionRoutes);
+
+// Rutas de eventos
+app.use('/api/events', eventRoutes);
+
+// Rutas públicas
+app.use('/api/public', publicRoutes);
 
 // ====================================================================
 // MANEJO DE ERRORES 404
@@ -310,7 +348,13 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
 const startServer = async (): Promise<void> => {
   try {
     console.log('🚀 Starting TradeConnect Platform...');
-    
+
+    // Inicializar servicios de eventos y listeners
+    console.log('🎯 Initializing event services...');
+    const eventEmitter = eventService.getEventEmitter();
+    eventListenersService(eventEmitter);
+    console.log('✅ Event listeners initialized');
+
     // Verificar conexión a base de datos
     console.log('📊 Connecting to database...');
     await sequelize.authenticate();

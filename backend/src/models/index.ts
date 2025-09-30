@@ -17,6 +17,16 @@ import { Session } from './Session';
 import { AuditLog } from './AuditLog';
 import { TwoFactorAuth } from './TwoFactorAuth';
 
+// Importar modelos de eventos
+import { EventType } from './EventType';
+import { EventCategory } from './EventCategory';
+import { EventStatus } from './EventStatus';
+import { Event } from './Event';
+import { EventTemplate } from './EventTemplate';
+import { EventDuplication } from './EventDuplication';
+import { EventRegistration } from './EventRegistration';
+import { EventMedia } from './EventMedia';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -26,7 +36,16 @@ sequelize.addModels([
   UserRole,
   Session,
   AuditLog,
-  TwoFactorAuth
+  TwoFactorAuth,
+  // Modelos de eventos
+  EventType,
+  EventCategory,
+  EventStatus,
+  Event,
+  EventTemplate,
+  EventDuplication,
+  EventRegistration,
+  EventMedia
 ]);
 
 // Exportar modelos y sequelize
@@ -39,7 +58,16 @@ export {
   UserRole,
   Session,
   AuditLog,
-  TwoFactorAuth
+  TwoFactorAuth,
+  // Modelos de eventos
+  EventType,
+  EventCategory,
+  EventStatus,
+  Event,
+  EventTemplate,
+  EventDuplication,
+  EventRegistration,
+  EventMedia
 };
 
 // Exportar por defecto
