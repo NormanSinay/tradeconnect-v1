@@ -93,13 +93,13 @@ const registerValidation = [
     .trim()
     .isLength({ min: 2, max: 50 })
     .withMessage('Nombre debe tener entre 2 y 50 caracteres')
-    .matches(/^[a-zA-Z\s]+$/)
+    .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
     .withMessage('Nombre solo puede contener letras'),
   body('lastName')
     .trim()
     .isLength({ min: 2, max: 50 })
     .withMessage('Apellido debe tener entre 2 y 50 caracteres')
-    .matches(/^[a-zA-Z\s]+$/)
+    .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
     .withMessage('Apellido solo puede contener letras'),
   body('phone')
     .optional()
@@ -107,8 +107,8 @@ const registerValidation = [
     .withMessage('Teléfono debe tener formato guatemalteco (+502 1234-5678)'),
   body('nit')
     .optional()
-    .matches(/^\d{8}-[0-9K]$/i)
-    .withMessage('NIT debe tener formato guatemalteco (12345678-9)'),
+    .matches(/^\d{8}(-[0-9K])?$/i)
+    .withMessage('NIT debe tener formato guatemalteco (12345678 o 12345678-9)'),
   body('cui')
     .optional()
     .isLength({ min: 13, max: 13 })

@@ -120,7 +120,7 @@ export interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'cre
  *         nit:
  *           type: string
  *           description: NIT guatemalteco
- *           example: 12345678-9
+ *           example: 123456789
  *         cui:
  *           type: string
  *           description: CUI guatemalteco
@@ -230,8 +230,9 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
     notEmpty: {
       msg: 'El nombre es requerido'
     },
-    isAlpha: {
-      msg: 'El nombre solo puede contener letras'
+    is: {
+      args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
+      msg: 'El nombre solo puede contener letras y espacios'
     }
   })
   @Column({
@@ -249,8 +250,9 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
     notEmpty: {
       msg: 'El apellido es requerido'
     },
-    isAlpha: {
-      msg: 'El apellido solo puede contener letras'
+    is: {
+      args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
+      msg: 'El apellido solo puede contener letras y espacios'
     }
   })
   @Column({
@@ -285,8 +287,8 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   @Index
   @Validate({
     is: {
-      args: /^\d{8}-[0-9K]$/i,
-      msg: 'El NIT debe tener formato guatemalteco válido (12345678-9)'
+      args: /^\d{8}[0-9A-Z]?$/i,
+      msg: 'El NIT debe tener formato guatemalteco válido (123456789 o 12345678K)'
     }
   })
   @Column({
@@ -819,7 +821,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
    */
   static validateGuatemalaNit(nit: string): boolean {
     if (!nit) return true; // NIT es opcional
-    const nitRegex = /^\d{8}-[0-9K]$/i;
+    const nitRegex = /^\d{8}[0-9A-Z]?$/i;
     return nitRegex.test(nit);
   }
 
