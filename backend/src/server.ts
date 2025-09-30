@@ -72,8 +72,7 @@ app.use(generalLimiter);
 // Middleware de seguridad básico
 app.use(basicSecurity);
 
-// Rate limiting específico para autenticación
-app.use('/api/auth', authLimiter);
+// Rate limiting específico para autenticación se maneja en rutas individuales
 
 // ====================================================================
 // MIDDLEWARES DE PARSING

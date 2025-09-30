@@ -12,6 +12,8 @@ import { body, param } from 'express-validator';
 import { authController } from '../controllers/authController';
 import { rateLimit } from 'express-rate-limit';
 import { RATE_LIMITS } from '../utils/constants';
+import { authLimiter } from '../middleware/rateLimiting';
+import { authenticated } from '../middleware/auth';
 
 const router = Router();
 
@@ -219,7 +221,7 @@ router.post('/login', loginLimiter, loginValidation, authController.login);
  *     summary: Registrar nuevo usuario
  *     description: Crea una nueva cuenta de usuario
  */
-router.post('/register', registerValidation, authController.register);
+router.post('/register', authLimiter, registerValidation, authController.register);
 
 /**
  * @swagger
@@ -229,7 +231,7 @@ router.post('/register', registerValidation, authController.register);
  *     summary: Solicitar reseteo de contraseña
  *     description: Envía email con instrucciones para resetear contraseña
  */
-router.post('/forgot-password', passwordResetLimiter, [
+router.post('/forgot-password', authLimiter, passwordResetLimiter, [
   body('email').isEmail().normalizeEmail().withMessage('Email inválido')
 ], authController.forgotPassword);
 
@@ -241,7 +243,7 @@ router.post('/forgot-password', passwordResetLimiter, [
  *     summary: Resetear contraseña
  *     description: Establece nueva contraseña usando token de reset
  */
-router.post('/reset-password', resetPasswordValidation, authController.resetPassword);
+router.post('/reset-password', authLimiter, resetPasswordValidation, authController.resetPassword);
 
 /**
  * @swagger
@@ -251,7 +253,7 @@ router.post('/reset-password', resetPasswordValidation, authController.resetPass
  *     summary: Verificar email
  *     description: Verifica dirección de email usando token enviado
  */
-router.post('/verify-email', [
+router.post('/verify-email', authLimiter, [
   body('token').notEmpty().withMessage('Token de verificación es requerido')
 ], authController.verifyEmail);
 
@@ -263,7 +265,7 @@ router.post('/verify-email', [
  *     summary: Verificar código 2FA
  *     description: Verifica código 2FA durante proceso de login
  */
-router.post('/2fa/verify', verify2FAValidation, authController.verify2FA);
+router.post('/2fa/verify', authLimiter, verify2FAValidation, authController.verify2FA);
 
 // ====================================================================
 // RUTAS PROTEGIDAS (REQUIEREN AUTENTICACIÓN)
@@ -279,7 +281,7 @@ router.post('/2fa/verify', verify2FAValidation, authController.verify2FA);
  *     security:
  *       - bearerAuth: []
  */
-router.post('/logout', authController.logout);
+router.post('/logout', authenticated, authController.logout);
 
 /**
  * @swagger
@@ -289,7 +291,7 @@ router.post('/logout', authController.logout);
  *     summary: Refrescar token de acceso
  *     description: Genera nuevo token de acceso usando refresh token
  */
-router.post('/refresh-token', [
+router.post('/refresh-token', authenticated, [
   body('refreshToken').notEmpty().withMessage('Refresh token es requerido')
 ], authController.refreshToken);
 
@@ -303,7 +305,7 @@ router.post('/refresh-token', [
  *     security:
  *       - bearerAuth: []
  */
-router.post('/password/change', changePasswordValidation, authController.changePassword);
+router.post('/password/change', authenticated, changePasswordValidation, authController.changePassword);
 
 /**
  * @swagger
@@ -315,7 +317,7 @@ router.post('/password/change', changePasswordValidation, authController.changeP
  *     security:
  *       - bearerAuth: []
  */
-router.post('/2fa/enable', enable2FAValidation, authController.enable2FA);
+router.post('/2fa/enable', authenticated, enable2FAValidation, authController.enable2FA);
 
 /**
  * @swagger
@@ -327,7 +329,7 @@ router.post('/2fa/enable', enable2FAValidation, authController.enable2FA);
  *     security:
  *       - bearerAuth: []
  */
-router.post('/2fa/disable', disable2FAValidation, authController.disable2FA);
+router.post('/2fa/disable', authenticated, disable2FAValidation, authController.disable2FA);
 
 /**
  * @swagger
@@ -346,7 +348,7 @@ router.post('/2fa/disable', disable2FAValidation, authController.disable2FA);
  *       401:
  *         description: No autorizado
  */
-router.post('/2fa/send-otp', authController.sendOTPCode);
+router.post('/2fa/send-otp', authenticated, authController.sendOTPCode);
 
 // ====================================================================
 // RUTAS DE PERFIL DE USUARIO
@@ -367,7 +369,7 @@ router.post('/2fa/send-otp', authController.sendOTPCode);
  *       401:
  *         description: No autorizado
  */
-router.get('/profile', authController.getProfile);
+router.get('/profile', authenticated, authController.getProfile);
 
 /**
  * @swagger
@@ -397,7 +399,7 @@ router.get('/profile', authController.getProfile);
  *       401:
  *         description: No autorizado
  */
-router.post('/profile/avatar', authController.uploadAvatar);
+router.post('/profile/avatar', authenticated, authController.uploadAvatar);
 
 /**
  * @swagger
@@ -414,7 +416,7 @@ router.post('/profile/avatar', authController.uploadAvatar);
  *       401:
  *         description: No autorizado
  */
-router.delete('/profile/avatar', authController.deleteAvatar);
+router.delete('/profile/avatar', authenticated, authController.deleteAvatar);
 
 // ====================================================================
 // RUTAS DE GESTIÓN DE SESIONES
@@ -435,7 +437,7 @@ router.delete('/profile/avatar', authController.deleteAvatar);
  *       401:
  *         description: No autorizado
  */
-router.get('/sessions', authController.getUserSessions);
+router.get('/sessions', authenticated, authController.getUserSessions);
 
 /**
  * @swagger
@@ -452,7 +454,7 @@ router.get('/sessions', authController.getUserSessions);
  *       401:
  *         description: No autorizado
  */
-router.post('/sessions/terminate-others', authController.terminateOtherSessions);
+router.post('/sessions/terminate-others', authenticated, authController.terminateOtherSessions);
 
 /**
  * @swagger
@@ -471,7 +473,7 @@ router.post('/sessions/terminate-others', authController.terminateOtherSessions)
  *       403:
  *         description: Permisos insuficientes
  */
-router.get('/sessions/stats', authController.getSessionStats);
+router.get('/sessions/stats', authenticated, authController.getSessionStats);
 
 // ====================================================================
 // RUTAS DE 2FA ADICIONALES
@@ -492,7 +494,7 @@ router.get('/sessions/stats', authController.getSessionStats);
  *       401:
  *         description: No autorizado
  */
-router.get('/2fa/backup-codes', authController.getBackupCodes);
+router.get('/2fa/backup-codes', authenticated, authController.getBackupCodes);
 
 // ====================================================================
 // RUTAS DE ADMINISTRACIÓN DE USUARIOS
@@ -536,7 +538,7 @@ router.get('/2fa/backup-codes', authController.getBackupCodes);
  *       403:
  *         description: Permisos insuficientes
  */
-router.get('/users', authController.getUsers);
+router.get('/users', authenticated, authController.getUsers);
 
 /**
  * @swagger
@@ -563,7 +565,7 @@ router.get('/users', authController.getUsers);
  *       403:
  *         description: Permisos insuficientes
  */
-router.post('/users', authController.createUser);
+router.post('/users', authenticated, authController.createUser);
 
 /**
  * @swagger
@@ -599,7 +601,7 @@ router.post('/users', authController.createUser);
  *       404:
  *         description: Usuario no encontrado
  */
-router.put('/users/:id', [
+router.put('/users/:id', authenticated, [
   param('id').isInt({ min: 1 }).withMessage('ID de usuario debe ser un número entero positivo')
 ], authController.updateUser);
 
@@ -629,7 +631,7 @@ router.put('/users/:id', [
  *       404:
  *         description: Usuario no encontrado
  */
-router.delete('/users/:id', [
+router.delete('/users/:id', authenticated, [
   param('id').isInt({ min: 1 }).withMessage('ID de usuario debe ser un número entero positivo')
 ], authController.deleteUser);
 
@@ -669,7 +671,7 @@ router.delete('/users/:id', [
  *       404:
  *         description: Usuario no encontrado
  */
-router.get('/users/:id/audit', [
+router.get('/users/:id/audit', authenticated, [
   param('id').isInt({ min: 1 }).withMessage('ID de usuario debe ser un número entero positivo')
 ], authController.getUserAudit);
 
