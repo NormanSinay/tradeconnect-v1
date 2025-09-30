@@ -12,6 +12,7 @@ import { body, param, query } from 'express-validator';
 import { userController } from '../controllers/userController';
 import { rateLimit } from 'express-rate-limit';
 import { RATE_LIMITS } from '../utils/constants';
+import { authenticated } from '../middleware/auth';
 
 const router = Router();
 
@@ -188,7 +189,7 @@ const userIdValidation = [
  *     security:
  *       - bearerAuth: []
  */
-router.get('/profile', userLimiter, userController.getProfile);
+router.get('/profile', authenticated, userLimiter, userController.getProfile);
 
 /**
  * @swagger
@@ -200,7 +201,7 @@ router.get('/profile', userLimiter, userController.getProfile);
  *     security:
  *       - bearerAuth: []
  */
-router.put('/profile', userLimiter, updateProfileValidation, userController.updateProfile);
+router.put('/profile', authenticated, userLimiter, updateProfileValidation, userController.updateProfile);
 
 /**
  * @swagger
@@ -212,7 +213,7 @@ router.put('/profile', userLimiter, updateProfileValidation, userController.upda
  *     security:
  *       - bearerAuth: []
  */
-router.get('/', userLimiter, queryValidation, userController.getUsers);
+router.get('/', authenticated, userLimiter, queryValidation, userController.getUsers);
 
 /**
  * @swagger
@@ -224,7 +225,7 @@ router.get('/', userLimiter, queryValidation, userController.getUsers);
  *     security:
  *       - bearerAuth: []
  */
-router.post('/', userLimiter, createUserValidation, userController.createUser);
+router.post('/', authenticated, userLimiter, createUserValidation, userController.createUser);
 
 /**
  * @swagger
@@ -243,7 +244,7 @@ router.post('/', userLimiter, createUserValidation, userController.createUser);
  *           type: integer
  *         description: ID del usuario
  */
-router.put('/:id', userLimiter, userIdValidation, updateUserValidation, userController.updateUser);
+router.put('/:id', authenticated, userLimiter, userIdValidation, updateUserValidation, userController.updateUser);
 
 /**
  * @swagger
@@ -262,6 +263,6 @@ router.put('/:id', userLimiter, userIdValidation, updateUserValidation, userCont
  *           type: integer
  *         description: ID del usuario
  */
-router.delete('/:id', userLimiter, userIdValidation, userController.deleteUser);
+router.delete('/:id', authenticated, userLimiter, userIdValidation, userController.deleteUser);
 
 export default router;
