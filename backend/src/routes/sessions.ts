@@ -12,6 +12,7 @@ import { param, query } from 'express-validator';
 import { sessionController } from '../controllers/sessionController';
 import { rateLimit } from 'express-rate-limit';
 import { RATE_LIMITS } from '../utils/constants';
+import { authenticated } from '../middleware/auth';
 
 const router = Router();
 
@@ -88,7 +89,7 @@ const statsQueryValidation = [
  *     security:
  *       - bearerAuth: []
  */
-router.get('/active', sessionLimiter, sessionController.getActiveSessions);
+router.get('/active', authenticated, sessionLimiter, sessionController.getActiveSessions);
 
 /**
  * @swagger
@@ -100,7 +101,7 @@ router.get('/active', sessionLimiter, sessionController.getActiveSessions);
  *     security:
  *       - bearerAuth: []
  */
-router.get('/current', sessionLimiter, sessionController.getCurrentSession);
+router.get('/current', authenticated, sessionLimiter, sessionController.getCurrentSession);
 
 /**
  * @swagger
@@ -112,7 +113,7 @@ router.get('/current', sessionLimiter, sessionController.getCurrentSession);
  *     security:
  *       - bearerAuth: []
  */
-router.get('/history', sessionLimiter, historyQueryValidation, sessionController.getSessionHistory);
+router.get('/history', authenticated, sessionLimiter, historyQueryValidation, sessionController.getSessionHistory);
 
 /**
  * @swagger
@@ -132,7 +133,7 @@ router.get('/history', sessionLimiter, historyQueryValidation, sessionController
  *           format: uuid
  *         description: ID de la sesión a terminar
  */
-router.delete('/:id', sessionLimiter, sessionIdValidation, sessionController.terminateSession);
+router.delete('/:id', authenticated, sessionLimiter, sessionIdValidation, sessionController.terminateSession);
 
 /**
  * @swagger
@@ -144,7 +145,7 @@ router.delete('/:id', sessionLimiter, sessionIdValidation, sessionController.ter
  *     security:
  *       - bearerAuth: []
  */
-router.post('/terminate-others', sessionLimiter, sessionController.terminateOtherSessions);
+router.post('/terminate-others', authenticated, sessionLimiter, sessionController.terminateOtherSessions);
 
 /**
  * @swagger
@@ -156,6 +157,6 @@ router.post('/terminate-others', sessionLimiter, sessionController.terminateOthe
  *     security:
  *       - bearerAuth: []
  */
-router.get('/stats', sessionLimiter, statsQueryValidation, sessionController.getSessionStats);
+router.get('/stats', authenticated, sessionLimiter, statsQueryValidation, sessionController.getSessionStats);
 
 export default router;
