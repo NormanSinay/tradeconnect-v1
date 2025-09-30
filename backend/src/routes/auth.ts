@@ -291,7 +291,7 @@ router.post('/logout', authenticated, authController.logout);
  *     summary: Refrescar token de acceso
  *     description: Genera nuevo token de acceso usando refresh token
  */
-router.post('/refresh-token', authenticated, [
+router.post('/refresh-token', authLimiter, [
   body('refreshToken').notEmpty().withMessage('Refresh token es requerido')
 ], authController.refreshToken);
 
