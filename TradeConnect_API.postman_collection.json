@@ -1,0 +1,2390 @@
+{
+	"info": {
+		"_postman_id": "tradeconnect-api-v1",
+		"name": "TradeConnect Platform API",
+		"description": "Colección completa de endpoints para TradeConnect Platform - Sistema de gestión de eventos empresariales",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "tradeconnect"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "01. General",
+			"item": [
+				{
+					"name": "Welcome",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": ["{{base_url}}"],
+							"path": [""]
+						}
+					}
+				},
+				{
+					"name": "Health Check",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						}
+					}
+				},
+				{
+					"name": "System Info",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/info",
+							"host": ["{{base_url}}"],
+							"path": ["info"]
+						}
+					}
+				},
+				{
+					"name": "System Metrics",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/metrics",
+							"host": ["{{base_url}}"],
+							"path": ["metrics"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "02. Authentication",
+			"item": [
+				{
+					"name": "Public",
+					"item": [
+						{
+							"name": "Register",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 201) {",
+											"    const response = pm.response.json();",
+											"    if (response.data && response.data.tokens) {",
+											"        pm.collectionVariables.set('access_token', response.data.tokens.accessToken);",
+											"        pm.collectionVariables.set('refresh_token', response.data.tokens.refreshToken);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"usuario@ejemplo.com\",\n  \"password\": \"Password123\",\n  \"confirmPassword\": \"Password123\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"phone\": \"+502 1234-5678\",\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"termsAccepted\": true,\n  \"marketingAccepted\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/register",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "register"]
+								}
+							}
+						},
+						{
+							"name": "Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    const response = pm.response.json();",
+											"    if (response.data && response.data.tokens) {",
+											"        pm.collectionVariables.set('access_token', response.data.tokens.accessToken);",
+											"        pm.collectionVariables.set('refresh_token', response.data.tokens.refreshToken);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"usuario@ejemplo.com\",\n  \"password\": \"Password123\",\n  \"rememberMe\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/login",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "login"]
+								}
+							}
+						},
+						{
+							"name": "Forgot Password",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"usuario@ejemplo.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/forgot-password",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "forgot-password"]
+								}
+							}
+						},
+						{
+							"name": "Reset Password",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"resetToken\": \"token-from-email\",\n  \"newPassword\": \"NewPassword123\",\n  \"confirmPassword\": \"NewPassword123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/reset-password",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "reset-password"]
+								}
+							}
+						},
+						{
+							"name": "Verify Email",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"token\": \"verification-token-from-email\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/verify-email",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "verify-email"]
+								}
+							}
+						},
+						{
+							"name": "Validate CUI",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"cui\": \"1234567890123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/validate/cui",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "validate", "cui"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Token Management",
+					"item": [
+						{
+							"name": "Refresh Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    const response = pm.response.json();",
+											"    if (response.data && response.data.accessToken) {",
+											"        pm.collectionVariables.set('access_token', response.data.accessToken);",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/refresh-token",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "refresh-token"]
+								}
+							}
+						},
+						{
+							"name": "Logout",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/logout",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "logout"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Password",
+					"item": [
+						{
+							"name": "Change Password",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"currentPassword\": \"Password123\",\n  \"newPassword\": \"NewPassword456\",\n  \"confirmNewPassword\": \"NewPassword456\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/password/change",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "password", "change"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Two Factor Auth",
+					"item": [
+						{
+							"name": "Enable 2FA",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"method\": \"totp\",\n  \"verificationCode\": \"123456\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/2fa/enable",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "2fa", "enable"]
+								}
+							}
+						},
+						{
+							"name": "Disable 2FA",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"password\": \"Password123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/2fa/disable",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "2fa", "disable"]
+								}
+							}
+						},
+						{
+							"name": "Verify 2FA",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"code\": \"123456\",\n  \"sessionId\": \"session-id-from-login\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/2fa/verify",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "2fa", "verify"]
+								}
+							}
+						},
+						{
+							"name": "Send OTP",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/2fa/send-otp",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "2fa", "send-otp"]
+								}
+							}
+						},
+						{
+							"name": "Get Backup Codes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/2fa/backup-codes",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "2fa", "backup-codes"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Profile",
+					"item": [
+						{
+							"name": "Get Profile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/profile",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "profile"]
+								}
+							}
+						},
+						{
+							"name": "Upload Avatar",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "avatar",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/profile/avatar",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "profile", "avatar"]
+								}
+							}
+						},
+						{
+							"name": "Delete Avatar",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/profile/avatar",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "profile", "avatar"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Sessions",
+					"item": [
+						{
+							"name": "Get User Sessions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/sessions",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "sessions"]
+								}
+							}
+						},
+						{
+							"name": "Terminate Other Sessions",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/sessions/terminate-others",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "sessions", "terminate-others"]
+								}
+							}
+						},
+						{
+							"name": "Get Session Stats",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/sessions/stats",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "sessions", "stats"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Admin - Users",
+					"item": [
+						{
+							"name": "List Users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/users?page=1&limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "users"],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "search",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "role",
+											"value": "",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Create User",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"newuser@ejemplo.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"Nuevo\",\n  \"lastName\": \"Usuario\",\n  \"phone\": \"+502 9876-5432\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/users",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "users"]
+								}
+							}
+						},
+						{
+							"name": "Update User",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"firstName\": \"Nombre Actualizado\",\n  \"isActive\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/auth/users/:id",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "users", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Delete User",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/users/:id",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "users", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get User Audit",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/auth/users/:id/audit?page=1&limit=20",
+									"host": ["{{base_url}}"],
+									"path": ["api", "auth", "users", ":id", "audit"],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "20"
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "03. Users",
+			"item": [
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update My Profile",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"phone\": \"+502 1234-5678\",\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"timezone\": \"America/Guatemala\",\n  \"locale\": \"es-GT\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "List All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "role",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "isActive",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create User (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@ejemplo.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"Usuario\",\n  \"lastName\": \"Nuevo\",\n  \"phone\": \"+502 1234-5678\",\n  \"role\": \"user\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Update User (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Nombre Actualizado\",\n  \"isActive\": true,\n  \"role\": \"user\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/users/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete User (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/users/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "users", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "04. Sessions",
+			"item": [
+				{
+					"name": "Get Active Sessions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/active",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", "active"]
+						}
+					}
+				},
+				{
+					"name": "Get Current Session",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/current",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", "current"]
+						}
+					}
+				},
+				{
+					"name": "Get Session History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/history?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", "history"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Terminate Session",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "session-uuid"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Terminate Other Sessions",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/terminate-others",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", "terminate-others"]
+						}
+					}
+				},
+				{
+					"name": "Get Session Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/sessions/stats?days=30",
+							"host": ["{{base_url}}"],
+							"path": ["api", "sessions", "stats"],
+							"query": [
+								{
+									"key": "days",
+									"value": "30"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "05. Events",
+			"item": [
+				{
+					"name": "Get My Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Conferencia de Negocios 2024\",\n  \"description\": \"Una conferencia sobre las últimas tendencias en negocios\",\n  \"shortDescription\": \"Conferencia de negocios\",\n  \"startDate\": \"2024-12-01T09:00:00.000Z\",\n  \"endDate\": \"2024-12-01T18:00:00.000Z\",\n  \"location\": \"Centro de Convenciones, Guatemala\",\n  \"isVirtual\": false,\n  \"price\": 250.00,\n  \"currency\": \"GTQ\",\n  \"capacity\": 200,\n  \"minAge\": 18,\n  \"eventTypeId\": 1,\n  \"eventCategoryId\": 1,\n  \"tags\": [\"negocios\", \"conferencia\", \"networking\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events"]
+						}
+					}
+				},
+				{
+					"name": "Get Event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Event",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Conferencia de Negocios 2024 - Actualizado\",\n  \"description\": \"Descripción actualizada del evento\",\n  \"price\": 275.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Publish Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notifySubscribers\": true,\n  \"notificationMessage\": \"¡Nuevo evento disponible!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events/:id/publish",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", ":id", "publish"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Cancel Event",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"El evento fue cancelado debido a circunstancias imprevistas\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events/:id/status?action=cancel",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", ":id", "status"],
+							"query": [
+								{
+									"key": "action",
+									"value": "cancel"
+								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Duplicate Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Conferencia de Negocios 2025\",\n  \"startDate\": \"2025-01-15T09:00:00.000Z\",\n  \"endDate\": \"2025-01-15T18:00:00.000Z\",\n  \"price\": 300.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events/:id/duplicate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", ":id", "duplicate"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Upload Media",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/events/:id/upload-media",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", ":id", "upload-media"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Event Media",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/:id/media",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", ":id", "media"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Media",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/events/:id/media/:mediaId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "events", ":id", "media", ":mediaId"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								},
+								{
+									"key": "mediaId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "06. Event Templates",
+			"item": [
+				{
+					"name": "Get Templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-templates?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-templates"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "isPublic",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Template",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Plantilla de Conferencia\",\n  \"description\": \"Plantilla estándar para conferencias empresariales\",\n  \"templateData\": {\n    \"duration\": \"8 hours\",\n    \"defaultCapacity\": 200,\n    \"defaultPrice\": 250,\n    \"includedFeatures\": [\"coffee break\", \"lunch\", \"materials\"]\n  },\n  \"isPublic\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/event-templates",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-templates"]
+						}
+					}
+				},
+				{
+					"name": "Get Template",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-templates/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-templates", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Template",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Plantilla de Conferencia Actualizada\",\n  \"description\": \"Descripción actualizada\",\n  \"isPublic\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/event-templates/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-templates", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Template",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-templates/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-templates", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Use Template",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customizations\": {\n    \"title\": \"Mi Evento Basado en Plantilla\",\n    \"startDate\": \"2024-12-15T09:00:00.000Z\",\n    \"endDate\": \"2024-12-15T18:00:00.000Z\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/event-templates/:id/use",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-templates", ":id", "use"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "07. Event Categories & Types",
+			"item": [
+				{
+					"name": "Categories",
+					"item": [
+						{
+							"name": "Get Categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event-categories?page=1&limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories"],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "search",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "isActive",
+											"value": "",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Active Categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/active",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", "active"]
+								}
+							}
+						},
+						{
+							"name": "Get Category",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/:id",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Create Category",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"business\",\n  \"displayName\": \"Negocios\",\n  \"description\": \"Eventos relacionados con negocios y emprendimiento\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/event-categories",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories"]
+								}
+							}
+						},
+						{
+							"name": "Update Category",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"displayName\": \"Negocios y Emprendimiento\",\n  \"description\": \"Descripción actualizada\",\n  \"isActive\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/:id",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Delete Category",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/:id",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Types",
+					"item": [
+						{
+							"name": "Get Types",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/types?page=1&limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", "types"],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "search",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "isActive",
+											"value": "",
+											"disabled": true
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Active Types",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/types/active",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", "types", "active"]
+								}
+							}
+						},
+						{
+							"name": "Get Type",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/types/:id",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", "types", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Create Type",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"conference\",\n  \"displayName\": \"Conferencia\",\n  \"description\": \"Evento tipo conferencia con ponencias y talleres\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/types",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", "types"]
+								}
+							}
+						},
+						{
+							"name": "Update Type",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"displayName\": \"Conferencia Empresarial\",\n  \"description\": \"Descripción actualizada\",\n  \"isActive\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/types/:id",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", "types", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						},
+						{
+							"name": "Delete Type",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/event-categories/types/:id",
+									"host": ["{{base_url}}"],
+									"path": ["api", "event-categories", "types", ":id"],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "08. Event Registrations",
+			"item": [
+				{
+					"name": "Get My Registrations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/my?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", "my"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "paymentStatus",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Check Registration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/check/:eventId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", "check", ":eventId"],
+							"variable": [
+								{
+									"key": "eventId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Register to Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"registrationData\": {\n    \"attendeeType\": \"professional\",\n    \"company\": \"Mi Empresa\",\n    \"specialRequirements\": \"Ninguno\"\n  },\n  \"paymentAmount\": 250.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/events/:eventId/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", "events", ":eventId", "register"],
+							"variable": [
+								{
+									"key": "eventId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Cancel Registration",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"No podré asistir por compromisos previos\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/:id/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", ":id", "cancel"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Check In",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/:id/checkin",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", ":id", "checkin"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Check Out",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/:id/checkout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", ":id", "checkout"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Registration (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Registration (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"confirmed\",\n  \"paymentStatus\": \"paid\",\n  \"paymentReference\": \"PAY-123456789\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Event Registrations (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/events/:eventId?page=1&limit=20",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", "events", ":eventId"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "paymentStatus",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "eventId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Event Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-registrations/events/:eventId/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-registrations", "events", ":eventId", "stats"],
+							"variable": [
+								{
+									"key": "eventId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "09. Event Reports",
+			"item": [
+				{
+					"name": "Get Sales Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-reports/sales?startDate=2024-01-01&endDate=2024-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-reports", "sales"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								},
+								{
+									"key": "eventId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "typeId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "organizerId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Export Sales Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-reports/sales/export?startDate=2024-01-01&endDate=2024-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-reports", "sales", "export"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								},
+								{
+									"key": "eventId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Attendance Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-reports/attendance?startDate=2024-01-01&endDate=2024-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-reports", "attendance"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								},
+								{
+									"key": "eventId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Export Attendance Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-reports/attendance/export?startDate=2024-01-01&endDate=2024-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-reports", "attendance", "export"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Event Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-reports/events/:eventId/analytics",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-reports", "events", ":eventId", "analytics"],
+							"variable": [
+								{
+									"key": "eventId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get System Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/event-reports/system/metrics",
+							"host": ["{{base_url}}"],
+							"path": ["api", "event-reports", "system", "metrics"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "10. Certificates",
+			"item": [
+				{
+					"name": "Generate Certificate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/certificates/events/:eventId/users/:userId/registrations/:registrationId/generate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "certificates", "events", ":eventId", "users", ":userId", "registrations", ":registrationId", "generate"],
+							"variable": [
+								{
+									"key": "eventId",
+									"value": "1"
+								},
+								{
+									"key": "userId",
+									"value": "1"
+								},
+								{
+									"key": "registrationId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Generate Bulk Certificates",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/certificates/events/:eventId/generate-bulk",
+							"host": ["{{base_url}}"],
+							"path": ["api", "certificates", "events", ":eventId", "generate-bulk"],
+							"variable": [
+								{
+									"key": "eventId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User Certificates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/certificates/users/:userId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "certificates", "users", ":userId"],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Event Certificates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/certificates/events/:eventId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "certificates", "events", ":eventId"],
+							"variable": [
+								{
+									"key": "eventId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Certificate by Registration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/certificates/registrations/:registrationId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "certificates", "registrations", ":registrationId"],
+							"variable": [
+								{
+									"key": "registrationId",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Verify Certificate (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/certificates/verify/:hash",
+							"host": ["{{base_url}}"],
+							"path": ["api", "certificates", "verify", ":hash"],
+							"variable": [
+								{
+									"key": "hash",
+									"value": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Certificate Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/certificates/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "certificates", "stats"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "11. Public Endpoints",
+			"item": [
+				{
+					"name": "Get Public Events",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/public/events?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "public", "events"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "eventTypeId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "eventCategoryId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "isVirtual",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "startDateFrom",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "startDateTo",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "priceMin",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "priceMax",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Public Event",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/public/events/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "public", "events", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Events",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/public/events/search?q=conferencia&page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "public", "events", "search"],
+							"query": [
+								{
+									"key": "q",
+									"value": "conferencia"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "location",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "dateFrom",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "dateTo",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "priceMin",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "priceMax",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "isVirtual",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Calendar Events",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/public/events/calendar?month=12&year=2024",
+							"host": ["{{base_url}}"],
+							"path": ["api", "public", "events", "calendar"],
+							"query": [
+								{
+									"key": "month",
+									"value": "12"
+								},
+								{
+									"key": "year",
+									"value": "2024"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Event Categories",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/public/events/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "public", "events", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Verify Certificate",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/public/certificates/verify/:hash",
+							"host": ["{{base_url}}"],
+							"path": ["api", "public", "certificates", "verify", ":hash"],
+							"variable": [
+								{
+									"key": "hash",
+									"value": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

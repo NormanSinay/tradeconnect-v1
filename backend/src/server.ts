@@ -12,6 +12,8 @@ import morgan from 'morgan';
 import compression from 'compression';
 import path from 'path';
 import fs from 'fs';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 import { config } from './config/environment';
 import { testRedisConnection } from './config/redis';
 import sequelize from './config/database';
@@ -114,6 +116,106 @@ if (process.env.NODE_ENV === 'development') {
 app.use(requestLogger);
 
 // ====================================================================
+// CONFIGURACIÓN DE SWAGGER
+// ====================================================================
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'TradeConnect Platform API',
+      version: '1.0.0',
+      description: 'Plataforma completa para gestión de eventos empresariales con blockchain',
+      contact: {
+        name: 'TradeConnect Team',
+        email: 'support@tradeconnect.com'
+      },
+      license: {
+        name: 'MIT',
+        url: 'https://opensource.org/licenses/MIT'
+      }
+    },
+    servers: [
+      {
+        url: `http://localhost:${config.PORT}`,
+        description: 'Development server'
+      },
+      {
+        url: 'https://api.tradeconnect.com',
+        description: 'Production server'
+      }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"'
+        }
+      },
+      schemas: {
+        Error: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean',
+              example: false
+            },
+            message: {
+              type: 'string',
+              example: 'Error description'
+            },
+            error: {
+              type: 'string',
+              example: 'ERROR_CODE'
+            },
+            timestamp: {
+              type: 'string',
+              format: 'date-time'
+            }
+          }
+        },
+        Success: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean',
+              example: true
+            },
+            message: {
+              type: 'string',
+              example: 'Operation successful'
+            },
+            data: {
+              type: 'object',
+              description: 'Response data'
+            },
+            timestamp: {
+              type: 'string',
+              format: 'date-time'
+            }
+          }
+        }
+      }
+    },
+    security: [
+      {
+        bearerAuth: []
+      }
+    ]
+  },
+  apis: [
+    './src/routes/*.ts',
+    './src/controllers/*.ts',
+    './src/models/*.ts',
+    './src/services/*.ts'
+  ]
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// ====================================================================
 // RUTAS PRINCIPALES
 // ====================================================================
 
@@ -136,6 +238,7 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/health',
       documentation: '/api/docs',
+      swaggerJson: '/api/docs.json',
       modules: [
         'Authentication & Users',
         'Events Management (CORE)',
@@ -272,6 +375,35 @@ app.get('/metrics', async (req, res) => {
 // RUTAS DE LA API
 // ====================================================================
 
+// Rutas de documentación Swagger
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  swaggerOptions: {
+    docExpansion: 'none',
+    filter: true,
+    showRequestDuration: true,
+    syntaxHighlight: {
+      activate: true,
+      theme: 'arta'
+    },
+    tryItOutEnabled: true,
+    requestInterceptor: (req: any) => {
+      // Agregar token JWT si existe en localStorage/sessionStorage
+      const token = req.headers.Authorization || localStorage.getItem('jwt_token');
+      if (token) {
+        req.headers.Authorization = `Bearer ${token}`;
+      }
+      return req;
+    }
+  }
+}));
+
+// Endpoint para obtener la especificación Swagger en JSON
+app.get('/api/docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
 
@@ -400,7 +532,7 @@ const startServer = async (): Promise<void> => {
                 🔗 URL: http://localhost:${PORT}${' '.repeat(33)}                          
                 📝 Health Check: http://localhost:${PORT}/health${' '.repeat(25)}          
                 📊 System Info: http://localhost:${PORT}/info${' '.repeat(26)}             
-                📚 API Documentation: http://localhost:${PORT}/api/docs${' '.repeat(19)}   
+                📚 API Documentation: http://localhost:${PORT}/api/docs/${' '.repeat(18)}
                 ⏰ Started at: ${new Date().toISOString().padEnd(37)} 
                                                                               
                               🎯 Ready to accept requests!                                               

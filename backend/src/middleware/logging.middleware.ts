@@ -122,12 +122,24 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
   // Override del método send
   res.send = function(body: any) {
     const duration = Date.now() - startTime;
-    
+
+    // Calcular tamaño de respuesta de forma segura
+    let responseSize = 0;
+    if (body) {
+      if (typeof body === 'string') {
+        responseSize = Buffer.byteLength(body, 'utf8');
+      } else if (typeof body === 'object') {
+        responseSize = Buffer.byteLength(JSON.stringify(body), 'utf8');
+      } else {
+        responseSize = Buffer.byteLength(String(body), 'utf8');
+      }
+    }
+
     const requestLogData: RequestLogData = {
       ...logData,
       statusCode: res.statusCode,
       duration,
-      responseSize: body ? Buffer.byteLength(body, 'utf8') : 0
+      responseSize
     };
     
     // Log con nivel apropiado según status code
