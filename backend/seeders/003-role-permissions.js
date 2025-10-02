@@ -266,7 +266,18 @@ module.exports = {
       }
     });
 
-    // Insertar todas las asignaciones de permisos
+    // Verificar si ya existen asignaciones de permisos
+    const [results] = await queryInterface.sequelize.query(
+      'SELECT COUNT(*) as count FROM role_permissions',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    );
+
+    if (results.count > 0) {
+      console.log('Asignaciones de permisos ya existen, saltando inserción...');
+      return;
+    }
+
+    // Insertar todas las asignaciones de permisos si no existen
     await queryInterface.bulkInsert('role_permissions', rolePermissions, {});
   },
 

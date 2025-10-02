@@ -103,6 +103,18 @@ module.exports = {
       }
     ];
 
+    // Verificar si ya existen roles usando consulta SQL directa
+    const [results] = await queryInterface.sequelize.query(
+      'SELECT COUNT(*) as count FROM roles',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    );
+
+    if (results.count > 0) {
+      console.log('Roles ya existen, saltando inserción...');
+      return;
+    }
+
+    // Insertar roles si no existen
     await queryInterface.bulkInsert('roles', roles, {});
   },
 

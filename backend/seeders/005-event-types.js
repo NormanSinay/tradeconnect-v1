@@ -103,6 +103,18 @@ module.exports = {
       }
     ];
 
+    // Verificar si ya existen tipos de eventos
+    const [results] = await queryInterface.sequelize.query(
+      'SELECT COUNT(*) as count FROM event_types',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    );
+
+    if (results.count > 0) {
+      console.log('Tipos de eventos ya existen, saltando inserción...');
+      return;
+    }
+
+    // Insertar tipos de eventos si no existen
     await queryInterface.bulkInsert('event_types', eventTypes, {});
   },
 

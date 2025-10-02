@@ -88,6 +88,18 @@ module.exports = {
       }
     ];
 
+    // Verificar si ya existen estados de eventos
+    const [results] = await queryInterface.sequelize.query(
+      'SELECT COUNT(*) as count FROM event_statuses',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    );
+
+    if (results.count > 0) {
+      console.log('Estados de eventos ya existen, saltando inserción...');
+      return;
+    }
+
+    // Insertar estados de eventos si no existen
     await queryInterface.bulkInsert('event_statuses', eventStatuses, {});
   },
 

@@ -681,6 +681,18 @@ module.exports = {
       }
     ];
 
+    // Verificar si ya existen permisos usando consulta SQL directa
+    const [results] = await queryInterface.sequelize.query(
+      'SELECT COUNT(*) as count FROM permissions',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    );
+
+    if (results.count > 0) {
+      console.log('Permisos ya existen, saltando inserción...');
+      return;
+    }
+
+    // Insertar permisos si no existen
     await queryInterface.bulkInsert('permissions', permissions, {});
   },
 

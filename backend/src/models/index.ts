@@ -27,6 +27,16 @@ import { EventDuplication } from './EventDuplication';
 import { EventRegistration } from './EventRegistration';
 import { EventMedia } from './EventMedia';
 
+// Importar modelos de speakers
+import { Specialty } from './Specialty';
+import { Speaker } from './Speaker';
+import { SpeakerSpecialty } from './SpeakerSpecialty';
+import { SpeakerAvailabilityBlock } from './SpeakerAvailabilityBlock';
+import { SpeakerEvent } from './SpeakerEvent';
+import { Contract } from './Contract';
+import { SpeakerPayment } from './SpeakerPayment';
+import { SpeakerEvaluation } from './SpeakerEvaluation';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -45,7 +55,16 @@ sequelize.addModels([
   EventTemplate,
   EventDuplication,
   EventRegistration,
-  EventMedia
+  EventMedia,
+  // Modelos de speakers
+  Specialty,
+  Speaker,
+  SpeakerSpecialty,
+  SpeakerAvailabilityBlock,
+  SpeakerEvent,
+  Contract,
+  SpeakerPayment,
+  SpeakerEvaluation
 ]);
 
 // Exportar modelos y sequelize
@@ -67,7 +86,16 @@ export {
   EventTemplate,
   EventDuplication,
   EventRegistration,
-  EventMedia
+  EventMedia,
+  // Modelos de speakers
+  Specialty,
+  Speaker,
+  SpeakerSpecialty,
+  SpeakerAvailabilityBlock,
+  SpeakerEvent,
+  Contract,
+  SpeakerPayment,
+  SpeakerEvaluation
 };
 
 // Exportar por defecto

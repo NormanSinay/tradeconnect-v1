@@ -23,7 +23,18 @@ module.exports = {
       updated_at: new Date()
     };
 
-    // Insertar usuario administrador
+    // Verificar si ya existe el usuario administrador
+    const [results] = await queryInterface.sequelize.query(
+      'SELECT COUNT(*) as count FROM users WHERE email = $1',
+      { bind: ['admin@tradeconnect.gt'], type: queryInterface.sequelize.QueryTypes.SELECT }
+    );
+
+    if (results.count > 0) {
+      console.log('Usuario administrador ya existe, saltando creación...');
+      return;
+    }
+
+    // Insertar usuario administrador si no existe
     const [userResult] = await queryInterface.bulkInsert('users', [adminUser], { returning: true });
 
     // Obtener el ID del usuario creado

@@ -1,10 +1,11 @@
 {
 	"info": {
-		"_postman_id": "tradeconnect-api-v1",
-		"name": "TradeConnect Platform API",
-		"description": "Colección completa de endpoints para TradeConnect Platform - Sistema de gestión de eventos empresariales",
+		"_postman_id": "tradeconnect-api-complete-v1",
+		"name": "TradeConnect Platform API - Complete",
+		"description": "Colección completa de 109 endpoints para TradeConnect Platform - Sistema de gestión de eventos empresariales con speakers y contratos",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "tradeconnect"
+		"_exporter_id": "tradeconnect",
+		"version": "1.0.0"
 	},
 	"auth": {
 		"type": "bearer",
@@ -30,6 +31,16 @@
 		{
 			"key": "refresh_token",
 			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "speaker_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "contract_id",
+			"value": "1",
 			"type": "string"
 		}
 	],
@@ -741,21 +752,6 @@
 								{
 									"key": "limit",
 									"value": "10"
-								},
-								{
-									"key": "search",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "role",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "isActive",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}
@@ -873,16 +869,6 @@
 								{
 									"key": "limit",
 									"value": "10"
-								},
-								{
-									"key": "startDate",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "endDate",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}
@@ -958,11 +944,6 @@
 								{
 									"key": "limit",
 									"value": "10"
-								},
-								{
-									"key": "status",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}
@@ -1229,16 +1210,6 @@
 								{
 									"key": "limit",
 									"value": "10"
-								},
-								{
-									"key": "search",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "isPublic",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}
@@ -1380,16 +1351,6 @@
 										{
 											"key": "limit",
 											"value": "10"
-										},
-										{
-											"key": "search",
-											"value": "",
-											"disabled": true
-										},
-										{
-											"key": "isActive",
-											"value": "",
-											"disabled": true
 										}
 									]
 								}
@@ -1513,16 +1474,6 @@
 										{
 											"key": "limit",
 											"value": "10"
-										},
-										{
-											"key": "search",
-											"value": "",
-											"disabled": true
-										},
-										{
-											"key": "isActive",
-											"value": "",
-											"disabled": true
 										}
 									]
 								}
@@ -1648,16 +1599,6 @@
 								{
 									"key": "limit",
 									"value": "10"
-								},
-								{
-									"key": "status",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "paymentStatus",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}
@@ -1833,21 +1774,6 @@
 								{
 									"key": "limit",
 									"value": "20"
-								},
-								{
-									"key": "status",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "paymentStatus",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "search",
-									"value": "",
-									"disabled": true
 								}
 							],
 							"variable": [
@@ -1899,31 +1825,6 @@
 								{
 									"key": "endDate",
 									"value": "2024-12-31"
-								},
-								{
-									"key": "eventId",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "categoryId",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "typeId",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "status",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "organizerId",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}
@@ -1946,11 +1847,6 @@
 								{
 									"key": "endDate",
 									"value": "2024-12-31"
-								},
-								{
-									"key": "eventId",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}
@@ -1973,16 +1869,6 @@
 								{
 									"key": "endDate",
 									"value": "2024-12-31"
-								},
-								{
-									"key": "eventId",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "categoryId",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}
@@ -2176,7 +2062,359 @@
 			]
 		},
 		{
-			"name": "11. Public Endpoints",
+			"name": "11. Speakers",
+			"item": [
+				{
+					"name": "Get Active Speakers",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/speakers?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speakers"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "category",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minRating",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Speaker",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Carlos\",\n  \"lastName\": \"García\",\n  \"email\": \"carlos.garcia@ejemplo.com\",\n  \"phone\": \"+502 5555-1234\",\n  \"country\": \"Guatemala\",\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"shortBio\": \"Experto en transformación digital con 15 años de experiencia\",\n  \"fullBio\": \"Carlos García es un reconocido experto en transformación digital y estrategia empresarial...\",\n  \"linkedinUrl\": \"https://linkedin.com/in/carlosgarcia\",\n  \"baseRate\": 5000.00,\n  \"rateType\": \"event\",\n  \"modalities\": [\"presential\", \"virtual\", \"hybrid\"],\n  \"languages\": [\"spanish\", \"english\"],\n  \"category\": \"expert\",\n  \"specialtyIds\": [1, 2, 3]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/speakers",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speakers"]
+						}
+					}
+				},
+				{
+					"name": "Get Speaker",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/speakers/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speakers", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{speaker_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Speaker",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shortBio\": \"Biografía actualizada\",\n  \"baseRate\": 6000.00,\n  \"category\": \"international\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/speakers/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speakers", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{speaker_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Speaker",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/speakers/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speakers", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{speaker_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Verify Speaker",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/speakers/:id/verify",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speakers", ":id", "verify"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{speaker_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Availability Block",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"startDate\": \"2024-12-15T00:00:00.000Z\",\n  \"endDate\": \"2024-12-20T00:00:00.000Z\",\n  \"reason\": \"Vacaciones programadas\",\n  \"isRecurring\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/speakers/:id/availability",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speakers", ":id", "availability"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{speaker_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Evaluate Speaker",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"eventId\": 1,\n  \"overallRating\": 4.5,\n  \"criteriaRatings\": {\n    \"content\": 5,\n    \"delivery\": 4,\n    \"engagement\": 5,\n    \"punctuality\": 4\n  },\n  \"comments\": \"Excelente presentación, muy profesional\",\n  \"isPublic\": true,\n  \"evaluationDate\": \"2024-10-02T18:00:00.000Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/speakers/:id/evaluate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speakers", ":id", "evaluate"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{speaker_id}}"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "12. Speaker Contracts",
+			"item": [
+				{
+					"name": "Get Contracts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/speaker-contracts?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speaker-contracts"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "speakerId",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "eventId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Contract",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"speakerId\": 1,\n  \"eventId\": 1,\n  \"agreedAmount\": 5000.00,\n  \"currency\": \"GTQ\",\n  \"paymentTerms\": \"advance_payment\",\n  \"advancePercentage\": 50,\n  \"termsConditions\": \"El speaker se compromete a presentarse 30 minutos antes del evento...\",\n  \"customClauses\": [\n    \"Incluye hospedaje por 2 noches\",\n    \"Transporte desde y hacia el aeropuerto\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/speaker-contracts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speaker-contracts"]
+						}
+					}
+				},
+				{
+					"name": "Get Contract",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/speaker-contracts/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speaker-contracts", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{contract_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Contract",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"agreedAmount\": 5500.00,\n  \"advancePercentage\": 60\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/speaker-contracts/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speaker-contracts", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{contract_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Approve Contract",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/speaker-contracts/:id/approve",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speaker-contracts", ":id", "approve"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{contract_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Payment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 2500.00,\n  \"currency\": \"GTQ\",\n  \"paymentType\": \"advance\",\n  \"scheduledDate\": \"2024-11-01T00:00:00.000Z\",\n  \"paymentMethod\": \"bank_transfer\",\n  \"referenceNumber\": \"TRF-2024-001\",\n  \"notes\": \"Pago de anticipo del 50%\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/speaker-contracts/:id/payment",
+							"host": ["{{base_url}}"],
+							"path": ["api", "speaker-contracts", ":id", "payment"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{contract_id}}"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "13. Public Endpoints",
 			"item": [
 				{
 					"name": "Get Public Events",
@@ -2198,46 +2436,6 @@
 								{
 									"key": "limit",
 									"value": "10"
-								},
-								{
-									"key": "search",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "eventTypeId",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "eventCategoryId",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "isVirtual",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "startDateFrom",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "startDateTo",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "priceMin",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "priceMax",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}
@@ -2288,36 +2486,6 @@
 								{
 									"key": "limit",
 									"value": "10"
-								},
-								{
-									"key": "location",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "dateFrom",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "dateTo",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "priceMin",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "priceMax",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "isVirtual",
-									"value": "",
-									"disabled": true
 								}
 							]
 						}

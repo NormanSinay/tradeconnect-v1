@@ -431,6 +431,12 @@ app.use('/api/event-reports', eventReportsRoutes);
 // Rutas de certificados blockchain
 app.use('/api/certificates', certificateRoutes);
 
+// Rutas de speakers
+import speakersRoutes from './routes/speakers';
+import speakerContractRoutes from './routes/speaker-contracts';
+app.use('/api/speakers', speakersRoutes);
+app.use('/api/speaker-contracts', speakerContractRoutes);
+
 // Rutas públicas
 app.use('/api/public', publicRoutes);
 

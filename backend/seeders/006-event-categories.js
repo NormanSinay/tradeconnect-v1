@@ -159,6 +159,18 @@ module.exports = {
       }
     ];
 
+    // Verificar si ya existen categorías de eventos
+    const [results] = await queryInterface.sequelize.query(
+      'SELECT COUNT(*) as count FROM event_categories',
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    );
+
+    if (results.count > 0) {
+      console.log('Categorías de eventos ya existen, saltando inserción...');
+      return;
+    }
+
+    // Insertar categorías de eventos si no existen
     await queryInterface.bulkInsert('event_categories', eventCategories, {});
   },
 
