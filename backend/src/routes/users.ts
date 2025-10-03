@@ -265,4 +265,36 @@ router.put('/:id', authenticated, userLimiter, userIdValidation, updateUserValid
  */
 router.delete('/:id', authenticated, userLimiter, userIdValidation, userController.deleteUser);
 
+/**
+ * @swagger
+ * /api/users/{id}/audit:
+ *   get:
+ *     tags: [Users]
+ *     summary: Obtener auditoría de usuario
+ *     description: Obtiene el historial de auditoría de un usuario específico (requiere permisos administrativos)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Elementos por página
+ */
+router.get('/:id/audit', authenticated, userLimiter, userIdValidation, [
+  query('page').optional().isInt({ min: 1 }).withMessage('Página debe ser un número entero positivo'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Límite debe estar entre 1 y 100')
+], userController.getUserAudit);
+
 export default router;

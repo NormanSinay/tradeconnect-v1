@@ -852,6 +852,71 @@ export class UserController {
       });
     }
   }
+
+  /**
+   * Obtener auditoría de usuario (admin)
+   */
+  async getUserAudit(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Verificar permisos administrativos
+      const userPermissions = req.user?.permissions || [];
+      if (!userPermissions.includes('view_user_audit')) {
+        res.status(HTTP_STATUS.FORBIDDEN).json({
+          success: false,
+          message: 'Permisos insuficientes',
+          error: 'FORBIDDEN',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = parseInt(req.params.id);
+      const { page = 1, limit = 20 } = req.query;
+
+      const offset = (Number(page) - 1) * Number(limit);
+
+      const { rows: auditLogs, count: total } = await AuditLog.findAndCountAll({
+        where: {
+          resource: 'user',
+          resourceId: userId.toString()
+        },
+        limit: Number(limit),
+        offset,
+        order: [['createdAt', 'DESC']],
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'email', 'firstName', 'lastName']
+          }
+        ]
+      });
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: 'Auditoría obtenida exitosamente',
+        data: {
+          auditLogs,
+          pagination: {
+            page: Number(page),
+            limit: Number(limit),
+            total,
+            pages: Math.ceil(total / Number(limit))
+          }
+        },
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error obteniendo auditoría de usuario:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
 }
 
 export const userController = new UserController();

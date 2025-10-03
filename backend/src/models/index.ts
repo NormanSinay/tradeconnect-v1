@@ -37,6 +37,14 @@ import { Contract } from './Contract';
 import { SpeakerPayment } from './SpeakerPayment';
 import { SpeakerEvaluation } from './SpeakerEvaluation';
 
+// Importar modelos de inscripciones
+import { Registration } from './Registration';
+import { GroupRegistration } from './GroupRegistration';
+import { Cart } from './Cart';
+import { CartItem } from './CartItem';
+import { CartSession } from './CartSession';
+import { AbandonedCart } from './AbandonedCart';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -64,7 +72,14 @@ sequelize.addModels([
   SpeakerEvent,
   Contract,
   SpeakerPayment,
-  SpeakerEvaluation
+  SpeakerEvaluation,
+  // Modelos de inscripciones
+  Registration,
+  GroupRegistration,
+  Cart,
+  CartItem,
+  CartSession,
+  AbandonedCart
 ]);
 
 // Exportar modelos y sequelize
@@ -95,7 +110,14 @@ export {
   SpeakerEvent,
   Contract,
   SpeakerPayment,
-  SpeakerEvaluation
+  SpeakerEvaluation,
+  // Modelos de inscripciones
+  Registration,
+  GroupRegistration,
+  Cart,
+  CartItem,
+  CartSession,
+  AbandonedCart
 };
 
 // Exportar por defecto

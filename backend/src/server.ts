@@ -196,6 +196,544 @@ const swaggerOptions = {
               format: 'date-time'
             }
           }
+        },
+        // Cart schemas
+        CartItemRequest: {
+          type: 'object',
+          required: ['eventId', 'participantType', 'quantity'],
+          properties: {
+            eventId: {
+              type: 'integer',
+              description: 'ID del evento',
+              example: 1
+            },
+            participantType: {
+              type: 'string',
+              enum: ['individual', 'empresa'],
+              description: 'Tipo de participante',
+              example: 'individual'
+            },
+            quantity: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 50,
+              description: 'Cantidad de participantes',
+              example: 2
+            },
+            customFields: {
+              type: 'object',
+              description: 'Campos personalizados del evento',
+              example: { 'dietary_restrictions': 'vegetarian' }
+            },
+            participantData: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  firstName: { type: 'string' },
+                  lastName: { type: 'string' },
+                  email: { type: 'string', format: 'email' },
+                  phone: { type: 'string' },
+                  nit: { type: 'string' },
+                  cui: { type: 'string' },
+                  position: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        CartUpdateRequest: {
+          type: 'object',
+          required: ['itemId'],
+          properties: {
+            itemId: {
+              type: 'integer',
+              description: 'ID del item a actualizar',
+              example: 1
+            },
+            quantity: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 50,
+              description: 'Nueva cantidad',
+              example: 3
+            },
+            customFields: {
+              type: 'object',
+              description: 'Campos personalizados actualizados'
+            }
+          }
+        },
+        PromoCodeRequest: {
+          type: 'object',
+          required: ['code'],
+          properties: {
+            code: {
+              type: 'string',
+              description: 'Código promocional',
+              example: 'DESCUENTO20'
+            }
+          }
+        },
+        CartResponse: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              description: 'ID del carrito'
+            },
+            sessionId: {
+              type: 'string',
+              description: 'ID de sesión del carrito'
+            },
+            userId: {
+              type: 'integer',
+              description: 'ID del usuario'
+            },
+            totalItems: {
+              type: 'integer',
+              description: 'Total de items'
+            },
+            subtotal: {
+              type: 'number',
+              description: 'Subtotal sin descuentos'
+            },
+            discountAmount: {
+              type: 'number',
+              description: 'Monto de descuentos'
+            },
+            total: {
+              type: 'number',
+              description: 'Total final'
+            },
+            promoCode: {
+              type: 'string',
+              description: 'Código promocional aplicado'
+            },
+            promoDiscount: {
+              type: 'number',
+              description: 'Descuento por código promocional'
+            },
+            expiresAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de expiración'
+            },
+            lastActivity: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Última actividad'
+            },
+            isAbandoned: {
+              type: 'boolean',
+              description: 'Si el carrito fue abandonado'
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación'
+            },
+            items: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'integer' },
+                  cartId: { type: 'integer' },
+                  eventId: { type: 'integer' },
+                  participantType: { type: 'string' },
+                  quantity: { type: 'integer' },
+                  basePrice: { type: 'number' },
+                  discountAmount: { type: 'number' },
+                  finalPrice: { type: 'number' },
+                  total: { type: 'number' },
+                  isGroupRegistration: { type: 'boolean' },
+                  customFields: { type: 'object' },
+                  addedAt: { type: 'string', format: 'date-time' }
+                }
+              }
+            }
+          }
+        }
+      },
+      // User management schemas
+      CreateUserRequest: {
+        type: 'object',
+        required: ['email', 'password', 'firstName', 'lastName'],
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Email del usuario',
+            example: 'usuario@tradeconnect.gt'
+          },
+          password: {
+            type: 'string',
+            minLength: 8,
+            description: 'Contraseña (mínimo 8 caracteres)',
+            example: 'SecurePass123'
+          },
+          firstName: {
+            type: 'string',
+            description: 'Nombre',
+            example: 'Juan'
+          },
+          lastName: {
+            type: 'string',
+            description: 'Apellido',
+            example: 'Pérez'
+          },
+          phone: {
+            type: 'string',
+            description: 'Teléfono',
+            example: '+502 1234-5678'
+          },
+          role: {
+            type: 'string',
+            enum: ['user', 'speaker', 'participant', 'client'],
+            description: 'Rol del usuario',
+            example: 'user'
+          }
+        }
+      },
+      UpdateUserRequest: {
+        type: 'object',
+        properties: {
+          firstName: {
+            type: 'string',
+            description: 'Nombre',
+            example: 'Juan'
+          },
+          lastName: {
+            type: 'string',
+            description: 'Apellido',
+            example: 'Pérez'
+          },
+          phone: {
+            type: 'string',
+            description: 'Teléfono',
+            example: '+502 1234-5678'
+          },
+          isActive: {
+            type: 'boolean',
+            description: 'Estado del usuario',
+            example: true
+          },
+          role: {
+            type: 'string',
+            enum: ['user', 'speaker', 'participant', 'client'],
+            description: 'Rol del usuario',
+            example: 'user'
+          }
+        }
+      },
+      // Authentication schemas
+      LoginRequest: {
+        type: 'object',
+        required: ['email', 'password'],
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Email del usuario',
+            example: 'usuario@tradeconnect.gt'
+          },
+          password: {
+            type: 'string',
+            description: 'Contraseña',
+            example: 'SecurePass123'
+          },
+          twoFactorCode: {
+            type: 'string',
+            description: 'Código 2FA (opcional)',
+            example: '123456'
+          },
+          rememberMe: {
+            type: 'boolean',
+            description: 'Recordar sesión',
+            example: true
+          }
+        }
+      },
+      RegisterRequest: {
+        type: 'object',
+        required: ['email', 'password', 'confirmPassword', 'firstName', 'lastName', 'termsAccepted'],
+        properties: {
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Email del usuario',
+            example: 'usuario@tradeconnect.gt'
+          },
+          password: {
+            type: 'string',
+            minLength: 8,
+            description: 'Contraseña (mínimo 8 caracteres)',
+            example: 'SecurePass123'
+          },
+          confirmPassword: {
+            type: 'string',
+            description: 'Confirmación de contraseña',
+            example: 'SecurePass123'
+          },
+          firstName: {
+            type: 'string',
+            description: 'Nombre',
+            example: 'Juan'
+          },
+          lastName: {
+            type: 'string',
+            description: 'Apellido',
+            example: 'Pérez'
+          },
+          phone: {
+            type: 'string',
+            description: 'Teléfono',
+            example: '+502 1234-5678'
+          },
+          nit: {
+            type: 'string',
+            description: 'NIT guatemalteco',
+            example: '12345678-9'
+          },
+          cui: {
+            type: 'string',
+            description: 'CUI guatemalteco (13 dígitos)',
+            example: '1234567890123'
+          },
+          termsAccepted: {
+            type: 'boolean',
+            description: 'Aceptación de términos y condiciones',
+            example: true
+          },
+          marketingAccepted: {
+            type: 'boolean',
+            description: 'Aceptación de marketing',
+            example: false
+          }
+        }
+      },
+      ResetPasswordData: {
+        type: 'object',
+        required: ['resetToken', 'newPassword', 'confirmPassword'],
+        properties: {
+          resetToken: {
+            type: 'string',
+            description: 'Token de reseteo de contraseña',
+            example: 'abc123def456'
+          },
+          newPassword: {
+            type: 'string',
+            minLength: 8,
+            description: 'Nueva contraseña',
+            example: 'NewSecurePass123'
+          },
+          confirmPassword: {
+            type: 'string',
+            description: 'Confirmación de nueva contraseña',
+            example: 'NewSecurePass123'
+          }
+        }
+      },
+      ChangePasswordData: {
+        type: 'object',
+        required: ['currentPassword', 'newPassword', 'confirmNewPassword'],
+        properties: {
+          currentPassword: {
+            type: 'string',
+            description: 'Contraseña actual',
+            example: 'CurrentPass123'
+          },
+          newPassword: {
+            type: 'string',
+            minLength: 8,
+            description: 'Nueva contraseña',
+            example: 'NewSecurePass123'
+          },
+          confirmNewPassword: {
+            type: 'string',
+            description: 'Confirmación de nueva contraseña',
+            example: 'NewSecurePass123'
+          }
+        }
+      },
+      AuthResponse: {
+        type: 'object',
+        properties: {
+          user: {
+            $ref: '#/components/schemas/AuthUser'
+          },
+          accessToken: {
+            type: 'string',
+            description: 'Token de acceso JWT',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+          },
+          refreshToken: {
+            type: 'string',
+            description: 'Token de refresco',
+            example: 'refresh_token_123'
+          },
+          expiresIn: {
+            type: 'integer',
+            description: 'Tiempo de expiración en segundos',
+            example: 3600
+          },
+          requires2FA: {
+            type: 'boolean',
+            description: 'Si requiere autenticación de dos factores',
+            example: false
+          }
+        }
+      },
+      AuthUser: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'integer',
+            description: 'ID del usuario',
+            example: 1
+          },
+          email: {
+            type: 'string',
+            format: 'email',
+            description: 'Email del usuario',
+            example: 'usuario@tradeconnect.gt'
+          },
+          firstName: {
+            type: 'string',
+            description: 'Nombre',
+            example: 'Juan'
+          },
+          lastName: {
+            type: 'string',
+            description: 'Apellido',
+            example: 'Pérez'
+          },
+          role: {
+            type: 'string',
+            description: 'Rol del usuario',
+            example: 'user'
+          },
+          isActive: {
+            type: 'boolean',
+            description: 'Estado del usuario',
+            example: true
+          },
+          emailVerified: {
+            type: 'boolean',
+            description: 'Email verificado',
+            example: true
+          },
+          twoFactorEnabled: {
+            type: 'boolean',
+            description: '2FA habilitado',
+            example: false
+          }
+        }
+      },
+      // Registration schemas
+      CreateIndividualRegistrationRequest: {
+        type: 'object',
+        required: ['eventId', 'participantType', 'participantData'],
+        properties: {
+          eventId: {
+            type: 'integer',
+            description: 'ID del evento',
+            example: 1
+          },
+          participantType: {
+            type: 'string',
+            enum: ['individual', 'empresa'],
+            description: 'Tipo de participante',
+            example: 'individual'
+          },
+          participantData: {
+            type: 'array',
+            minItems: 1,
+            items: {
+              type: 'object',
+              required: ['firstName', 'lastName', 'email'],
+              properties: {
+                firstName: {
+                  type: 'string',
+                  description: 'Nombre del participante',
+                  example: 'Juan'
+                },
+                lastName: {
+                  type: 'string',
+                  description: 'Apellido del participante',
+                  example: 'Pérez'
+                },
+                email: {
+                  type: 'string',
+                  format: 'email',
+                  description: 'Email del participante',
+                  example: 'juan.perez@email.com'
+                },
+                phone: {
+                  type: 'string',
+                  description: 'Teléfono del participante',
+                  example: '+502 1234-5678'
+                },
+                nit: {
+                  type: 'string',
+                  description: 'NIT del participante',
+                  example: '12345678-9'
+                },
+                cui: {
+                  type: 'string',
+                  description: 'CUI del participante',
+                  example: '1234567890123'
+                },
+                position: {
+                  type: 'string',
+                  description: 'Cargo del participante',
+                  example: 'Gerente de Ventas'
+                }
+              }
+            }
+          },
+          customFields: {
+            type: 'object',
+            description: 'Campos personalizados del evento',
+            example: { 'dietary_restrictions': 'vegetarian', 'special_needs': 'wheelchair access' }
+          },
+          paymentMethod: {
+            type: 'string',
+            enum: ['paypal', 'stripe', 'neonet', 'bam'],
+            description: 'Método de pago',
+            example: 'paypal'
+          }
+        }
+      },
+      UpdateRegistrationRequest: {
+        type: 'object',
+        properties: {
+          participantData: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                firstName: { type: 'string' },
+                lastName: { type: 'string' },
+                email: { type: 'string', format: 'email' },
+                phone: { type: 'string' },
+                nit: { type: 'string' },
+                cui: { type: 'string' },
+                position: { type: 'string' }
+              }
+            }
+          },
+          customFields: {
+            type: 'object',
+            description: 'Campos personalizados actualizados'
+          },
+          status: {
+            type: 'string',
+            enum: ['pending', 'confirmed', 'cancelled'],
+            description: 'Estado de la inscripción',
+            example: 'confirmed'
+          }
         }
       }
     },
@@ -239,6 +777,10 @@ app.get('/', (req, res) => {
       health: '/health',
       documentation: '/api/docs',
       swaggerJson: '/api/docs.json',
+      api: {
+        v1: '/api/v1',
+        legacy: '/api (redirects to v1)'
+      },
       modules: [
         'Authentication & Users',
         'Events Management (CORE)',
@@ -334,8 +876,8 @@ app.get('/info', (req, res) => {
       pid: process.pid
     },
     features: {
-      modules: 15,
-      endpoints: 99, // Total endpoints implemented: auth(25) + users(6) + sessions(6) + events(54) + public(6) + general(4)
+      modules: 17,
+      endpoints: 113, // Total endpoints implemented: auth(25) + users(6) + sessions(6) + events(54) + speakers(8) + registrations(6) + cart(7) + public(6) + general(4)
       paymentGateways: ['PayPal', 'Stripe', 'NeoNet', 'BAM'],
       felIntegration: true,
       blockchainSupport: true,
@@ -404,41 +946,66 @@ app.get('/api/docs.json', (req, res) => {
   res.send(swaggerSpec);
 });
 
+// API Version 1
+const API_VERSION = '/api/v1';
+
 // Rutas de autenticación
-app.use('/api/auth', authRoutes);
+app.use(`${API_VERSION}/auth`, authRoutes);
 
 // Rutas de usuarios
-app.use('/api/users', userRoutes);
+app.use(`${API_VERSION}/users`, userRoutes);
 
 // Rutas de sesiones
-app.use('/api/sessions', sessionRoutes);
+app.use(`${API_VERSION}/sessions`, sessionRoutes);
 
 // Rutas de eventos
-app.use('/api/events', eventRoutes);
+app.use(`${API_VERSION}/events`, eventRoutes);
 
 // Rutas de plantillas de eventos
-app.use('/api/event-templates', eventTemplateRoutes);
+app.use(`${API_VERSION}/event-templates`, eventTemplateRoutes);
 
 // Rutas de categorías y tipos de eventos
-app.use('/api/event-categories', eventCategoryRoutes);
+app.use(`${API_VERSION}/event-categories`, eventCategoryRoutes);
 
 // Rutas de inscripciones a eventos
-app.use('/api/event-registrations', eventRegistrationRoutes);
+app.use(`${API_VERSION}/event-registrations`, eventRegistrationRoutes);
 
 // Rutas de reportes y analytics
-app.use('/api/event-reports', eventReportsRoutes);
+app.use(`${API_VERSION}/event-reports`, eventReportsRoutes);
 
 // Rutas de certificados blockchain
-app.use('/api/certificates', certificateRoutes);
+app.use(`${API_VERSION}/certificates`, certificateRoutes);
 
 // Rutas de speakers
 import speakersRoutes from './routes/speakers';
 import speakerContractRoutes from './routes/speaker-contracts';
-app.use('/api/speakers', speakersRoutes);
-app.use('/api/speaker-contracts', speakerContractRoutes);
+app.use(`${API_VERSION}/speakers`, speakersRoutes);
+app.use(`${API_VERSION}/speaker-contracts`, speakerContractRoutes);
+
+// Rutas de inscripciones y carrito
+import registrationRoutes from './routes/registrations';
+import cartRoutes from './routes/cart';
+app.use(`${API_VERSION}/registrations`, registrationRoutes);
+app.use(`${API_VERSION}/cart`, cartRoutes);
 
 // Rutas públicas
-app.use('/api/public', publicRoutes);
+app.use(`${API_VERSION}/public`, publicRoutes);
+
+// Backward compatibility - redirect old API routes to v1
+app.use('/api/auth', (req, res) => res.redirect(301, `${API_VERSION}/auth${req.path}`));
+app.use('/api/users', (req, res) => res.redirect(301, `${API_VERSION}/users${req.path}`));
+app.use('/api/sessions', (req, res) => res.redirect(301, `${API_VERSION}/sessions${req.path}`));
+app.use('/api/events', (req, res) => res.redirect(301, `${API_VERSION}/events${req.path}`));
+app.use('/api/event-templates', (req, res) => res.redirect(301, `${API_VERSION}/event-templates${req.path}`));
+app.use('/api/event-categories', (req, res) => res.redirect(301, `${API_VERSION}/event-categories${req.path}`));
+app.use('/api/event-registrations', (req, res) => res.redirect(301, `${API_VERSION}/event-registrations${req.path}`));
+app.use('/api/event-reports', (req, res) => res.redirect(301, `${API_VERSION}/event-reports${req.path}`));
+app.use('/api/certificates', (req, res) => res.redirect(301, `${API_VERSION}/certificates${req.path}`));
+app.use('/api/speakers', (req, res) => res.redirect(301, `${API_VERSION}/speakers${req.path}`));
+app.use('/api/speaker-contracts', (req, res) => res.redirect(301, `${API_VERSION}/speaker-contracts${req.path}`));
+app.use('/api/registrations', (req, res) => res.redirect(301, `${API_VERSION}/registrations${req.path}`));
+app.use('/api/cart', (req, res) => res.redirect(301, `${API_VERSION}/cart${req.path}`));
+app.use('/api/public', (req, res) => res.redirect(301, `${API_VERSION}/public${req.path}`));
 
 // ====================================================================
 // MANEJO DE ERRORES 404
