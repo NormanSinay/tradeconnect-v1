@@ -876,8 +876,8 @@ app.get('/info', (req, res) => {
       pid: process.pid
     },
     features: {
-      modules: 17,
-      endpoints: 113, // Total endpoints implemented: auth(25) + users(6) + sessions(6) + events(54) + speakers(8) + registrations(6) + cart(7) + public(6) + general(4)
+      modules: 18,
+      endpoints: 143, // Total endpoints implemented: auth(25) + users(6) + sessions(6) + events(54) + speakers(8) + registrations(6) + cart(7) + public(6) + payments(15) + refunds(4) + webhooks(6) + general(4)
       paymentGateways: ['PayPal', 'Stripe', 'NeoNet', 'BAM'],
       felIntegration: true,
       blockchainSupport: true,
@@ -991,6 +991,14 @@ app.use(`${API_VERSION}/cart`, cartRoutes);
 // Rutas públicas
 app.use(`${API_VERSION}/public`, publicRoutes);
 
+// Rutas de pagos
+import paymentsRoutes from './routes/payments';
+import refundsRoutes from './routes/refunds';
+import webhooksRoutes from './routes/webhooks';
+app.use(`${API_VERSION}/payments`, paymentsRoutes);
+app.use(`${API_VERSION}/refunds`, refundsRoutes);
+app.use(`${API_VERSION}/webhooks`, webhooksRoutes);
+
 // Backward compatibility - redirect old API routes to v1
 app.use('/api/auth', (req, res) => res.redirect(301, `${API_VERSION}/auth${req.path}`));
 app.use('/api/users', (req, res) => res.redirect(301, `${API_VERSION}/users${req.path}`));
@@ -1006,6 +1014,9 @@ app.use('/api/speaker-contracts', (req, res) => res.redirect(301, `${API_VERSION
 app.use('/api/registrations', (req, res) => res.redirect(301, `${API_VERSION}/registrations${req.path}`));
 app.use('/api/cart', (req, res) => res.redirect(301, `${API_VERSION}/cart${req.path}`));
 app.use('/api/public', (req, res) => res.redirect(301, `${API_VERSION}/public${req.path}`));
+app.use('/api/payments', (req, res) => res.redirect(301, `${API_VERSION}/payments${req.path}`));
+app.use('/api/refunds', (req, res) => res.redirect(301, `${API_VERSION}/refunds${req.path}`));
+app.use('/api/webhooks', (req, res) => res.redirect(301, `${API_VERSION}/webhooks${req.path}`));
 
 // ====================================================================
 // MANEJO DE ERRORES 404

@@ -28,6 +28,7 @@
   "author": "Nasg Dev",
   "license": "MIT",
   "dependencies": {
+    "@types/stripe": "^8.0.416",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "compression": "^1.8.1",
@@ -58,6 +59,7 @@
     "sequelize-typescript": "^2.1.6",
     "sharp": "^0.34.4",
     "speakeasy": "^2.0.0",
+    "stripe": "^19.0.0",
     "twilio": "^5.9.0",
     "uuid": "^13.0.0",
     "whatsapp-web.js": "^1.23.0",

@@ -45,6 +45,12 @@ import { CartItem } from './CartItem';
 import { CartSession } from './CartSession';
 import { AbandonedCart } from './AbandonedCart';
 
+// Importar modelos de pagos
+import { Payment } from './Payment';
+import { PaymentMethod } from './PaymentMethod';
+import { Refund } from './Refund';
+import { PaymentReconciliation } from './PaymentReconciliation';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -79,7 +85,12 @@ sequelize.addModels([
   Cart,
   CartItem,
   CartSession,
-  AbandonedCart
+  AbandonedCart,
+  // Modelos de pagos
+  Payment,
+  PaymentMethod,
+  Refund,
+  PaymentReconciliation
 ]);
 
 // Exportar modelos y sequelize
@@ -117,7 +128,12 @@ export {
   Cart,
   CartItem,
   CartSession,
-  AbandonedCart
+  AbandonedCart,
+  // Modelos de pagos
+  Payment,
+  PaymentMethod,
+  Refund,
+  PaymentReconciliation
 };
 
 // Exportar por defecto
