@@ -51,6 +51,15 @@ import { PaymentMethod } from './PaymentMethod';
 import { Refund } from './Refund';
 import { PaymentReconciliation } from './PaymentReconciliation';
 
+// Importar modelos FEL
+import { Invoice } from './Invoice';
+import { FelDocument } from './FelDocument';
+import { FelToken } from './FelToken';
+import { NitValidation } from './NitValidation';
+import { CuiValidation } from './CuiValidation';
+import { FelError } from './FelError';
+import { FelAuditLog } from './FelAuditLog';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -90,7 +99,15 @@ sequelize.addModels([
   Payment,
   PaymentMethod,
   Refund,
-  PaymentReconciliation
+  PaymentReconciliation,
+  // Modelos FEL
+  Invoice,
+  FelDocument,
+  FelToken,
+  NitValidation,
+  CuiValidation,
+  FelError,
+  FelAuditLog
 ]);
 
 // Exportar modelos y sequelize
@@ -133,7 +150,15 @@ export {
   Payment,
   PaymentMethod,
   Refund,
-  PaymentReconciliation
+  PaymentReconciliation,
+  // Modelos FEL
+  Invoice,
+  FelDocument,
+  FelToken,
+  NitValidation,
+  CuiValidation,
+  FelError,
+  FelAuditLog
 };
 
 // Exportar por defecto

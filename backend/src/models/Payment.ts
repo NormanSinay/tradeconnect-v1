@@ -24,6 +24,7 @@ import {
   AutoIncrement,
   Unique
 } from 'sequelize-typescript';
+import { Op } from 'sequelize';
 import { PaymentStatus, PaymentGateway, PaymentType } from '../utils/constants';
 import { Registration } from './Registration';
 import { Refund } from './Refund';
@@ -182,7 +183,7 @@ export interface PaymentCreationAttributes extends Omit<PaymentAttributes, 'id' 
       unique: true,
       fields: ['gateway', 'gateway_transaction_id'],
       where: {
-        gateway_transaction_id: { $ne: null },
+        gateway_transaction_id: { [Op.ne]: null },
         deleted_at: null
       }
     },
@@ -570,7 +571,7 @@ export class Payment extends Model<PaymentAttributes, PaymentCreationAttributes>
       where: {
         status: 'pending',
         expiresAt: {
-          $lt: new Date()
+          [Op.lt]: new Date()
         }
       }
     });

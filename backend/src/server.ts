@@ -258,13 +258,161 @@ const swaggerOptions = {
               description: 'Nueva cantidad',
               example: 3
             },
-            customFields: {
-              type: 'object',
-              description: 'Campos personalizados actualizados'
+          }
+        },
+        // FEL schemas
+        FelValidationRequest: {
+          type: 'object',
+          required: ['nit'],
+          properties: {
+            nit: {
+              type: 'string',
+              description: 'Número de Identificación Tributaria',
+              example: '12345678-9'
             }
           }
         },
-        PromoCodeRequest: {
+        FelCuiValidationRequest: {
+          type: 'object',
+          required: ['cui'],
+          properties: {
+            cui: {
+              type: 'string',
+              description: 'Código Único de Identificación',
+              example: '1234567890123'
+            }
+          }
+        },
+        InvoiceGenerationRequest: {
+          type: 'object',
+          required: ['registrationId'],
+          properties: {
+            registrationId: {
+              type: 'integer',
+              description: 'ID de la inscripción',
+              example: 1
+            },
+            paymentId: {
+              type: 'integer',
+              description: 'ID del pago (opcional)',
+              example: 1
+            },
+            customItems: {
+              type: 'array',
+              description: 'Items personalizados de factura',
+              items: {
+                type: 'object',
+                properties: {
+                  description: { type: 'string' },
+                  quantity: { type: 'number' },
+                  unitPrice: { type: 'number' },
+                  discount: { type: 'number' }
+                }
+              }
+            },
+            notes: {
+              type: 'string',
+              description: 'Notas adicionales',
+              example: 'Factura generada automáticamente'
+            }
+          }
+        },
+        InvoiceCancelRequest: {
+          type: 'object',
+          required: ['reason'],
+          properties: {
+            reason: {
+              type: 'string',
+              description: 'Motivo de la anulación',
+              example: 'Cliente solicitó cancelación'
+            }
+          }
+        },
+        FelDocumentResponse: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            uuid: { type: 'string', example: '550e8400-e29b-41d4-a716-446655440000' },
+            invoiceId: { type: 'integer', example: 1 },
+            status: {
+              type: 'string',
+              enum: ['generated', 'sent', 'certified', 'cancelled', 'expired', 'failed'],
+              example: 'certified'
+            },
+            authorizationNumber: { type: 'string', example: '123456789' },
+            certifiedAt: { type: 'string', format: 'date-time' },
+            qrCode: { type: 'string', example: 'https://fel.sat.gob.gt/verify/...' },
+            series: { type: 'string', example: 'A' },
+            number: { type: 'integer', example: 1 }
+          }
+        },
+        InvoiceResponse: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            uuid: { type: 'string', example: '550e8400-e29b-41d4-a716-446655440000' },
+            registrationId: { type: 'integer', example: 1 },
+            status: {
+              type: 'string',
+              enum: ['draft', 'pending', 'certified', 'sent', 'cancelled', 'expired'],
+              example: 'certified'
+            },
+            documentType: {
+              type: 'string',
+              enum: ['FACTURA', 'NOTA_CREDITO', 'NOTA_DEBITO'],
+              example: 'FACTURA'
+            },
+            series: { type: 'string', example: 'A' },
+            number: { type: 'integer', example: 1 },
+            nit: { type: 'string', example: '12345678-9' },
+            name: { type: 'string', example: 'Juan Pérez' },
+            address: { type: 'string', example: 'Ciudad de Guatemala' },
+            email: { type: 'string', example: 'cliente@example.com' },
+            phone: { type: 'string', example: '+502 1234-5678' },
+            subtotal: { type: 'number', example: 100.00 },
+            taxRate: { type: 'number', example: 0.12 },
+            taxAmount: { type: 'number', example: 12.00 },
+            total: { type: 'number', example: 112.00 },
+            currency: { type: 'string', example: 'GTQ' },
+            description: { type: 'string', example: 'Factura por servicios' },
+            notes: { type: 'string', example: 'Pago en efectivo' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        NitValidationResponse: {
+          type: 'object',
+          properties: {
+            nit: { type: 'string', example: '12345678-9' },
+            name: { type: 'string', example: 'EMPRESA S.A.' },
+            status: {
+              type: 'string',
+              enum: ['valid', 'invalid', 'not_found'],
+              example: 'valid'
+            },
+            address: { type: 'string', example: 'Ciudad de Guatemala' },
+            municipality: { type: 'string', example: 'Guatemala' },
+            department: { type: 'string', example: 'Guatemala' },
+            lastUpdated: { type: 'string', format: 'date-time' }
+          }
+        },
+        CuiValidationResponse: {
+          type: 'object',
+          properties: {
+            cui: { type: 'string', example: '1234567890123' },
+            name: { type: 'string', example: 'Juan Pérez García' },
+            status: {
+              type: 'string',
+              enum: ['valid', 'invalid', 'not_found'],
+              example: 'valid'
+            },
+            birthDate: { type: 'string', format: 'date', example: '1990-01-15' },
+            gender: { type: 'string', example: 'M' },
+            lastUpdated: { type: 'string', format: 'date-time' }
+          }
+        }
+      },
+      PromoCodeRequest: {
           type: 'object',
           required: ['code'],
           properties: {
@@ -353,395 +501,547 @@ const swaggerOptions = {
                 }
               }
             }
-          }
-        }
-      },
-      // User management schemas
-      CreateUserRequest: {
-        type: 'object',
-        required: ['email', 'password', 'firstName', 'lastName'],
-        properties: {
-          email: {
-            type: 'string',
-            format: 'email',
-            description: 'Email del usuario',
-            example: 'usuario@tradeconnect.gt'
           },
-          password: {
-            type: 'string',
-            minLength: 8,
-            description: 'Contraseña (mínimo 8 caracteres)',
-            example: 'SecurePass123'
-          },
-          firstName: {
-            type: 'string',
-            description: 'Nombre',
-            example: 'Juan'
-          },
-          lastName: {
-            type: 'string',
-            description: 'Apellido',
-            example: 'Pérez'
-          },
-          phone: {
-            type: 'string',
-            description: 'Teléfono',
-            example: '+502 1234-5678'
-          },
-          role: {
-            type: 'string',
-            enum: ['user', 'speaker', 'participant', 'client'],
-            description: 'Rol del usuario',
-            example: 'user'
-          }
-        }
-      },
-      UpdateUserRequest: {
-        type: 'object',
-        properties: {
-          firstName: {
-            type: 'string',
-            description: 'Nombre',
-            example: 'Juan'
-          },
-          lastName: {
-            type: 'string',
-            description: 'Apellido',
-            example: 'Pérez'
-          },
-          phone: {
-            type: 'string',
-            description: 'Teléfono',
-            example: '+502 1234-5678'
-          },
-          isActive: {
-            type: 'boolean',
-            description: 'Estado del usuario',
-            example: true
-          },
-          role: {
-            type: 'string',
-            enum: ['user', 'speaker', 'participant', 'client'],
-            description: 'Rol del usuario',
-            example: 'user'
-          }
-        }
-      },
-      // Authentication schemas
-      LoginRequest: {
-        type: 'object',
-        required: ['email', 'password'],
-        properties: {
-          email: {
-            type: 'string',
-            format: 'email',
-            description: 'Email del usuario',
-            example: 'usuario@tradeconnect.gt'
-          },
-          password: {
-            type: 'string',
-            description: 'Contraseña',
-            example: 'SecurePass123'
-          },
-          twoFactorCode: {
-            type: 'string',
-            description: 'Código 2FA (opcional)',
-            example: '123456'
-          },
-          rememberMe: {
-            type: 'boolean',
-            description: 'Recordar sesión',
-            example: true
-          }
-        }
-      },
-      RegisterRequest: {
-        type: 'object',
-        required: ['email', 'password', 'confirmPassword', 'firstName', 'lastName', 'termsAccepted'],
-        properties: {
-          email: {
-            type: 'string',
-            format: 'email',
-            description: 'Email del usuario',
-            example: 'usuario@tradeconnect.gt'
-          },
-          password: {
-            type: 'string',
-            minLength: 8,
-            description: 'Contraseña (mínimo 8 caracteres)',
-            example: 'SecurePass123'
-          },
-          confirmPassword: {
-            type: 'string',
-            description: 'Confirmación de contraseña',
-            example: 'SecurePass123'
-          },
-          firstName: {
-            type: 'string',
-            description: 'Nombre',
-            example: 'Juan'
-          },
-          lastName: {
-            type: 'string',
-            description: 'Apellido',
-            example: 'Pérez'
-          },
-          phone: {
-            type: 'string',
-            description: 'Teléfono',
-            example: '+502 1234-5678'
-          },
-          nit: {
-            type: 'string',
-            description: 'NIT guatemalteco',
-            example: '12345678-9'
-          },
-          cui: {
-            type: 'string',
-            description: 'CUI guatemalteco (13 dígitos)',
-            example: '1234567890123'
-          },
-          termsAccepted: {
-            type: 'boolean',
-            description: 'Aceptación de términos y condiciones',
-            example: true
-          },
-          marketingAccepted: {
-            type: 'boolean',
-            description: 'Aceptación de marketing',
-            example: false
-          }
-        }
-      },
-      ResetPasswordData: {
-        type: 'object',
-        required: ['resetToken', 'newPassword', 'confirmPassword'],
-        properties: {
-          resetToken: {
-            type: 'string',
-            description: 'Token de reseteo de contraseña',
-            example: 'abc123def456'
-          },
-          newPassword: {
-            type: 'string',
-            minLength: 8,
-            description: 'Nueva contraseña',
-            example: 'NewSecurePass123'
-          },
-          confirmPassword: {
-            type: 'string',
-            description: 'Confirmación de nueva contraseña',
-            example: 'NewSecurePass123'
-          }
-        }
-      },
-      ChangePasswordData: {
-        type: 'object',
-        required: ['currentPassword', 'newPassword', 'confirmNewPassword'],
-        properties: {
-          currentPassword: {
-            type: 'string',
-            description: 'Contraseña actual',
-            example: 'CurrentPass123'
-          },
-          newPassword: {
-            type: 'string',
-            minLength: 8,
-            description: 'Nueva contraseña',
-            example: 'NewSecurePass123'
-          },
-          confirmNewPassword: {
-            type: 'string',
-            description: 'Confirmación de nueva contraseña',
-            example: 'NewSecurePass123'
-          }
-        }
-      },
-      AuthResponse: {
-        type: 'object',
-        properties: {
-          user: {
-            $ref: '#/components/schemas/AuthUser'
-          },
-          accessToken: {
-            type: 'string',
-            description: 'Token de acceso JWT',
-            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-          },
-          refreshToken: {
-            type: 'string',
-            description: 'Token de refresco',
-            example: 'refresh_token_123'
-          },
-          expiresIn: {
-            type: 'integer',
-            description: 'Tiempo de expiración en segundos',
-            example: 3600
-          },
-          requires2FA: {
-            type: 'boolean',
-            description: 'Si requiere autenticación de dos factores',
-            example: false
-          }
-        }
-      },
-      AuthUser: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'integer',
-            description: 'ID del usuario',
-            example: 1
-          },
-          email: {
-            type: 'string',
-            format: 'email',
-            description: 'Email del usuario',
-            example: 'usuario@tradeconnect.gt'
-          },
-          firstName: {
-            type: 'string',
-            description: 'Nombre',
-            example: 'Juan'
-          },
-          lastName: {
-            type: 'string',
-            description: 'Apellido',
-            example: 'Pérez'
-          },
-          role: {
-            type: 'string',
-            description: 'Rol del usuario',
-            example: 'user'
-          },
-          isActive: {
-            type: 'boolean',
-            description: 'Estado del usuario',
-            example: true
-          },
-          emailVerified: {
-            type: 'boolean',
-            description: 'Email verificado',
-            example: true
-          },
-          twoFactorEnabled: {
-            type: 'boolean',
-            description: '2FA habilitado',
-            example: false
-          }
-        }
-      },
-      // Registration schemas
-      CreateIndividualRegistrationRequest: {
-        type: 'object',
-        required: ['eventId', 'participantType', 'participantData'],
-        properties: {
-          eventId: {
-            type: 'integer',
-            description: 'ID del evento',
-            example: 1
-          },
-          participantType: {
-            type: 'string',
-            enum: ['individual', 'empresa'],
-            description: 'Tipo de participante',
-            example: 'individual'
-          },
-          participantData: {
-            type: 'array',
-            minItems: 1,
-            items: {
-              type: 'object',
-              required: ['firstName', 'lastName', 'email'],
-              properties: {
-                firstName: {
-                  type: 'string',
-                  description: 'Nombre del participante',
-                  example: 'Juan'
+          paths: {
+            // FEL paths
+            '/api/v1/fel/authenticate': {
+              post: {
+                tags: ['FEL'],
+                summary: 'Autenticar con certificador FEL',
+                description: 'Obtiene un token de autenticación del certificador FEL especificado',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                  {
+                    name: 'certifier',
+                    in: 'query',
+                    required: true,
+                    schema: { type: 'string', enum: ['infile', 'dimexa'] },
+                    description: 'Nombre del certificador FEL'
+                  }
+                ],
+                responses: {
+                  200: {
+                    description: 'Token obtenido exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/ApiResponse' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/certify-dte': {
+              post: {
+                tags: ['FEL'],
+                summary: 'Certificar Documento Tributario Electrónico',
+                description: 'Envía un DTE para certificación ante el SAT',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                  required: true,
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        required: ['invoiceId'],
+                        properties: {
+                          invoiceId: { type: 'integer', description: 'ID de la factura' }
+                        }
+                      }
+                    }
+                  }
                 },
-                lastName: {
-                  type: 'string',
-                  description: 'Apellido del participante',
-                  example: 'Pérez'
+                responses: {
+                  200: {
+                    description: 'DTE certificado exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/ApiResponse' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  404: { description: 'Factura no encontrada' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/cancel-dte': {
+              post: {
+                tags: ['FEL'],
+                summary: 'Anular Documento Tributario Electrónico',
+                description: 'Anula un DTE certificado',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                  required: true,
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/InvoiceCancelRequest' }
+                    }
+                  }
                 },
-                email: {
-                  type: 'string',
-                  format: 'email',
-                  description: 'Email del participante',
-                  example: 'juan.perez@email.com'
+                responses: {
+                  200: {
+                    description: 'DTE anulado exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/ApiResponse' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  404: { description: 'Factura no encontrada' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/consult-dte/{uuid}': {
+              get: {
+                tags: ['FEL'],
+                summary: 'Consultar estado de DTE',
+                description: 'Consulta el estado de un DTE ante el SAT',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                  {
+                    name: 'uuid',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'string' },
+                    description: 'UUID del documento FEL'
+                  }
+                ],
+                responses: {
+                  200: {
+                    description: 'Estado del DTE obtenido',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/ApiResponse' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  404: { description: 'Documento no encontrado' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/auto-generate/{registrationId}': {
+              post: {
+                tags: ['FEL'],
+                summary: 'Generar factura automáticamente',
+                description: 'Genera factura FEL automáticamente después de un pago exitoso',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                  {
+                    name: 'registrationId',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'integer' },
+                    description: 'ID de la inscripción'
+                  }
+                ],
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/InvoiceGenerationRequest' }
+                    }
+                  }
                 },
-                phone: {
-                  type: 'string',
-                  description: 'Teléfono del participante',
-                  example: '+502 1234-5678'
+                responses: {
+                  200: {
+                    description: 'Factura generada exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/ApiResponse' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  404: { description: 'Inscripción no encontrada' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/download-pdf/{uuid}': {
+              get: {
+                tags: ['FEL'],
+                summary: 'Descargar PDF de factura',
+                description: 'Descarga el PDF de una factura certificada',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                  {
+                    name: 'uuid',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'string' },
+                    description: 'UUID del documento FEL'
+                  }
+                ],
+                responses: {
+                  200: {
+                    description: 'PDF descargado exitosamente',
+                    content: {
+                      'application/pdf': {
+                        schema: { type: 'string', format: 'binary' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  404: { description: 'Documento no encontrado' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/retry-failed': {
+              post: {
+                tags: ['FEL'],
+                summary: 'Reintentar operaciones fallidas',
+                description: 'Reintenta la certificación de documentos FEL que fallaron',
+                security: [{ bearerAuth: [] }],
+                responses: {
+                  200: {
+                    description: 'Reintentos procesados exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/ApiResponse' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/token/status': {
+              get: {
+                tags: ['FEL'],
+                summary: 'Estado del token FEL',
+                description: 'Obtiene el estado actual del token de autenticación FEL',
+                security: [{ bearerAuth: [] }],
+                responses: {
+                  200: {
+                    description: 'Estado del token obtenido',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/ApiResponse' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/token/refresh': {
+              post: {
+                tags: ['FEL'],
+                summary: 'Renovar token FEL',
+                description: 'Renueva el token de autenticación FEL antes de que expire',
+                security: [{ bearerAuth: [] }],
+                responses: {
+                  200: {
+                    description: 'Token renovado exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/ApiResponse' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/validate-nit': {
+              post: {
+                tags: ['FEL Validation'],
+                summary: 'Validar NIT',
+                description: 'Valida un NIT ante el sistema tributario guatemalteco',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                  required: true,
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/FelValidationRequest' }
+                    }
+                  }
                 },
-                nit: {
-                  type: 'string',
-                  description: 'NIT del participante',
-                  example: '12345678-9'
+                responses: {
+                  200: {
+                    description: 'NIT validado exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: {
+                          allOf: [
+                            { $ref: '#/components/schemas/ApiResponse' },
+                            {
+                              properties: {
+                                data: { $ref: '#/components/schemas/NitValidationResponse' }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  400: { description: 'NIT inválido' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/validate-cui': {
+              post: {
+                tags: ['FEL Validation'],
+                summary: 'Validar CUI',
+                description: 'Valida un CUI ante el Registro Nacional de Personas',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                  required: true,
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/FelCuiValidationRequest' }
+                    }
+                  }
                 },
-                cui: {
-                  type: 'string',
-                  description: 'CUI del participante',
-                  example: '1234567890123'
+                responses: {
+                  200: {
+                    description: 'CUI validado exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: {
+                          allOf: [
+                            { $ref: '#/components/schemas/ApiResponse' },
+                            {
+                              properties: {
+                                data: { $ref: '#/components/schemas/CuiValidationResponse' }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  400: { description: 'CUI inválido' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/fel/validation-history': {
+              get: {
+                tags: ['FEL Validation'],
+                summary: 'Historial de validaciones',
+                description: 'Obtiene el historial de validaciones NIT/CUI realizadas',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                  {
+                    name: 'type',
+                    in: 'query',
+                    schema: { type: 'string', enum: ['nit', 'cui'] },
+                    description: 'Tipo de validación'
+                  },
+                  {
+                    name: 'limit',
+                    in: 'query',
+                    schema: { type: 'integer', default: 50 },
+                    description: 'Límite de resultados'
+                  }
+                ],
+                responses: {
+                  200: {
+                    description: 'Historial obtenido exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: { $ref: '#/components/schemas/ApiResponse' }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/invoices': {
+              get: {
+                tags: ['Invoices'],
+                summary: 'Listar facturas',
+                description: 'Obtiene la lista de facturas con filtros opcionales',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                  {
+                    name: 'status',
+                    in: 'query',
+                    schema: { type: 'string', enum: ['draft', 'pending', 'certified', 'sent', 'cancelled', 'expired'] },
+                    description: 'Estado de la factura'
+                  },
+                  {
+                    name: 'registrationId',
+                    in: 'query',
+                    schema: { type: 'integer' },
+                    description: 'ID de la inscripción'
+                  },
+                  {
+                    name: 'limit',
+                    in: 'query',
+                    schema: { type: 'integer', default: 50 },
+                    description: 'Límite de resultados'
+                  },
+                  {
+                    name: 'offset',
+                    in: 'query',
+                    schema: { type: 'integer', default: 0 },
+                    description: 'Desplazamiento'
+                  }
+                ],
+                responses: {
+                  200: {
+                    description: 'Facturas obtenidas exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: {
+                          allOf: [
+                            { $ref: '#/components/schemas/ApiResponse' },
+                            {
+                              properties: {
+                                data: {
+                                  type: 'array',
+                                  items: { $ref: '#/components/schemas/InvoiceResponse' }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              },
+              post: {
+                tags: ['Invoices'],
+                summary: 'Crear factura',
+                description: 'Crea una nueva factura',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                  required: true,
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/InvoiceGenerationRequest' }
+                    }
+                  }
                 },
-                position: {
-                  type: 'string',
-                  description: 'Cargo del participante',
-                  example: 'Gerente de Ventas'
+                responses: {
+                  201: {
+                    description: 'Factura creada exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: {
+                          allOf: [
+                            { $ref: '#/components/schemas/ApiResponse' },
+                            {
+                              properties: {
+                                data: { $ref: '#/components/schemas/InvoiceResponse' }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  400: { description: 'Datos inválidos' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/invoices/{id}': {
+              get: {
+                tags: ['Invoices'],
+                summary: 'Obtener factura por ID',
+                description: 'Obtiene los detalles de una factura específica',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                  {
+                    name: 'id',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'integer' },
+                    description: 'ID de la factura'
+                  }
+                ],
+                responses: {
+                  200: {
+                    description: 'Factura obtenida exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: {
+                          allOf: [
+                            { $ref: '#/components/schemas/ApiResponse' },
+                            {
+                              properties: {
+                                data: { $ref: '#/components/schemas/InvoiceResponse' }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  404: { description: 'Factura no encontrada' },
+                  500: { description: 'Error interno del servidor' }
+                }
+              }
+            },
+            '/api/v1/invoices/registration/{regId}': {
+              get: {
+                tags: ['Invoices'],
+                summary: 'Facturas por inscripción',
+                description: 'Obtiene todas las facturas de una inscripción específica',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                  {
+                    name: 'regId',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'integer' },
+                    description: 'ID de la inscripción'
+                  }
+                ],
+                responses: {
+                  200: {
+                    description: 'Facturas obtenidas exitosamente',
+                    content: {
+                      'application/json': {
+                        schema: {
+                          allOf: [
+                            { $ref: '#/components/schemas/ApiResponse' },
+                            {
+                              properties: {
+                                data: {
+                                  type: 'array',
+                                  items: { $ref: '#/components/schemas/InvoiceResponse' }
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  401: { description: 'No autorizado' },
+                  404: { description: 'Inscripción no encontrada' },
+                  500: { description: 'Error interno del servidor' }
                 }
               }
             }
-          },
-          customFields: {
-            type: 'object',
-            description: 'Campos personalizados del evento',
-            example: { 'dietary_restrictions': 'vegetarian', 'special_needs': 'wheelchair access' }
-          },
-          paymentMethod: {
-            type: 'string',
-            enum: ['paypal', 'stripe', 'neonet', 'bam'],
-            description: 'Método de pago',
-            example: 'paypal'
           }
         }
-      },
-      UpdateRegistrationRequest: {
-        type: 'object',
-        properties: {
-          participantData: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                firstName: { type: 'string' },
-                lastName: { type: 'string' },
-                email: { type: 'string', format: 'email' },
-                phone: { type: 'string' },
-                nit: { type: 'string' },
-                cui: { type: 'string' },
-                position: { type: 'string' }
-              }
-            }
-          },
-          customFields: {
-            type: 'object',
-            description: 'Campos personalizados actualizados'
-          },
-          status: {
-            type: 'string',
-            enum: ['pending', 'confirmed', 'cancelled'],
-            description: 'Estado de la inscripción',
-            example: 'confirmed'
-          }
-        }
-      }
-    },
-    security: [
-      {
-        bearerAuth: []
-      }
-    ]
+    }
   },
   apis: [
     './src/routes/*.ts',
@@ -999,6 +1299,14 @@ app.use(`${API_VERSION}/payments`, paymentsRoutes);
 app.use(`${API_VERSION}/refunds`, refundsRoutes);
 app.use(`${API_VERSION}/webhooks`, webhooksRoutes);
 
+// Rutas FEL (Facturación Electrónica)
+import felRoutes from './routes/fel';
+import felValidationRoutes from './routes/fel-validation';
+import invoicesRoutes from './routes/invoices';
+app.use(`${API_VERSION}/fel`, felRoutes);
+app.use(`${API_VERSION}/fel/validation`, felValidationRoutes);
+app.use(`${API_VERSION}/invoices`, invoicesRoutes);
+
 // Backward compatibility - redirect old API routes to v1
 app.use('/api/auth', (req, res) => res.redirect(301, `${API_VERSION}/auth${req.path}`));
 app.use('/api/users', (req, res) => res.redirect(301, `${API_VERSION}/users${req.path}`));
@@ -1017,6 +1325,10 @@ app.use('/api/public', (req, res) => res.redirect(301, `${API_VERSION}/public${r
 app.use('/api/payments', (req, res) => res.redirect(301, `${API_VERSION}/payments${req.path}`));
 app.use('/api/refunds', (req, res) => res.redirect(301, `${API_VERSION}/refunds${req.path}`));
 app.use('/api/webhooks', (req, res) => res.redirect(301, `${API_VERSION}/webhooks${req.path}`));
+
+// Backward compatibility - FEL routes
+app.use('/api/fel', (req, res) => res.redirect(301, `${API_VERSION}/fel${req.path}`));
+app.use('/api/invoices', (req, res) => res.redirect(301, `${API_VERSION}/invoices${req.path}`));
 
 // ====================================================================
 // MANEJO DE ERRORES 404

@@ -6,7 +6,7 @@
  */
 
 import crypto from 'crypto';
-import { Transaction } from 'sequelize';
+import { Transaction, Op } from 'sequelize';
 import { logger } from '../utils/logger';
 import { Payment, PaymentMethod, Refund, PaymentReconciliation } from '../models';
 import { Registration } from '../models/Registration';
@@ -686,18 +686,18 @@ export class PaymentService {
    * Procesa jobs de reintentos pendientes
    */
   private async processRetryJobs(): Promise<void> {
-    const pendingPayments = await Payment.findAll({
-      where: {
-        status: 'failed',
-        retryCount: { $lt: 3 },
-        lastRetryAt: {
-          $or: [
-            null,
-            { $lt: new Date(Date.now() - 2 * 60 * 1000) } // 2 minutos desde último reintento
-          ]
-        }
-      }
-    });
+    const where: any = {
+      status: 'failed',
+      retryCount: { [Op.lt]: 3 }
+    };
+
+    // Agregar condición OR para lastRetryAt
+    where[Op.or] = [
+      { lastRetryAt: null },
+      { lastRetryAt: { [Op.lt]: new Date(Date.now() - 2 * 60 * 1000) } } // 2 minutos desde último reintento
+    ];
+
+    const pendingPayments = await Payment.findAll({ where });
 
     for (const payment of pendingPayments) {
       try {
