@@ -26,6 +26,7 @@ import { EventTemplate } from './EventTemplate';
 import { EventDuplication } from './EventDuplication';
 import { EventRegistration } from './EventRegistration';
 import { EventMedia } from './EventMedia';
+import { EventSession } from './EventSession';
 
 // Importar modelos de speakers
 import { Specialty } from './Specialty';
@@ -67,6 +68,13 @@ import { VolumeDiscount } from './VolumeDiscount';
 import { EarlyBirdDiscount } from './EarlyBirdDiscount';
 import { PromoCodeUsage } from './PromoCodeUsage';
 
+// Importar modelos de gestión de aforos
+import { Capacity } from './Capacity';
+import { AccessType } from './AccessType';
+import { Overbooking } from './Overbooking';
+import { CapacityRule } from './CapacityRule';
+import { Waitlist } from './Waitlist';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -86,6 +94,7 @@ sequelize.addModels([
   EventDuplication,
   EventRegistration,
   EventMedia,
+  EventSession,
   // Modelos de speakers
   Specialty,
   Speaker,
@@ -120,7 +129,13 @@ sequelize.addModels([
   PromoCode,
   VolumeDiscount,
   EarlyBirdDiscount,
-  PromoCodeUsage
+  PromoCodeUsage,
+  // Modelos de gestión de aforos
+  Capacity,
+  AccessType,
+  Overbooking,
+  CapacityRule,
+  Waitlist
 ]);
 
 // Exportar modelos y sequelize
@@ -143,6 +158,7 @@ export {
   EventDuplication,
   EventRegistration,
   EventMedia,
+  EventSession,
   // Modelos de speakers
   Specialty,
   Speaker,
@@ -177,7 +193,13 @@ export {
   PromoCode,
   VolumeDiscount,
   EarlyBirdDiscount,
-  PromoCodeUsage
+  PromoCodeUsage,
+  // Modelos de gestión de aforos
+  Capacity,
+  AccessType,
+  Overbooking,
+  CapacityRule,
+  Waitlist
 };
 
 // Exportar por defecto

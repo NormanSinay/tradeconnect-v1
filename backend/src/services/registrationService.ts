@@ -31,6 +31,7 @@ import { EventEmitter } from 'events';
 import { affiliationValidationService } from './affiliationValidationService';
 import { cacheService } from './cacheService';
 import { discountService } from './discountService';
+import { capacityManagementService } from './capacityManagementService';
 
 /**
  * Servicio para manejo de operaciones de inscripciones
@@ -65,13 +66,20 @@ export class RegistrationService {
         };
       }
 
-      // Verificar disponibilidad de cupos
-      const availabilityCheck = await this.checkEventAvailability(data.eventId, 1);
-      if (!availabilityCheck.canAccommodate) {
+      // Verificar y reservar capacidad temporalmente
+      const capacityReservation = await capacityManagementService.reserveCapacity(
+        data.eventId,
+        1, // Cantidad para inscripción individual
+        undefined, // Sin tipo de acceso específico
+        userId,
+        `registration-${Date.now()}` // Session ID único
+      );
+
+      if (!capacityReservation.success) {
         return {
           success: false,
-          message: availabilityCheck.message,
-          error: 'INSUFFICIENT_AVAILABILITY',
+          message: capacityReservation.message,
+          error: capacityReservation.error,
           timestamp: new Date().toISOString()
         };
       }
@@ -152,6 +160,7 @@ export class RegistrationService {
         status: 'PENDIENTE_PAGO',
         totalAmount: priceCalculation.finalPrice,
         reservationExpiresAt,
+        capacityLockId: capacityReservation.data?.id,
         message: 'Inscripción creada exitosamente. Complete el pago antes de que expire la reserva.'
       };
 
@@ -665,37 +674,46 @@ export class RegistrationService {
   // ====================================================================
 
   /**
-   * Verifica disponibilidad de cupos en un evento
+   * Verifica disponibilidad de cupos en un evento usando el servicio de capacidad
    */
   private async checkEventAvailability(eventId: number, requestedQuantity: number): Promise<{
     canAccommodate: boolean;
     availableCapacity: number;
     message: string;
   }> {
-    const event = await Event.findByPk(eventId);
-    if (!event) {
+    try {
+      // Usar el servicio de capacidad para validación robusta
+      const capacityValidation = await capacityManagementService.validateCapacityForRegistration(
+        eventId,
+        undefined, // Sin tipo de acceso específico por ahora
+        requestedQuantity
+      );
+
+      if (capacityValidation.isValid) {
+        return {
+          canAccommodate: true,
+          availableCapacity: capacityValidation.availableSpots,
+          message: `Capacidad disponible: ${capacityValidation.availableSpots} cupos`
+        };
+      }
+
+      // No hay capacidad suficiente
+      const errorMessages = capacityValidation.errors.map(e => e.message).join(', ');
       return {
         canAccommodate: false,
-        availableCapacity: 0,
-        message: 'Evento no encontrado'
+        availableCapacity: capacityValidation.availableSpots,
+        message: `Capacidad insuficiente: ${errorMessages}`
+      };
+
+    } catch (error) {
+      logger.error('Error verificando disponibilidad de capacidad:', error);
+      // Fallback: asumir capacidad ilimitada si hay error
+      return {
+        canAccommodate: true,
+        availableCapacity: -1,
+        message: 'Error verificando capacidad, asumiendo ilimitada'
       };
     }
-
-    // TODO: Agregar campo capacity al modelo Event
-    // Por ahora, asumir capacidad ilimitada
-    return {
-      canAccommodate: true,
-      availableCapacity: -1,
-      message: 'Evento sin límite de capacidad'
-    };
-
-    // TODO: Implementar control de capacidad cuando se agregue el campo al modelo Event
-    // Por ahora, asumir capacidad ilimitada
-    return {
-      canAccommodate: true,
-      availableCapacity: -1,
-      message: 'Capacidad no limitada'
-    };
   }
 
   /**

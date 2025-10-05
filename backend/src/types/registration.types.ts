@@ -117,6 +117,7 @@ export interface RegistrationResponse {
   status: RegistrationStatus;
   totalAmount: number;
   reservationExpiresAt?: Date;
+  capacityLockId?: string;
   message: string;
 }
 

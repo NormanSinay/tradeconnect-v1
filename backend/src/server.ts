@@ -37,12 +37,18 @@ import eventTemplateRoutes from './routes/event-templates';
 import eventCategoryRoutes from './routes/event-categories';
 import eventRegistrationRoutes from './routes/event-registrations';
 import eventReportsRoutes from './routes/event-reports';
+import eventSessionsRoutes from './routes/event-sessions';
 import certificateRoutes from './routes/certificates';
 import publicRoutes from './routes/public';
 
 // Importar rutas de promociones y descuentos
 import promotionRoutes from './routes/promotions';
 import discountRoutes from './routes/discounts';
+
+// Importar rutas del módulo de aforos
+import capacityRoutes from './routes/capacity';
+import accessTypesRoutes from './routes/access-types';
+import overbookingRoutes from './routes/overbooking';
 
 // Importar middleware de seguridad
 import { generalLimiter, authLimiter } from './middleware/rateLimiting';
@@ -1868,6 +1874,9 @@ app.use(`${API_VERSION}/sessions`, sessionRoutes);
 // Rutas de eventos
 app.use(`${API_VERSION}/events`, eventRoutes);
 
+// Rutas de sesiones de eventos
+app.use(`${API_VERSION}/events`, eventSessionsRoutes);
+
 // Rutas de plantillas de eventos
 app.use(`${API_VERSION}/event-templates`, eventTemplateRoutes);
 
@@ -1919,6 +1928,11 @@ app.use(`${API_VERSION}/invoices`, invoicesRoutes);
 // Rutas de promociones y descuentos
 app.use(`${API_VERSION}/promotions`, promotionRoutes);
 app.use(`${API_VERSION}/discounts`, discountRoutes);
+
+// Rutas del módulo de aforos
+app.use(`${API_VERSION}/capacity`, capacityRoutes);
+app.use(`${API_VERSION}/access-types`, accessTypesRoutes);
+app.use(`${API_VERSION}/overbooking`, overbookingRoutes);
 
 // Backward compatibility - redirect old API routes to v1
 app.use('/api/auth', (req, res) => res.redirect(301, `${API_VERSION}/auth${req.path}`));
