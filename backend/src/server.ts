@@ -40,6 +40,10 @@ import eventReportsRoutes from './routes/event-reports';
 import certificateRoutes from './routes/certificates';
 import publicRoutes from './routes/public';
 
+// Importar rutas de promociones y descuentos
+import promotionRoutes from './routes/promotions';
+import discountRoutes from './routes/discounts';
+
 // Importar middleware de seguridad
 import { generalLimiter, authLimiter } from './middleware/rateLimiting';
 import { basicSecurity, publicSecurity, protectedSecurity } from './middleware/security';
@@ -110,10 +114,10 @@ app.use(express.urlencoded({
 // ====================================================================
 // MIDDLEWARES DE LOGGING
 // ====================================================================
+app.use(requestLogger);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-app.use(requestLogger);
 
 // ====================================================================
 // CONFIGURACIÓN DE SWAGGER
@@ -413,16 +417,618 @@ const swaggerOptions = {
         }
       },
       PromoCodeRequest: {
-          type: 'object',
-          required: ['code'],
-          properties: {
-            code: {
-              type: 'string',
-              description: 'Código promocional',
-              example: 'DESCUENTO20'
+        type: 'object',
+        required: ['code'],
+        properties: {
+          code: {
+            type: 'string',
+            description: 'Código promocional',
+            example: 'DESCUENTO20'
+          }
+        }
+      },
+      // Promotion schemas
+      Promotion: {
+        type: 'object',
+        required: ['name', 'type', 'createdBy'],
+        properties: {
+          id: {
+            type: 'integer',
+            description: 'ID único de la promoción',
+            example: 1
+          },
+          name: {
+            type: 'string',
+            description: 'Nombre de la promoción',
+            example: 'Promoción Verano 2024'
+          },
+          description: {
+            type: 'string',
+            description: 'Descripción detallada',
+            example: 'Descuentos especiales para temporada de verano'
+          },
+          type: {
+            type: 'string',
+            enum: ['GENERAL', 'EVENT_SPECIFIC', 'CATEGORY_SPECIFIC', 'MEMBERSHIP'],
+            description: 'Tipo de promoción',
+            example: 'GENERAL'
+          },
+          isActive: {
+            type: 'boolean',
+            description: 'Estado de la promoción',
+            example: true
+          },
+          startDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de inicio'
+          },
+          endDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de fin'
+          },
+          eventIds: {
+            type: 'array',
+            items: { type: 'integer' },
+            description: 'IDs de eventos específicos'
+          },
+          categoryIds: {
+            type: 'array',
+            items: { type: 'integer' },
+            description: 'IDs de categorías permitidas'
+          },
+          minPurchaseAmount: {
+            type: 'number',
+            description: 'Monto mínimo de compra'
+          },
+          userTypes: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Tipos de usuario permitidos'
+          },
+          isStackable: {
+            type: 'boolean',
+            description: 'Si puede combinarse con otras promociones'
+          },
+          priority: {
+            type: 'integer',
+            description: 'Prioridad de aplicación'
+          },
+          createdBy: {
+            type: 'integer',
+            description: 'ID del usuario creador'
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de creación'
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de actualización'
+          }
+        }
+      },
+      PromotionCreateRequest: {
+        type: 'object',
+        required: ['name', 'type'],
+        properties: {
+          name: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 255,
+            description: 'Nombre de la promoción'
+          },
+          description: {
+            type: 'string',
+            maxLength: 1000,
+            description: 'Descripción detallada'
+          },
+          type: {
+            type: 'string',
+            enum: ['GENERAL', 'EVENT_SPECIFIC', 'CATEGORY_SPECIFIC', 'MEMBERSHIP'],
+            description: 'Tipo de promoción'
+          },
+          isActive: {
+            type: 'boolean',
+            description: 'Estado inicial',
+            default: true
+          },
+          startDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de inicio'
+          },
+          endDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de fin'
+          },
+          eventIds: {
+            type: 'array',
+            items: { type: 'integer' },
+            description: 'IDs de eventos específicos'
+          },
+          categoryIds: {
+            type: 'array',
+            items: { type: 'integer' },
+            description: 'IDs de categorías permitidas'
+          },
+          minPurchaseAmount: {
+            type: 'number',
+            minimum: 0,
+            description: 'Monto mínimo de compra'
+          },
+          userTypes: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Tipos de usuario permitidos'
+          },
+          isStackable: {
+            type: 'boolean',
+            description: 'Si puede combinarse con otras promociones',
+            default: true
+          },
+          priority: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 100,
+            description: 'Prioridad de aplicación',
+            default: 0
+          }
+        }
+      },
+      // PromoCode schemas
+      PromoCode: {
+        type: 'object',
+        required: ['code', 'name', 'discountType', 'discountValue', 'createdBy'],
+        properties: {
+          id: {
+            type: 'integer',
+            description: 'ID único del código promocional',
+            example: 1
+          },
+          code: {
+            type: 'string',
+            description: 'Código promocional único',
+            example: 'DESCUENTO20'
+          },
+          name: {
+            type: 'string',
+            description: 'Nombre del código',
+            example: 'Descuento del 20%'
+          },
+          description: {
+            type: 'string',
+            description: 'Descripción detallada'
+          },
+          discountType: {
+            type: 'string',
+            enum: ['PERCENTAGE', 'FIXED_AMOUNT', 'BUY_X_GET_Y', 'SPECIAL_PRICE'],
+            description: 'Tipo de descuento',
+            example: 'PERCENTAGE'
+          },
+          discountValue: {
+            type: 'number',
+            description: 'Valor del descuento',
+            example: 20
+          },
+          startDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de inicio de vigencia'
+          },
+          endDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de fin de vigencia'
+          },
+          maxUsesTotal: {
+            type: 'integer',
+            description: 'Máximo de usos totales'
+          },
+          maxUsesPerUser: {
+            type: 'integer',
+            description: 'Máximo de usos por usuario',
+            default: 1
+          },
+          currentUsesTotal: {
+            type: 'integer',
+            description: 'Usos actuales totales',
+            default: 0
+          },
+          isActive: {
+            type: 'boolean',
+            description: 'Estado del código',
+            default: true
+          },
+          minPurchaseAmount: {
+            type: 'number',
+            description: 'Monto mínimo de compra'
+          },
+          maxDiscountAmount: {
+            type: 'number',
+            description: 'Monto máximo de descuento'
+          },
+          isStackable: {
+            type: 'boolean',
+            description: 'Si puede combinarse con otros descuentos',
+            default: true
+          },
+          promotionId: {
+            type: 'integer',
+            description: 'ID de la promoción padre'
+          },
+          createdBy: {
+            type: 'integer',
+            description: 'ID del usuario creador'
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de creación'
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de actualización'
+          }
+        }
+      },
+      PromoCodeCreateRequest: {
+        type: 'object',
+        required: ['code', 'name', 'discountType', 'discountValue'],
+        properties: {
+          code: {
+            type: 'string',
+            minLength: 4,
+            maxLength: 50,
+            pattern: '^[A-Z0-9_-]+$',
+            description: 'Código promocional único'
+          },
+          name: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 255,
+            description: 'Nombre del código'
+          },
+          description: {
+            type: 'string',
+            maxLength: 1000,
+            description: 'Descripción detallada'
+          },
+          discountType: {
+            type: 'string',
+            enum: ['PERCENTAGE', 'FIXED_AMOUNT', 'BUY_X_GET_Y', 'SPECIAL_PRICE'],
+            description: 'Tipo de descuento'
+          },
+          discountValue: {
+            type: 'number',
+            minimum: 0,
+            description: 'Valor del descuento'
+          },
+          startDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de inicio de vigencia'
+          },
+          endDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de fin de vigencia'
+          },
+          maxUsesTotal: {
+            type: 'integer',
+            minimum: 1,
+            description: 'Máximo de usos totales'
+          },
+          maxUsesPerUser: {
+            type: 'integer',
+            minimum: 1,
+            description: 'Máximo de usos por usuario',
+            default: 1
+          },
+          isActive: {
+            type: 'boolean',
+            description: 'Estado inicial',
+            default: true
+          },
+          minPurchaseAmount: {
+            type: 'number',
+            minimum: 0,
+            description: 'Monto mínimo de compra'
+          },
+          maxDiscountAmount: {
+            type: 'number',
+            minimum: 0,
+            description: 'Monto máximo de descuento'
+          },
+          isStackable: {
+            type: 'boolean',
+            description: 'Si puede combinarse con otros descuentos',
+            default: true
+          },
+          promotionId: {
+            type: 'integer',
+            description: 'ID de la promoción padre'
+          }
+        }
+      },
+      // Discount schemas
+      VolumeDiscount: {
+        type: 'object',
+        required: ['eventId', 'minQuantity', 'discountPercentage'],
+        properties: {
+          id: {
+            type: 'integer',
+            description: 'ID único del descuento por volumen',
+            example: 1
+          },
+          eventId: {
+            type: 'integer',
+            description: 'ID del evento',
+            example: 1
+          },
+          minQuantity: {
+            type: 'integer',
+            description: 'Cantidad mínima',
+            example: 5
+          },
+          maxQuantity: {
+            type: 'integer',
+            description: 'Cantidad máxima (opcional)',
+            example: 10
+          },
+          discountPercentage: {
+            type: 'number',
+            description: 'Porcentaje de descuento',
+            example: 10
+          },
+          description: {
+            type: 'string',
+            description: 'Descripción del descuento'
+          },
+          isActive: {
+            type: 'boolean',
+            description: 'Estado del descuento',
+            default: true
+          },
+          priority: {
+            type: 'integer',
+            description: 'Prioridad de aplicación',
+            default: 0
+          },
+          createdBy: {
+            type: 'integer',
+            description: 'ID del usuario creador'
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de creación'
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de actualización'
+          }
+        }
+      },
+      EarlyBirdDiscount: {
+        type: 'object',
+        required: ['eventId', 'daysBeforeEvent', 'discountPercentage'],
+        properties: {
+          id: {
+            type: 'integer',
+            description: 'ID único del descuento early bird',
+            example: 1
+          },
+          eventId: {
+            type: 'integer',
+            description: 'ID del evento',
+            example: 1
+          },
+          daysBeforeEvent: {
+            type: 'integer',
+            description: 'Días antes del evento',
+            example: 30
+          },
+          discountPercentage: {
+            type: 'number',
+            description: 'Porcentaje de descuento',
+            example: 15
+          },
+          description: {
+            type: 'string',
+            description: 'Descripción del descuento'
+          },
+          isActive: {
+            type: 'boolean',
+            description: 'Estado del descuento',
+            default: true
+          },
+          priority: {
+            type: 'integer',
+            description: 'Prioridad de aplicación',
+            default: 0
+          },
+          autoApply: {
+            type: 'boolean',
+            description: 'Si se aplica automáticamente',
+            default: true
+          },
+          createdBy: {
+            type: 'integer',
+            description: 'ID del usuario creador'
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de creación'
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de actualización'
+          }
+        }
+      },
+      // Request/Response schemas
+      ValidatePromoCodeRequest: {
+        type: 'object',
+        required: ['code', 'eventId'],
+        properties: {
+          code: {
+            type: 'string',
+            description: 'Código promocional a validar'
+          },
+          eventId: {
+            type: 'integer',
+            description: 'ID del evento'
+          },
+          userId: {
+            type: 'integer',
+            description: 'ID del usuario (opcional)'
+          },
+          cartTotal: {
+            type: 'number',
+            description: 'Total del carrito (opcional)'
+          }
+        }
+      },
+      ValidatePromoCodeResponse: {
+        type: 'object',
+        properties: {
+          valid: {
+            type: 'boolean',
+            description: 'Si el código es válido'
+          },
+          promoCode: {
+            $ref: '#/components/schemas/PromoCode',
+            description: 'Detalles del código promocional'
+          },
+          discountAmount: {
+            type: 'number',
+            description: 'Monto del descuento calculado'
+          },
+          finalAmount: {
+            type: 'number',
+            description: 'Monto final después del descuento'
+          },
+          message: {
+            type: 'string',
+            description: 'Mensaje descriptivo'
+          }
+        }
+      },
+      ApplyPromoCodeRequest: {
+        type: 'object',
+        required: ['code', 'eventId', 'cartTotal'],
+        properties: {
+          code: {
+            type: 'string',
+            description: 'Código promocional a aplicar'
+          },
+          eventId: {
+            type: 'integer',
+            description: 'ID del evento'
+          },
+          cartTotal: {
+            type: 'number',
+            description: 'Total del carrito'
+          },
+          quantity: {
+            type: 'integer',
+            description: 'Cantidad de items',
+            default: 1
+          }
+        }
+      },
+      ApplicableDiscountsRequest: {
+        type: 'object',
+        required: ['eventId', 'quantity', 'basePrice'],
+        properties: {
+          eventId: {
+            type: 'integer',
+            description: 'ID del evento'
+          },
+          userId: {
+            type: 'integer',
+            description: 'ID del usuario'
+          },
+          quantity: {
+            type: 'integer',
+            description: 'Cantidad de items'
+          },
+          registrationDate: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de registro'
+          },
+          basePrice: {
+            type: 'number',
+            description: 'Precio base'
+          },
+          currentDiscounts: {
+            type: 'array',
+            description: 'Descuentos ya aplicados',
+            items: {
+              type: 'object',
+              properties: {
+                type: { type: 'string' },
+                description: { type: 'string' },
+                amount: { type: 'number' },
+                percentage: { type: 'number' }
+              }
             }
           }
-        },
+        }
+      },
+      ApplicableDiscountsResponse: {
+        type: 'object',
+        properties: {
+          volumeDiscount: {
+            $ref: '#/components/schemas/VolumeDiscount',
+            description: 'Descuento por volumen aplicable'
+          },
+          earlyBirdDiscount: {
+            $ref: '#/components/schemas/EarlyBirdDiscount',
+            description: 'Descuento early bird aplicable'
+          },
+          totalDiscount: {
+            type: 'number',
+            description: 'Descuento total calculado'
+          },
+          finalPrice: {
+            type: 'number',
+            description: 'Precio final'
+          },
+          appliedDiscounts: {
+            type: 'array',
+            description: 'Descuentos aplicados',
+            items: {
+              type: 'object',
+              properties: {
+                type: { type: 'string' },
+                description: { type: 'string' },
+                amount: { type: 'number' },
+                percentage: { type: 'number' }
+              }
+            }
+          },
+          nextVolumeTier: {
+            type: 'object',
+            description: 'Próximo nivel de descuento por volumen',
+            properties: {
+              minQuantity: { type: 'integer' },
+              discountPercentage: { type: 'number' },
+              additionalSavings: { type: 'number' }
+            }
+          }
+        }
+      },
         CartResponse: {
           type: 'object',
           properties: {
@@ -1091,7 +1697,8 @@ app.get('/', (req, res) => {
         'Certificate Generation',
         'Notifications',
         'Hybrid Events',
-        'Reports & Analytics'
+        'Reports & Analytics',
+        'Promotions & Discounts'
       ]
     }
   }, 'Welcome to TradeConnect Platform API'));
@@ -1177,7 +1784,7 @@ app.get('/info', (req, res) => {
     },
     features: {
       modules: 18,
-      endpoints: 143, // Total endpoints implemented: auth(25) + users(6) + sessions(6) + events(54) + speakers(8) + registrations(6) + cart(7) + public(6) + payments(15) + refunds(4) + webhooks(6) + general(4)
+      endpoints: 167, // Total endpoints implemented: auth(25) + users(6) + sessions(6) + events(54) + speakers(8) + registrations(6) + cart(7) + public(6) + payments(15) + refunds(4) + webhooks(6) + promotions(7) + discounts(5) + general(4)
       paymentGateways: ['PayPal', 'Stripe', 'NeoNet', 'BAM'],
       felIntegration: true,
       blockchainSupport: true,
@@ -1306,6 +1913,12 @@ import invoicesRoutes from './routes/invoices';
 app.use(`${API_VERSION}/fel`, felRoutes);
 app.use(`${API_VERSION}/fel/validation`, felValidationRoutes);
 app.use(`${API_VERSION}/invoices`, invoicesRoutes);
+
+// Rutas de promociones y descuentos ya están importadas arriba
+
+// Rutas de promociones y descuentos
+app.use(`${API_VERSION}/promotions`, promotionRoutes);
+app.use(`${API_VERSION}/discounts`, discountRoutes);
 
 // Backward compatibility - redirect old API routes to v1
 app.use('/api/auth', (req, res) => res.redirect(301, `${API_VERSION}/auth${req.path}`));

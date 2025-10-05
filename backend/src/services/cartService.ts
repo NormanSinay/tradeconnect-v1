@@ -21,6 +21,8 @@ import {
 import { ApiResponse } from '../types/global.types';
 import { logger } from '../utils/logger';
 import { Op } from 'sequelize';
+import { promoCodeService } from './promoCodeService';
+import { discountService } from './discountService';
 
 /**
  * Servicio para manejo de operaciones del carrito de compras
@@ -305,14 +307,60 @@ export class CartService {
     try {
       const cart = await this.getOrCreateCart(userId, sessionId);
 
-      // TODO: Validar código promocional
-      // Por ahora, aplicar descuento fijo del 10%
-      const discountPercent = 10;
-      const discountAmount = cart.subtotal * (discountPercent / 100);
+      // Obtener el primer item del carrito para determinar el evento
+      const firstItem = await CartItem.findOne({
+        where: { cartId: cart.id },
+        include: [{ model: Event, as: 'event' }]
+      });
 
+      if (!firstItem || !firstItem.event) {
+        return {
+          success: false,
+          message: 'No se puede aplicar código promocional a un carrito vacío',
+          error: 'EMPTY_CART',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Calcular cantidad total en el carrito
+      const cartItems = await CartItem.findAll({
+        where: { cartId: cart.id }
+      });
+      const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+      // Preparar datos para aplicar el código promocional
+      const applyData = {
+        code: promoCode,
+        eventId: firstItem.eventId,
+        cartTotal: cart.subtotal,
+        quantity: totalQuantity,
+        userId: userId
+      };
+
+      // Usar el servicio de códigos promocionales
+      const promoResult = await promoCodeService.applyPromoCode(
+        applyData,
+        userId || 0, // Asegurar que no sea undefined
+        {
+          userAgent: 'cart-service',
+          ipAddress: 'system',
+          cartSessionId: sessionId
+        }
+      );
+
+      if (!promoResult.success) {
+        return {
+          success: false,
+          message: promoResult.message,
+          error: 'PROMO_CODE_INVALID',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Actualizar el carrito con el descuento aplicado
       cart.promoCode = promoCode;
-      cart.promoDiscount = discountAmount;
-      cart.total = Math.max(0, cart.subtotal - cart.discountAmount - discountAmount);
+      cart.promoDiscount = promoResult.discountAmount;
+      cart.total = Math.max(0, cart.subtotal - cart.discountAmount - cart.promoDiscount);
 
       await cart.save();
 

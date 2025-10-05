@@ -242,6 +242,57 @@ export const notificationLimiter: RateLimitRequestHandler = rateLimit({
   }
 });
 
+/**
+ * Rate limiter específico para códigos promocionales
+ */
+export const promoCodeLimiter: RateLimitRequestHandler = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 20, // Máximo 20 intentos por ventana
+  message: {
+    success: false,
+    message: 'Demasiados intentos de validación de códigos promocionales. Intente más tarde.',
+    error: 'PROMO_CODE_RATE_LIMIT_EXCEEDED',
+    retryAfter: 15 * 60,
+    timestamp: new Date().toISOString()
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: new RedisStore({
+    sendCommand: (command: string, ...args: string[]) => redis.call(command, ...args) as any,
+    prefix: 'rl:promo_code:'
+  }),
+  keyGenerator: (req: Request) => {
+    // Usar combinación de IP y user ID para mayor precisión
+    const userId = (req as any).user?.id;
+    const ip = ipKeyGenerator(req.ip || req.connection.remoteAddress || 'unknown');
+    return userId ? `user:${userId}:${ip}` : ip;
+  },
+  handler: async (req: Request, res: Response) => {
+    // Log de rate limit excedido para códigos promocionales
+    await securityService.logSecurityEvent('rate_limit_exceeded', {
+      resource: 'promo_code',
+      resourceId: req.body?.code || 'unknown',
+      ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+      userAgent: req.get('User-Agent') || 'unknown',
+      metadata: {
+        path: req.path,
+        method: req.method,
+        code: req.body?.code,
+        userId: (req as any).user?.id
+      },
+      severity: 'high'
+    });
+
+    res.status(HTTP_STATUS.TOO_MANY_REQUESTS).json({
+      success: false,
+      message: 'Demasiados intentos de validación de códigos promocionales. Intente más tarde.',
+      error: 'PROMO_CODE_RATE_LIMIT_EXCEEDED',
+      retryAfter: 15 * 60,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // ====================================================================
 // MIDDLEWARE DE RATE LIMITING ADAPTATIVO
 // ====================================================================

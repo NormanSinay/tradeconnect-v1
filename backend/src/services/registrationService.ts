@@ -30,6 +30,7 @@ import { Op } from 'sequelize';
 import { EventEmitter } from 'events';
 import { affiliationValidationService } from './affiliationValidationService';
 import { cacheService } from './cacheService';
+import { discountService } from './discountService';
 
 /**
  * Servicio para manejo de operaciones de inscripciones
@@ -703,7 +704,8 @@ export class RegistrationService {
   private async calculateRegistrationPrice(
     eventId: number,
     participantType: string,
-    quantity: number
+    quantity: number,
+    registrationDate?: Date
   ): Promise<PriceCalculationResult> {
     const event = await Event.findByPk(eventId);
     if (!event) {
@@ -714,32 +716,28 @@ export class RegistrationService {
     let basePrice = 0; // Precio por defecto
 
     const totalBase = basePrice * quantity;
-    let discountAmount = 0;
 
-    // Aplicar descuentos por cantidad (para grupos)
-    if (quantity >= 2) {
-      let discountPercent = 0;
-      if (quantity >= 21) discountPercent = 20;
-      else if (quantity >= 11) discountPercent = 15;
-      else if (quantity >= 6) discountPercent = 10;
-      else if (quantity >= 2) discountPercent = 5;
+    // Usar el servicio de descuentos para calcular todos los descuentos aplicables
+    const discountCalculation = await discountService.calculateApplicableDiscounts({
+      eventId,
+      quantity,
+      basePrice: totalBase,
+      registrationDate: registrationDate || new Date(),
+      currentDiscounts: []
+    });
 
-      discountAmount = totalBase * (discountPercent / 100);
+    if (!discountCalculation.success || !discountCalculation.data) {
+      throw new Error('Error calculando descuentos aplicables');
     }
 
-    const finalPrice = Math.max(0, totalBase - discountAmount);
+    const discountData = discountCalculation.data;
 
     return {
       basePrice: totalBase,
-      discountAmount,
-      finalPrice,
+      discountAmount: discountData.totalDiscount,
+      finalPrice: Math.max(event.minPrice || 0, discountData.finalPrice),
       currency: 'GTQ',
-      appliedDiscounts: discountAmount > 0 ? [{
-        type: 'group',
-        description: `Descuento grupal ${Math.round((discountAmount / totalBase) * 100)}%`,
-        amount: discountAmount,
-        percentage: Math.round((discountAmount / totalBase) * 100)
-      }] : []
+      appliedDiscounts: discountData.appliedDiscounts
     };
   }
 

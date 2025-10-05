@@ -60,6 +60,13 @@ import { CuiValidation } from './CuiValidation';
 import { FelError } from './FelError';
 import { FelAuditLog } from './FelAuditLog';
 
+// Importar modelos de promociones y descuentos
+import { Promotion } from './Promotion';
+import { PromoCode } from './PromoCode';
+import { VolumeDiscount } from './VolumeDiscount';
+import { EarlyBirdDiscount } from './EarlyBirdDiscount';
+import { PromoCodeUsage } from './PromoCodeUsage';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -107,7 +114,13 @@ sequelize.addModels([
   NitValidation,
   CuiValidation,
   FelError,
-  FelAuditLog
+  FelAuditLog,
+  // Modelos de promociones y descuentos
+  Promotion,
+  PromoCode,
+  VolumeDiscount,
+  EarlyBirdDiscount,
+  PromoCodeUsage
 ]);
 
 // Exportar modelos y sequelize
@@ -158,7 +171,13 @@ export {
   NitValidation,
   CuiValidation,
   FelError,
-  FelAuditLog
+  FelAuditLog,
+  // Modelos de promociones y descuentos
+  Promotion,
+  PromoCode,
+  VolumeDiscount,
+  EarlyBirdDiscount,
+  PromoCodeUsage
 };
 
 // Exportar por defecto

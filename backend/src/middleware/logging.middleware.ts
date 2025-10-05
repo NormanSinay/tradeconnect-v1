@@ -104,7 +104,7 @@ interface RequestLogData {
  */
 export const requestLogger = (req: Request, res: Response, next: NextFunction): void => {
   const startTime = Date.now();
-  
+
   // Capturar información básica del request
   const logData: RequestLogData = {
     method: req.method,
@@ -114,6 +114,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction): 
     userId: (req as any).user?.id, // Si hay usuario autenticado
     timestamp: new Date().toISOString()
   };
+
 
   // Interceptar el final de la respuesta para calcular duración
   const originalSend = res.send;

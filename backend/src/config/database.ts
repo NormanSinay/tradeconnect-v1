@@ -3,6 +3,9 @@
  * @version 1.0.0
  */
 
+// Importar configuración de environment para cargar dotenv
+import './environment';
+
 import { Sequelize } from 'sequelize-typescript';
 
 const sequelize = new Sequelize(

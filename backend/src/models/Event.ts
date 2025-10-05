@@ -63,6 +63,7 @@ export interface EventAttributes {
   eventCategoryId: number;
   eventStatusId: number;
   eventTemplateId?: number;
+  minPrice?: number;
   createdBy: number;
   publishedAt?: Date;
   cancelledAt?: Date;
@@ -424,6 +425,18 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
     comment: 'Referencia a la plantilla usada para crear el evento (opcional)'
   })
   declare eventTemplateId?: number;
+
+  @Validate({
+    min: {
+      args: [0],
+      msg: 'El precio mínimo no puede ser negativo'
+    }
+  })
+  @Column({
+    type: DataType.DECIMAL(10, 2),
+    comment: 'Precio mínimo del evento (floor price para descuentos)'
+  })
+  declare minPrice?: number;
 
   @ForeignKey(() => User)
   @AllowNull(false)
