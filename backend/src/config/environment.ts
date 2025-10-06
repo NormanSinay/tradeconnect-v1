@@ -63,7 +63,7 @@ export const config = {
         chainId: 11155111, // Sepolia testnet
         symbol: 'ETH',
         contractAddress: process.env.ETHEREUM_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000',
-        contractAbi: JSON.parse(process.env.ETHEREUM_CONTRACT_ABI || '[]'),
+        contractAbi: JSON.parse(process.env.ETHEREUM_CONTRACT_ABI || JSON.stringify(require('../../contracts/CertificateRegistryABI.json'))),
         systemWalletAddress: process.env.ETHEREUM_WALLET_ADDRESS || '0x0000000000000000000000000000000000000000',
         systemWalletKey: process.env.ETHEREUM_WALLET_KEY || '',
         requiredConfirmations: parseInt(process.env.ETHEREUM_CONFIRMATIONS || '3'),

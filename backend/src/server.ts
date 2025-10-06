@@ -32,6 +32,7 @@ import sessionRoutes from './routes/sessions';
 import { eventService } from './services/eventService';
 import { eventListenersService } from './services/eventListeners';
 import { metricsService } from './services/metricsService';
+import { queueService } from './services/queueService';
 import eventRoutes from './routes/events';
 import eventTemplateRoutes from './routes/event-templates';
 import eventCategoryRoutes from './routes/event-categories';
@@ -2035,6 +2036,14 @@ const startServer = async (): Promise<void> => {
     const eventEmitter = eventService.getEventEmitter();
     eventListenersService(eventEmitter);
     console.log('✅ Event listeners initialized');
+
+    // Inicializar servicio de colas
+    console.log('📋 Initializing queue service...');
+    if (!queueService.isReady()) {
+      console.log('❌ Queue service not ready');
+    } else {
+      console.log('✅ Queue service initialized');
+    }
 
     // Verificar conexión a base de datos
     console.log('📊 Connecting to database...');

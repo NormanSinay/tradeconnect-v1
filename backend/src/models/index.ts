@@ -82,6 +82,11 @@ import { AccessLog } from './AccessLog';
 import { QrSyncLog } from './QrSyncLog';
 import { BlockchainHash } from './BlockchainHash';
 
+// Importar modelos de certificados
+import { CertificateTemplate } from './CertificateTemplate';
+import { Certificate } from './Certificate';
+import { CertificateValidationLog } from './CertificateValidationLog';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -148,7 +153,11 @@ sequelize.addModels([
   Attendance,
   AccessLog,
   QrSyncLog,
-  BlockchainHash
+  BlockchainHash,
+  // Modelos de certificados
+  CertificateTemplate,
+  Certificate,
+  CertificateValidationLog
 ]);
 
 // Exportar modelos y sequelize
@@ -218,7 +227,11 @@ export {
   Attendance,
   AccessLog,
   QrSyncLog,
-  BlockchainHash
+  BlockchainHash,
+  // Modelos de certificados
+  CertificateTemplate,
+  Certificate,
+  CertificateValidationLog
 };
 
 // Exportar por defecto

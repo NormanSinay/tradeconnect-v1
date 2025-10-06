@@ -12,6 +12,7 @@ import { validationResult } from 'express-validator';
 import { eventService } from '../services/eventService';
 import { CertificateService } from '../services/certificateService';
 import { EventQueryParams } from '../types/event.types';
+import { CertificateValidationMethod } from '../types/certificate.types';
 import { HTTP_STATUS } from '../utils/constants';
 import { logger } from '../utils/logger';
 
@@ -466,18 +467,25 @@ export class PublicController {
         return;
       }
 
-      const verification = await CertificateService.verifyCertificate(hash);
+      const verification = await CertificateService.verifyCertificate({
+        hash,
+        method: CertificateValidationMethod.HASH_LOOKUP,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        location: req.body?.location,
+        deviceInfo: req.body?.deviceInfo
+      });
 
-      if (verification.isValid) {
+      if (verification.isValid && verification.validationResult) {
         res.status(HTTP_STATUS.OK).json({
           success: true,
           message: 'Certificado válido',
           data: {
             isValid: verification.isValid,
-            certificate: verification.certificate,
-            event: verification.event,
-            participant: verification.participant,
-            verificationDetails: verification.verificationDetails
+            certificate: verification.validationResult.certificate,
+            event: verification.validationResult.event,
+            participant: verification.validationResult.participant,
+            verificationDetails: verification.validationResult
           },
           timestamp: new Date().toISOString()
         });
@@ -487,7 +495,7 @@ export class PublicController {
           message: 'Certificado no encontrado o inválido',
           data: {
             isValid: verification.isValid,
-            verificationDetails: verification.verificationDetails
+            verificationDetails: verification.validationResult || {}
           },
           timestamp: new Date().toISOString()
         });

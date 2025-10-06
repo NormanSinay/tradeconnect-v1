@@ -128,7 +128,7 @@ router.post('/events/:eventId/users/:userId/registrations/:registrationId/genera
   eventIdValidation,
   userIdValidation,
   registrationIdValidation,
-  CertificateController.generateAttendanceCertificate
+  CertificateController.generateCertificate
 );
 
 /**
@@ -256,7 +256,7 @@ router.get('/verify/:hash',
   authenticated,
   certificateLimiter,
   hashValidation,
-  CertificateController.verifyCertificate
+  CertificateController.verifyCertificateAdmin
 );
 
 // ====================================================================
