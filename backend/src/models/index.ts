@@ -75,6 +75,13 @@ import { Overbooking } from './Overbooking';
 import { CapacityRule } from './CapacityRule';
 import { Waitlist } from './Waitlist';
 
+// Importar modelos QR y control de acceso
+import { QRCode } from './QRCode';
+import { Attendance } from './Attendance';
+import { AccessLog } from './AccessLog';
+import { QrSyncLog } from './QrSyncLog';
+import { BlockchainHash } from './BlockchainHash';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -135,7 +142,13 @@ sequelize.addModels([
   AccessType,
   Overbooking,
   CapacityRule,
-  Waitlist
+  Waitlist,
+  // Modelos QR y control de acceso
+  QRCode,
+  Attendance,
+  AccessLog,
+  QrSyncLog,
+  BlockchainHash
 ]);
 
 // Exportar modelos y sequelize
@@ -199,7 +212,13 @@ export {
   AccessType,
   Overbooking,
   CapacityRule,
-  Waitlist
+  Waitlist,
+  // Modelos QR y control de acceso
+  QRCode,
+  Attendance,
+  AccessLog,
+  QrSyncLog,
+  BlockchainHash
 };
 
 // Exportar por defecto

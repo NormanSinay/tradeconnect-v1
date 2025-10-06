@@ -52,6 +52,39 @@ export const config = {
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000'
   },
 
+  // Blockchain
+  blockchain: {
+    enabled: process.env.BLOCKCHAIN_ENABLED === 'true' || false,
+    defaultNetwork: 'sepolia_testnet',
+    networks: {
+      sepolia_testnet: {
+        name: 'sepolia_testnet',
+        rpcUrl: process.env.ETHEREUM_TESTNET_RPC_URL || 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY',
+        chainId: 11155111, // Sepolia testnet
+        symbol: 'ETH',
+        contractAddress: process.env.ETHEREUM_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000',
+        contractAbi: JSON.parse(process.env.ETHEREUM_CONTRACT_ABI || '[]'),
+        systemWalletAddress: process.env.ETHEREUM_WALLET_ADDRESS || '0x0000000000000000000000000000000000000000',
+        systemWalletKey: process.env.ETHEREUM_WALLET_KEY || '',
+        requiredConfirmations: parseInt(process.env.ETHEREUM_CONFIRMATIONS || '3'),
+        transactionTimeoutSeconds: parseInt(process.env.ETHEREUM_TIMEOUT || '300'),
+        maxRetries: parseInt(process.env.ETHEREUM_MAX_RETRIES || '3'),
+        maxGasPriceGwei: parseInt(process.env.ETHEREUM_MAX_GAS_PRICE || '50'),
+        gasLimit: parseInt(process.env.ETHEREUM_GAS_LIMIT || '200000')
+      }
+    }
+  },
+
+  // QR Codes
+  qr: {
+    encryptionKey: process.env.QR_ENCRYPTION_KEY || 'qr-encryption-key-32-chars-long!!!',
+    hmacSecret: process.env.QR_HMAC_SECRET || 'qr-hmac-secret-32-chars-long!!!!!',
+    validityHours: parseInt(process.env.QR_VALIDITY_HOURS || '24'),
+    maxOfflineHours: parseInt(process.env.QR_MAX_OFFLINE_HOURS || '168'), // 7 días
+    batchSize: parseInt(process.env.QR_BATCH_SIZE || '100'),
+    cacheTtl: parseInt(process.env.QR_CACHE_TTL || '3600') // 1 hora
+  },
+
   // Logging
   logging: {
     level: process.env.LOG_LEVEL || 'debug',

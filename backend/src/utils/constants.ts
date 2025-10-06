@@ -90,6 +90,7 @@ export const PERMISSIONS = {
   PUBLISH_EVENT: 'publish_event',
   MANAGE_EVENT_CAPACITY: 'manage_event_capacity',
   DUPLICATE_EVENT: 'duplicate_event',
+  MANAGE_EVENTS: 'manage_events',
   
   // === GESTIÓN DE SPEAKERS ===
   CREATE_SPEAKER: 'create_speaker',
@@ -127,6 +128,10 @@ export const PERMISSIONS = {
   APPLY_DISCOUNT: 'apply_discount',
   
   // === CÓDIGOS QR Y ACCESO ===
+  CREATE_QR: 'create_qr',
+  READ_QR: 'read_qr',
+  UPDATE_QR: 'update_qr',
+  DELETE_QR: 'delete_qr',
   GENERATE_QR: 'generate_qr',
   VALIDATE_QR: 'validate_qr',
   MANAGE_ACCESS_CONTROL: 'manage_access_control',
@@ -473,6 +478,21 @@ export const RATE_LIMITS = {
   },
   /** Envío de notificaciones - 100 por hora */
   NOTIFICATIONS: {
+    windowMs: 60 * 60 * 1000, // 1 hora
+    max: 100
+  },
+  /** Generación de QR - 50 por hora */
+  QR_GENERATION: {
+    windowMs: 60 * 60 * 1000, // 1 hora
+    max: 50
+  },
+  /** Validación de QR - 1000 por hora */
+  QR_VALIDATION: {
+    windowMs: 60 * 60 * 1000, // 1 hora
+    max: 1000
+  },
+  /** QR público - 100 por hora */
+  PUBLIC_QR: {
     windowMs: 60 * 60 * 1000, // 1 hora
     max: 100
   }

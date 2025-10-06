@@ -50,6 +50,9 @@ import capacityRoutes from './routes/capacity';
 import accessTypesRoutes from './routes/access-types';
 import overbookingRoutes from './routes/overbooking';
 
+// Importar rutas del módulo QR y control de acceso
+import qrRoutes from './routes/qr';
+
 // Importar middleware de seguridad
 import { generalLimiter, authLimiter } from './middleware/rateLimiting';
 import { basicSecurity, publicSecurity, protectedSecurity } from './middleware/security';
@@ -1933,6 +1936,9 @@ app.use(`${API_VERSION}/discounts`, discountRoutes);
 app.use(`${API_VERSION}/capacity`, capacityRoutes);
 app.use(`${API_VERSION}/access-types`, accessTypesRoutes);
 app.use(`${API_VERSION}/overbooking`, overbookingRoutes);
+
+// Rutas del módulo QR y control de acceso
+app.use(`${API_VERSION}/qr`, qrRoutes);
 
 // Backward compatibility - redirect old API routes to v1
 app.use('/api/auth', (req, res) => res.redirect(301, `${API_VERSION}/auth${req.path}`));
