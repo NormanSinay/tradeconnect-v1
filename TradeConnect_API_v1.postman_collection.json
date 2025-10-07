@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "TradeConnect Platform API v1.0",
-    "description": "Colección completa de endpoints para TradeConnect - Plataforma de gestión de eventos empresariales\n\n**Características:**\n- 17 módulos funcionales\n- 143 endpoints REST\n- Autenticación JWT\n- Pagos multi-pasarela\n- Facturación electrónica FEL\n- Certificados blockchain\n\n**Variables de entorno:**\n- `{{baseUrl}}`: http://localhost:3000\n- `{{apiVersion}}`: /api/v1\n- `{{token}}`: Bearer token JWT\n\n**Actualizado:** 2025-01-03",
+    "description": "Colección completa de endpoints para TradeConnect - Plataforma de gestión de eventos empresariales\n\n**Características:**\n- 18 módulos funcionales\n- 155 endpoints REST\n- Autenticación JWT\n- Pagos multi-pasarela\n- Facturación electrónica FEL\n- Certificados blockchain\n- Control de acceso QR\n\n**Módulos incluidos:**\n- 🔐 Autenticación & Usuarios\n- 👤 Gestión de Usuarios\n- 🔄 Sesiones\n- 🎫 Eventos\n- 💳 Procesamiento de Pagos\n- 💸 Reembolsos\n- 🔔 Webhooks\n- 📱 Control de Acceso QR\n- 📝 Inscripciones\n- 🛒 Carrito de Compras\n- 🎤 Speakers\n- 🌐 Endpoints Públicos\n\n**Variables de entorno:**\n- `{{baseUrl}}`: http://localhost:3000\n- `{{apiVersion}}`: /api/v1\n- `{{token}}`: Bearer token JWT\n\n**Módulo QR incluye:**\n- Generación de códigos QR dinámicos\n- Validación en tiempo real con blockchain\n- Control de acceso offline\n- Reportes y estadísticas\n- Seguridad HMAC-SHA256 + AES-256\n\n**Actualizado:** 2025-10-06",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "tradeconnect"
   },
@@ -799,6 +799,179 @@
               "raw": "{{baseUrl}}{{apiVersion}}/webhooks/bam",
               "host": ["{{baseUrl}}{{apiVersion}}"],
               "path": ["webhooks", "bam"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📱 QR Codes",
+      "item": [
+        {
+          "name": "Generate QR Code",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expiresAt\": \"2025-12-31T23:59:59Z\",\n  \"metadata\": {\n    \"purpose\": \"event_access\",\n    \"notes\": \"Generated for Tech Conference 2025\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/generate/:registrationId",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "generate", ":registrationId"],
+              "variable": [{"key": "registrationId", "value": "1"}]
+            }
+          }
+        },
+        {
+          "name": "Get QR Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/:registrationId",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", ":registrationId"],
+              "variable": [{"key": "registrationId", "value": "1"}]
+            }
+          }
+        },
+        {
+          "name": "Regenerate QR Code",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"QR dañado o perdido\",\n  \"expiresAt\": \"2025-12-31T23:59:59Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/regenerate/:registrationId",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "regenerate", ":registrationId"],
+              "variable": [{"key": "registrationId", "value": "1"}]
+            }
+          }
+        },
+        {
+          "name": "Invalidate QR Code",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Código QR comprometido por seguridad\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/invalidate/:qrId",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "invalidate", ":qrId"],
+              "variable": [{"key": "qrId", "value": "1"}]
+            }
+          }
+        },
+        {
+          "name": "Validate QR Code (Check-in)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrHash\": \"a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3\",\n  \"eventId\": 1,\n  \"accessPoint\": \"Main Entrance\",\n  \"deviceInfo\": {\n    \"deviceType\": \"mobile_scanner\",\n    \"appVersion\": \"1.0.0\",\n    \"os\": \"iOS\"\n  },\n  \"location\": {\n    \"latitude\": 14.6349,\n    \"longitude\": -90.5069,\n    \"accuracy\": 10\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/validate",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "validate"]
+            }
+          }
+        },
+        {
+          "name": "Verify QR on Blockchain",
+          "request": {
+            "auth": {"type": "noauth"},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/blockchain-verify/:hash",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "blockchain-verify", ":hash"],
+              "variable": [{"key": "hash", "value": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"}]
+            }
+          }
+        },
+        {
+          "name": "Get QR Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/stats/:eventId",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "stats", ":eventId"],
+              "variable": [{"key": "eventId", "value": "1"}]
+            }
+          }
+        },
+        {
+          "name": "Download Offline QR List",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"scanner-device-001\",\n  \"deviceInfo\": {\n    \"deviceType\": \"mobile_scanner\",\n    \"appVersion\": \"1.0.0\",\n    \"os\": \"Android\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/offline/download-list/:eventId",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "offline", "download-list", ":eventId"],
+              "variable": [{"key": "eventId", "value": "1"}]
+            }
+          }
+        },
+        {
+          "name": "Validate QR Offline",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrHash\": \"a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3\",\n  \"batchId\": \"offline-batch-001\",\n  \"timestamp\": \"2025-01-15T10:30:00Z\",\n  \"deviceInfo\": {\n    \"deviceType\": \"mobile_scanner\",\n    \"appVersion\": \"1.0.0\",\n    \"os\": \"Android\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/offline/validate",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "offline", "validate"]
+            }
+          }
+        },
+        {
+          "name": "Sync Offline Attendance",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"scanner-device-001\",\n  \"batchId\": \"offline-batch-001\",\n  \"attendanceRecords\": [\n    {\n      \"qrHash\": \"a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3\",\n      \"timestamp\": \"2025-01-15T10:30:00Z\",\n      \"eventId\": 1,\n      \"accessPoint\": \"Main Entrance\"\n    }\n  ],\n  \"deviceInfo\": {\n    \"deviceType\": \"mobile_scanner\",\n    \"appVersion\": \"1.0.0\",\n    \"os\": \"Android\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/offline/sync-attendance",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "offline", "sync-attendance"]
+            }
+          }
+        },
+        {
+          "name": "Get Offline Sync Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}{{apiVersion}}/qr/offline/sync-status",
+              "host": ["{{baseUrl}}{{apiVersion}}"],
+              "path": ["qr", "offline", "sync-status"]
             }
           }
         }

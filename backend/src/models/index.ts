@@ -87,6 +87,13 @@ import { CertificateTemplate } from './CertificateTemplate';
 import { Certificate } from './Certificate';
 import { CertificateValidationLog } from './CertificateValidationLog';
 
+// Importar modelos de notificaciones
+import { Notification } from './Notification';
+import { NotificationLog } from './NotificationLog';
+import { EmailTemplate } from './EmailTemplate';
+import { NotificationRule } from './NotificationRule';
+import { UserNotificationPreferences } from './UserNotificationPreferences';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -157,7 +164,13 @@ sequelize.addModels([
   // Modelos de certificados
   CertificateTemplate,
   Certificate,
-  CertificateValidationLog
+  CertificateValidationLog,
+  // Modelos de notificaciones
+  Notification,
+  NotificationLog,
+  EmailTemplate,
+  NotificationRule,
+  UserNotificationPreferences
 ]);
 
 // Exportar modelos y sequelize
@@ -231,7 +244,13 @@ export {
   // Modelos de certificados
   CertificateTemplate,
   Certificate,
-  CertificateValidationLog
+  CertificateValidationLog,
+  // Modelos de notificaciones
+  Notification,
+  NotificationLog,
+  EmailTemplate,
+  NotificationRule,
+  UserNotificationPreferences
 };
 
 // Exportar por defecto

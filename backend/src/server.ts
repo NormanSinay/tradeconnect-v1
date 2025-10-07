@@ -33,6 +33,7 @@ import { eventService } from './services/eventService';
 import { eventListenersService } from './services/eventListeners';
 import { metricsService } from './services/metricsService';
 import { queueService } from './services/queueService';
+import { notificationTriggersService } from './services/notificationTriggers';
 import eventRoutes from './routes/events';
 import eventTemplateRoutes from './routes/event-templates';
 import eventCategoryRoutes from './routes/event-categories';
@@ -53,6 +54,12 @@ import overbookingRoutes from './routes/overbooking';
 
 // Importar rutas del módulo QR y control de acceso
 import qrRoutes from './routes/qr';
+
+// Importar rutas del módulo de notificaciones
+import notificationRoutes from './routes/notifications';
+import emailTemplateRoutes from './routes/email-templates';
+import notificationRuleRoutes from './routes/notification-rules';
+import userPreferencesRoutes from './routes/user-preferences';
 
 // Importar middleware de seguridad
 import { generalLimiter, authLimiter } from './middleware/rateLimiting';
@@ -1941,6 +1948,12 @@ app.use(`${API_VERSION}/overbooking`, overbookingRoutes);
 // Rutas del módulo QR y control de acceso
 app.use(`${API_VERSION}/qr`, qrRoutes);
 
+// Rutas del módulo de notificaciones
+app.use(`${API_VERSION}/notifications`, notificationRoutes);
+app.use(`${API_VERSION}/email-templates`, emailTemplateRoutes);
+app.use(`${API_VERSION}/notification-rules`, notificationRuleRoutes);
+app.use(`${API_VERSION}/user/preferences`, userPreferencesRoutes);
+
 // Backward compatibility - redirect old API routes to v1
 app.use('/api/auth', (req, res) => res.redirect(301, `${API_VERSION}/auth${req.path}`));
 app.use('/api/users', (req, res) => res.redirect(301, `${API_VERSION}/users${req.path}`));
@@ -1963,6 +1976,11 @@ app.use('/api/webhooks', (req, res) => res.redirect(301, `${API_VERSION}/webhook
 // Backward compatibility - FEL routes
 app.use('/api/fel', (req, res) => res.redirect(301, `${API_VERSION}/fel${req.path}`));
 app.use('/api/invoices', (req, res) => res.redirect(301, `${API_VERSION}/invoices${req.path}`));
+
+// Backward compatibility - Notification routes
+app.use('/api/notifications', (req, res) => res.redirect(301, `${API_VERSION}/notifications${req.path}`));
+app.use('/api/email-templates', (req, res) => res.redirect(301, `${API_VERSION}/email-templates${req.path}`));
+app.use('/api/notification-rules', (req, res) => res.redirect(301, `${API_VERSION}/notification-rules${req.path}`));
 
 // ====================================================================
 // MANEJO DE ERRORES 404
@@ -2035,7 +2053,8 @@ const startServer = async (): Promise<void> => {
     console.log('🎯 Initializing event services...');
     const eventEmitter = eventService.getEventEmitter();
     eventListenersService(eventEmitter);
-    console.log('✅ Event listeners initialized');
+    notificationTriggersService(eventEmitter);
+    console.log('✅ Event listeners and notification triggers initialized');
 
     // Inicializar servicio de colas
     console.log('📋 Initializing queue service...');

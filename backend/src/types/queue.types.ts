@@ -16,7 +16,11 @@ export enum QueueType {
   BULK_CERTIFICATE_GENERATION = 'bulk_certificate_generation',
   CERTIFICATE_EMAIL_RESEND = 'certificate_email_resend',
   CERTIFICATE_WEBHOOK = 'certificate_webhook',
-  CERTIFICATE_CLEANUP = 'certificate_cleanup'
+  CERTIFICATE_CLEANUP = 'certificate_cleanup',
+  NOTIFICATION_SEND = 'notification_send',
+  BULK_NOTIFICATION_SEND = 'bulk_notification_send',
+  NOTIFICATION_RETRY = 'notification_retry',
+  NOTIFICATION_CLEANUP = 'notification_cleanup'
 }
 
 // ====================================================================
@@ -69,6 +73,29 @@ export interface CertificateCleanupJobData {
   priority?: number;
 }
 
+export interface NotificationSendJobData {
+  notificationId: number;
+  priority?: number;
+}
+
+export interface BulkNotificationSendJobData {
+  notificationIds: number[];
+  priority?: number;
+}
+
+export interface NotificationRetryJobData {
+  notificationId: number;
+  maxRetries?: number;
+  priority?: number;
+}
+
+export interface NotificationCleanupJobData {
+  olderThanDays: number;
+  includeRead?: boolean;
+  dryRun?: boolean;
+  priority?: number;
+}
+
 // ====================================================================
 // RESULTADOS DE TRABAJOS
 // ====================================================================
@@ -116,6 +143,40 @@ export interface CertificateCleanupJobResult {
   certificatesFound: number;
   certificatesDeleted: number;
   filesRemoved: number;
+  errors: string[];
+  dryRun: boolean;
+}
+
+export interface NotificationSendJobResult {
+  success: boolean;
+  notificationId: number;
+  error?: string;
+  processingTime?: number;
+}
+
+export interface BulkNotificationSendJobResult {
+  totalRequested: number;
+  successful: number;
+  failed: number;
+  results: Array<{
+    notificationId: number;
+    success: boolean;
+    error?: string;
+  }>;
+  processingTime: number;
+}
+
+export interface NotificationRetryJobResult {
+  success: boolean;
+  notificationId: number;
+  retryCount: number;
+  error?: string;
+  processingTime?: number;
+}
+
+export interface NotificationCleanupJobResult {
+  notificationsFound: number;
+  notificationsDeleted: number;
   errors: string[];
   dryRun: boolean;
 }
@@ -190,6 +251,10 @@ export interface QueueConfig {
     [QueueType.CERTIFICATE_EMAIL_RESEND]: number;
     [QueueType.CERTIFICATE_WEBHOOK]: number;
     [QueueType.CERTIFICATE_CLEANUP]: number;
+    [QueueType.NOTIFICATION_SEND]: number;
+    [QueueType.BULK_NOTIFICATION_SEND]: number;
+    [QueueType.NOTIFICATION_RETRY]: number;
+    [QueueType.NOTIFICATION_CLEANUP]: number;
   };
   retryPolicy: {
     maxAttempts: number;
@@ -229,7 +294,11 @@ export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
     [QueueType.BULK_CERTIFICATE_GENERATION]: 2,
     [QueueType.CERTIFICATE_EMAIL_RESEND]: 10,
     [QueueType.CERTIFICATE_WEBHOOK]: 5,
-    [QueueType.CERTIFICATE_CLEANUP]: 1
+    [QueueType.CERTIFICATE_CLEANUP]: 1,
+    [QueueType.NOTIFICATION_SEND]: 20,
+    [QueueType.BULK_NOTIFICATION_SEND]: 5,
+    [QueueType.NOTIFICATION_RETRY]: 10,
+    [QueueType.NOTIFICATION_CLEANUP]: 1
   },
   retryPolicy: {
     maxAttempts: 3,

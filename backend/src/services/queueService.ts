@@ -20,6 +20,14 @@ import {
   CertificateEmailResendJobResult,
   CertificateWebhookJobResult,
   CertificateCleanupJobResult,
+  NotificationSendJobData,
+  BulkNotificationSendJobData,
+  NotificationRetryJobData,
+  NotificationCleanupJobData,
+  NotificationSendJobResult,
+  BulkNotificationSendJobResult,
+  NotificationRetryJobResult,
+  NotificationCleanupJobResult,
   QueueJobOptions,
   QueueStats,
   QueueHealth,
@@ -27,6 +35,7 @@ import {
 } from '../types/queue.types';
 import { certificateService } from './certificateService';
 import { emailService } from './emailService';
+import { notificationService } from './notificationService';
 import { logger } from '../utils/logger';
 import { config } from '../config/environment';
 
@@ -71,6 +80,23 @@ export class QueueService {
       // Cola de limpieza
       this.createQueue(QueueType.CERTIFICATE_CLEANUP, {
         concurrency: DEFAULT_QUEUE_CONFIG.concurrency[QueueType.CERTIFICATE_CLEANUP]
+      });
+
+      // Colas de notificaciones
+      this.createQueue(QueueType.NOTIFICATION_SEND, {
+        concurrency: DEFAULT_QUEUE_CONFIG.concurrency[QueueType.NOTIFICATION_SEND]
+      });
+
+      this.createQueue(QueueType.BULK_NOTIFICATION_SEND, {
+        concurrency: DEFAULT_QUEUE_CONFIG.concurrency[QueueType.BULK_NOTIFICATION_SEND]
+      });
+
+      this.createQueue(QueueType.NOTIFICATION_RETRY, {
+        concurrency: DEFAULT_QUEUE_CONFIG.concurrency[QueueType.NOTIFICATION_RETRY]
+      });
+
+      this.createQueue(QueueType.NOTIFICATION_CLEANUP, {
+        concurrency: DEFAULT_QUEUE_CONFIG.concurrency[QueueType.NOTIFICATION_CLEANUP]
       });
 
       this.setupEventHandlers();
@@ -130,6 +156,22 @@ export class QueueService {
 
           case QueueType.CERTIFICATE_CLEANUP:
             result = await this.processCertificateCleanup(job.data as CertificateCleanupJobData);
+            break;
+
+          case QueueType.NOTIFICATION_SEND:
+            result = await this.processNotificationSend(job.data as NotificationSendJobData);
+            break;
+
+          case QueueType.BULK_NOTIFICATION_SEND:
+            result = await this.processBulkNotificationSend(job.data as BulkNotificationSendJobData);
+            break;
+
+          case QueueType.NOTIFICATION_RETRY:
+            result = await this.processNotificationRetry(job.data as NotificationRetryJobData);
+            break;
+
+          case QueueType.NOTIFICATION_CLEANUP:
+            result = await this.processNotificationCleanup(job.data as NotificationCleanupJobData);
             break;
 
           default:
@@ -320,6 +362,103 @@ export class QueueService {
     }
   }
 
+  /**
+   * Procesa envío de notificación individual
+   */
+  private async processNotificationSend(data: NotificationSendJobData): Promise<NotificationSendJobResult> {
+    try {
+      // TODO: Implementar envío de notificación individual
+      // Por ahora, simulamos éxito
+      return {
+        success: true,
+        notificationId: data.notificationId
+      };
+    } catch (error) {
+      return {
+        success: false,
+        notificationId: data.notificationId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Procesa envío masivo de notificaciones
+   */
+  private async processBulkNotificationSend(data: BulkNotificationSendJobData): Promise<BulkNotificationSendJobResult> {
+    try {
+      // TODO: Implementar envío masivo de notificaciones
+      // Por ahora, simulamos resultados
+      return {
+        totalRequested: data.notificationIds.length,
+        successful: data.notificationIds.length,
+        failed: 0,
+        results: data.notificationIds.map(id => ({
+          notificationId: id,
+          success: true
+        })),
+        processingTime: 0 // Se calcula en el procesador principal
+      };
+    } catch (error) {
+      return {
+        totalRequested: data.notificationIds.length,
+        successful: 0,
+        failed: data.notificationIds.length,
+        results: data.notificationIds.map(id => ({
+          notificationId: id,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        })),
+        processingTime: 0
+      };
+    }
+  }
+
+  /**
+   * Procesa reintento de notificación
+   */
+  private async processNotificationRetry(data: NotificationRetryJobData): Promise<NotificationRetryJobResult> {
+    try {
+      // TODO: Implementar reintento de notificación
+      // Por ahora, simulamos éxito
+      return {
+        success: true,
+        notificationId: data.notificationId,
+        retryCount: 1
+      };
+    } catch (error) {
+      return {
+        success: false,
+        notificationId: data.notificationId,
+        retryCount: 0,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Procesa limpieza de notificaciones antiguas
+   */
+  private async processNotificationCleanup(data: NotificationCleanupJobData): Promise<NotificationCleanupJobResult> {
+    try {
+      // TODO: Implementar limpieza de notificaciones antiguas
+      // Por ahora, simulamos resultados
+      return {
+        notificationsFound: 0,
+        notificationsDeleted: 0,
+        errors: [],
+        dryRun: data.dryRun || false
+      };
+    } catch (error) {
+      return {
+        notificationsFound: 0,
+        notificationsDeleted: 0,
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+        dryRun: data.dryRun || false
+      };
+    }
+  }
+
   // ====================================================================
   // MÉTODOS PÚBLICOS PARA ENCOLAR TRABAJOS
   // ====================================================================
@@ -377,17 +516,73 @@ export class QueueService {
   }
 
   /**
-   * Agrega trabajo de limpieza
-   */
-  async addCertificateCleanupJob(data: CertificateCleanupJobData, options?: QueueJobOptions): Promise<Job> {
-    const queue = this.queues.get(QueueType.CERTIFICATE_CLEANUP);
-    if (!queue) throw new Error('Certificate cleanup queue not initialized');
+    * Agrega trabajo de limpieza
+    */
+   async addCertificateCleanupJob(data: CertificateCleanupJobData, options?: QueueJobOptions): Promise<Job> {
+     const queue = this.queues.get(QueueType.CERTIFICATE_CLEANUP);
+     if (!queue) throw new Error('Certificate cleanup queue not initialized');
 
-    return queue.add(data, {
-      priority: data.priority || 5,
-      ...options
-    });
-  }
+     return queue.add(data, {
+       priority: data.priority || 5,
+       ...options
+     });
+   }
+
+   // ====================================================================
+   // MÉTODOS PÚBLICOS PARA ENCOLAR TRABAJOS DE NOTIFICACIONES
+   // ====================================================================
+
+   /**
+    * Agrega trabajo de envío de notificación individual
+    */
+   async addNotificationSendJob(data: NotificationSendJobData, options?: QueueJobOptions): Promise<Job> {
+     const queue = this.queues.get(QueueType.NOTIFICATION_SEND);
+     if (!queue) throw new Error('Notification send queue not initialized');
+
+     return queue.add(data, {
+       priority: data.priority || 1,
+       ...options
+     });
+   }
+
+   /**
+    * Agrega trabajo de envío masivo de notificaciones
+    */
+   async addBulkNotificationSendJob(data: BulkNotificationSendJobData, options?: QueueJobOptions): Promise<Job> {
+     const queue = this.queues.get(QueueType.BULK_NOTIFICATION_SEND);
+     if (!queue) throw new Error('Bulk notification send queue not initialized');
+
+     return queue.add(data, {
+       priority: data.priority || 2,
+       ...options
+     });
+   }
+
+   /**
+    * Agrega trabajo de reintento de notificación
+    */
+   async addNotificationRetryJob(data: NotificationRetryJobData, options?: QueueJobOptions): Promise<Job> {
+     const queue = this.queues.get(QueueType.NOTIFICATION_RETRY);
+     if (!queue) throw new Error('Notification retry queue not initialized');
+
+     return queue.add(data, {
+       priority: data.priority || 3,
+       ...options
+     });
+   }
+
+   /**
+    * Agrega trabajo de limpieza de notificaciones
+    */
+   async addNotificationCleanupJob(data: NotificationCleanupJobData, options?: QueueJobOptions): Promise<Job> {
+     const queue = this.queues.get(QueueType.NOTIFICATION_CLEANUP);
+     if (!queue) throw new Error('Notification cleanup queue not initialized');
+
+     return queue.add(data, {
+       priority: data.priority || 4,
+       ...options
+     });
+   }
 
   // ====================================================================
   // MONITOREO Y ESTADÍSTICAS
