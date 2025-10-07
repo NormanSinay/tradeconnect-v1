@@ -404,6 +404,231 @@ router.put('/:id/status', authenticated, eventLimiter, eventIdValidation, [
     .withMessage('La razón debe tener entre 10 y 500 caracteres')
 ], eventController.updateEventStatus);
 
+/**
+ * @swagger
+ * /api/events/{id}/duplicate:
+ *   post:
+ *     tags: [Events]
+ *     summary: Duplicar evento
+ *     description: Crea una copia del evento con opción de modificar título, fechas y precio
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID único del evento a duplicar
+ *         example: 123
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 255
+ *                 description: Nuevo título para el evento duplicado
+ *                 example: "Taller de Introducción a la IA - Edición 2"
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Nueva fecha de inicio (debe ser futura)
+ *                 example: "2023-12-01T09:00:00.000Z"
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Nueva fecha de fin (posterior a startDate)
+ *                 example: "2023-12-01T17:00:00.000Z"
+ *               price:
+ *                 type: number
+ *                 minimum: 0
+ *                 description: Nuevo precio para el evento duplicado
+ *                 example: 150.00
+ *           examples:
+ *             duplicar_basico:
+ *               summary: Duplicar evento sin cambios
+ *               value: {}
+ *             duplicar_con_cambios:
+ *               summary: Duplicar con modificaciones
+ *               value:
+ *                 title: "Taller de Introducción a la IA - Edición 2"
+ *                 startDate: "2023-12-01T09:00:00.000Z"
+ *                 endDate: "2023-12-01T17:00:00.000Z"
+ *                 price: 150.00
+ *     responses:
+ *       201:
+ *         description: Evento duplicado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Evento duplicado exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     originalEvent:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 123
+ *                         title:
+ *                           type: string
+ *                           example: "Taller de Introducción a la IA"
+ *                     duplicatedEvent:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 201
+ *                         title:
+ *                           type: string
+ *                           example: "Taller de Introducción a la IA - Edición 2"
+ *                         startDate:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-12-01T09:00:00.000Z"
+ *                         endDate:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-12-01T17:00:00.000Z"
+ *                         price:
+ *                           type: number
+ *                           example: 150.00
+ *                         status:
+ *                           type: string
+ *                           example: "draft"
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-10-15T10:00:00.000Z"
+ *             examples:
+ *               evento_duplicado:
+ *                 summary: Evento duplicado exitosamente
+ *                 value:
+ *                   success: true
+ *                   message: "Evento duplicado exitosamente"
+ *                   data:
+ *                     originalEvent:
+ *                       id: 123
+ *                       title: "Taller de Introducción a la IA"
+ *                     duplicatedEvent:
+ *                       id: 201
+ *                       title: "Taller de Introducción a la IA - Edición 2"
+ *                       startDate: "2023-12-01T09:00:00.000Z"
+ *                       endDate: "2023-12-01T17:00:00.000Z"
+ *                       price: 150.00
+ *                       status: "draft"
+ *                       createdAt: "2023-10-15T10:00:00.000Z"
+ *       400:
+ *         description: Datos inválidos o conflicto en fechas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "La fecha de fin debe ser posterior a la fecha de inicio"
+ *                 error:
+ *                   type: string
+ *                   example: "VALIDATION_ERROR"
+ *       401:
+ *         description: Token inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Token de autenticación inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "INVALID_TOKEN"
+ *       403:
+ *         description: Permisos insuficientes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "No tienes permisos para duplicar este evento"
+ *                 error:
+ *                   type: string
+ *                   example: "INSUFFICIENT_PERMISSIONS"
+ *       404:
+ *         description: Evento no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Evento no encontrado"
+ *                 error:
+ *                   type: string
+ *                   example: "EVENT_NOT_FOUND"
+ *       409:
+ *         description: Evento no puede ser duplicado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "No se puede duplicar un evento cancelado"
+ *                 error:
+ *                   type: string
+ *                   example: "EVENT_NOT_DUPLICABLE"
+ *       429:
+ *         description: Demasiadas operaciones de creación/edición
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Demasiadas operaciones de creación/edición. Intente más tarde."
+ *                 error:
+ *                   type: string
+ *                   example: "RATE_LIMIT_EXCEEDED"
+ */
 // Ruta para duplicar eventos
 router.post('/:id/duplicate', authenticated, createEditLimiter, eventIdValidation, [
   body('title')

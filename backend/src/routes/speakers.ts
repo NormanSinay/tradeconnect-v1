@@ -354,8 +354,276 @@ const queryValidation = [
  *   get:
  *     tags: [Speakers]
  *     summary: Listar speakers activos
- *     description: Obtiene una lista de speakers activos con filtros
- */
+ *     description: Obtiene una lista paginada de speakers activos con filtros avanzados para búsqueda y selección
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Número de página para paginación
+ *         example: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 20
+ *         description: Número de speakers por página
+ *         example: 20
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 100
+ *         description: Término de búsqueda (nombre, apellido, especialidades)
+ *         example: "Juan Pérez"
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *           enum: [national, international, expert, special_guest]
+ *         description: Filtrar por categoría de speaker
+ *         example: "expert"
+ *       - in: query
+ *         name: minRating
+ *         schema:
+ *           type: number
+ *           minimum: 0
+ *           maximum: 5
+ *         description: Rating mínimo del speaker
+ *         example: 4.0
+ *       - in: query
+ *         name: modalities
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *             enum: [presential, virtual, hybrid]
+ *         description: Modalidades disponibles (presencial, virtual, híbrido)
+ *         example: ["virtual", "hybrid"]
+ *       - in: query
+ *         name: languages
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *             enum: [spanish, english, french, german, italian, portuguese, other]
+ *         description: Idiomas hablados por el speaker
+ *         example: ["spanish", "english"]
+ *       - in: query
+ *         name: specialties
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: integer
+ *             minimum: 1
+ *         description: IDs de especialidades
+ *         example: [1, 3, 5]
+ *       - in: query
+ *         name: sortBy
+ *         schema:
+ *           type: string
+ *           enum: [firstName, lastName, rating, totalEvents, baseRate, createdAt, verifiedAt]
+ *           default: rating
+ *         description: Campo por el cual ordenar
+ *         example: "rating"
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [ASC, DESC]
+ *           default: DESC
+ *         description: Orden de clasificación
+ *         example: "DESC"
+ *     responses:
+ *       200:
+ *         description: Speakers obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Speakers obtenidos exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     speakers:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 1
+ *                           firstName:
+ *                             type: string
+ *                             example: "María"
+ *                           lastName:
+ *                             type: string
+ *                             example: "González"
+ *                           avatar:
+ *                             type: string
+ *                             format: uri
+ *                             example: "https://example.com/avatar.jpg"
+ *                           category:
+ *                             type: string
+ *                             enum: [national, international, expert, special_guest]
+ *                             example: "expert"
+ *                           shortBio:
+ *                             type: string
+ *                             example: "Experta en transformación digital con 15 años de experiencia"
+ *                           modalities:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                               enum: [presential, virtual, hybrid]
+ *                             example: ["virtual", "hybrid"]
+ *                           languages:
+ *                             type: array
+ *                             items:
+ *                               type: string
+ *                               enum: [spanish, english, french, german, italian, portuguese, other]
+ *                             example: ["spanish", "english"]
+ *                           specialties:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 id:
+ *                                   type: integer
+ *                                   example: 1
+ *                                 name:
+ *                                   type: string
+ *                                   example: "Transformación Digital"
+ *                             example: [{ "id": 1, "name": "Transformación Digital" }]
+ *                           rating:
+ *                             type: number
+ *                             minimum: 0
+ *                             maximum: 5
+ *                             example: 4.8
+ *                           totalEvents:
+ *                             type: integer
+ *                             example: 45
+ *                           baseRate:
+ *                             type: number
+ *                             example: 150.00
+ *                           rateType:
+ *                             type: string
+ *                             enum: [hourly, daily, event]
+ *                             example: "hourly"
+ *                           isVerified:
+ *                             type: boolean
+ *                             example: true
+ *                           verifiedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2023-06-15T10:00:00.000Z"
+ *                     pagination:
+ *                       type: object
+ *                       properties:
+ *                         page:
+ *                           type: integer
+ *                           example: 1
+ *                         limit:
+ *                           type: integer
+ *                           example: 20
+ *                         total:
+ *                           type: integer
+ *                           example: 150
+ *                         totalPages:
+ *                           type: integer
+ *                           example: 8
+ *                         hasNext:
+ *                           type: boolean
+ *                           example: true
+ *                         hasPrev:
+ *                           type: boolean
+ *                           example: false
+ *             examples:
+ *               speakers_listados:
+ *                 summary: Speakers listados exitosamente
+ *                 value:
+ *                   success: true
+ *                   message: "Speakers obtenidos exitosamente"
+ *                   data:
+ *                     speakers:
+ *                       - id: 1
+ *                         firstName: "María"
+ *                         lastName: "González"
+ *                         avatar: "https://example.com/avatar.jpg"
+ *                         category: "expert"
+ *                         shortBio: "Experta en transformación digital con 15 años de experiencia"
+ *                         modalities: ["virtual", "hybrid"]
+ *                         languages: ["spanish", "english"]
+ *                         specialties: [{ "id": 1, "name": "Transformación Digital" }]
+ *                         rating: 4.8
+ *                         totalEvents: 45
+ *                         baseRate: 150.00
+ *                         rateType: "hourly"
+ *                         isVerified: true
+ *                         verifiedAt: "2023-06-15T10:00:00.000Z"
+ *                       - id: 2
+ *                         firstName: "Carlos"
+ *                         lastName: "Rodríguez"
+ *                         category: "national"
+ *                         shortBio: "Especialista en ciberseguridad empresarial"
+ *                         modalities: ["presential", "virtual"]
+ *                         languages: ["spanish"]
+ *                         specialties: [{ "id": 2, "name": "Ciberseguridad" }]
+ *                         rating: 4.5
+ *                         totalEvents: 28
+ *                         baseRate: 120.00
+ *                         rateType: "daily"
+ *                         isVerified: true
+ *                         verifiedAt: "2023-08-20T14:30:00.000Z"
+ *                     pagination:
+ *                       page: 1
+ *                       limit: 20
+ *                       total: 150
+ *                       totalPages: 8
+ *                       hasNext: true
+ *                       hasPrev: false
+ *       400:
+ *         description: Parámetros de consulta inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Rating mínimo debe estar entre 0 y 5"
+ *                 error:
+ *                   type: string
+ *                   example: "VALIDATION_ERROR"
+ *       429:
+ *         description: Demasiadas solicitudes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Demasiadas solicitudes. Intente más tarde."
+ *                 error:
+ *                   type: string
+ *                   example: "RATE_LIMIT_EXCEEDED"
 router.get('/', speakerLimiter, queryValidation, speakerController.getActiveSpeakers);
 
 // ====================================================================
@@ -368,10 +636,299 @@ router.get('/', speakerLimiter, queryValidation, speakerController.getActiveSpea
  *   post:
  *     tags: [Speakers]
  *     summary: Crear speaker
- *     description: Crea un nuevo speaker
+ *     description: Crea un nuevo speaker con toda su información profesional y de contacto
  *     security:
  *       - bearerAuth: []
- */
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - baseRate
+ *               - rateType
+ *               - modalities
+ *               - languages
+ *               - category
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 100
+ *                 description: Nombre del speaker
+ *                 example: "María"
+ *               lastName:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 100
+ *                 description: Apellido del speaker
+ *                 example: "González"
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Correo electrónico único
+ *                 example: "maria.gonzalez@ejemplo.com"
+ *               phone:
+ *                 type: string
+ *                 minLength: 8
+ *                 maxLength: 20
+ *                 description: Número de teléfono
+ *                 example: "+502 5555-1234"
+ *               country:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 100
+ *                 description: País de residencia
+ *                 example: "Guatemala"
+ *               nit:
+ *                 type: string
+ *                 minLength: 8
+ *                 maxLength: 20
+ *                 description: Número de Identificación Tributaria
+ *                 example: "12345678-9"
+ *               cui:
+ *                 type: string
+ *                 minLength: 8
+ *                 maxLength: 20
+ *                 description: Código Único de Identificación
+ *                 example: "1234567890123"
+ *               rtu:
+ *                 type: string
+ *                 minLength: 5
+ *                 maxLength: 50
+ *                 description: Registro Tributario Unificado
+ *                 example: "RTU-12345678"
+ *               shortBio:
+ *                 type: string
+ *                 maxLength: 200
+ *                 description: Biografía corta para listados
+ *                 example: "Experta en transformación digital con 15 años de experiencia"
+ *               fullBio:
+ *                 type: string
+ *                 maxLength: 2000
+ *                 description: Biografía completa detallada
+ *                 example: "María González es una reconocida experta en transformación digital con más de 15 años de experiencia..."
+ *               linkedinUrl:
+ *                 type: string
+ *                 format: uri
+ *                 description: URL del perfil de LinkedIn
+ *                 example: "https://linkedin.com/in/mariagonzalez"
+ *               twitterUrl:
+ *                 type: string
+ *                 format: uri
+ *                 description: URL del perfil de Twitter
+ *                 example: "https://twitter.com/mariagonzalez"
+ *               websiteUrl:
+ *                 type: string
+ *                 format: uri
+ *                 description: URL del sitio web personal
+ *                 example: "https://mariagonzalez.com"
+ *               baseRate:
+ *                 type: number
+ *                 minimum: 0
+ *                 description: Tarifa base por el servicio
+ *                 example: 150.00
+ *               rateType:
+ *                 type: string
+ *                 enum: [hourly, daily, event]
+ *                 description: Tipo de tarifa (por hora, día o evento)
+ *                 example: "hourly"
+ *               modalities:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: string
+ *                   enum: [presential, virtual, hybrid]
+ *                 description: Modalidades disponibles
+ *                 example: ["virtual", "hybrid"]
+ *               languages:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: string
+ *                   enum: [spanish, english, french, german, italian, portuguese, other]
+ *                 description: Idiomas hablados
+ *                 example: ["spanish", "english"]
+ *               category:
+ *                 type: string
+ *                 enum: [national, international, expert, special_guest]
+ *                 description: Categoría del speaker
+ *                 example: "expert"
+ *               specialtyIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                   minimum: 1
+ *                 description: IDs de especialidades del speaker
+ *                 example: [1, 3, 5]
+ *           examples:
+ *             crear_speaker_completo:
+ *               summary: Crear speaker con información completa
+ *               value:
+ *                 firstName: "María"
+ *                 lastName: "González"
+ *                 email: "maria.gonzalez@ejemplo.com"
+ *                 phone: "+502 5555-1234"
+ *                 country: "Guatemala"
+ *                 nit: "12345678-9"
+ *                 cui: "1234567890123"
+ *                 rtu: "RTU-12345678"
+ *                 shortBio: "Experta en transformación digital con 15 años de experiencia"
+ *                 fullBio: "María González es una reconocida experta en transformación digital con más de 15 años de experiencia..."
+ *                 linkedinUrl: "https://linkedin.com/in/mariagonzalez"
+ *                 twitterUrl: "https://twitter.com/mariagonzalez"
+ *                 websiteUrl: "https://mariagonzalez.com"
+ *                 baseRate: 150.00
+ *                 rateType: "hourly"
+ *                 modalities: ["virtual", "hybrid"]
+ *                 languages: ["spanish", "english"]
+ *                 category: "expert"
+ *                 specialtyIds: [1, 3, 5]
+ *     responses:
+ *       201:
+ *         description: Speaker creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Speaker creado exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     speaker:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 1
+ *                         firstName:
+ *                           type: string
+ *                           example: "María"
+ *                         lastName:
+ *                           type: string
+ *                           example: "González"
+ *                         email:
+ *                           type: string
+ *                           example: "maria.gonzalez@ejemplo.com"
+ *                         category:
+ *                           type: string
+ *                           example: "expert"
+ *                         modalities:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                           example: ["virtual", "hybrid"]
+ *                         languages:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                           example: ["spanish", "english"]
+ *                         baseRate:
+ *                           type: number
+ *                           example: 150.00
+ *                         rateType:
+ *                           type: string
+ *                           example: "hourly"
+ *                         isVerified:
+ *                           type: boolean
+ *                           example: false
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-10-15T10:00:00.000Z"
+ *             examples:
+ *               speaker_creado:
+ *                 summary: Speaker creado exitosamente
+ *                 value:
+ *                   success: true
+ *                   message: "Speaker creado exitosamente"
+ *                   data:
+ *                     speaker:
+ *                       id: 1
+ *                       firstName: "María"
+ *                       lastName: "González"
+ *                       email: "maria.gonzalez@ejemplo.com"
+ *                       category: "expert"
+ *                       modalities: ["virtual", "hybrid"]
+ *                       languages: ["spanish", "english"]
+ *                       baseRate: 150.00
+ *                       rateType: "hourly"
+ *                       isVerified: false
+ *                       createdAt: "2023-10-15T10:00:00.000Z"
+ *       400:
+ *         description: Datos inválidos o email ya registrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "El email ya está registrado para otro speaker"
+ *                 error:
+ *                   type: string
+ *                   example: "SPEAKER_EMAIL_EXISTS"
+ *       401:
+ *         description: Token inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Token de autenticación inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "INVALID_TOKEN"
+ *       403:
+ *         description: Permisos insuficientes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "No tienes permisos para crear speakers"
+ *                 error:
+ *                   type: string
+ *                   example: "INSUFFICIENT_PERMISSIONS"
+ *       429:
+ *         description: Demasiadas operaciones de creación/edición
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Demasiadas operaciones de creación/edición. Intente más tarde."
+ *                 error:
+ *                   type: string
+ *                   example: "RATE_LIMIT_EXCEEDED"
 router.post('/', authenticated, createEditLimiter, createSpeakerValidation, speakerController.createSpeaker);
 
 /**
@@ -380,14 +937,265 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
  *   get:
  *     tags: [Speakers]
  *     summary: Obtener speaker
- *     description: Obtiene detalles de un speaker específico
+ *     description: Obtiene información completa y detallada de un speaker específico
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: integer
- */
+ *           minimum: 1
+ *         description: ID único del speaker
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Speaker obtenido exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Speaker obtenido exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     speaker:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 1
+ *                         firstName:
+ *                           type: string
+ *                           example: "María"
+ *                         lastName:
+ *                           type: string
+ *                           example: "González"
+ *                         email:
+ *                           type: string
+ *                           format: email
+ *                           example: "maria.gonzalez@ejemplo.com"
+ *                         phone:
+ *                           type: string
+ *                           example: "+502 5555-1234"
+ *                         country:
+ *                           type: string
+ *                           example: "Guatemala"
+ *                         avatar:
+ *                           type: string
+ *                           format: uri
+ *                           example: "https://example.com/avatar.jpg"
+ *                         nit:
+ *                           type: string
+ *                           example: "12345678-9"
+ *                         cui:
+ *                           type: string
+ *                           example: "1234567890123"
+ *                         rtu:
+ *                           type: string
+ *                           example: "RTU-12345678"
+ *                         shortBio:
+ *                           type: string
+ *                           example: "Experta en transformación digital con 15 años de experiencia"
+ *                         fullBio:
+ *                           type: string
+ *                           example: "María González es una reconocida experta en transformación digital..."
+ *                         linkedinUrl:
+ *                           type: string
+ *                           format: uri
+ *                           example: "https://linkedin.com/in/mariagonzalez"
+ *                         twitterUrl:
+ *                           type: string
+ *                           format: uri
+ *                           example: "https://twitter.com/mariagonzalez"
+ *                         websiteUrl:
+ *                           type: string
+ *                           format: uri
+ *                           example: "https://mariagonzalez.com"
+ *                         category:
+ *                           type: string
+ *                           enum: [national, international, expert, special_guest]
+ *                           example: "expert"
+ *                         modalities:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                             enum: [presential, virtual, hybrid]
+ *                           example: ["virtual", "hybrid"]
+ *                         languages:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                             enum: [spanish, english, french, german, italian, portuguese, other]
+ *                           example: ["spanish", "english"]
+ *                         specialties:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 example: 1
+ *                               name:
+ *                                 type: string
+ *                                 example: "Transformación Digital"
+ *                               description:
+ *                                 type: string
+ *                                 example: "Estrategias para modernizar procesos empresariales"
+ *                           example: [{ "id": 1, "name": "Transformación Digital", "description": "Estrategias para modernizar procesos empresariales" }]
+ *                         baseRate:
+ *                           type: number
+ *                           example: 150.00
+ *                         rateType:
+ *                           type: string
+ *                           enum: [hourly, daily, event]
+ *                           example: "hourly"
+ *                         rating:
+ *                           type: number
+ *                           minimum: 0
+ *                           maximum: 5
+ *                           example: 4.8
+ *                         totalEvents:
+ *                           type: integer
+ *                           example: 45
+ *                         totalEvaluations:
+ *                           type: integer
+ *                           example: 38
+ *                         isVerified:
+ *                           type: boolean
+ *                           example: true
+ *                         verifiedAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-06-15T10:00:00.000Z"
+ *                         availabilityBlocks:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 example: 1
+ *                               startDate:
+ *                                 type: string
+ *                                 format: date-time
+ *                                 example: "2023-12-01T00:00:00.000Z"
+ *                               endDate:
+ *                                 type: string
+ *                                 format: date-time
+ *                                 example: "2023-12-31T23:59:59.000Z"
+ *                               reason:
+ *                                 type: string
+ *                                 example: "Vacaciones de fin de año"
+ *                               isRecurring:
+ *                                 type: boolean
+ *                                 example: false
+ *                           example: [{ "id": 1, "startDate": "2023-12-01T00:00:00.000Z", "endDate": "2023-12-31T23:59:59.000Z", "reason": "Vacaciones de fin de año", "isRecurring": false }]
+ *                         recentEvaluations:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: integer
+ *                                 example: 1
+ *                               eventId:
+ *                                 type: integer
+ *                                 example: 123
+ *                               eventTitle:
+ *                                 type: string
+ *                                 example: "Conferencia Tech 2023"
+ *                               overallRating:
+ *                                 type: number
+ *                                 minimum: 1
+ *                                 maximum: 5
+ *                                 example: 5
+ *                               comments:
+ *                                 type: string
+ *                                 example: "Excelente presentación, muy claro y didáctico"
+ *                               evaluationDate:
+ *                                 type: string
+ *                                 format: date-time
+ *                                 example: "2023-10-01T18:00:00.000Z"
+ *                           example: [{ "id": 1, "eventId": 123, "eventTitle": "Conferencia Tech 2023", "overallRating": 5, "comments": "Excelente presentación, muy claro y didáctico", "evaluationDate": "2023-10-01T18:00:00.000Z" }]
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-01-15T10:00:00.000Z"
+ *                         updatedAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-10-01T14:30:00.000Z"
+ *             examples:
+ *               speaker_detallado:
+ *                 summary: Speaker obtenido exitosamente
+ *                 value:
+ *                   success: true
+ *                   message: "Speaker obtenido exitosamente"
+ *                   data:
+ *                     speaker:
+ *                       id: 1
+ *                       firstName: "María"
+ *                       lastName: "González"
+ *                       email: "maria.gonzalez@ejemplo.com"
+ *                       phone: "+502 5555-1234"
+ *                       country: "Guatemala"
+ *                       avatar: "https://example.com/avatar.jpg"
+ *                       shortBio: "Experta en transformación digital con 15 años de experiencia"
+ *                       fullBio: "María González es una reconocida experta en transformación digital..."
+ *                       linkedinUrl: "https://linkedin.com/in/mariagonzalez"
+ *                       category: "expert"
+ *                       modalities: ["virtual", "hybrid"]
+ *                       languages: ["spanish", "english"]
+ *                       specialties: [{ "id": 1, "name": "Transformación Digital", "description": "Estrategias para modernizar procesos empresariales" }]
+ *                       baseRate: 150.00
+ *                       rateType: "hourly"
+ *                       rating: 4.8
+ *                       totalEvents: 45
+ *                       totalEvaluations: 38
+ *                       isVerified: true
+ *                       verifiedAt: "2023-06-15T10:00:00.000Z"
+ *                       availabilityBlocks: [{ "id": 1, "startDate": "2023-12-01T00:00:00.000Z", "endDate": "2023-12-31T23:59:59.000Z", "reason": "Vacaciones de fin de año", "isRecurring": false }]
+ *                       recentEvaluations: [{ "id": 1, "eventId": 123, "eventTitle": "Conferencia Tech 2023", "overallRating": 5, "comments": "Excelente presentación, muy claro y didáctico", "evaluationDate": "2023-10-01T18:00:00.000Z" }]
+ *                       createdAt: "2023-01-15T10:00:00.000Z"
+ *                       updatedAt: "2023-10-01T14:30:00.000Z"
+ *       404:
+ *         description: Speaker no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Speaker no encontrado"
+ *                 error:
+ *                   type: string
+ *                   example: "SPEAKER_NOT_FOUND"
+ *       429:
+ *         description: Demasiadas solicitudes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Demasiadas solicitudes. Intente más tarde."
+ *                 error:
+ *                   type: string
+ *                   example: "RATE_LIMIT_EXCEEDED"
 router.get('/:id', speakerLimiter, speakerIdValidation, speakerController.getSpeaker);
 
 /**
