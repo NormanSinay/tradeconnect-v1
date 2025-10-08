@@ -19,6 +19,7 @@ import { testRedisConnection } from './config/redis';
 import sequelize from './config/database';
 import { requestLogger, errorLogger } from './middleware/logging.middleware';
 import { successResponse, errorResponse } from './utils/common.utils';
+import { initializeSocketService } from './services/socketService';
 
 // Importar modelos (esto los registra con Sequelize)
 import './models';
@@ -60,6 +61,11 @@ import notificationRoutes from './routes/notifications';
 import emailTemplateRoutes from './routes/email-templates';
 import notificationRuleRoutes from './routes/notification-rules';
 import userPreferencesRoutes from './routes/user-preferences';
+
+// Importar rutas del módulo de eventos híbridos
+import hybridEventRoutes from './routes/hybrid-events';
+import streamingRoutes from './routes/streaming';
+import virtualParticipantRoutes from './routes/virtual-participants';
 
 // Importar middleware de seguridad
 import { generalLimiter, authLimiter } from './middleware/rateLimiting';
@@ -1046,6 +1052,734 @@ const swaggerOptions = {
           }
         }
       },
+      // Hybrid Events schemas
+      VirtualParticipant: {
+        type: 'object',
+        required: ['id', 'userId', 'hybridEventId', 'status'],
+        properties: {
+          id: {
+            type: 'integer',
+            description: 'ID único del participante virtual',
+            example: 1
+          },
+          userId: {
+            type: 'integer',
+            description: 'ID del usuario',
+            example: 123
+          },
+          hybridEventId: {
+            type: 'integer',
+            description: 'ID del evento híbrido',
+            example: 456
+          },
+          roomId: {
+            type: 'integer',
+            description: 'ID de la sala virtual',
+            example: 789
+          },
+          status: {
+            type: 'string',
+            enum: ['invited', 'joined', 'left', 'removed', 'blocked'],
+            description: 'Estado del participante',
+            example: 'joined'
+          },
+          role: {
+            type: 'string',
+            enum: ['attendee', 'presenter', 'moderator', 'organizer'],
+            description: 'Rol del participante',
+            example: 'attendee'
+          },
+          isModerator: {
+            type: 'boolean',
+            description: 'Si el participante es moderador',
+            example: false
+          },
+          isMuted: {
+            type: 'boolean',
+            description: 'Si el participante está silenciado',
+            example: false
+          },
+          isBlocked: {
+            type: 'boolean',
+            description: 'Si el participante está bloqueado',
+            example: false
+          },
+          moderationNotes: {
+            type: 'string',
+            description: 'Notas de moderación',
+            example: 'Silenciado por spam'
+          },
+          messagesSent: {
+            type: 'integer',
+            description: 'Mensajes enviados',
+            example: 15
+          },
+          questionsAsked: {
+            type: 'integer',
+            description: 'Preguntas realizadas',
+            example: 3
+          },
+          pollsParticipated: {
+            type: 'integer',
+            description: 'Encuestas participadas',
+            example: 5
+          },
+          totalTimeActive: {
+            type: 'integer',
+            description: 'Tiempo total activo (segundos)',
+            example: 3600
+          },
+          averageLatency: {
+            type: 'number',
+            description: 'Latencia promedio (ms)',
+            example: 45.2
+          },
+          lastActivity: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Última actividad'
+          },
+          lastPingAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Último ping'
+          },
+          joinedAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de unión'
+          },
+          leftAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de salida'
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de creación'
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de actualización'
+          }
+        }
+      },
+      HybridEvent: {
+        type: 'object',
+        required: ['id', 'eventId', 'modality'],
+        properties: {
+          id: {
+            type: 'integer',
+            description: 'ID único del evento híbrido',
+            example: 1
+          },
+          eventId: {
+            type: 'integer',
+            description: 'ID del evento base',
+            example: 123
+          },
+          modality: {
+            type: 'string',
+            enum: ['presential_only', 'virtual_only', 'hybrid'],
+            description: 'Modalidad del evento',
+            example: 'hybrid'
+          },
+          streamingPlatform: {
+            type: 'string',
+            enum: ['zoom', 'google_meet', 'microsoft_teams', 'jitsi', 'custom_streaming'],
+            description: 'Plataforma de streaming',
+            example: 'zoom'
+          },
+          streamingConfigId: {
+            type: 'integer',
+            description: 'ID de la configuración de streaming',
+            example: 456
+          },
+          virtualRoomId: {
+            type: 'integer',
+            description: 'ID de la sala virtual',
+            example: 789
+          },
+          maxVirtualParticipants: {
+            type: 'integer',
+            description: 'Máximo participantes virtuales',
+            example: 500
+          },
+          isRecordingEnabled: {
+            type: 'boolean',
+            description: 'Si la grabación está habilitada',
+            example: true
+          },
+          isChatEnabled: {
+            type: 'boolean',
+            description: 'Si el chat está habilitado',
+            example: true
+          },
+          isQAndAEnabled: {
+            type: 'boolean',
+            description: 'Si Q&A está habilitado',
+            example: true
+          },
+          isPollingEnabled: {
+            type: 'boolean',
+            description: 'Si encuestas están habilitadas',
+            example: true
+          },
+          encryptionEnabled: {
+            type: 'boolean',
+            description: 'Si el encriptación está habilitada',
+            example: true
+          },
+          createdBy: {
+            type: 'integer',
+            description: 'ID del usuario creador',
+            example: 1
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de creación'
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de actualización'
+          }
+        }
+      },
+      StreamingConfig: {
+        type: 'object',
+        required: ['id', 'platform', 'meetingId'],
+        properties: {
+          id: {
+            type: 'integer',
+            description: 'ID único de la configuración',
+            example: 1
+          },
+          platform: {
+            type: 'string',
+            enum: ['zoom', 'google_meet', 'microsoft_teams', 'jitsi', 'custom_streaming'],
+            description: 'Plataforma de streaming',
+            example: 'zoom'
+          },
+          meetingId: {
+            type: 'string',
+            description: 'ID de la reunión',
+            example: '123456789'
+          },
+          meetingPassword: {
+            type: 'string',
+            description: 'Contraseña de la reunión',
+            example: 'abc123'
+          },
+          hostUrl: {
+            type: 'string',
+            format: 'uri',
+            description: 'URL del host',
+            example: 'https://zoom.us/j/123456789?pwd=abc123'
+          },
+          attendeeUrl: {
+            type: 'string',
+            format: 'uri',
+            description: 'URL de los asistentes',
+            example: 'https://zoom.us/j/123456789'
+          },
+          apiKey: {
+            type: 'string',
+            description: 'API Key de la plataforma',
+            example: 'zoom_api_key_123'
+          },
+          apiSecret: {
+            type: 'string',
+            description: 'API Secret de la plataforma',
+            example: 'zoom_api_secret_456'
+          },
+          webhookUrl: {
+            type: 'string',
+            format: 'uri',
+            description: 'URL de webhook',
+            example: 'https://api.tradeconnect.com/webhooks/streaming'
+          },
+          isActive: {
+            type: 'boolean',
+            description: 'Si la configuración está activa',
+            example: true
+          },
+          settings: {
+            type: 'object',
+            description: 'Configuraciones específicas de la plataforma',
+            properties: {
+              record: { type: 'boolean', example: true },
+              autoRecord: { type: 'boolean', example: false },
+              muteOnEntry: { type: 'boolean', example: true },
+              waitingRoom: { type: 'boolean', example: false },
+              quality: { type: 'string', enum: ['low', 'medium', 'high'], example: 'high' }
+            }
+          },
+          expiresAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de expiración'
+          },
+          createdAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de creación'
+          },
+          updatedAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de actualización'
+          }
+        }
+      },
+      // Request/Response schemas for Hybrid Events
+      CreateHybridEventRequest: {
+        type: 'object',
+        required: ['eventId', 'modality'],
+        properties: {
+          eventId: {
+            type: 'integer',
+            description: 'ID del evento a convertir en híbrido',
+            example: 123
+          },
+          modality: {
+            type: 'string',
+            enum: ['presential_only', 'virtual_only', 'hybrid'],
+            description: 'Modalidad del evento',
+            example: 'hybrid'
+          },
+          streamingPlatform: {
+            type: 'string',
+            enum: ['zoom', 'google_meet', 'microsoft_teams', 'jitsi', 'custom_streaming'],
+            description: 'Plataforma de streaming',
+            example: 'zoom'
+          },
+          maxVirtualParticipants: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 10000,
+            description: 'Máximo participantes virtuales',
+            example: 500
+          },
+          isRecordingEnabled: {
+            type: 'boolean',
+            description: 'Habilitar grabación',
+            default: false,
+            example: true
+          },
+          isChatEnabled: {
+            type: 'boolean',
+            description: 'Habilitar chat',
+            default: true,
+            example: true
+          },
+          isQAndAEnabled: {
+            type: 'boolean',
+            description: 'Habilitar Q&A',
+            default: true,
+            example: true
+          },
+          isPollingEnabled: {
+            type: 'boolean',
+            description: 'Habilitar encuestas',
+            default: true,
+            example: true
+          },
+          encryptionEnabled: {
+            type: 'boolean',
+            description: 'Habilitar encriptación end-to-end',
+            default: true,
+            example: true
+          }
+        }
+      },
+      UpdateHybridEventRequest: {
+        type: 'object',
+        properties: {
+          modality: {
+            type: 'string',
+            enum: ['presential_only', 'virtual_only', 'hybrid'],
+            description: 'Nueva modalidad del evento'
+          },
+          streamingPlatform: {
+            type: 'string',
+            enum: ['zoom', 'google_meet', 'microsoft_teams', 'jitsi', 'custom_streaming'],
+            description: 'Nueva plataforma de streaming'
+          },
+          maxVirtualParticipants: {
+            type: 'integer',
+            minimum: 1,
+            maximum: 10000,
+            description: 'Nuevo máximo participantes virtuales'
+          },
+          isRecordingEnabled: {
+            type: 'boolean',
+            description: 'Cambiar estado de grabación'
+          },
+          isChatEnabled: {
+            type: 'boolean',
+            description: 'Cambiar estado del chat'
+          },
+          isQAndAEnabled: {
+            type: 'boolean',
+            description: 'Cambiar estado de Q&A'
+          },
+          isPollingEnabled: {
+            type: 'boolean',
+            description: 'Cambiar estado de encuestas'
+          },
+          encryptionEnabled: {
+            type: 'boolean',
+            description: 'Cambiar estado de encriptación'
+          }
+        }
+      },
+      JoinVirtualEventRequest: {
+        type: 'object',
+        properties: {
+          accessToken: {
+            type: 'string',
+            description: 'Token de acceso JWT para streams privados',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+          },
+          deviceInfo: {
+            type: 'object',
+            description: 'Información del dispositivo',
+            properties: {
+              userAgent: { type: 'string', example: 'Mozilla/5.0...' },
+              platform: { type: 'string', example: 'web' },
+              screenResolution: { type: 'string', example: '1920x1080' }
+            }
+          },
+          preferredQuality: {
+            type: 'string',
+            enum: ['low', 'medium', 'high', 'auto'],
+            description: 'Calidad preferida de video',
+            example: 'high'
+          }
+        }
+      },
+      StartStreamingRequest: {
+        type: 'object',
+        properties: {
+          quality: {
+            type: 'string',
+            enum: ['low', 'medium', 'high'],
+            description: 'Calidad del stream',
+            default: 'high',
+            example: 'high'
+          },
+          record: {
+            type: 'boolean',
+            description: 'Habilitar grabación',
+            default: false,
+            example: true
+          },
+          autoStartRecording: {
+            type: 'boolean',
+            description: 'Iniciar grabación automáticamente',
+            default: false,
+            example: false
+          },
+          enableChat: {
+            type: 'boolean',
+            description: 'Habilitar chat',
+            default: true,
+            example: true
+          },
+          enableQAndA: {
+            type: 'boolean',
+            description: 'Habilitar Q&A',
+            default: true,
+            example: true
+          },
+          enablePolling: {
+            type: 'boolean',
+            description: 'Habilitar encuestas',
+            default: true,
+            example: true
+          },
+          moderatorOnlyControls: {
+            type: 'boolean',
+            description: 'Solo moderadores pueden controlar',
+            default: true,
+            example: true
+          }
+        }
+      },
+      VirtualAccessResponse: {
+        type: 'object',
+        properties: {
+          accessToken: {
+            type: 'string',
+            description: 'Token JWT para acceso al stream',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+          },
+          streamUrl: {
+            type: 'string',
+            format: 'uri',
+            description: 'URL del stream',
+            example: 'https://zoom.us/j/123456789'
+          },
+          websocketUrl: {
+            type: 'string',
+            format: 'uri',
+            description: 'URL de WebSocket para comunicación en tiempo real',
+            example: 'wss://api.tradeconnect.com/socket.io/'
+          },
+          participantId: {
+            type: 'integer',
+            description: 'ID del participante asignado',
+            example: 123
+          },
+          roomId: {
+            type: 'string',
+            description: 'ID de la sala',
+            example: 'room_456'
+          },
+          permissions: {
+            type: 'object',
+            description: 'Permisos del participante',
+            properties: {
+              canChat: { type: 'boolean', example: true },
+              canAskQuestions: { type: 'boolean', example: true },
+              canVotePolls: { type: 'boolean', example: true },
+              canModerate: { type: 'boolean', example: false },
+              canShareScreen: { type: 'boolean', example: false }
+            }
+          },
+          encryptionKey: {
+            type: 'string',
+            description: 'Clave de encriptación para datos sensibles',
+            example: 'a1b2c3d4e5f678901234567890123456789012345678901234567890'
+          },
+          expiresAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de expiración del token'
+          }
+        }
+      },
+      // Moderation schemas
+      ModerationActionRequest: {
+        type: 'object',
+        required: ['action', 'participantId'],
+        properties: {
+          action: {
+            type: 'string',
+            enum: ['mute', 'unmute', 'block', 'change_role'],
+            description: 'Acción de moderación',
+            example: 'mute'
+          },
+          participantId: {
+            type: 'integer',
+            description: 'ID del participante',
+            example: 123
+          },
+          reason: {
+            type: 'string',
+            description: 'Razón de la acción',
+            example: 'Comportamiento disruptivo'
+          },
+          newRole: {
+            type: 'string',
+            enum: ['attendee', 'presenter', 'moderator', 'organizer'],
+            description: 'Nuevo rol (solo para change_role)',
+            example: 'moderator'
+          },
+          duration: {
+            type: 'integer',
+            description: 'Duración en minutos (para acciones temporales)',
+            example: 15
+          }
+        }
+      },
+      ModerationActionResponse: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          action: { type: 'string', example: 'mute' },
+          participantId: { type: 'integer', example: 123 },
+          moderatorId: { type: 'integer', example: 456 },
+          timestamp: { type: 'string', format: 'date-time' },
+          reason: { type: 'string', example: 'Comportamiento disruptivo' },
+          expiresAt: { type: 'string', format: 'date-time' }
+        }
+      },
+      // WebSocket/Socket.io schemas
+      SocketEventData: {
+        type: 'object',
+        properties: {
+          event: {
+            type: 'string',
+            description: 'Tipo de evento',
+            example: 'chat_message'
+          },
+          data: {
+            type: 'object',
+            description: 'Datos del evento',
+            example: {
+              message: 'Hola a todos!',
+              senderId: 123,
+              timestamp: '2024-01-01T12:00:00Z'
+            }
+          },
+          roomId: {
+            type: 'string',
+            description: 'ID de la sala',
+            example: 'room_456'
+          },
+          userId: {
+            type: 'integer',
+            description: 'ID del usuario',
+            example: 123
+          }
+        }
+      },
+      // WebSocket Events Documentation
+      WebSocketChatMessage: {
+        type: 'object',
+        required: ['message'],
+        properties: {
+          message: {
+            type: 'string',
+            description: 'Contenido del mensaje',
+            example: 'Hola a todos los participantes!'
+          },
+          messageType: {
+            type: 'string',
+            enum: ['text', 'emoji', 'system'],
+            description: 'Tipo de mensaje',
+            default: 'text',
+            example: 'text'
+          },
+          replyTo: {
+            type: 'integer',
+            description: 'ID del mensaje al que se responde',
+            example: 123
+          }
+        }
+      },
+      WebSocketQuestion: {
+        type: 'object',
+        required: ['question'],
+        properties: {
+          question: {
+            type: 'string',
+            description: 'Texto de la pregunta',
+            example: '¿Cuál es el horario de la próxima sesión?'
+          },
+          isAnonymous: {
+            type: 'boolean',
+            description: 'Si la pregunta es anónima',
+            default: false,
+            example: false
+          },
+          category: {
+            type: 'string',
+            enum: ['general', 'technical', 'schedule', 'content'],
+            description: 'Categoría de la pregunta',
+            example: 'schedule'
+          }
+        }
+      },
+      WebSocketPollVote: {
+        type: 'object',
+        required: ['pollId', 'optionId'],
+        properties: {
+          pollId: {
+            type: 'integer',
+            description: 'ID de la encuesta',
+            example: 456
+          },
+          optionId: {
+            type: 'integer',
+            description: 'ID de la opción seleccionada',
+            example: 2
+          }
+        }
+      },
+      WebSocketModerationAction: {
+        type: 'object',
+        required: ['action', 'targetUserId'],
+        properties: {
+          action: {
+            type: 'string',
+            enum: ['mute', 'unmute', 'block', 'change_role'],
+            description: 'Acción de moderación',
+            example: 'mute'
+          },
+          targetUserId: {
+            type: 'integer',
+            description: 'ID del usuario objetivo',
+            example: 789
+          },
+          reason: {
+            type: 'string',
+            description: 'Razón de la acción',
+            example: 'Comportamiento disruptivo'
+          },
+          duration: {
+            type: 'integer',
+            description: 'Duración en minutos (para acciones temporales)',
+            example: 15
+          }
+        }
+      },
+      // Security schemas
+      StreamTokenRequest: {
+        type: 'object',
+        required: ['eventId', 'participantId'],
+        properties: {
+          eventId: {
+            type: 'integer',
+            description: 'ID del evento',
+            example: 123
+          },
+          participantId: {
+            type: 'integer',
+            description: 'ID del participante',
+            example: 456
+          },
+          platform: {
+            type: 'string',
+            enum: ['zoom', 'google_meet', 'microsoft_teams', 'jitsi'],
+            description: 'Plataforma de streaming',
+            example: 'zoom'
+          },
+          expiresInHours: {
+            type: 'integer',
+            description: 'Horas de validez del token',
+            default: 24,
+            example: 24
+          }
+        }
+      },
+      StreamTokenResponse: {
+        type: 'object',
+        properties: {
+          token: {
+            type: 'string',
+            description: 'Token JWT generado',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+          },
+          expiresAt: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Fecha de expiración'
+          },
+          participantId: { type: 'integer', example: 456 },
+          eventId: { type: 'integer', example: 123 },
+          permissions: {
+            type: 'array',
+            items: { type: 'string' },
+            example: ['read', 'write', 'moderate']
+          }
+        }
+      },
         CartResponse: {
           type: 'object',
           properties: {
@@ -1663,10 +2397,75 @@ const swaggerOptions = {
               }
             }
           }
+        },
+        // WebSocket/Socket.io endpoints documentation
+        websocket: {
+          summary: 'WebSocket/Socket.io Events',
+          description: `
+  ## Eventos de WebSocket para Eventos Híbridos
+  
+  ### Conexión y Autenticación
+  - **connect**: Cliente se conecta al servidor WebSocket
+  - **authenticate**: Autenticación del participante (requiere token JWT)
+  - **disconnect**: Cliente se desconecta
+  
+  ### Chat y Comunicación
+  - **chat_message**: Enviar mensaje de chat
+  - **chat_history**: Solicitar historial de mensajes
+  - **message_received**: Confirmación de mensaje recibido
+  - **typing_start/typing_stop**: Indicadores de escritura
+  
+  ### Preguntas y Respuestas (Q&A)
+  - **ask_question**: Enviar pregunta
+  - **answer_question**: Responder pregunta (solo moderadores)
+  - **question_upvote**: Votar pregunta
+  - **question_answered**: Marcar pregunta como respondida
+  
+  ### Encuestas
+  - **poll_vote**: Votar en encuesta
+  - **poll_results**: Solicitar resultados actualizados
+  - **poll_created**: Nueva encuesta creada
+  
+  ### Moderación
+  - **moderation_action**: Acción de moderación (mute, unmute, block, change_role)
+  - **participant_muted/unmuted**: Estado de mute actualizado
+  - **participant_blocked**: Participante bloqueado
+  - **role_changed**: Rol de participante cambiado
+  
+  ### Streaming y Participantes
+  - **stream_started/stopped**: Estado del stream
+  - **participant_joined/left**: Participantes uniéndose/saliendo
+  - **participant_count**: Conteo actualizado de participantes
+  - **quality_changed**: Cambio de calidad de video
+  
+  ### Notificaciones
+  - **notification**: Notificación general del sistema
+  - **private_message**: Mensaje privado (moderador a participante)
+  
+  ### Eventos del Sistema
+  - **ping/pong**: Heartbeat para mantener conexión
+  - **error**: Error en la comunicación
+  - **reconnect**: Reconexión automática
+  
+  ### Autenticación Requerida
+  Todos los eventos requieren autenticación previa mediante el evento 'authenticate' con un token JWT válido.
+  
+  ### Salas (Rooms)
+  Los participantes se unen automáticamente a la sala del evento híbrido correspondiente.
+  
+  ### Rate Limiting
+  Se aplican límites de rate por participante para prevenir abuso (60 mensajes/minuto por defecto).
+          `,
+          tags: ['WebSocket'],
+          responses: {
+            101: {
+              description: 'WebSocket connection established'
+            }
+          }
         }
-    }
-  },
-  apis: [
+      }
+    },
+    apis: [
     './src/routes/*.ts',
     './src/controllers/*.ts',
     './src/models/*.ts',
@@ -1713,7 +2512,12 @@ app.get('/', (req, res) => {
         'QR Codes & Access Control',
         'Certificate Generation',
         'Notifications',
-        'Hybrid Events',
+        'Hybrid Events (Advanced)',
+        'Real-time Communication (WebSocket)',
+        'Streaming & Moderation',
+        'Virtual Participants Management',
+        'Stream Security & Encryption',
+        'Engagement Analytics',
         'Reports & Analytics',
         'Promotions & Discounts'
       ]
@@ -1800,14 +2604,19 @@ app.get('/info', (req, res) => {
       pid: process.pid
     },
     features: {
-      modules: 18,
-      endpoints: 167, // Total endpoints implemented: auth(25) + users(6) + sessions(6) + events(54) + speakers(8) + registrations(6) + cart(7) + public(6) + payments(15) + refunds(4) + webhooks(6) + promotions(7) + discounts(5) + general(4)
+      modules: 20,
+      endpoints: 185, // Total endpoints implemented: auth(25) + users(6) + sessions(6) + events(54) + speakers(8) + registrations(6) + cart(7) + public(6) + payments(15) + refunds(4) + webhooks(6) + promotions(7) + discounts(5) + hybrid-events(12) + streaming(15) + virtual-participants(12) + general(4)
       paymentGateways: ['PayPal', 'Stripe', 'NeoNet', 'BAM'],
       felIntegration: true,
       blockchainSupport: true,
       qrCodes: true,
       certificates: true,
-      hybridEvents: true
+      hybridEvents: true,
+      realtimeCommunication: true,
+      websocketSupport: true,
+      advancedModeration: true,
+      streamSecurity: true,
+      engagementAnalytics: true
     }
   }, 'System information retrieved successfully'));
 });
@@ -1954,6 +2763,11 @@ app.use(`${API_VERSION}/email-templates`, emailTemplateRoutes);
 app.use(`${API_VERSION}/notification-rules`, notificationRuleRoutes);
 app.use(`${API_VERSION}/user/preferences`, userPreferencesRoutes);
 
+// Rutas del módulo de eventos híbridos
+app.use(`${API_VERSION}/hybrid-events`, hybridEventRoutes);
+app.use(`${API_VERSION}/streaming`, streamingRoutes);
+app.use(`${API_VERSION}/virtual-participants`, virtualParticipantRoutes);
+
 // Backward compatibility - redirect old API routes to v1
 app.use('/api/auth', (req, res) => res.redirect(301, `${API_VERSION}/auth${req.path}`));
 app.use('/api/users', (req, res) => res.redirect(301, `${API_VERSION}/users${req.path}`));
@@ -2082,21 +2896,26 @@ const startServer = async (): Promise<void> => {
     const server = app.listen(PORT, () => {
       console.log(`
 ╭──────────────────────────────────────────────────────────────────────────────────────────╮
-                                                                             
-                🚀 TradeConnect Platform Server Started Successfully!                      
-                                                                             
-                📍 Environment: ${config.NODE_ENV.padEnd(44)}                              
-                🔗 URL: http://localhost:${PORT}${' '.repeat(33)}                          
-                📝 Health Check: http://localhost:${PORT}/health${' '.repeat(25)}          
-                📊 System Info: http://localhost:${PORT}/info${' '.repeat(26)}             
+
+                🚀 TradeConnect Platform Server Started Successfully!
+
+                📍 Environment: ${config.NODE_ENV.padEnd(44)}
+                🔗 URL: http://localhost:${PORT}${' '.repeat(33)}
+                📝 Health Check: http://localhost:${PORT}/health${' '.repeat(25)}
+                📊 System Info: http://localhost:${PORT}/info${' '.repeat(26)}
                 📚 API Documentation: http://localhost:${PORT}/api/docs/${' '.repeat(18)}
-                ⏰ Started at: ${new Date().toISOString().padEnd(37)} 
-                                                                              
-                              🎯 Ready to accept requests!                                               
-                                                                             
+                ⏰ Started at: ${new Date().toISOString().padEnd(37)}
+
+                              🎯 Ready to accept requests!
+
 ╰─────────────────────────────────────────────────────────────────────────────────────────╯
       `);
     });
+
+    // Inicializar WebSocket/Socket.io
+    console.log('🔌 Initializing WebSocket/Socket.io service...');
+    initializeSocketService(server);
+    console.log('✅ WebSocket/Socket.io service initialized');
     
     // Manejo graceful de shutdown
     const gracefulShutdown = (signal: string) => {

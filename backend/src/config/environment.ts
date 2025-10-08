@@ -85,6 +85,48 @@ export const config = {
     cacheTtl: parseInt(process.env.QR_CACHE_TTL || '3600') // 1 hora
   },
 
+  // Plataformas de Streaming para Eventos Híbridos
+  streaming: {
+    // Zoom
+    zoom: {
+      apiKey: process.env.ZOOM_API_KEY,
+      apiSecret: process.env.ZOOM_API_SECRET,
+      webhookSecret: process.env.ZOOM_WEBHOOK_SECRET,
+      accountId: process.env.ZOOM_ACCOUNT_ID
+    },
+
+    // Google Meet
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+      calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary'
+    },
+
+    // Microsoft Teams
+    microsoft: {
+      clientId: process.env.MICROSOFT_CLIENT_ID,
+      clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+      tenantId: process.env.MICROSOFT_TENANT_ID,
+      userId: process.env.MICROSOFT_USER_ID
+    },
+
+    // Jitsi
+    jitsi: {
+      defaultDomain: process.env.JITSI_DEFAULT_DOMAIN || 'meet.jit.si',
+      appId: process.env.JITSI_APP_ID,
+      appSecret: process.env.JITSI_APP_SECRET
+    },
+
+    // Configuración general
+    general: {
+      defaultQuality: process.env.STREAMING_DEFAULT_QUALITY || '720p',
+      maxDurationHours: parseInt(process.env.STREAMING_MAX_DURATION_HOURS || '8'),
+      recordingRetentionDays: parseInt(process.env.STREAMING_RECORDING_RETENTION_DAYS || '30'),
+      webhookUrl: process.env.STREAMING_WEBHOOK_URL
+    }
+  },
+
   // Logging
   logging: {
     level: process.env.LOG_LEVEL || 'debug',
