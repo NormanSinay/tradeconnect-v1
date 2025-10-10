@@ -106,7 +106,7 @@ router.post(
  *   put:
  *     tags: [Cart]
  *     summary: Actualizar item del carrito
- *     description: Actualiza la cantidad o datos de un item en el carrito (MÉTODO NO IMPLEMENTADO)
+ *     description: Actualiza la cantidad o datos de un item en el carrito
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -129,12 +129,30 @@ router.post(
  *           schema:
  *             $ref: '#/components/schemas/CartUpdateRequest'
  *     responses:
- *       501:
- *         description: Método no implementado
+ *       200:
+ *         description: Item actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Item actualizado exitosamente"
+ *                 data:
+ *                   $ref: '#/components/schemas/CartResponse'
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       400:
- *         description: Se requiere userId o sessionId
+ *         description: Datos inválidos o se requiere userId/sessionId
  *       401:
  *         description: No autorizado
+ *       404:
+ *         description: Item no encontrado
  */
 router.put(
   '/update',
@@ -149,7 +167,7 @@ router.put(
  *   delete:
  *     tags: [Cart]
  *     summary: Remover item del carrito
- *     description: Elimina un item específico del carrito (MÉTODO NO IMPLEMENTADO)
+ *     description: Elimina un item específico del carrito
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -172,12 +190,30 @@ router.put(
  *           type: integer
  *         description: ID del item a remover
  *     responses:
- *       501:
- *         description: Método no implementado
+ *       200:
+ *         description: Item removido exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Item removido del carrito exitosamente"
+ *                 data:
+ *                   $ref: '#/components/schemas/CartResponse'
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       400:
  *         description: Se requiere userId o sessionId
  *       401:
  *         description: No autorizado
+ *       404:
+ *         description: Item no encontrado
  */
 router.delete(
   '/remove/:itemId',
@@ -192,7 +228,7 @@ router.delete(
  *   delete:
  *     tags: [Cart]
  *     summary: Limpiar carrito
- *     description: Elimina todos los items del carrito (MÉTODO NO IMPLEMENTADO)
+ *     description: Elimina todos los items del carrito
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -209,8 +245,25 @@ router.delete(
  *         description: ID de sesión alternativo como parámetro query
  *         required: false
  *     responses:
- *       501:
- *         description: Método no implementado
+ *       200:
+ *         description: Carrito limpiado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Carrito limpiado exitosamente"
+ *                 data:
+ *                   type: boolean
+ *                   example: true
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       400:
  *         description: Se requiere userId o sessionId
  *       401:
@@ -229,7 +282,7 @@ router.delete(
  *   post:
  *     tags: [Cart]
  *     summary: Aplicar código promocional
- *     description: Aplica un código promocional al carrito (MÉTODO NO IMPLEMENTADO)
+ *     description: Aplica un código promocional al carrito
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -252,10 +305,26 @@ router.delete(
  *           schema:
  *             $ref: '#/components/schemas/PromoCodeRequest'
  *     responses:
- *       501:
- *         description: Método no implementado
+ *       200:
+ *         description: Código promocional aplicado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Código promocional aplicado exitosamente"
+ *                 data:
+ *                   $ref: '#/components/schemas/CartResponse'
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       400:
- *         description: Se requiere userId o sessionId
+ *         description: Código promocional inválido o se requiere userId/sessionId
  *       401:
  *         description: No autorizado
  */
@@ -272,7 +341,7 @@ router.post(
  *   get:
  *     tags: [Cart]
  *     summary: Calcular totales del carrito
- *     description: Recalcula los totales del carrito sin modificarlo (MÉTODO NO IMPLEMENTADO)
+ *     description: Recalcula los totales del carrito sin modificarlo
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -289,8 +358,54 @@ router.post(
  *         description: ID de sesión alternativo como parámetro query
  *         required: false
  *     responses:
- *       501:
- *         description: Método no implementado
+ *       200:
+ *         description: Cálculo completado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Cálculo completado exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     subtotal:
+ *                       type: number
+ *                       example: 150.00
+ *                     discountAmount:
+ *                       type: number
+ *                       example: 15.00
+ *                     total:
+ *                       type: number
+ *                       example: 135.00
+ *                     currency:
+ *                       type: string
+ *                       example: "GTQ"
+ *                     appliedDiscounts:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           type:
+ *                             type: string
+ *                             example: "promo"
+ *                           description:
+ *                             type: string
+ *                             example: "Código promocional: DESCUENTO20"
+ *                           amount:
+ *                             type: number
+ *                             example: 15.00
+ *                           percentage:
+ *                             type: number
+ *                             example: 10
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
  *       400:
  *         description: Se requiere userId o sessionId
  *       401:

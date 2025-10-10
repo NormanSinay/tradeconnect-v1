@@ -581,6 +581,108 @@ export class NotificationService {
   }
 
   /**
+   * Cancela una notificación específica
+   */
+  async cancelNotification(notificationId: number, userId: number): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      const notification = await Notification.findOne({
+        where: { id: notificationId, userId }
+      });
+
+      if (!notification) {
+        return { success: false, error: 'Notificación no encontrada' };
+      }
+
+      if (notification.status === NotificationStatus.CANCELLED) {
+        return { success: false, error: 'La notificación ya está cancelada' };
+      }
+
+      if (notification.status === NotificationStatus.SENT || notification.status === NotificationStatus.DELIVERED) {
+        return { success: false, error: 'No se puede cancelar una notificación ya enviada' };
+      }
+
+      await notification.update({ status: NotificationStatus.CANCELLED });
+
+      // Registrar log
+      await NotificationLog.logSystemEvent('NOTIFICATION_CANCELLED', {
+        notificationId,
+        cancelledBy: userId
+      });
+
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      logger.error('Error canceling notification:', error);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Reintenta envío de una notificación específica
+   */
+  async retryNotification(notificationId: number, userId: number): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      const notification = await Notification.findOne({
+        where: { id: notificationId, userId }
+      });
+
+      if (!notification) {
+        return { success: false, error: 'Notificación no encontrada' };
+      }
+
+      if (notification.status !== NotificationStatus.FAILED) {
+        return { success: false, error: 'Solo se pueden reintentar notificaciones fallidas' };
+      }
+
+      if (!notification.canRetry()) {
+        return { success: false, error: 'Máximo de reintentos alcanzado' };
+      }
+
+      await notification.incrementRetryCount();
+      await this.processNotification(notification);
+
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      logger.error('Error retrying notification:', error);
+      return { success: false, error: errorMessage };
+    }
+  }
+
+  /**
+   * Obtiene notificaciones popup pendientes para un usuario
+   */
+  async getPendingPopupNotifications(userId: number): Promise<{
+    notifications: Notification[];
+    total: number;
+  }> {
+    try {
+      const where: any = {
+        userId,
+        channel: NotificationChannel.POPUP,
+        status: NotificationStatus.PENDING
+      };
+
+      const { rows: notifications, count: total } = await Notification.findAndCountAll({
+        where,
+        order: [['priority', 'DESC'], ['createdAt', 'DESC']],
+        limit: 10 // Máximo 10 notificaciones popup pendientes
+      });
+
+      return { notifications, total };
+    } catch (error) {
+      logger.error('Error getting pending popup notifications:', error);
+      return { notifications: [], total: 0 };
+    }
+  }
+
+  /**
    * Obtiene el tipo de plantilla de email por código
    */
   private async getEmailTemplateType(templateCode: string): Promise<EmailTemplateType | undefined> {

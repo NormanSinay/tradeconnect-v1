@@ -838,6 +838,455 @@ export class QRService {
       logger.error('Error registrando acceso:', error);
     }
   }
+
+  // ====================================================================
+  // MÉTODOS PARA FUNCIONALIDAD OFFLINE
+  // ====================================================================
+
+  /**
+   * Descarga lista encriptada de QRs para modo offline
+   */
+  async downloadOfflineList(eventId: number, deviceId: string, deviceInfo?: any): Promise<ApiResponse<{
+    encryptedList: string;
+    batchId: string;
+    expiresAt: Date;
+    totalQRs: number;
+  }>> {
+    try {
+      // Verificar que el evento existe
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        return {
+          success: false,
+          message: 'Evento no encontrado',
+          error: 'EVENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Obtener QRs activos del evento
+      const qrCodes = await QRCodeModel.findAll({
+        where: {
+          status: QRStatus.ACTIVE
+        },
+        include: [{
+          model: EventRegistration,
+          as: 'eventRegistration',
+          where: { eventId },
+          include: [{
+            model: User,
+            as: 'user',
+            attributes: ['id', 'firstName', 'lastName', 'email']
+          }]
+        }]
+      });
+
+      if (qrCodes.length === 0) {
+        return {
+          success: false,
+          message: 'No hay códigos QR activos para este evento',
+          error: 'NO_ACTIVE_QRS',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Preparar datos para offline
+      const offlineData = {
+        batchId: crypto.randomUUID(),
+        eventId,
+        deviceId,
+        generatedAt: new Date(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 horas
+        qrCodes: qrCodes.map(qr => ({
+          qrHash: qr.qrHash,
+          registrationId: qr.eventRegistrationId,
+          userId: qr.eventRegistration!.userId,
+          userName: `${qr.eventRegistration!.user.firstName} ${qr.eventRegistration!.user.lastName}`,
+          userEmail: qr.eventRegistration!.user.email,
+          expiresAt: qr.expiresAt
+        }))
+      };
+
+      // Encriptar datos
+      const dataString = JSON.stringify(offlineData);
+      const encryptedList = this.encryptOfflineData(dataString);
+
+      // Registrar descarga offline
+      await AccessLog.create({
+        eventId,
+        accessType: AccessType.API_ACCESS,
+        timestamp: new Date(),
+        result: AccessResult.SUCCESS,
+        severity: AccessSeverity.LOW,
+        isSuspicious: false,
+        deviceInfo,
+        metadata: {
+          action: 'offline_list_download',
+          batchId: offlineData.batchId,
+          deviceId,
+          totalQRs: qrCodes.length
+        }
+      });
+
+      return {
+        success: true,
+        message: 'Lista offline descargada exitosamente',
+        data: {
+          encryptedList,
+          batchId: offlineData.batchId,
+          expiresAt: offlineData.expiresAt,
+          totalQRs: qrCodes.length
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error descargando lista offline:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Valida QR en modo offline
+   */
+  async validateOfflineQR(qrHash: string, batchId: string, deviceInfo?: any): Promise<ApiResponse<{
+    isValid: boolean;
+    registrationId?: number;
+    userId?: number;
+    userName?: string;
+    accessGranted: boolean;
+    message: string;
+  }>> {
+    try {
+      // Buscar QR en base de datos
+      const qrCode = await QRCodeModel.findByHash(qrHash);
+
+      if (!qrCode) {
+        return {
+          success: false,
+          message: 'Código QR no encontrado',
+          data: {
+            isValid: false,
+            accessGranted: false,
+            message: 'Código QR inválido'
+          },
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar estado del QR
+      if (!qrCode.isValid) {
+        const message = qrCode.status === QRStatus.USED ? 'Código QR ya utilizado' :
+                       qrCode.status === QRStatus.EXPIRED ? 'Código QR expirado' :
+                       'Código QR invalidado';
+
+        return {
+          success: false,
+          message,
+          data: {
+            isValid: false,
+            accessGranted: false,
+            message
+          },
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Obtener información del usuario
+      const registration = await EventRegistration.findByPk(qrCode.eventRegistrationId, {
+        include: [{
+          model: User,
+          as: 'user',
+          attributes: ['id', 'firstName', 'lastName', 'email']
+        }]
+      });
+
+      if (!registration) {
+        return {
+          success: false,
+          message: 'Inscripción no encontrada',
+          data: {
+            isValid: false,
+            accessGranted: false,
+            message: 'Inscripción inválida'
+          },
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Registrar validación offline (sin marcar como usado aún)
+      await AccessLog.create({
+        eventId: registration.eventId,
+        userId: registration.userId,
+        qrCodeId: qrCode.id,
+        accessType: AccessType.QR_SCAN,
+        timestamp: new Date(),
+        result: AccessResult.SUCCESS,
+        severity: AccessSeverity.LOW,
+        isSuspicious: false,
+        deviceInfo,
+        metadata: {
+          action: 'offline_qr_validation',
+          batchId,
+          qrHash,
+          isOfflineSync: true
+        }
+      });
+
+      return {
+        success: true,
+        message: 'Código QR válido',
+        data: {
+          isValid: true,
+          registrationId: registration.id,
+          userId: registration.userId,
+          userName: `${registration.user.firstName} ${registration.user.lastName}`,
+          accessGranted: true,
+          message: 'Acceso concedido'
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error validando QR offline:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        data: {
+          isValid: false,
+          accessGranted: false,
+          message: 'Error procesando validación'
+        },
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Sincroniza registros de asistencia offline
+   */
+  async syncOfflineAttendance(
+    deviceId: string,
+    batchId: string,
+    attendanceRecords: Array<{
+      qrHash: string;
+      timestamp: Date;
+      accessPoint?: string;
+      deviceInfo?: any;
+      location?: any;
+    }>,
+    deviceInfo?: any
+  ): Promise<ApiResponse<{
+    processed: number;
+    successful: number;
+    failed: number;
+    errors: string[];
+  }>> {
+    const result = {
+      processed: 0,
+      successful: 0,
+      failed: 0,
+      errors: [] as string[]
+    };
+
+    try {
+      for (const record of attendanceRecords) {
+        result.processed++;
+
+        try {
+          // Buscar QR por hash
+          const qrCode = await QRCodeModel.findByHash(record.qrHash);
+
+          if (!qrCode) {
+            result.failed++;
+            result.errors.push(`QR ${record.qrHash}: no encontrado`);
+            continue;
+          }
+
+          // Verificar que no esté ya usado
+          if (qrCode.status === QRStatus.USED) {
+            result.failed++;
+            result.errors.push(`QR ${record.qrHash}: ya utilizado`);
+            continue;
+          }
+
+          // Obtener información del evento
+          const registration = await EventRegistration.findByPk(qrCode.eventRegistrationId);
+          if (!registration) {
+            result.failed++;
+            result.errors.push(`QR ${record.qrHash}: inscripción no encontrada`);
+            continue;
+          }
+
+          // Crear registro de asistencia offline
+          await Attendance.create({
+            eventId: registration.eventId,
+            userId: registration.userId,
+            qrCodeId: qrCode.id,
+            checkInTime: record.timestamp,
+            accessPoint: record.accessPoint,
+            deviceInfo: record.deviceInfo,
+            location: record.location,
+            method: AttendanceMethod.QR,
+            status: AttendanceStatus.CHECKED_IN,
+            isOfflineSync: true,
+            syncedAt: new Date()
+          });
+
+          // Marcar QR como usado
+          await qrCode.markAsUsed();
+
+          // Limpiar cache
+          await this.invalidateQRCache(record.qrHash);
+
+          result.successful++;
+
+        } catch (error) {
+          result.failed++;
+          const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
+          result.errors.push(`QR ${record.qrHash}: ${errorMsg}`);
+          logger.error(`Error sincronizando asistencia offline para QR ${record.qrHash}:`, error);
+        }
+      }
+
+      // Registrar sincronización
+      await AccessLog.create({
+        eventId: 0, // No específico de evento
+        accessType: AccessType.API_ACCESS,
+        timestamp: new Date(),
+        result: AccessResult.SUCCESS,
+        severity: AccessSeverity.LOW,
+        isSuspicious: false,
+        deviceInfo,
+        metadata: {
+          action: 'offline_attendance_sync',
+          batchId,
+          deviceId,
+          processed: result.processed,
+          successful: result.successful,
+          failed: result.failed
+        }
+      });
+
+      return {
+        success: true,
+        message: 'Sincronización offline completada',
+        data: result,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error sincronizando asistencia offline:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        data: result,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Obtiene estado de sincronización offline
+   */
+  async getOfflineSyncStatus(deviceId?: string, batchId?: string): Promise<ApiResponse<{
+    lastSync?: Date;
+    pendingSyncs: number;
+    deviceStatus: 'active' | 'inactive' | 'unknown';
+    batches: Array<{
+      batchId: string;
+      createdAt: Date;
+      totalRecords: number;
+      syncedRecords: number;
+      status: 'pending' | 'partial' | 'complete';
+    }>;
+  }>> {
+    try {
+      // En una implementación completa, esto consultaría logs de sincronización
+      // Por ahora, retornamos datos básicos
+      const status = {
+        lastSync: undefined as Date | undefined,
+        pendingSyncs: 0,
+        deviceStatus: 'unknown' as 'active' | 'inactive' | 'unknown',
+        batches: [] as Array<{
+          batchId: string;
+          createdAt: Date;
+          totalRecords: number;
+          syncedRecords: number;
+          status: 'pending' | 'partial' | 'complete';
+        }>
+      };
+
+      // Buscar últimas sincronizaciones del dispositivo
+      if (deviceId) {
+        const recentLogs = await AccessLog.findAll({
+          where: {
+            metadata: {
+              deviceId
+            }
+          },
+          order: [['timestamp', 'DESC']],
+          limit: 10
+        });
+
+        if (recentLogs.length > 0) {
+          status.lastSync = recentLogs[0].timestamp;
+          status.deviceStatus = 'active';
+        } else {
+          status.deviceStatus = 'inactive';
+        }
+
+        // Contar sincronizaciones pendientes (simulado)
+        status.pendingSyncs = 0; // En implementación real, contar registros sin sync
+      }
+
+      return {
+        success: true,
+        message: 'Estado de sincronización obtenido',
+        data: status,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error obteniendo estado de sincronización offline:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Encripta datos para offline
+   */
+  private encryptOfflineData(data: string): string {
+    try {
+      const iv = crypto.randomBytes(16);
+      const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(this.ENCRYPTION_KEY, 'hex'), iv);
+      let encrypted = cipher.update(data, 'utf8', 'hex');
+      encrypted += cipher.final('hex');
+
+      // Retornar datos encriptados con IV
+      return JSON.stringify({
+        encrypted,
+        iv: iv.toString('hex'),
+        algorithm: 'aes-256-cbc',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      logger.error('Error encriptando datos offline:', error);
+      throw error;
+    }
+  }
 }
 
 export const qrService = new QRService();

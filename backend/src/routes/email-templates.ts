@@ -448,7 +448,7 @@ router.post('/',
  *   get:
  *     tags: [Email Templates]
  *     summary: Obtener plantilla por ID
- *     description: Obtiene los detalles de una plantilla específica
+ *     description: Obtiene los detalles completos de una plantilla específica
  *     security: [{ bearerAuth: [] }]
  *     parameters:
  *       - name: id
@@ -456,11 +456,156 @@ router.post('/',
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
+ *         description: ID único de la plantilla
+ *         example: 1
  *     responses:
  *       200:
  *         description: Plantilla obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Plantilla obtenida exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     template:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 1
+ *                         codigo:
+ *                           type: string
+ *                           example: "WELCOME_EMAIL"
+ *                         nombre:
+ *                           type: string
+ *                           example: "Email de Bienvenida"
+ *                         asunto:
+ *                           type: string
+ *                           example: "¡Bienvenido a TradeConnect, {{userName}}!"
+ *                         contenido_html:
+ *                           type: string
+ *                           example: "<h1>¡Hola {{userName}}!</h1><p>Gracias por registrarte.</p>"
+ *                         contenido_texto:
+ *                           type: string
+ *                           example: "¡Hola {{userName}}!\n\nGracias por registrarte."
+ *                         tipo:
+ *                           type: string
+ *                           enum: [TRANSACCIONAL, PROMOCIONAL, OPERACIONAL]
+ *                           example: "TRANSACCIONAL"
+ *                         variables_disponibles:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                           example: ["{{userName}}", "{{eventName}}", "{{loginUrl}}"]
+ *                         activo:
+ *                           type: boolean
+ *                           example: true
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-01-15T10:00:00.000Z"
+ *                         updatedAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-10-01T14:30:00.000Z"
+ *             examples:
+ *               plantilla_obtenida:
+ *                 summary: Plantilla obtenida exitosamente
+ *                 value:
+ *                   success: true
+ *                   message: "Plantilla obtenida exitosamente"
+ *                   data:
+ *                     template:
+ *                       id: 1
+ *                       codigo: "WELCOME_EMAIL"
+ *                       nombre: "Email de Bienvenida"
+ *                       asunto: "¡Bienvenido a TradeConnect, {{userName}}!"
+ *                       contenido_html: "<h1>¡Hola {{userName}}!</h1><p>Gracias por registrarte.</p>"
+ *                       contenido_texto: "¡Hola {{userName}}!\n\nGracias por registrarte."
+ *                       tipo: "TRANSACCIONAL"
+ *                       variables_disponibles: ["{{userName}}", "{{eventName}}", "{{loginUrl}}"]
+ *                       activo: true
+ *                       createdAt: "2023-01-15T10:00:00.000Z"
+ *                       updatedAt: "2023-10-01T14:30:00.000Z"
+ *                   timestamp: "2023-10-15T10:30:00.000Z"
+ *       400:
+ *         description: ID de plantilla inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "ID de plantilla inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "VALIDATION_ERROR"
+ *                 details:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   example: [{"field": "id", "message": "ID de plantilla inválido"}]
+ *       401:
+ *         description: Token inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Token de autenticación inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "INVALID_TOKEN"
  *       404:
  *         description: Plantilla no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Plantilla no encontrada"
+ *                 error:
+ *                   type: string
+ *                   example: "TEMPLATE_NOT_FOUND"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ *                 error:
+ *                   type: string
+ *                   example: "INTERNAL_SERVER_ERROR"
  */
 router.get('/:id',
   [
@@ -476,7 +621,7 @@ router.get('/:id',
  *   put:
  *     tags: [Email Templates]
  *     summary: Actualizar plantilla de email
- *     description: Actualiza una plantilla existente
+ *     description: Actualiza una plantilla de email existente con nuevos datos
  *     security: [{ bearerAuth: [] }]
  *     parameters:
  *       - name: id
@@ -484,6 +629,9 @@ router.get('/:id',
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
+ *         description: ID único de la plantilla a actualizar
+ *         example: 1
  *     requestBody:
  *       required: true
  *       content:
@@ -491,17 +639,189 @@ router.get('/:id',
  *           schema:
  *             type: object
  *             properties:
- *               nombre: { type: string, minLength: 2, maxLength: 100 }
- *               asunto: { type: string, minLength: 1, maxLength: 200 }
- *               contenido_html: { type: string, minLength: 10 }
- *               contenido_texto: { type: string }
- *               tipo: { type: string, enum: ['TRANSACCIONAL', 'PROMOCIONAL', 'OPERACIONAL'] }
- *               activo: { type: boolean }
+ *               nombre:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 100
+ *                 description: Nuevo nombre descriptivo de la plantilla
+ *                 example: "Email de Bienvenida Actualizado"
+ *               asunto:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 200
+ *                 description: Nuevo línea de asunto del email
+ *                 example: "¡Bienvenido a TradeConnect 2025!"
+ *               contenido_html:
+ *                 type: string
+ *                 minLength: 10
+ *                 description: Nuevo contenido HTML de la plantilla
+ *                 example: "<h1>¡Hola {{userName}}!</h1><p>Tu cuenta ha sido actualizada.</p>"
+ *               contenido_texto:
+ *                 type: string
+ *                 description: Nuevo contenido de texto plano
+ *                 example: "¡Hola {{userName}}!\n\nTu cuenta ha sido actualizada."
+ *               tipo:
+ *                 type: string
+ *                 enum: [TRANSACCIONAL, PROMOCIONAL, OPERACIONAL]
+ *                 description: Nuevo tipo de plantilla
+ *                 example: "TRANSACCIONAL"
+ *               activo:
+ *                 type: boolean
+ *                 description: Estado de activación de la plantilla
+ *                 example: true
+ *           examples:
+ *             actualizar_plantilla:
+ *               summary: Actualizar plantilla completa
+ *               value:
+ *                 nombre: "Email de Bienvenida Actualizado"
+ *                 asunto: "¡Bienvenido a TradeConnect 2025!"
+ *                 contenido_html: "<h1>¡Hola {{userName}}!</h1><p>Tu cuenta ha sido actualizada.</p>"
+ *                 contenido_texto: "¡Hola {{userName}}!\n\nTu cuenta ha sido actualizada."
+ *                 tipo: "TRANSACCIONAL"
+ *                 activo: true
  *     responses:
  *       200:
  *         description: Plantilla actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Plantilla actualizada exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     template:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 1
+ *                         codigo:
+ *                           type: string
+ *                           example: "WELCOME_EMAIL"
+ *                         nombre:
+ *                           type: string
+ *                           example: "Email de Bienvenida Actualizado"
+ *                         asunto:
+ *                           type: string
+ *                           example: "¡Bienvenido a TradeConnect 2025!"
+ *                         tipo:
+ *                           type: string
+ *                           example: "TRANSACCIONAL"
+ *                         activo:
+ *                           type: boolean
+ *                           example: true
+ *                         updatedAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-10-15T14:30:00.000Z"
+ *             examples:
+ *               plantilla_actualizada:
+ *                 summary: Plantilla actualizada exitosamente
+ *                 value:
+ *                   success: true
+ *                   message: "Plantilla actualizada exitosamente"
+ *                   data:
+ *                     template:
+ *                       id: 1
+ *                       codigo: "WELCOME_EMAIL"
+ *                       nombre: "Email de Bienvenida Actualizado"
+ *                       asunto: "¡Bienvenido a TradeConnect 2025!"
+ *                       tipo: "TRANSACCIONAL"
+ *                       activo: true
+ *                       updatedAt: "2023-10-15T14:30:00.000Z"
+ *                   timestamp: "2023-10-15T14:30:00.000Z"
+ *       400:
+ *         description: Datos de entrada inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Datos de entrada inválidos"
+ *                 error:
+ *                   type: string
+ *                   example: "VALIDATION_ERROR"
+ *                 details:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   example: [{"field": "nombre", "message": "Nombre requerido (2-100 caracteres)"}]
+ *       401:
+ *         description: Token inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Token de autenticación inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "INVALID_TOKEN"
+ *       403:
+ *         description: Permisos insuficientes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Permisos insuficientes"
+ *                 error:
+ *                   type: string
+ *                   example: "FORBIDDEN"
  *       404:
  *         description: Plantilla no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Plantilla no encontrada"
+ *                 error:
+ *                   type: string
+ *                   example: "TEMPLATE_NOT_FOUND"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ *                 error:
+ *                   type: string
+ *                   example: "INTERNAL_SERVER_ERROR"
  */
 router.put('/:id',
   [
@@ -523,7 +843,7 @@ router.put('/:id',
  *   delete:
  *     tags: [Email Templates]
  *     summary: Eliminar plantilla de email
- *     description: Elimina una plantilla de email (soft delete)
+ *     description: Elimina una plantilla de email mediante soft delete (desactivación)
  *     security: [{ bearerAuth: [] }]
  *     parameters:
  *       - name: id
@@ -531,11 +851,120 @@ router.put('/:id',
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
+ *         description: ID único de la plantilla a eliminar
+ *         example: 1
  *     responses:
  *       200:
  *         description: Plantilla eliminada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Plantilla eliminada exitosamente"
+ *                 error:
+ *                   type: string
+ *                   nullable: true
+ *                   example: null
+ *             examples:
+ *               plantilla_eliminada:
+ *                 summary: Plantilla eliminada exitosamente
+ *                 value:
+ *                   success: true
+ *                   message: "Plantilla eliminada exitosamente"
+ *                   error: null
+ *                   timestamp: "2023-10-15T14:30:00.000Z"
+ *       400:
+ *         description: ID de plantilla inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "ID de plantilla inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "VALIDATION_ERROR"
+ *                 details:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   example: [{"field": "id", "message": "ID de plantilla inválido"}]
+ *       401:
+ *         description: Token inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Token de autenticación inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "INVALID_TOKEN"
+ *       403:
+ *         description: Permisos insuficientes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Permisos insuficientes"
+ *                 error:
+ *                   type: string
+ *                   example: "FORBIDDEN"
  *       404:
  *         description: Plantilla no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Plantilla no encontrada"
+ *                 error:
+ *                   type: string
+ *                   example: "TEMPLATE_NOT_FOUND"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ *                 error:
+ *                   type: string
+ *                   example: "INTERNAL_SERVER_ERROR"
  */
 router.delete('/:id',
   [
@@ -551,7 +980,7 @@ router.delete('/:id',
  *   post:
  *     tags: [Email Templates]
  *     summary: Vista previa de plantilla
- *     description: Genera una vista previa de la plantilla con datos de prueba
+ *     description: Genera una vista previa de la plantilla reemplazando las variables con datos de prueba
  *     security: [{ bearerAuth: [] }]
  *     parameters:
  *       - name: id
@@ -559,18 +988,180 @@ router.delete('/:id',
  *         required: true
  *         schema:
  *           type: integer
+ *           minimum: 1
+ *         description: ID único de la plantilla para vista previa
+ *         example: 1
  *     requestBody:
+ *       required: false
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             description: Variables para reemplazar en la plantilla
- *             example: { "nombre_usuario": "Juan Pérez", "evento": "Conferencia Tech" }
+ *             properties:
+ *               variables:
+ *                 type: object
+ *                 description: Objeto con las variables a reemplazar en la plantilla
+ *                 additionalProperties:
+ *                   type: string
+ *                 example: {
+ *                   "userName": "Juan Pérez",
+ *                   "eventName": "Conferencia Empresarial Guatemala 2025",
+ *                   "eventDate": "2025-12-15",
+ *                   "loginUrl": "https://tradeconnect.com/login",
+ *                   "eventLocation": "Hotel Westin Camino Real, Zona 10"
+ *                 }
+ *           examples:
+ *             preview_con_variables:
+ *               summary: Vista previa con variables personalizadas
+ *               value:
+ *                 variables: {
+ *                   "userName": "María González",
+ *                   "eventName": "Conferencia Tech 2025",
+ *                   "eventDate": "2025-11-15",
+ *                   "loginUrl": "https://tradeconnect.com/login",
+ *                   "eventLocation": "Centro de Convenciones"
+ *                 }
+ *             preview_sin_variables:
+ *               summary: Vista previa sin variables (usa valores por defecto)
+ *               value: {}
  *     responses:
  *       200:
  *         description: Vista previa generada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Vista previa generada exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     preview:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 1
+ *                         codigo:
+ *                           type: string
+ *                           example: "WELCOME_EMAIL"
+ *                         nombre:
+ *                           type: string
+ *                           example: "Email de Bienvenida"
+ *                         asunto:
+ *                           type: string
+ *                           example: "¡Bienvenido a TradeConnect, María González!"
+ *                         contenido_html:
+ *                           type: string
+ *                           example: "<h1>¡Hola María González!</h1><p>Gracias por registrarte en TradeConnect.</p><p>Tu evento: Conferencia Tech 2025</p><a href='https://tradeconnect.com/login'>Iniciar Sesión</a>"
+ *                         contenido_texto:
+ *                           type: string
+ *                           example: "¡Hola María González!\n\nGracias por registrarte en TradeConnect.\n\nTu evento: Conferencia Tech 2025\n\nIniciar Sesión: https://tradeconnect.com/login"
+ *                         tipo:
+ *                           type: string
+ *                           example: "TRANSACCIONAL"
+ *                         variables_aplicadas:
+ *                           type: object
+ *                           example: {
+ *                             "userName": "María González",
+ *                             "eventName": "Conferencia Tech 2025",
+ *                             "loginUrl": "https://tradeconnect.com/login"
+ *                           }
+ *             examples:
+ *               preview_generada:
+ *                 summary: Vista previa generada exitosamente
+ *                 value:
+ *                   success: true
+ *                   message: "Vista previa generada exitosamente"
+ *                   data:
+ *                     preview:
+ *                       id: 1
+ *                       codigo: "WELCOME_EMAIL"
+ *                       nombre: "Email de Bienvenida"
+ *                       asunto: "¡Bienvenido a TradeConnect, María González!"
+ *                       contenido_html: "<h1>¡Hola María González!</h1><p>Gracias por registrarte en TradeConnect.</p><p>Tu evento: Conferencia Tech 2025</p><a href='https://tradeconnect.com/login'>Iniciar Sesión</a>"
+ *                       contenido_texto: "¡Hola María González!\n\nGracias por registrarte en TradeConnect.\n\nTu evento: Conferencia Tech 2025\n\nIniciar Sesión: https://tradeconnect.com/login"
+ *                       tipo: "TRANSACCIONAL"
+ *                       variables_aplicadas: {
+ *                         "userName": "María González",
+ *                         "eventName": "Conferencia Tech 2025",
+ *                         "loginUrl": "https://tradeconnect.com/login"
+ *                       }
+ *                   timestamp: "2023-10-15T14:30:00.000Z"
+ *       400:
+ *         description: ID de plantilla inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "ID de plantilla inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "VALIDATION_ERROR"
+ *                 details:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   example: [{"field": "id", "message": "ID de plantilla inválido"}]
+ *       401:
+ *         description: Token inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Token de autenticación inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "INVALID_TOKEN"
  *       404:
  *         description: Plantilla no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Plantilla no encontrada"
+ *                 error:
+ *                   type: string
+ *                   example: "TEMPLATE_NOT_FOUND"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ *                 error:
+ *                   type: string
+ *                   example: "INTERNAL_SERVER_ERROR"
  */
 router.post('/:id/preview',
   [
@@ -762,14 +1353,227 @@ router.post('/:id/preview',
  *                   format: date-time
  *                   example: "2023-10-15T10:30:00.000Z"
  */
-// Rutas adicionales - placeholders para funcionalidad futura
-router.post('/:id/duplicate', (req, res) => {
-  res.json({
-    success: false,
-    message: 'Funcionalidad pendiente de implementación',
-    timestamp: new Date().toISOString()
-  });
-});
+/**
+ * @swagger
+ * /api/v1/email-templates/{id}/duplicate:
+ *   post:
+ *     tags: [Email Templates]
+ *     summary: Duplicar plantilla de email
+ *     description: Crea una copia de una plantilla existente con opción de modificar campos
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID de la plantilla a duplicar
+ *         example: 1
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 50
+ *                 pattern: '^[A-Z_]+$'
+ *                 description: Nuevo código único para la plantilla duplicada
+ *                 example: "WELCOME_EMAIL_V2"
+ *               name:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 255
+ *                 description: Nuevo nombre para la plantilla duplicada
+ *                 example: "Email de Bienvenida - Versión 2"
+ *               subject:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 200
+ *                 description: Nuevo asunto para la plantilla duplicada
+ *                 example: "¡Bienvenido a TradeConnect!"
+ *               type:
+ *                 type: string
+ *                 enum: [TRANSACTIONAL, PROMOTIONAL, OPERATIONAL]
+ *                 description: Nuevo tipo para la plantilla duplicada
+ *                 example: "TRANSACTIONAL"
+ *           examples:
+ *             duplicar_plantilla:
+ *               summary: Duplicar plantilla con cambios
+ *               value:
+ *                 code: "WELCOME_EMAIL_V2"
+ *                 name: "Email de Bienvenida - Versión 2"
+ *                 subject: "¡Bienvenido a TradeConnect!"
+ *                 type: "TRANSACTIONAL"
+ *     responses:
+ *       201:
+ *         description: Plantilla duplicada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Plantilla duplicada exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     originalTemplate:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 1
+ *                         name:
+ *                           type: string
+ *                           example: "Email de Bienvenida"
+ *                     duplicatedTemplate:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 2
+ *                         code:
+ *                           type: string
+ *                           example: "WELCOME_EMAIL_V2"
+ *                         name:
+ *                           type: string
+ *                           example: "Email de Bienvenida - Versión 2"
+ *                         createdAt:
+ *                           type: string
+ *                           format: date-time
+ *                           example: "2023-10-15T10:30:00.000Z"
+ *             examples:
+ *               plantilla_duplicada:
+ *                 summary: Plantilla duplicada exitosamente
+ *                 value:
+ *                   success: true
+ *                   message: "Plantilla duplicada exitosamente"
+ *                   data:
+ *                     originalTemplate:
+ *                       id: 1
+ *                       name: "Email de Bienvenida"
+ *                     duplicatedTemplate:
+ *                       id: 2
+ *                       code: "WELCOME_EMAIL_V2"
+ *                       name: "Email de Bienvenida - Versión 2"
+ *                       createdAt: "2023-10-15T10:30:00.000Z"
+ *       400:
+ *         description: Datos inválidos o código ya existe
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "El código WELCOME_EMAIL_V2 ya está en uso"
+ *                 error:
+ *                   type: string
+ *                   example: "TEMPLATE_CODE_EXISTS"
+ *       401:
+ *         description: Token inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Token de autenticación inválido"
+ *                 error:
+ *                   type: string
+ *                   example: "INVALID_TOKEN"
+ *       403:
+ *         description: Permisos insuficientes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "No tienes permisos para duplicar plantillas"
+ *                 error:
+ *                   type: string
+ *                   example: "INSUFFICIENT_PERMISSIONS"
+ *       404:
+ *         description: Plantilla no encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Plantilla no encontrada"
+ *                 error:
+ *                   type: string
+ *                   example: "TEMPLATE_NOT_FOUND"
+ *       409:
+ *         description: Código de plantilla ya existe
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "El código WELCOME_EMAIL_V2 ya está en uso"
+ *                 error:
+ *                   type: string
+ *                   example: "TEMPLATE_CODE_EXISTS"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ *                 error:
+ *                   type: string
+ *                   example: "INTERNAL_SERVER_ERROR"
+ */
+router.post('/:id/duplicate',
+  [
+    param('id').isInt({ min: 1 }).withMessage('ID de plantilla inválido'),
+    body('code').optional().isString().isLength({ min: 3, max: 50 }).withMessage('Código inválido (3-50 caracteres)'),
+    body('name').optional().isString().isLength({ min: 2, max: 255 }).withMessage('Nombre inválido (2-255 caracteres)'),
+    body('subject').optional().isString().isLength({ min: 1, max: 200 }).withMessage('Asunto inválido (máx 200 caracteres)'),
+    body('type').optional().isIn(['TRANSACTIONAL', 'PROMOTIONAL', 'OPERATIONAL']).withMessage('Tipo inválido'),
+    handleValidationErrors
+  ],
+  emailTemplateController.duplicateTemplate.bind(emailTemplateController)
+);
 
 /**
  * @swagger
@@ -964,12 +1768,12 @@ router.post('/:id/duplicate', (req, res) => {
  *                   format: date-time
  *                   example: "2023-10-15T10:30:00.000Z"
  */
-router.get('/:id/versions', (req, res) => {
-  res.json({
-    success: false,
-    message: 'Funcionalidad pendiente de implementación',
-    timestamp: new Date().toISOString()
-  });
-});
+router.get('/:id/versions',
+  [
+    param('id').isInt({ min: 1 }).withMessage('ID de plantilla inválido'),
+    handleValidationErrors
+  ],
+  emailTemplateController.getTemplateVersions.bind(emailTemplateController)
+);
 
 export default router;

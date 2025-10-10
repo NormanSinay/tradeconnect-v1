@@ -583,6 +583,93 @@ export class NotificationController {
   }
 
   /**
+   * Cancela una notificación específica
+   */
+  async cancelNotification(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const notificationId = parseInt(req.params.id);
+      const userId = req.user!.id;
+
+      const result = await notificationService.cancelNotification(notificationId, userId);
+
+      const statusCode = result.success ? HTTP_STATUS.OK : HTTP_STATUS.BAD_REQUEST;
+
+      res.status(statusCode).json({
+        success: result.success,
+        message: result.success ? 'Notificación cancelada exitosamente' : result.error,
+        error: result.error,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error en cancelNotification controller:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Reintenta envío de una notificación específica
+   */
+  async retryNotification(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const notificationId = parseInt(req.params.id);
+      const userId = req.user!.id;
+
+      const result = await notificationService.retryNotification(notificationId, userId);
+
+      const statusCode = result.success ? HTTP_STATUS.OK : HTTP_STATUS.BAD_REQUEST;
+
+      res.status(statusCode).json({
+        success: result.success,
+        message: result.success ? 'Reintento de notificación programado' : result.error,
+        error: result.error,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error en retryNotification controller:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Obtiene notificaciones popup pendientes
+   */
+  async getPendingPopupNotifications(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+
+      const result = await notificationService.getPendingPopupNotifications(userId);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: 'Notificaciones popup pendientes obtenidas exitosamente',
+        data: result,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error en getPendingPopupNotifications controller:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
    * Tracking de clics en enlaces de emails
    */
   async trackEmailClick(req: Request, res: Response): Promise<void> {

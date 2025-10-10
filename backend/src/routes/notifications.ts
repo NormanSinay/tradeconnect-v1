@@ -348,8 +348,8 @@ router.put('/:id/read',
  * /api/v1/notifications/{id}/cancel:
  *   put:
  *     tags: [Notifications]
- *     summary: Cancelar notificación (placeholder)
- *     description: Endpoint placeholder para cancelar notificaciones
+ *     summary: Cancelar notificación
+ *     description: Cancela una notificación pendiente antes de que sea enviada
  *     security: [{ bearerAuth: [] }]
  *     parameters:
  *       - name: id
@@ -357,25 +357,62 @@ router.put('/:id/read',
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID de la notificación a cancelar
  *     responses:
  *       200:
- *         description: Funcionalidad pendiente de implementación
+ *         description: Notificación cancelada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Notificación cancelada exitosamente"
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *       400:
+ *         description: Error en la solicitud o notificación no puede ser cancelada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "La notificación ya está cancelada"
+ *                 error:
+ *                   type: string
+ *                   example: "NOTIFICATION_ALREADY_CANCELLED"
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Notificación no encontrada
+ *       500:
+ *         description: Error interno del servidor
  */
-router.put('/:id/cancel', (req, res) => {
-  res.json({
-    success: false,
-    message: 'Funcionalidad pendiente de implementación',
-    timestamp: new Date().toISOString()
-  });
-});
+router.put('/:id/cancel',
+  [
+    param('id').isInt({ min: 1 }).withMessage('ID de notificación inválido'),
+    handleValidationErrors
+  ],
+  notificationController.cancelNotification.bind(notificationController)
+);
 
 /**
  * @swagger
  * /api/v1/notifications/{id}/retry:
  *   post:
  *     tags: [Notifications]
- *     summary: Reintentar envío (placeholder)
- *     description: Endpoint placeholder para reintento de notificaciones
+ *     summary: Reintentar envío de notificación
+ *     description: Reintenta el envío de una notificación que falló anteriormente
  *     security: [{ bearerAuth: [] }]
  *     parameters:
  *       - name: id
@@ -383,17 +420,54 @@ router.put('/:id/cancel', (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
+ *         description: ID de la notificación a reintentar
  *     responses:
  *       200:
- *         description: Funcionalidad pendiente de implementación
+ *         description: Reintento programado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Reintento de notificación programado"
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *       400:
+ *         description: Error en la solicitud o notificación no puede ser reintentada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Solo se pueden reintentar notificaciones fallidas"
+ *                 error:
+ *                   type: string
+ *                   example: "NOTIFICATION_CANNOT_RETRY"
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Notificación no encontrada
+ *       500:
+ *         description: Error interno del servidor
  */
-router.post('/:id/retry', (req, res) => {
-  res.json({
-    success: false,
-    message: 'Funcionalidad pendiente de implementación',
-    timestamp: new Date().toISOString()
-  });
-});
+router.post('/:id/retry',
+  [
+    param('id').isInt({ min: 1 }).withMessage('ID de notificación inválido'),
+    handleValidationErrors
+  ],
+  notificationController.retryNotification.bind(notificationController)
+);
 
 /**
  * @swagger
@@ -443,20 +517,68 @@ router.get('/user/:userId',
  * /api/v1/notifications/popup/pending:
  *   get:
  *     tags: [Notifications]
- *     summary: Notificaciones Pop-up pendientes (placeholder)
- *     description: Endpoint placeholder para notificaciones Pop-up
+ *     summary: Notificaciones Pop-up pendientes
+ *     description: Obtiene las notificaciones de tipo popup que están pendientes para el usuario actual
  *     security: [{ bearerAuth: [] }]
  *     responses:
  *       200:
- *         description: Funcionalidad pendiente de implementación
+ *         description: Notificaciones popup pendientes obtenidas exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Notificaciones popup pendientes obtenidas exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     notifications:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 123
+ *                           type:
+ *                             type: string
+ *                             example: "POPUP"
+ *                           channel:
+ *                             type: string
+ *                             example: "POPUP"
+ *                           subject:
+ *                             type: string
+ *                             example: "Notificación importante"
+ *                           message:
+ *                             type: string
+ *                             example: "Tienes una nueva actualización disponible"
+ *                           priority:
+ *                             type: string
+ *                             enum: [LOW, NORMAL, HIGH, CRITICAL]
+ *                             example: "HIGH"
+ *                           data:
+ *                             type: object
+ *                             example: { "actionUrl": "/update" }
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                     total:
+ *                       type: integer
+ *                       example: 3
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error interno del servidor
  */
-router.get('/popup/pending', (req, res) => {
-  res.json({
-    success: false,
-    message: 'Funcionalidad pendiente de implementación',
-    timestamp: new Date().toISOString()
-  });
-});
+router.get('/popup/pending', notificationController.getPendingPopupNotifications.bind(notificationController));
 
 /**
  * @swagger

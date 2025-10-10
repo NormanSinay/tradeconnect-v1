@@ -10,9 +10,11 @@
 import { Router } from 'express';
 import { body, param } from 'express-validator';
 import { qrController } from '../controllers/qrController';
+import { qrService } from '../services/qrService';
 import { rateLimit } from 'express-rate-limit';
 import { RATE_LIMITS } from '../utils/constants';
 import { authenticated } from '../middleware/auth';
+import { logger } from '../utils/logger';
 
 const router = Router();
 
@@ -1068,6 +1070,80 @@ router.get('/blockchain-verify/:code',
  *     tags: [QR Codes - Offline]
  *     summary: Descargar lista offline
  *     description: Descarga una lista encriptada de QRs válidos para modo offline
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID del evento
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: ['deviceId']
+ *             properties:
+ *               deviceId:
+ *                 type: string
+ *                 description: ID único del dispositivo
+ *                 example: "device_123"
+ *               deviceInfo:
+ *                 type: object
+ *                 description: Información del dispositivo
+ *                 properties:
+ *                   deviceType:
+ *                     type: string
+ *                     enum: [mobile, tablet, desktop]
+ *                     example: "mobile"
+ *                   appVersion:
+ *                     type: string
+ *                     example: "1.2.3"
+ *                   os:
+ *                     type: string
+ *                     example: "iOS 15.0"
+ *     responses:
+ *       200:
+ *         description: Lista offline descargada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Lista offline descargada exitosamente"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     encryptedList:
+ *                       type: string
+ *                       description: Lista encriptada de QRs
+ *                       example: "eyJlbmNyeXB0ZWQiOiI..."
+ *                     batchId:
+ *                       type: string
+ *                       description: ID del lote offline
+ *                       example: "batch_123"
+ *                     expiresAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: Fecha de expiración del lote
+ *                     totalQRs:
+ *                       type: integer
+ *                       description: Número total de QRs en el lote
+ *                       example: 150
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Evento no encontrado
  */
 router.post('/offline/download-list/:eventId',
   authenticated,
@@ -1083,14 +1159,28 @@ router.post('/offline/download-list/:eventId',
       .isObject()
       .withMessage('Información del dispositivo debe ser un objeto válido')
   ],
-  // TODO: Implementar controlador para offline
-  (req: any, res: any) => {
-    res.status(501).json({
-      success: false,
-      message: 'Funcionalidad offline no implementada aún',
-      error: 'NOT_IMPLEMENTED',
-      timestamp: new Date().toISOString()
-    });
+  async (req: any, res: any) => {
+    try {
+      const { eventId } = req.params;
+      const { deviceId, deviceInfo } = req.body;
+      const userId = req.user?.id;
+
+      const result = await qrService.downloadOfflineList(
+        parseInt(eventId),
+        deviceId,
+        { ...deviceInfo, userId }
+      );
+
+      res.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+      logger.error('Error en downloadOfflineList:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
   }
 );
 
@@ -1101,6 +1191,77 @@ router.post('/offline/download-list/:eventId',
  *     tags: [QR Codes - Offline]
  *     summary: Validar QR offline
  *     description: Valida un QR en modo offline (sin conexión a internet)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: ['qrHash', 'batchId', 'timestamp']
+ *             properties:
+ *               qrHash:
+ *                 type: string
+ *                 minLength: 64
+ *                 maxLength: 64
+ *                 pattern: '^[a-f0-9]+$'
+ *                 description: Hash único del QR
+ *                 example: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+ *               batchId:
+ *                 type: string
+ *                 description: ID del lote offline descargado
+ *                 example: "batch_123"
+ *               timestamp:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Timestamp de la validación
+ *                 example: "2023-10-15T14:30:00.000Z"
+ *               deviceInfo:
+ *                 type: object
+ *                 description: Información del dispositivo
+ *                 properties:
+ *                   deviceType:
+ *                     type: string
+ *                     enum: [mobile, tablet, desktop]
+ *                     example: "mobile"
+ *                   appVersion:
+ *                     type: string
+ *                     example: "1.2.3"
+ *     responses:
+ *       200:
+ *         description: QR validado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Código QR válido"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     isValid:
+ *                       type: boolean
+ *                       example: true
+ *                     registrationId:
+ *                       type: integer
+ *                       example: 123
+ *                     userId:
+ *                       type: integer
+ *                       example: 456
+ *                     userName:
+ *                       type: string
+ *                       example: "Juan Pérez"
+ *                     accessGranted:
+ *                       type: boolean
+ *                       example: true
+ *       400:
+ *         description: Datos inválidos
+ *       404:
+ *         description: QR no encontrado
  */
 router.post('/offline/validate',
   [
@@ -1118,14 +1279,22 @@ router.post('/offline/validate',
       .isObject()
       .withMessage('Información del dispositivo debe ser un objeto válido')
   ],
-  // TODO: Implementar controlador para offline
-  (req: any, res: any) => {
-    res.status(501).json({
-      success: false,
-      message: 'Funcionalidad offline no implementada aún',
-      error: 'NOT_IMPLEMENTED',
-      timestamp: new Date().toISOString()
-    });
+  async (req: any, res: any) => {
+    try {
+      const { qrHash, batchId, deviceInfo } = req.body;
+
+      const result = await qrService.validateOfflineQR(qrHash, batchId, deviceInfo);
+
+      res.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+      logger.error('Error en offline validate:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
   }
 );
 
@@ -1136,6 +1305,92 @@ router.post('/offline/validate',
  *     tags: [QR Codes - Offline]
  *     summary: Sincronizar asistencia offline
  *     description: Sincroniza registros de asistencia realizados en modo offline
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: ['deviceId', 'batchId', 'attendanceRecords']
+ *             properties:
+ *               deviceId:
+ *                 type: string
+ *                 description: ID único del dispositivo
+ *                 example: "device_123"
+ *               batchId:
+ *                 type: string
+ *                 description: ID del lote offline
+ *                 example: "batch_123"
+ *               attendanceRecords:
+ *                 type: array
+ *                 minItems: 1
+ *                 maxItems: 1000
+ *                 description: Registros de asistencia a sincronizar
+ *                 items:
+ *                   type: object
+ *                   required: ['qrHash', 'timestamp']
+ *                   properties:
+ *                     qrHash:
+ *                       type: string
+ *                       minLength: 64
+ *                       maxLength: 64
+ *                       description: Hash del QR validado
+ *                       example: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+ *                     timestamp:
+ *                       type: string
+ *                       format: date-time
+ *                       description: Timestamp de la validación
+ *                       example: "2023-10-15T14:30:00.000Z"
+ *                     accessPoint:
+ *                       type: string
+ *                       maxLength: 100
+ *                       description: Punto de acceso
+ *                       example: "Entrada Principal"
+ *                     deviceInfo:
+ *                       type: object
+ *                       description: Información del dispositivo
+ *                     location:
+ *                       type: object
+ *                       description: Ubicación geográfica
+ *               deviceInfo:
+ *                 type: object
+ *                 description: Información del dispositivo que sincroniza
+ *     responses:
+ *       200:
+ *         description: Sincronización completada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Sincronización offline completada"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     processed:
+ *                       type: integer
+ *                       example: 50
+ *                     successful:
+ *                       type: integer
+ *                       example: 48
+ *                     failed:
+ *                       type: integer
+ *                       example: 2
+ *                     errors:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       example: ["QR abc...: no encontrado", "QR def...: ya utilizado"]
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autorizado
  */
 router.post('/offline/sync-attendance',
   authenticated,
@@ -1147,21 +1402,40 @@ router.post('/offline/sync-attendance',
       .notEmpty()
       .withMessage('ID del lote es requerido'),
     body('attendanceRecords')
-      .isArray()
-      .withMessage('Registros de asistencia deben ser un arreglo'),
+      .isArray({ min: 1, max: 1000 })
+      .withMessage('Registros de asistencia deben ser un arreglo (1-1000 elementos)'),
+    body('attendanceRecords.*.qrHash')
+      .notEmpty()
+      .withMessage('Hash del QR es requerido en cada registro'),
+    body('attendanceRecords.*.timestamp')
+      .isISO8601()
+      .withMessage('Timestamp debe tener formato ISO 8601'),
     body('deviceInfo')
       .optional()
       .isObject()
       .withMessage('Información del dispositivo debe ser un objeto válido')
   ],
-  // TODO: Implementar controlador para offline
-  (req: any, res: any) => {
-    res.status(501).json({
-      success: false,
-      message: 'Funcionalidad offline no implementada aún',
-      error: 'NOT_IMPLEMENTED',
-      timestamp: new Date().toISOString()
-    });
+  async (req: any, res: any) => {
+    try {
+      const { deviceId, batchId, attendanceRecords, deviceInfo } = req.body;
+
+      const result = await qrService.syncOfflineAttendance(
+        deviceId,
+        batchId,
+        attendanceRecords,
+        deviceInfo
+      );
+
+      res.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+      logger.error('Error en offline sync attendance:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
   }
 );
 
@@ -1172,20 +1446,97 @@ router.post('/offline/sync-attendance',
  *     tags: [QR Codes - Offline]
  *     summary: Estado de sincronización
  *     description: Consulta el estado de sincronización offline para un dispositivo
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - name: deviceId
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: ID del dispositivo (opcional, usa el del usuario si no se especifica)
+ *         example: "device_123"
+ *       - name: batchId
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: ID del lote específico
+ *         example: "batch_123"
+ *     responses:
+ *       200:
+ *         description: Estado de sincronización obtenido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Estado de sincronización obtenido"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     lastSync:
+ *                       type: string
+ *                       format: date-time
+ *                       nullable: true
+ *                       description: Última sincronización del dispositivo
+ *                       example: "2023-10-15T14:30:00.000Z"
+ *                     pendingSyncs:
+ *                       type: integer
+ *                       description: Número de sincronizaciones pendientes
+ *                       example: 0
+ *                     deviceStatus:
+ *                       type: string
+ *                       enum: [active, inactive, unknown]
+ *                       description: Estado del dispositivo
+ *                       example: "active"
+ *                     batches:
+ *                       type: array
+ *                       description: Información de lotes offline
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           batchId:
+ *                             type: string
+ *                             example: "batch_123"
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2023-10-15T10:00:00.000Z"
+ *                           totalRecords:
+ *                             type: integer
+ *                             example: 150
+ *                           syncedRecords:
+ *                             type: integer
+ *                             example: 148
+ *                           status:
+ *                             type: string
+ *                             enum: [pending, partial, complete]
+ *                             example: "complete"
+ *       401:
+ *         description: No autorizado
  */
 router.get('/offline/sync-status',
   authenticated,
-  [
-    // TODO: Agregar query parameters para filtrar por deviceId, batchId, etc.
-  ],
-  // TODO: Implementar controlador para offline
-  (req: any, res: any) => {
-    res.status(501).json({
-      success: false,
-      message: 'Funcionalidad offline no implementada aún',
-      error: 'NOT_IMPLEMENTED',
-      timestamp: new Date().toISOString()
-    });
+  [],
+  async (req: any, res: any) => {
+    try {
+      const deviceId = req.query.deviceId as string;
+
+      const result = await qrService.getOfflineSyncStatus(deviceId);
+
+      res.status(result.success ? 200 : 500).json(result);
+    } catch (error) {
+      logger.error('Error en offline sync status:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
   }
 );
 

@@ -99,16 +99,48 @@ class EmailService {
     try {
       const mailOptions = {
         from: process.env.SMTP_FROM || 'noreply@tradeconnect.gt',
-        to,
-        subject: 'Verifica tu cuenta - TradeConnect',
-        html: `
-          <h1>¡Bienvenido a TradeConnect, ${data.firstName}!</h1>
-          <p>Para completar tu registro, por favor verifica tu dirección de email haciendo clic en el siguiente enlace:</p>
-          <a href="${data.verificationUrl}">Verificar Email</a>
-          <p>Este enlace expirará en 24 horas.</p>
-          <p>Si no solicitaste esta cuenta, ignora este mensaje.</p>
-        `
-      };
+to,
+subject: 'Verifica tu cuenta - TradeConnect',
+html: `
+  <div style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 40px 0; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
+      
+      <div style="background: linear-gradient(90deg, #007BFF, #00C6FF); color: white; padding: 20px 30px; text-align: center;">
+        <h1 style="margin: 0; font-size: 24px;">Bienvenido a <span style="font-weight: bold;">TradeConnect</span></h1>
+      </div>
+
+      <div style="padding: 30px;">
+        <p style="font-size: 16px;">Hola <strong>${data.firstName}</strong>,</p>
+        <p style="font-size: 15px; line-height: 1.6;">
+          Gracias por registrarte en <strong>TradeConnect</strong>. Para completar tu registro y activar tu cuenta, 
+          por favor verifica tu dirección de correo electrónico haciendo clic en el siguiente botón:
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${data.verificationUrl}" 
+             style="background: #007BFF; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; 
+                    font-size: 16px; display: inline-block; font-weight: bold;">
+             Verificar Email
+          </a>
+        </div>
+
+        <p style="font-size: 14px; color: #555;">
+          Este enlace expirará en <strong>24 horas</strong>.
+        </p>
+        <p style="font-size: 14px; color: #888;">
+          Si no solicitaste esta cuenta, puedes ignorar este mensaje.
+        </p>
+      </div>
+
+      <div style="background: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #777;">
+        © ${new Date().getFullYear()} TradeConnect. Todos los derechos reservados.
+      </div>
+
+    </div>
+  </div>
+`
+};
+
 
       await this.transporter.sendMail(mailOptions);
       logger.info(`Email verification sent to ${to}`);

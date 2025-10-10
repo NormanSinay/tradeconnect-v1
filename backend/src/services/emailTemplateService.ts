@@ -272,6 +272,73 @@ class EmailTemplateService {
     }
   }
 
+  async duplicateTemplate(templateId: number, duplicateData: any, duplicatedBy: number): Promise<any> {
+    try {
+      const originalTemplate = await EmailTemplate.findByPk(templateId);
+      if (!originalTemplate) {
+        return {
+          success: false,
+          error: 'TEMPLATE_NOT_FOUND',
+          message: 'Plantilla original no encontrada',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar si el código ya existe (si se proporciona uno nuevo)
+      if (duplicateData.code) {
+        const existingTemplate = await EmailTemplate.findOne({
+          where: { code: duplicateData.code },
+          paranoid: false
+        });
+
+        if (existingTemplate) {
+          return {
+            success: false,
+            error: 'TEMPLATE_CODE_EXISTS',
+            message: 'Ya existe una plantilla con este código',
+            timestamp: new Date().toISOString()
+          };
+        }
+      }
+
+      // Crear la plantilla duplicada
+      const duplicatedTemplate = await EmailTemplate.create({
+        code: duplicateData.code || `${originalTemplate.code}_COPY`,
+        name: duplicateData.name || `${originalTemplate.name} (Copia)`,
+        subject: duplicateData.subject || originalTemplate.subject,
+        htmlContent: originalTemplate.htmlContent,
+        textContent: originalTemplate.textContent,
+        type: duplicateData.type || originalTemplate.type,
+        variables: originalTemplate.variables,
+        version: 1,
+        active: true,
+        createdBy: duplicatedBy,
+        updatedBy: duplicatedBy
+      });
+
+      logger.info(`Email template duplicated: ${originalTemplate.code} -> ${duplicatedTemplate.code} by user ${duplicatedBy}`);
+
+      return {
+        success: true,
+        message: 'Plantilla duplicada exitosamente',
+        data: {
+          originalTemplate: originalTemplate.toJSON(),
+          duplicatedTemplate: duplicatedTemplate.toJSON()
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error: any) {
+      logger.error('Error duplicating email template:', error);
+      return {
+        success: false,
+        error: 'DATABASE_ERROR',
+        message: 'Error al duplicar la plantilla',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
   private renderTemplate(template: string, variables: any): string {
     let rendered = template;
     for (const [key, value] of Object.entries(variables)) {
@@ -279,6 +346,63 @@ class EmailTemplateService {
       rendered = rendered.replace(regex, String(value));
     }
     return rendered;
+  }
+
+  async getTemplateVersions(templateId: number, filters?: any): Promise<any> {
+    try {
+      const template = await EmailTemplate.findByPk(templateId);
+      if (!template) {
+        return {
+          success: false,
+          error: 'TEMPLATE_NOT_FOUND',
+          message: 'Plantilla no encontrada',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Por ahora, retornamos solo la versión actual
+      // En una implementación completa, habría una tabla de versiones
+      const versions = [{
+        version: template.version,
+        name: template.name,
+        subject: template.subject,
+        changes: 'Versión actual',
+        createdBy: template.createdBy,
+        createdAt: template.createdAt
+      }];
+
+      // Aplicar filtros de paginación
+      const limit = filters?.limit || 20;
+      const offset = filters?.offset || 0;
+      const paginatedVersions = versions.slice(offset, offset + limit);
+
+      return {
+        success: true,
+        message: 'Versiones de plantilla obtenidas exitosamente',
+        data: {
+          templateId,
+          versions: paginatedVersions,
+          pagination: {
+            page: Math.floor(offset / limit) + 1,
+            limit,
+            total: versions.length,
+            totalPages: Math.ceil(versions.length / limit),
+            hasNext: offset + limit < versions.length,
+            hasPrev: offset > 0
+          }
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error: any) {
+      logger.error('Error getting template versions:', error);
+      return {
+        success: false,
+        error: 'DATABASE_ERROR',
+        message: 'Error al obtener las versiones de la plantilla',
+        timestamp: new Date().toISOString()
+      };
+    }
   }
 }
 

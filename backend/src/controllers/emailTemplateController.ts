@@ -538,6 +538,479 @@ export class EmailTemplateController {
       });
     }
   }
+
+  /**
+   * @swagger
+   * /api/v1/email-templates/{id}/duplicate:
+   *   post:
+   *     tags: [Email Templates]
+   *     summary: Duplicar plantilla de email
+   *     description: Crea una copia de una plantilla existente con opción de modificar campos
+   *     security: [{ bearerAuth: [] }]
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         description: ID de la plantilla a duplicar
+   *         example: 1
+   *     requestBody:
+   *       required: false
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               code:
+   *                 type: string
+   *                 minLength: 3
+   *                 maxLength: 50
+   *                 pattern: '^[A-Z_]+$'
+   *                 description: Nuevo código único para la plantilla duplicada
+   *                 example: "WELCOME_EMAIL_V2"
+   *               name:
+   *                 type: string
+   *                 minLength: 2
+   *                 maxLength: 255
+   *                 description: Nuevo nombre para la plantilla duplicada
+   *                 example: "Email de Bienvenida - Versión 2"
+   *               subject:
+   *                 type: string
+   *                 minLength: 1
+   *                 maxLength: 200
+   *                 description: Nuevo asunto para la plantilla duplicada
+   *                 example: "¡Bienvenido a TradeConnect!"
+   *               type:
+   *                 type: string
+   *                 enum: [TRANSACTIONAL, PROMOTIONAL, OPERATIONAL]
+   *                 description: Nuevo tipo para la plantilla duplicada
+   *                 example: "TRANSACTIONAL"
+   *           examples:
+   *             duplicar_plantilla:
+   *               summary: Duplicar plantilla con cambios
+   *               value:
+   *                 code: "WELCOME_EMAIL_V2"
+   *                 name: "Email de Bienvenida - Versión 2"
+   *                 subject: "¡Bienvenido a TradeConnect!"
+   *                 type: "TRANSACTIONAL"
+   *     responses:
+   *       201:
+   *         description: Plantilla duplicada exitosamente
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Plantilla duplicada exitosamente"
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     originalTemplate:
+   *                       type: object
+   *                       properties:
+   *                         id:
+   *                           type: integer
+   *                           example: 1
+   *                         name:
+   *                           type: string
+   *                           example: "Email de Bienvenida"
+   *                     duplicatedTemplate:
+   *                       type: object
+   *                       properties:
+   *                         id:
+   *                           type: integer
+   *                           example: 2
+   *                         code:
+   *                           type: string
+   *                           example: "WELCOME_EMAIL_V2"
+   *                         name:
+   *                           type: string
+   *                           example: "Email de Bienvenida - Versión 2"
+   *                         createdAt:
+   *                           type: string
+   *                           format: date-time
+   *                           example: "2023-10-15T10:30:00.000Z"
+   *             examples:
+   *               plantilla_duplicada:
+   *                 summary: Plantilla duplicada exitosamente
+   *                 value:
+   *                   success: true
+   *                   message: "Plantilla duplicada exitosamente"
+   *                   data:
+   *                     originalTemplate:
+   *                       id: 1
+   *                       name: "Email de Bienvenida"
+   *                     duplicatedTemplate:
+   *                       id: 2
+   *                       code: "WELCOME_EMAIL_V2"
+   *                       name: "Email de Bienvenida - Versión 2"
+   *                       createdAt: "2023-10-15T10:30:00.000Z"
+   *       400:
+   *         description: Datos inválidos o código ya existe
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "El código WELCOME_EMAIL_V2 ya está en uso"
+   *                 error:
+   *                   type: string
+   *                   example: "TEMPLATE_CODE_EXISTS"
+   *       401:
+   *         description: Token inválido
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Token de autenticación inválido"
+   *                 error:
+   *                   type: string
+   *                   example: "INVALID_TOKEN"
+   *       403:
+   *         description: Permisos insuficientes
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "No tienes permisos para duplicar plantillas"
+   *                 error:
+   *                   type: string
+   *                   example: "INSUFFICIENT_PERMISSIONS"
+   *       404:
+   *         description: Plantilla no encontrada
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Plantilla no encontrada"
+   *                 error:
+   *                   type: string
+   *                   example: "TEMPLATE_NOT_FOUND"
+   *       500:
+   *         description: Error interno del servidor
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Error interno del servidor"
+   *                 error:
+   *                   type: string
+   *                   example: "INTERNAL_SERVER_ERROR"
+   */
+  async duplicateTemplate(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      // Verificar permisos
+      const userPermissions = req.user?.permissions || [];
+      const hasPermission = userPermissions.includes(PERMISSIONS.MANAGE_EMAIL_TEMPLATES);
+
+      if (!hasPermission) {
+        res.status(HTTP_STATUS.FORBIDDEN).json({
+          success: false,
+          message: 'Permisos insuficientes',
+          error: 'FORBIDDEN',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          error: 'VALIDATION_ERROR',
+          details: errors.array(),
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const templateId = parseInt(req.params.id);
+      const duplicateData = req.body;
+      const result = await emailTemplateService.duplicateTemplate(templateId, duplicateData, req.user!.id);
+
+      const statusCode = result.success ? HTTP_STATUS.CREATED :
+        result.error === 'TEMPLATE_CODE_EXISTS' ? HTTP_STATUS.CONFLICT :
+        result.error === 'TEMPLATE_NOT_FOUND' ? HTTP_STATUS.NOT_FOUND :
+        HTTP_STATUS.INTERNAL_SERVER_ERROR;
+
+      res.status(statusCode).json({
+        success: result.success,
+        message: result.success ? 'Plantilla duplicada exitosamente' : result.error,
+        data: result.success ? result.data : undefined,
+        error: result.error,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error en duplicateTemplate controller:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/v1/email-templates/{id}/versions:
+   *   get:
+   *     tags: [Email Templates]
+   *     summary: Obtener versiones de plantilla
+   *     description: Obtiene el historial de versiones de una plantilla para seguimiento de cambios
+   *     security: [{ bearerAuth: [] }]
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         description: ID de la plantilla
+   *         example: 1
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           default: 1
+   *         description: Número de página para paginación
+   *         example: 1
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 50
+   *           default: 20
+   *         description: Número de versiones por página
+   *         example: 20
+   *     responses:
+   *       200:
+   *         description: Versiones obtenidas exitosamente
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "Versiones de plantilla obtenidas exitosamente"
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     templateId:
+   *                       type: integer
+   *                       example: 1
+   *                     versions:
+   *                       type: array
+   *                       items:
+   *                         type: object
+   *                         properties:
+   *                           version:
+   *                             type: integer
+   *                             example: 2
+   *                           name:
+   *                             type: string
+   *                             example: "Email de Bienvenida - Actualizado"
+   *                           subject:
+   *                             type: string
+   *                             example: "¡Bienvenido a TradeConnect!"
+   *                           changes:
+   *                             type: string
+   *                             example: "Actualización del contenido HTML y variables"
+   *                           createdBy:
+   *                             type: string
+   *                             example: "admin@tradeconnect.com"
+   *                           createdAt:
+   *                             type: string
+   *                             format: date-time
+   *                             example: "2023-10-10T14:30:00.000Z"
+   *                     pagination:
+   *                       type: object
+   *                       properties:
+   *                         page:
+   *                           type: integer
+   *                           example: 1
+   *                         limit:
+   *                           type: integer
+   *                           example: 20
+   *                         total:
+   *                           type: integer
+   *                           example: 5
+   *                         totalPages:
+   *                           type: integer
+   *                           example: 1
+   *                         hasNext:
+   *                           type: boolean
+   *                           example: false
+   *                         hasPrev:
+   *                           type: boolean
+   *                           example: false
+   *             examples:
+   *               versiones_obtenidas:
+   *                 summary: Versiones obtenidas exitosamente
+   *                 value:
+   *                   success: true
+   *                   message: "Versiones de plantilla obtenidas exitosamente"
+   *                   data:
+   *                     templateId: 1
+   *                     versions:
+   *                       - version: 2
+   *                         name: "Email de Bienvenida - Actualizado"
+   *                         subject: "¡Bienvenido a TradeConnect!"
+   *                         changes: "Actualización del contenido HTML y variables"
+   *                         createdBy: "admin@tradeconnect.com"
+   *                         createdAt: "2023-10-10T14:30:00.000Z"
+   *                       - version: 1
+   *                         name: "Email de Bienvenida"
+   *                         subject: "¡Bienvenido!"
+   *                         changes: "Versión inicial"
+   *                         createdBy: "admin@tradeconnect.com"
+   *                         createdAt: "2023-01-15T10:00:00.000Z"
+   *                     pagination:
+   *                       page: 1
+   *                       limit: 20
+   *                       total: 2
+   *                       totalPages: 1
+   *                       hasNext: false
+   *                       hasPrev: false
+   *       401:
+   *         description: Token inválido
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Token de autenticación inválido"
+   *                 error:
+   *                   type: string
+   *                   example: "INVALID_TOKEN"
+   *       403:
+   *         description: Permisos insuficientes
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "No tienes permisos para acceder a las versiones"
+   *                 error:
+   *                   type: string
+   *                   example: "INSUFFICIENT_PERMISSIONS"
+   *       404:
+   *         description: Plantilla no encontrada
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Plantilla no encontrada"
+   *                 error:
+   *                   type: string
+   *                   example: "TEMPLATE_NOT_FOUND"
+   *       500:
+   *         description: Error interno del servidor
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: false
+   *                 message:
+   *                   type: string
+   *                   example: "Error interno del servidor"
+   *                 error:
+   *                   type: string
+   *                   example: "INTERNAL_SERVER_ERROR"
+   */
+  async getTemplateVersions(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const templateId = parseInt(req.params.id);
+      const filters = {
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 20
+      };
+
+      const result = await emailTemplateService.getTemplateVersions(templateId, filters);
+
+      const statusCode = result.success ? HTTP_STATUS.OK : HTTP_STATUS.NOT_FOUND;
+
+      res.status(statusCode).json({
+        success: result.success,
+        message: result.success ? 'Versiones de plantilla obtenidas exitosamente' : result.error,
+        data: result.success ? result.data : undefined,
+        error: result.error,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error en getTemplateVersions controller:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
 }
 
 export const emailTemplateController = new EmailTemplateController();
