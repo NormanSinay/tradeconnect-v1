@@ -1,0 +1,2105 @@
+{
+  "info": {
+    "name": "TradeConnect API v1 - Complete Collection",
+    "_postman_id": "tradeconnect-api-v1-complete",
+    "description": "Colección completa de API endpoints para TradeConnect - Plataforma empresarial de gestión de eventos con registro, pagos, FEL (facturación electrónica Guatemala), códigos QR, certificados blockchain y eventos híbridos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "registrationId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "speakerId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "transactionId",
+      "value": "txn_123_abc123def",
+      "type": "string"
+    },
+    {
+      "key": "qrHash",
+      "value": "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890",
+      "type": "string"
+    },
+    {
+      "key": "certificateHash",
+      "value": "c1d2e3f4g5h6789012345678901234567890123456789012345678901234567890",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication & Users",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Login",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"usuario@ejemplo.com\",\n  \"password\": \"MiContraseña123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Autentica un usuario con email y contraseña. Retorna tokens de acceso y refresh."
+              }
+            },
+            {
+              "name": "Login with 2FA",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"usuario@ejemplo.com\",\n  \"password\": \"MiContraseña123\",\n  \"twoFactorCode\": \"123456\",\n  \"rememberMe\": false\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Login con autenticación de dos factores"
+              }
+            },
+            {
+              "name": "Register",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"nuevo@ejemplo.com\",\n  \"password\": \"MiContraseña123\",\n  \"confirmPassword\": \"MiContraseña123\",\n  \"firstName\": \"María\",\n  \"lastName\": \"González\",\n  \"phone\": \"+502 5555-1234\",\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"termsAccepted\": true,\n  \"marketingAccepted\": false\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                },
+                "description": "Registra un nuevo usuario con validación completa de datos guatemaltecos"
+              }
+            },
+            {
+              "name": "Logout",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "logout"]
+                },
+                "description": "Cierra sesión del usuario autenticado y revoca el token"
+              }
+            },
+            {
+              "name": "Refresh Token",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/refresh-token",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "refresh-token"]
+                },
+                "description": "Genera nuevo par de tokens usando refresh token"
+              }
+            },
+            {
+              "name": "Forgot Password",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"usuario@ejemplo.com\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "forgot-password"]
+                },
+                "description": "Envía email con instrucciones para resetear contraseña"
+              }
+            },
+            {
+              "name": "Reset Password",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"resetToken\": \"abc123def456\",\n  \"newPassword\": \"NuevaContraseña123\",\n  \"confirmPassword\": \"NuevaContraseña123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "reset-password"]
+                },
+                "description": "Establece nueva contraseña usando token de reset"
+              }
+            },
+            {
+              "name": "Change Password",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"currentPassword\": \"ContraseñaActual123\",\n  \"newPassword\": \"NuevaContraseña123\",\n  \"confirmNewPassword\": \"NuevaContraseña123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/password/change",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "password", "change"]
+                },
+                "description": "Cambia contraseña del usuario autenticado"
+              }
+            },
+            {
+              "name": "Verify Email",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"xyz789token\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/verify-email",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "verify-email"]
+                },
+                "description": "Verifica email usando token enviado por correo"
+              }
+            },
+            {
+              "name": "Get Profile",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "profile"]
+                },
+                "description": "Obtiene perfil completo del usuario autenticado"
+              }
+            },
+            {
+              "name": "Enable 2FA",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"method\": \"totp\",\n  \"verificationCode\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/2fa/enable",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "2fa", "enable"]
+                },
+                "description": "Habilita autenticación de dos factores"
+              }
+            },
+            {
+              "name": "Disable 2FA",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"password\": \"MiContraseña123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/2fa/disable",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "2fa", "disable"]
+                },
+                "description": "Deshabilita autenticación de dos factores"
+              }
+            },
+            {
+              "name": "Verify 2FA",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"123456\",\n  \"sessionId\": \"sess_123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/2fa/verify",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "2fa", "verify"]
+                },
+                "description": "Verifica código 2FA durante login"
+              }
+            },
+            {
+              "name": "Get Sessions",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/sessions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "sessions"]
+                },
+                "description": "Lista todas las sesiones activas del usuario"
+              }
+            },
+            {
+              "name": "Terminate Other Sessions",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/sessions/terminate-others",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "sessions", "terminate-others"]
+                },
+                "description": "Termina todas las sesiones excepto la actual"
+              }
+            },
+            {
+              "name": "Validate CUI",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cui\": \"1234567890123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/validate/cui",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "validate", "cui"]
+                },
+                "description": "Valida formato de CUI guatemalteco (13 dígitos)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "Get User Profile",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "profile"]
+                },
+                "description": "Obtiene perfil del usuario autenticado"
+              }
+            },
+            {
+              "name": "Update Profile",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Juan Carlos\",\n  \"lastName\": \"Pérez González\",\n  \"phone\": \"+502 5555-1234\",\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"timezone\": \"America/Guatemala\",\n  \"locale\": \"es-GT\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "profile"]
+                },
+                "description": "Actualiza perfil del usuario autenticado"
+              }
+            },
+            {
+              "name": "List Users (Admin)",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users?page=1&limit=20&search=Juan&role=user&isActive=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "limit", "value": "20"},
+                    {"key": "search", "value": "Juan"},
+                    {"key": "role", "value": "user"},
+                    {"key": "isActive", "value": "true"}
+                  ]
+                },
+                "description": "Lista usuarios con filtros (requiere permisos admin)"
+              }
+            },
+            {
+              "name": "Create User (Admin)",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"nuevo@ejemplo.com\",\n  \"password\": \"Contraseña123\",\n  \"firstName\": \"Ana\",\n  \"lastName\": \"Martínez\",\n  \"phone\": \"+502 8765-4321\",\n  \"role\": \"user\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users"]
+                },
+                "description": "Crea nuevo usuario (requiere permisos admin)"
+              }
+            },
+            {
+              "name": "Update User (Admin)",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Ana María\",\n  \"lastName\": \"Martínez López\",\n  \"phone\": \"+502 9999-8888\",\n  \"isActive\": true,\n  \"role\": \"speaker\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "{{userId}}"]
+                },
+                "description": "Actualiza usuario específico (requiere permisos admin)"
+              }
+            },
+            {
+              "name": "Delete User (Admin)",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "{{userId}}"]
+                },
+                "description": "Elimina usuario (soft delete - requiere permisos admin)"
+              }
+            },
+            {
+              "name": "Get User Audit",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/{{userId}}/audit?page=1&limit=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users", "{{userId}}", "audit"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "limit", "value": "20"}
+                  ]
+                },
+                "description": "Obtiene historial de auditoría del usuario"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Events Management",
+      "item": [
+        {
+          "name": "List User Events",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events?page=1&limit=20&status=published",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"},
+                {"key": "status", "value": "published"}
+              ]
+            },
+            "description": "Lista eventos del usuario autenticado"
+          }
+        },
+        {
+          "name": "Create Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Conferencia Tech Guatemala 2023\",\n  \"description\": \"Evento anual de tecnología e innovación en Guatemala con speakers internacionales\",\n  \"shortDescription\": \"El evento tech más grande de Guatemala\",\n  \"startDate\": \"2024-03-15T09:00:00.000Z\",\n  \"endDate\": \"2024-03-15T18:00:00.000Z\",\n  \"location\": \"Centro de Convenciones Tikal Futura, Guatemala City\",\n  \"virtualLocation\": \"https://zoom.us/j/123456789\",\n  \"isVirtual\": false,\n  \"price\": 150.00,\n  \"currency\": \"GTQ\",\n  \"capacity\": 500,\n  \"minAge\": 18,\n  \"maxAge\": null,\n  \"tags\": [\"tecnología\", \"innovación\", \"networking\"],\n  \"requirements\": \"Llevar laptop personal y tarjeta de presentación\",\n  \"eventTypeId\": 1,\n  \"eventCategoryId\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"]
+            },
+            "description": "Crea un nuevo evento"
+          }
+        },
+        {
+          "name": "Get Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}"]
+            },
+            "description": "Obtiene detalles de un evento específico"
+          }
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Conferencia Tech Guatemala 2023 - Actualizado\",\n  \"price\": 175.00,\n  \"capacity\": 600\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}"]
+            },
+            "description": "Actualiza información de un evento"
+          }
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}"]
+            },
+            "description": "Elimina un evento (soft delete)"
+          }
+        },
+        {
+          "name": "Publish Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notifySubscribers\": true,\n  \"notificationMessage\": \"¡Nuevo evento disponible! Registrate ahora.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}", "publish"]
+            },
+            "description": "Publica un evento para que sea visible"
+          }
+        },
+        {
+          "name": "Cancel Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Problemas logísticos con el venue\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}/status?action=cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}", "status"],
+              "query": [{"key": "action", "value": "cancel"}]
+            },
+            "description": "Cancela un evento"
+          }
+        },
+        {
+          "name": "Duplicate Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Conferencia Tech Guatemala 2024 - Edición 2\",\n  \"startDate\": \"2024-06-15T09:00:00.000Z\",\n  \"endDate\": \"2024-06-15T18:00:00.000Z\",\n  \"price\": 175.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}/duplicate",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}", "duplicate"]
+            },
+            "description": "Duplica un evento existente con modificaciones opcionales"
+          }
+        },
+        {
+          "name": "Upload Event Media",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}/upload-media",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}", "upload-media"]
+            },
+            "description": "Sube archivos multimedia al evento"
+          }
+        },
+        {
+          "name": "Get Event Media",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}/media",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}", "media"]
+            },
+            "description": "Lista archivos multimedia del evento"
+          }
+        },
+        {
+          "name": "Delete Event Media",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/{{eventId}}/media/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "{{eventId}}", "media", "1"]
+            },
+            "description": "Elimina un archivo multimedia del evento"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Speakers",
+      "item": [
+        {
+          "name": "List Active Speakers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/speakers?page=1&limit=20&category=expert&minRating=4.0&sortBy=rating&sortOrder=DESC",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"},
+                {"key": "category", "value": "expert"},
+                {"key": "minRating", "value": "4.0"},
+                {"key": "sortBy", "value": "rating"},
+                {"key": "sortOrder", "value": "DESC"}
+              ]
+            },
+            "description": "Lista speakers activos con filtros (endpoint público)"
+          }
+        },
+        {
+          "name": "Create Speaker",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"María\",\n  \"lastName\": \"González\",\n  \"email\": \"maria.gonzalez@ejemplo.com\",\n  \"phone\": \"+502 5555-1234\",\n  \"country\": \"Guatemala\",\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"rtu\": \"RTU-12345678\",\n  \"shortBio\": \"Experta en transformación digital con 15 años de experiencia\",\n  \"fullBio\": \"María González es una reconocida experta en transformación digital...\",\n  \"linkedinUrl\": \"https://linkedin.com/in/mariagonzalez\",\n  \"twitterUrl\": \"https://twitter.com/mariagonzalez\",\n  \"websiteUrl\": \"https://mariagonzalez.com\",\n  \"baseRate\": 150.00,\n  \"rateType\": \"hourly\",\n  \"modalities\": [\"virtual\", \"hybrid\"],\n  \"languages\": [\"spanish\", \"english\"],\n  \"category\": \"expert\",\n  \"specialtyIds\": [1, 3, 5]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/speakers",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers"]
+            },
+            "description": "Crea un nuevo speaker con información completa"
+          }
+        },
+        {
+          "name": "Get Speaker",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/speakers/{{speakerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", "{{speakerId}}"]
+            },
+            "description": "Obtiene información detallada de un speaker"
+          }
+        },
+        {
+          "name": "Update Speaker",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseRate\": 175.00,\n  \"category\": \"international\",\n  \"specialtyIds\": [1, 3, 5, 7]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/speakers/{{speakerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", "{{speakerId}}"]
+            },
+            "description": "Actualiza información de un speaker"
+          }
+        },
+        {
+          "name": "Delete Speaker",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/speakers/{{speakerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", "{{speakerId}}"]
+            },
+            "description": "Elimina un speaker (soft delete)"
+          }
+        },
+        {
+          "name": "Verify Speaker",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/speakers/{{speakerId}}/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", "{{speakerId}}", "verify"]
+            },
+            "description": "Verifica un speaker administrativamente"
+          }
+        },
+        {
+          "name": "Create Availability Block",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2024-12-01T00:00:00.000Z\",\n  \"endDate\": \"2024-12-31T23:59:59.000Z\",\n  \"reason\": \"Vacaciones de fin de año\",\n  \"isRecurring\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/speakers/{{speakerId}}/availability",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", "{{speakerId}}", "availability"]
+            },
+            "description": "Crea bloqueo de disponibilidad para un speaker"
+          }
+        },
+        {
+          "name": "Create Speaker Evaluation",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": 123,\n  \"overallRating\": 5,\n  \"criteriaRatings\": {\n    \"presentation\": 5,\n    \"knowledge\": 5,\n    \"engagement\": 4,\n    \"clarity\": 5\n  },\n  \"comments\": \"Excelente presentación, muy claro y didáctico\",\n  \"isPublic\": true,\n  \"evaluationDate\": \"2024-01-15T18:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/speakers/{{speakerId}}/evaluate",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", "{{speakerId}}", "evaluate"]
+            },
+            "description": "Crea evaluación para un speaker después de evento"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Registrations & Cart",
+      "item": [
+        {
+          "name": "Registrations",
+          "item": [
+            {
+              "name": "Create Individual Registration",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"eventId\": 123,\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"email\": \"juan.perez@email.com\",\n  \"phone\": \"+502 5555-1234\",\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"company\": \"Tech Solutions GT\",\n  \"position\": \"Developer\",\n  \"dietaryRestrictions\": \"vegetarian\",\n  \"specialRequirements\": \"Acceso para silla de ruedas\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/registrations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["registrations"]
+                },
+                "description": "Crea inscripción individual a un evento"
+              }
+            },
+            {
+              "name": "List Registrations",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/registrations?page=1&limit=20&eventId=123&status=PAGADO",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["registrations"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "limit", "value": "20"},
+                    {"key": "eventId", "value": "123"},
+                    {"key": "status", "value": "PAGADO"}
+                  ]
+                },
+                "description": "Lista inscripciones con filtros"
+              }
+            },
+            {
+              "name": "Get Registration",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/registrations/{{registrationId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["registrations", "{{registrationId}}"]
+                },
+                "description": "Obtiene detalles de una inscripción"
+              }
+            },
+            {
+              "name": "Update Registration",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phone\": \"+502 5555-9999\",\n  \"company\": \"Tech Solutions Guatemala\",\n  \"dietaryRestrictions\": \"vegetarian, gluten-free\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/registrations/{{registrationId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["registrations", "{{registrationId}}"]
+                },
+                "description": "Actualiza datos de una inscripción"
+              }
+            },
+            {
+              "name": "Cancel Registration",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"No puedo asistir por compromisos laborales\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/registrations/{{registrationId}}/cancel",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["registrations", "{{registrationId}}", "cancel"]
+                },
+                "description": "Cancela inscripción y procesa reembolso si aplica"
+              }
+            },
+            {
+              "name": "Validate Affiliation Data",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"email\": \"usuario@email.com\",\n  \"phone\": \"+502 5555-1234\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/registrations/validate-affiliation",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["registrations", "validate-affiliation"]
+                },
+                "description": "Valida datos de afiliación (NIT, CUI, etc.)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cart",
+          "item": [
+            {
+              "name": "Get Cart",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/cart",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["cart"]
+                },
+                "description": "Obtiene carrito actual del usuario"
+              }
+            },
+            {
+              "name": "Add Item to Cart",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"eventId\": 123,\n  \"quantity\": 2,\n  \"accessType\": \"presential\",\n  \"customizations\": {\n    \"dietaryRestrictions\": \"vegetarian\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cart/add",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["cart", "add"]
+                },
+                "description": "Agrega item al carrito"
+              }
+            },
+            {
+              "name": "Update Cart Item",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"itemId\": 1,\n  \"quantity\": 3\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cart/update",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["cart", "update"]
+                },
+                "description": "Actualiza cantidad de item (Método no implementado)"
+              }
+            },
+            {
+              "name": "Remove Item from Cart",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/cart/remove/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["cart", "remove", "1"]
+                },
+                "description": "Remueve item del carrito (Método no implementado)"
+              }
+            },
+            {
+              "name": "Clear Cart",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/cart/clear",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["cart", "clear"]
+                },
+                "description": "Limpia todos los items del carrito (Método no implementado)"
+              }
+            },
+            {
+              "name": "Apply Promo Code",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"promoCode\": \"SUMMER2024\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/cart/apply-promo",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["cart", "apply-promo"]
+                },
+                "description": "Aplica código promocional (Método no implementado)"
+              }
+            },
+            {
+              "name": "Calculate Cart Totals",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/cart/calculate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["cart", "calculate"]
+                },
+                "description": "Recalcula totales del carrito (Método no implementado)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payments & Refunds",
+      "item": [
+        {
+          "name": "Payments",
+          "item": [
+            {
+              "name": "Process Payment (Generic)",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"registrationId\": 123,\n  \"gateway\": \"stripe\",\n  \"paymentType\": \"one_time\",\n  \"amount\": 150.00,\n  \"currency\": \"GTQ\",\n  \"description\": \"Inscripción Tech Conference 2023\",\n  \"billingInfo\": {\n    \"firstName\": \"María\",\n    \"lastName\": \"González\",\n    \"email\": \"maria.gonzalez@email.com\",\n    \"phone\": \"+502 5555-1234\"\n  },\n  \"paymentMethod\": {\n    \"type\": \"card\",\n    \"cardNumber\": \"4111111111111111\",\n    \"expiryMonth\": 12,\n    \"expiryYear\": 2025,\n    \"cvv\": \"123\",\n    \"holderName\": \"MARIA GONZALEZ\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/payments/process",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "process"]
+                },
+                "description": "Procesa pago genérico con cualquier pasarela"
+              }
+            },
+            {
+              "name": "Create PayPal Payment",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"registrationId\": 123,\n  \"amount\": 150.00,\n  \"currency\": \"USD\",\n  \"description\": \"Inscripción Tech Conference 2023\",\n  \"billingInfo\": {\n    \"firstName\": \"María\",\n    \"lastName\": \"González\",\n    \"email\": \"maria.gonzalez@email.com\",\n    \"phone\": \"+502 5555-1234\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/payments/paypal/create",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "paypal", "create"]
+                },
+                "description": "Crea orden de pago en PayPal"
+              }
+            },
+            {
+              "name": "Create Stripe Payment",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"registrationId\": 123,\n  \"amount\": 15000,\n  \"currency\": \"usd\",\n  \"description\": \"Inscripción Tech Conference 2023\",\n  \"billingInfo\": {\n    \"firstName\": \"María\",\n    \"lastName\": \"González\",\n    \"email\": \"maria.gonzalez@email.com\",\n    \"phone\": \"+502 5555-1234\"\n  },\n  \"paymentMethod\": {\n    \"type\": \"card\",\n    \"card\": {\n      \"number\": \"4242424242424242\",\n      \"exp_month\": 12,\n      \"exp_year\": 2025,\n      \"cvc\": \"123\"\n    }\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/payments/stripe/create",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "stripe", "create"]
+                },
+                "description": "Crea Payment Intent en Stripe"
+              }
+            },
+            {
+              "name": "Create NeoNet Payment",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"registrationId\": 123,\n  \"amount\": 150.00,\n  \"currency\": \"GTQ\",\n  \"description\": \"Inscripción Tech Conference 2023\",\n  \"billingInfo\": {\n    \"firstName\": \"María\",\n    \"lastName\": \"González\",\n    \"email\": \"maria.gonzalez@email.com\",\n    \"phone\": \"+502 5555-1234\"\n  },\n  \"paymentMethod\": {\n    \"type\": \"card\",\n    \"cardNumber\": \"4111111111111111\",\n    \"expiryMonth\": 12,\n    \"expiryYear\": 2025,\n    \"cvv\": \"123\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/payments/neonet/create",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "neonet", "create"]
+                },
+                "description": "Crea transacción en NeoNet (Guatemala)"
+              }
+            },
+            {
+              "name": "Create BAM Payment",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"registrationId\": 123,\n  \"amount\": 150.00,\n  \"currency\": \"GTQ\",\n  \"description\": \"Inscripción Tech Conference 2023\",\n  \"billingInfo\": {\n    \"firstName\": \"María\",\n    \"lastName\": \"González\",\n    \"email\": \"maria.gonzalez@email.com\",\n    \"phone\": \"+502 5555-1234\"\n  },\n  \"paymentMethod\": {\n    \"type\": \"card\",\n    \"cardNumber\": \"4111111111111111\",\n    \"expiryMonth\": 12,\n    \"expiryYear\": 2025,\n    \"cvv\": \"123\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/payments/bam/create",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "bam", "create"]
+                },
+                "description": "Crea transacción en BAM (Guatemala)"
+              }
+            },
+            {
+              "name": "Get Payment Status",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payments/{{transactionId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "{{transactionId}}", "status"]
+                },
+                "description": "Obtiene estado actual de una transacción"
+              }
+            },
+            {
+              "name": "Get Payment Methods",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payments/methods",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "methods"]
+                },
+                "description": "Obtiene métodos de pago guardados del usuario"
+              }
+            },
+            {
+              "name": "Get Payment History",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payments/history?page=1&limit=20&status=completed&gateway=stripe",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["payments", "history"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "limit", "value": "20"},
+                    {"key": "status", "value": "completed"},
+                    {"key": "gateway", "value": "stripe"}
+                  ]
+                },
+                "description": "Obtiene historial de pagos con filtros"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refunds",
+          "item": [
+            {
+              "name": "Process Refund",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"txn_123_abc123def\",\n  \"amount\": 150.00,\n  \"reason\": \"cancelacion_evento\",\n  \"description\": \"Evento cancelado por problemas logísticos\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/refunds",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["refunds"]
+                },
+                "description": "Procesa reembolso para un pago completado"
+              }
+            },
+            {
+              "name": "Get Refund",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/refunds/ref_123_abc123",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["refunds", "ref_123_abc123"]
+                },
+                "description": "Obtiene detalles de un reembolso"
+              }
+            },
+            {
+              "name": "Get Refunds by Payment",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/refunds/payment/123",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["refunds", "payment", "123"]
+                },
+                "description": "Obtiene reembolsos de un pago específico"
+              }
+            },
+            {
+              "name": "Cancel Refund",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/refunds/ref_123_abc123/cancel",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["refunds", "ref_123_abc123", "cancel"]
+                },
+                "description": "Cancela reembolso pendiente"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "FEL & Invoices (Guatemala)",
+      "item": [
+        {
+          "name": "FEL Operations",
+          "item": [
+            {
+              "name": "Authenticate FEL",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificador\": \"infile\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fel/authenticate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["fel", "authenticate"]
+                },
+                "description": "Autentica con certificador FEL (Infile o Dimexa)"
+              }
+            },
+            {
+              "name": "Certify DTE",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fel/certify-dte/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["fel", "certify-dte", "1"]
+                },
+                "description": "Certifica DTE (Documento Tributario Electrónico)"
+              }
+            },
+            {
+              "name": "Cancel DTE",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Factura emitida por error\",\n  \"userId\": 1\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fel/cancel-dte/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["fel", "cancel-dte", "1"]
+                },
+                "description": "Anula DTE certificado"
+              }
+            },
+            {
+              "name": "Consult DTE",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fel/consult-dte/UUID-123-456",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["fel", "consult-dte", "UUID-123-456"]
+                },
+                "description": "Consulta estado de DTE por UUID"
+              }
+            },
+            {
+              "name": "Auto Generate Invoice",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"paymentId\": 1,\n  \"notes\": \"Factura generada automáticamente\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fel/auto-generate/{{registrationId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["fel", "auto-generate", "{{registrationId}}"]
+                },
+                "description": "Genera factura automáticamente desde inscripción"
+              }
+            },
+            {
+              "name": "Download PDF",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fel/download-pdf/UUID-123-456",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["fel", "download-pdf", "UUID-123-456"]
+                },
+                "description": "Descarga PDF de factura certificada"
+              }
+            },
+            {
+              "name": "Retry Failed Operations",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fel/retry-failed",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["fel", "retry-failed"]
+                },
+                "description": "Reintenta operaciones FEL fallidas"
+              }
+            },
+            {
+              "name": "Token Status",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fel/token/status/infile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["fel", "token", "status", "infile"]
+                },
+                "description": "Consulta estado del token FEL"
+              }
+            },
+            {
+              "name": "Refresh Token",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificador\": \"infile\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/fel/token/refresh",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["fel", "token", "refresh"]
+                },
+                "description": "Renueva token FEL expirado"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invoices",
+          "item": [
+            {
+              "name": "Get All Invoices",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/invoices?page=1&limit=20&status=certified&documentType=FACTURA",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["invoices"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "limit", "value": "20"},
+                    {"key": "status", "value": "certified"},
+                    {"key": "documentType", "value": "FACTURA"}
+                  ]
+                },
+                "description": "Lista facturas con filtros"
+              }
+            },
+            {
+              "name": "Get Invoice by ID",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/invoices/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["invoices", "1"]
+                },
+                "description": "Obtiene factura por ID"
+              }
+            },
+            {
+              "name": "Get Invoices by Registration",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/invoices/registration/{{registrationId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["invoices", "registration", "{{registrationId}}"]
+                },
+                "description": "Obtiene facturas de una inscripción"
+              }
+            },
+            {
+              "name": "Generate Invoice",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"registrationId\": 123,\n  \"notes\": \"Factura por inscripción a evento\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/invoices/generate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["invoices", "generate"]
+                },
+                "description": "Genera nueva factura"
+              }
+            },
+            {
+              "name": "Update Invoice Status",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"sent\",\n  \"notes\": \"Factura enviada al cliente\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/invoices/1/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["invoices", "1", "status"]
+                },
+                "description": "Actualiza estado de factura"
+              }
+            },
+            {
+              "name": "Get Invoice Stats",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/invoices/stats?startDate=2024-01-01&endDate=2024-12-31",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["invoices", "stats"],
+                  "query": [
+                    {"key": "startDate", "value": "2024-01-01"},
+                    {"key": "endDate", "value": "2024-12-31"}
+                  ]
+                },
+                "description": "Obtiene estadísticas de facturación"
+              }
+            },
+            {
+              "name": "Download Invoice PDF",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/invoices/1/download-pdf",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["invoices", "1", "download-pdf"]
+                },
+                "description": "Descarga PDF de factura"
+              }
+            },
+            {
+              "name": "Download Invoice XML",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/invoices/1/download-xml",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["invoices", "1", "download-xml"]
+                },
+                "description": "Descarga XML de factura"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "QR & Certificates",
+      "item": [
+        {
+          "name": "QR Codes",
+          "item": [
+            {
+              "name": "Generate QR",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expiresAt\": \"2024-12-01T23:59:59.000Z\",\n  \"metadata\": {\n    \"accessLevel\": \"vip\",\n    \"specialRequirements\": [\"vegetarian\", \"wheelchair_access\"]\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/qr/generate/{{registrationId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["qr", "generate", "{{registrationId}}"]
+                },
+                "description": "Genera código QR único para control de acceso"
+              }
+            },
+            {
+              "name": "Get QR",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/qr/{{registrationId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["qr", "{{registrationId}}"]
+                },
+                "description": "Obtiene QR activo de una inscripción"
+              }
+            },
+            {
+              "name": "Regenerate QR",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"QR comprometido - posible fuga de información\",\n  \"expiresAt\": \"2024-12-15T23:59:59.000Z\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/qr/regenerate/{{registrationId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["qr", "regenerate", "{{registrationId}}"]
+                },
+                "description": "Regenera QR por seguridad (invalida el anterior)"
+              }
+            },
+            {
+              "name": "Validate QR (Public)",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"qrHash\": \"{{qrHash}}\",\n  \"eventId\": 123,\n  \"accessPoint\": \"Entrada Principal\",\n  \"deviceInfo\": {\n    \"deviceId\": \"device_123\",\n    \"deviceType\": \"mobile\",\n    \"appVersion\": \"1.2.3\",\n    \"os\": \"iOS 15.0\"\n  },\n  \"location\": {\n    \"latitude\": 14.6349,\n    \"longitude\": -90.5069,\n    \"accuracy\": 10.5\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/qr/validate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["qr", "validate"]
+                },
+                "description": "Valida QR escaneado y registra asistencia (público)"
+              }
+            },
+            {
+              "name": "Invalidate QR",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Código comprometido por seguridad\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/qr/invalidate/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["qr", "invalidate", "1"]
+                },
+                "description": "Invalida QR por razones de seguridad"
+              }
+            },
+            {
+              "name": "Get QR Stats",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/qr/stats/{{eventId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["qr", "stats", "{{eventId}}"]
+                },
+                "description": "Obtiene estadísticas de uso de QR para un evento"
+              }
+            },
+            {
+              "name": "Verify QR Blockchain (Public)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/qr/blockchain-verify/{{qrHash}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["qr", "blockchain-verify", "{{qrHash}}"]
+                },
+                "description": "Verifica autenticidad de QR en blockchain (público)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificates",
+          "item": [
+            {
+              "name": "Generate Certificate",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/certificates/events/{{eventId}}/users/{{userId}}/registrations/{{registrationId}}/generate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["certificates", "events", "{{eventId}}", "users", "{{userId}}", "registrations", "{{registrationId}}", "generate"]
+                },
+                "description": "Genera certificado de asistencia para participante"
+              }
+            },
+            {
+              "name": "Generate Bulk Certificates",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/certificates/events/{{eventId}}/generate-bulk",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["certificates", "events", "{{eventId}}", "generate-bulk"]
+                },
+                "description": "Genera certificados masivos para todos los asistentes"
+              }
+            },
+            {
+              "name": "Get User Certificates",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/certificates/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["certificates", "users", "{{userId}}"]
+                },
+                "description": "Obtiene certificados de un usuario"
+              }
+            },
+            {
+              "name": "Get Event Certificates",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/certificates/events/{{eventId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["certificates", "events", "{{eventId}}"]
+                },
+                "description": "Obtiene certificados de un evento"
+              }
+            },
+            {
+              "name": "Get Certificate by Registration",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/certificates/registrations/{{registrationId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["certificates", "registrations", "{{registrationId}}"]
+                },
+                "description": "Obtiene certificado por inscripción"
+              }
+            },
+            {
+              "name": "Verify Certificate (Admin)",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/certificates/verify/{{certificateHash}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["certificates", "verify", "{{certificateHash}}"]
+                },
+                "description": "Verifica validez de certificado (admin)"
+              }
+            },
+            {
+              "name": "Get Certificate Stats",
+              "request": {
+                "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/certificates/stats",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["certificates", "stats"]
+                },
+                "description": "Obtiene estadísticas del sistema de certificados"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get Notifications",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/notifications?status=PENDING&type=EMAIL&limit=20&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "notifications"],
+              "query": [
+                {"key": "status", "value": "PENDING"},
+                {"key": "type", "value": "EMAIL"},
+                {"key": "limit", "value": "20"},
+                {"key": "offset", "value": "0"}
+              ]
+            },
+            "description": "Lista notificaciones con filtros"
+          }
+        },
+        {
+          "name": "Send Notification",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 123,\n  \"type\": \"EMAIL\",\n  \"channel\": \"EMAIL\",\n  \"message\": \"Tu inscripción al evento ha sido confirmada\",\n  \"priority\": \"HIGH\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/notifications/send",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "notifications", "send"]
+            },
+            "description": "Envía notificación individual"
+          }
+        },
+        {
+          "name": "Send Bulk Notification",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIds\": [123, 124, 125],\n  \"type\": \"EMAIL\",\n  \"channel\": \"EMAIL\",\n  \"message\": \"Recordatorio: El evento inicia mañana a las 9:00 AM\",\n  \"priority\": \"NORMAL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/notifications/bulk-send",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "notifications", "bulk-send"]
+            },
+            "description": "Envía notificación masiva"
+          }
+        },
+        {
+          "name": "Get Notification",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/notifications/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "notifications", "1"]
+            },
+            "description": "Obtiene notificación por ID"
+          }
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/notifications/1/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "notifications", "1", "read"]
+            },
+            "description": "Marca notificación como leída"
+          }
+        },
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/notifications/user/{{userId}}?status=SENT&limit=20&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "notifications", "user", "{{userId}}"],
+              "query": [
+                {"key": "status", "value": "SENT"},
+                {"key": "limit", "value": "20"},
+                {"key": "offset", "value": "0"}
+              ]
+            },
+            "description": "Obtiene notificaciones de un usuario"
+          }
+        },
+        {
+          "name": "Get Notification Stats",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/notifications/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "notifications", "stats"]
+            },
+            "description": "Obtiene estadísticas del sistema de notificaciones"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hybrid Events",
+      "item": [
+        {
+          "name": "List Hybrid Events",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/hybrid-events?page=1&limit=20&modality=hybrid&platform=zoom",
+              "host": ["{{baseUrl}}"],
+              "path": ["hybrid-events"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"},
+                {"key": "modality", "value": "hybrid"},
+                {"key": "platform", "value": "zoom"}
+              ]
+            },
+            "description": "Lista eventos híbridos con filtros"
+          }
+        },
+        {
+          "name": "Create Hybrid Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": 123,\n  \"config\": {\n    \"modality\": \"hybrid\",\n    \"presentialCapacity\": 500,\n    \"virtualCapacity\": 1000,\n    \"streamingPlatform\": \"zoom\",\n    \"recordingEnabled\": true,\n    \"chatEnabled\": true,\n    \"qaEnabled\": true,\n    \"pollsEnabled\": true,\n    \"timezone\": \"America/Guatemala\",\n    \"streamDelaySeconds\": 10\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/hybrid-events",
+              "host": ["{{baseUrl}}"],
+              "path": ["hybrid-events"]
+            },
+            "description": "Configura evento como híbrido"
+          }
+        },
+        {
+          "name": "Get Hybrid Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/hybrid-events/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["hybrid-events", "1"]
+            },
+            "description": "Obtiene configuración híbrida de un evento"
+          }
+        },
+        {
+          "name": "Update Hybrid Event",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"config\": {\n    \"virtualCapacity\": 1500,\n    \"recordingEnabled\": true,\n    \"pollsEnabled\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/hybrid-events/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["hybrid-events", "1"]
+            },
+            "description": "Actualiza configuración híbrida"
+          }
+        },
+        {
+          "name": "Get Hybrid Event Config",
+          "request": {
+            "auth": {"type": "bearer", "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]},
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/hybrid-events/1/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["hybrid-events", "1", "config"]
+            },
+            "description": "Obtiene configuración completa de streaming"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public Endpoints",
+      "item": [
+        {
+          "name": "List Public Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/events?page=1&limit=20&isVirtual=false&priceMin=0&priceMax=500",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "events"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"},
+                {"key": "isVirtual", "value": "false"},
+                {"key": "priceMin", "value": "0"},
+                {"key": "priceMax", "value": "500"}
+              ]
+            },
+            "description": "Lista eventos públicos disponibles"
+          }
+        },
+        {
+          "name": "Get Public Event",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/events/{{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "events", "{{eventId}}"]
+            },
+            "description": "Obtiene detalles públicos de un evento"
+          }
+        },
+        {
+          "name": "Search Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/events/search?q=tech&location=Guatemala&dateFrom=2024-01-01&isVirtual=false&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "events", "search"],
+              "query": [
+                {"key": "q", "value": "tech"},
+                {"key": "location", "value": "Guatemala"},
+                {"key": "dateFrom", "value": "2024-01-01"},
+                {"key": "isVirtual", "value": "false"},
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"}
+              ]
+            },
+            "description": "Búsqueda avanzada de eventos públicos"
+          }
+        },
+        {
+          "name": "Get Calendar Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/events/calendar?month=3&year=2024",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "events", "calendar"],
+              "query": [
+                {"key": "month", "value": "3"},
+                {"key": "year", "value": "2024"}
+              ]
+            },
+            "description": "Obtiene eventos en formato calendario"
+          }
+        },
+        {
+          "name": "Get Event Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/events/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "events", "categories"]
+            },
+            "description": "Lista categorías de eventos disponibles"
+          }
+        },
+        {
+          "name": "Verify Certificate (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/public/certificates/verify/{{certificateHash}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["public", "certificates", "verify", "{{certificateHash}}"]
+            },
+            "description": "Verifica validez de certificado por hash (público)"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure baseUrl is set",
+          "if (!pm.variables.get('baseUrl')) {",
+          "  pm.variables.set('baseUrl', 'http://localhost:3000/api');",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-save token from login responses",
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "  try {",
+          "    const jsonData = pm.response.json();",
+          "    if (jsonData.data && jsonData.data.tokens && jsonData.data.tokens.accessToken) {",
+          "      pm.environment.set('token', jsonData.data.tokens.accessToken);",
+          "      pm.variables.set('token', jsonData.data.tokens.accessToken);",
+          "      console.log('Token saved successfully');",
+          "    }",
+          "  } catch(e) {",
+          "    // Response is not JSON or does not contain token",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ]
+}

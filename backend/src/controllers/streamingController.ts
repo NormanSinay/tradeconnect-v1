@@ -312,12 +312,14 @@ export class StreamingController {
     *         content:
     *           'application/json':
     *             schema:
-    *               allOf:
-    *                 - $ref: '#/components/schemas/ApiResponse'
-    *                 - type: object
-    *                   properties:
-    *                     data:
-    *                       $ref: '#/components/schemas/StreamTokenResponse'
+    *               type: object
+    *               properties:
+    *                 success:
+    *                   type: boolean
+    *                 message:
+    *                   type: string
+    *                 data:
+    *                   $ref: '#/components/schemas/StreamTokenResponse'
     *       400:
     *         description: Datos inválidos
     *       401:
@@ -352,15 +354,20 @@ export class StreamingController {
     *         content:
     *           'application/json':
     *             schema:
-    *               allOf:
-    *                 - $ref: '#/components/schemas/ApiResponse'
-    *               - type: object
-    *                 properties:
-    *                   data:
-    *                     type: object
-    *                     properties:
-    *                       tokenId: { type: 'string' }
-    *                       revokedAt: { type: 'string', format: 'date-time' }
+    *               type: object
+    *               properties:
+    *                 success:
+    *                   type: boolean
+    *                 message:
+    *                   type: string
+    *                 data:
+    *                   type: object
+    *                   properties:
+    *                     tokenId:
+    *                       type: string
+    *                     revokedAt:
+    *                       type: string
+    *                       format: date-time
     *       401:
     *         description: No autorizado
     *       403:
@@ -393,19 +400,28 @@ export class StreamingController {
     *         content:
     *           'application/json':
     *             schema:
-    *               allOf:
-    *                 - $ref: '#/components/schemas/ApiResponse'
-    *               - type: object
-    *                 properties:
-    *                   data:
-    *                     type: object
-    *                     properties:
-    *                       participantId: { type: 'integer' }
-    *                       allowed: { type: 'boolean' }
-    *                       remaining: { type: 'integer' }
-    *                       resetTime: { type: 'string', format: 'date-time' }
-    *                       currentRequests: { type: 'integer' }
-    *                       maxRequests: { type: 'integer' }
+    *               type: object
+    *               properties:
+    *                 success:
+    *                   type: boolean
+    *                 message:
+    *                   type: string
+    *                 data:
+    *                   type: object
+    *                   properties:
+    *                     participantId:
+    *                       type: integer
+    *                     allowed:
+    *                       type: boolean
+    *                     remaining:
+    *                       type: integer
+    *                     resetTime:
+    *                       type: string
+    *                       format: date-time
+    *                     currentRequests:
+    *                       type: integer
+    *                     maxRequests:
+    *                       type: integer
     *       401:
     *         description: No autorizado
     *       403:
@@ -457,18 +473,27 @@ export class StreamingController {
     *         content:
     *           'application/json':
     *             schema:
-    *               allOf:
-    *                 - $ref: '#/components/schemas/ApiResponse'
-    *               - type: object
-    *                 properties:
-    *                   data:
-    *                     type: object
-    *                     properties:
-    *                       participantId: { type: 'integer' }
-    *                       blocked: { type: 'boolean' }
-    *                       reason: { type: 'string' }
-    *                       blockedAt: { type: 'string', format: 'date-time' }
-    *                       expiresAt: { type: 'string', format: 'date-time' }
+    *               type: object
+    *               properties:
+    *                 success:
+    *                   type: boolean
+    *                 message:
+    *                   type: string
+    *                 data:
+    *                   type: object
+    *                   properties:
+    *                     participantId:
+    *                       type: integer
+    *                     blocked:
+    *                       type: boolean
+    *                     reason:
+    *                       type: string
+    *                     blockedAt:
+    *                       type: string
+    *                       format: date-time
+    *                     expiresAt:
+    *                       type: string
+    *                       format: date-time
     *       400:
     *         description: Datos inválidos
     *       401:
@@ -505,16 +530,22 @@ export class StreamingController {
     *         content:
     *           'application/json':
     *             schema:
-    *               allOf:
-    *                 - $ref: '#/components/schemas/ApiResponse'
-    *               - type: object
-    *                 properties:
-    *                   data:
-    *                     type: object
-    *                     properties:
-    *                       participantId: { type: 'integer' }
-    *                       unblocked: { type: 'boolean' }
-    *                       unblockedAt: { type: 'string', format: 'date-time' }
+    *               type: object
+    *               properties:
+    *                 success:
+    *                   type: boolean
+    *                 message:
+    *                   type: string
+    *                 data:
+    *                   type: object
+    *                   properties:
+    *                     participantId:
+    *                       type: integer
+    *                     unblocked:
+    *                       type: boolean
+    *                     unblockedAt:
+    *                       type: string
+    *                       format: date-time
     *       401:
     *         description: No autorizado
     *       403:
@@ -548,20 +579,30 @@ export class StreamingController {
     *         content:
     *           'application/json':
     *             schema:
-    *               allOf:
-    *                 - $ref: '#/components/schemas/ApiResponse'
-    *               - type: object
-    *                 properties:
-    *                   data:
-    *                     type: object
-    *                     properties:
-    *                       totalTokensGenerated: { type: 'integer' }
-    *                       totalTokensRevoked: { type: 'integer' }
-    *                       totalRateLimitExceeded: { type: 'integer' }
-    *                       totalParticipantsBlocked: { type: 'integer' }
-    *                       activeBlocks: { type: 'integer' }
-    *                       timeRangeHours: { type: 'integer' }
-    *                       timestamp: { type: 'string', format: 'date-time' }
+    *               type: object
+    *               properties:
+    *                 success:
+    *                   type: boolean
+    *                 message:
+    *                   type: string
+    *                 data:
+    *                   type: object
+    *                   properties:
+    *                     totalTokensGenerated:
+    *                       type: integer
+    *                     totalTokensRevoked:
+    *                       type: integer
+    *                     totalRateLimitExceeded:
+    *                       type: integer
+    *                     totalParticipantsBlocked:
+    *                       type: integer
+    *                     activeBlocks:
+    *                       type: integer
+    *                     timeRangeHours:
+    *                       type: integer
+    *                     timestamp:
+    *                       type: string
+    *                       format: date-time
     *       401:
     *         description: No autorizado
     *       403:

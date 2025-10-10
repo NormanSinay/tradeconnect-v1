@@ -379,13 +379,13 @@ const queryValidation = [
  *           type: string
  *           minLength: 2
  *           maxLength: 100
- *         description: Término de búsqueda (nombre, apellido, especialidades)
+ *         description: "Término de búsqueda (nombre, apellido, especialidades)"
  *         example: "Juan Pérez"
  *       - in: query
  *         name: category
  *         schema:
  *           type: string
- *           enum: [national, international, expert, special_guest]
+ *           enum: ["national", "international", "expert", "special_guest"]
  *         description: Filtrar por categoría de speaker
  *         example: "expert"
  *       - in: query
@@ -402,8 +402,8 @@ const queryValidation = [
  *           type: array
  *           items:
  *             type: string
- *             enum: [presential, virtual, hybrid]
- *         description: Modalidades disponibles (presencial, virtual, híbrido)
+ *             enum: ["presential", "virtual", "hybrid"]
+ *         description: "Modalidades disponibles (presencial, virtual, híbrido)"
  *         example: ["virtual", "hybrid"]
  *       - in: query
  *         name: languages
@@ -411,7 +411,7 @@ const queryValidation = [
  *           type: array
  *           items:
  *             type: string
- *             enum: [spanish, english, french, german, italian, portuguese, other]
+ *             enum: ["spanish", "english", "french", "german", "italian", "portuguese", "other"]
  *         description: Idiomas hablados por el speaker
  *         example: ["spanish", "english"]
  *       - in: query
@@ -427,7 +427,7 @@ const queryValidation = [
  *         name: sortBy
  *         schema:
  *           type: string
- *           enum: [firstName, lastName, rating, totalEvents, baseRate, createdAt, verifiedAt]
+ *           enum: ["firstName", "lastName", "rating", "totalEvents", "baseRate", "createdAt", "verifiedAt"]
  *           default: rating
  *         description: Campo por el cual ordenar
  *         example: "rating"
@@ -435,7 +435,7 @@ const queryValidation = [
  *         name: sortOrder
  *         schema:
  *           type: string
- *           enum: [ASC, DESC]
+ *           enum: ["ASC", "DESC"]
  *           default: DESC
  *         description: Orden de clasificación
  *         example: "DESC"
@@ -476,7 +476,7 @@ const queryValidation = [
  *                             example: "https://example.com/avatar.jpg"
  *                           category:
  *                             type: string
- *                             enum: [national, international, expert, special_guest]
+ *                             enum: ["national", "international", "expert", "special_guest"]
  *                             example: "expert"
  *                           shortBio:
  *                             type: string
@@ -485,13 +485,13 @@ const queryValidation = [
  *                             type: array
  *                             items:
  *                               type: string
- *                               enum: [presential, virtual, hybrid]
+ *                               enum: ["presential", "virtual", "hybrid"]
  *                             example: ["virtual", "hybrid"]
  *                           languages:
  *                             type: array
  *                             items:
  *                               type: string
- *                               enum: [spanish, english, french, german, italian, portuguese, other]
+ *                               enum: ["spanish", "english", "french", "german", "italian", "portuguese", "other"]
  *                             example: ["spanish", "english"]
  *                           specialties:
  *                             type: array
@@ -518,7 +518,7 @@ const queryValidation = [
  *                             example: 150.00
  *                           rateType:
  *                             type: string
- *                             enum: [hourly, daily, event]
+ *                             enum: ["hourly", "daily", "event"]
  *                             example: "hourly"
  *                           isVerified:
  *                             type: boolean
@@ -557,14 +557,16 @@ const queryValidation = [
  *                   data:
  *                     speakers:
  *                       - id: 1
- *                         firstName: "María"
- *                         lastName: "González"
+ *                         firstName: "Maria"
+ *                         lastName: "Gonzalez"
  *                         avatar: "https://example.com/avatar.jpg"
  *                         category: "expert"
  *                         shortBio: "Experta en transformación digital con 15 años de experiencia"
  *                         modalities: ["virtual", "hybrid"]
  *                         languages: ["spanish", "english"]
- *                         specialties: [{ "id": 1, "name": "Transformación Digital" }]
+ *                         specialties:
+ *                           - id: 1
+ *                             name: "Transformación Digital"
  *                         rating: 4.8
  *                         totalEvents: 45
  *                         baseRate: 150.00
@@ -578,7 +580,9 @@ const queryValidation = [
  *                         shortBio: "Especialista en ciberseguridad empresarial"
  *                         modalities: ["presential", "virtual"]
  *                         languages: ["spanish"]
- *                         specialties: [{ "id": 2, "name": "Ciberseguridad" }]
+ *                         specialties:
+ *                           - id: 2
+ *                             name: "Ciberseguridad"
  *                         rating: 4.5
  *                         totalEvents: 28
  *                         baseRate: 120.00
@@ -624,6 +628,7 @@ const queryValidation = [
  *                 error:
  *                   type: string
  *                   example: "RATE_LIMIT_EXCEEDED"
+ */
 router.get('/', speakerLimiter, queryValidation, speakerController.getActiveSpeakers);
 
 // ====================================================================
@@ -734,15 +739,15 @@ router.get('/', speakerLimiter, queryValidation, speakerController.getActiveSpea
  *                 example: 150.00
  *               rateType:
  *                 type: string
- *                 enum: [hourly, daily, event]
- *                 description: Tipo de tarifa (por hora, día o evento)
+ *                 enum: ["hourly", "daily", "event"]
+ *                 description: "Tipo de tarifa (por hora, día o evento)"
  *                 example: "hourly"
  *               modalities:
  *                 type: array
  *                 minItems: 1
  *                 items:
  *                   type: string
- *                   enum: [presential, virtual, hybrid]
+ *                   enum: ["presential", "virtual", "hybrid"]
  *                 description: Modalidades disponibles
  *                 example: ["virtual", "hybrid"]
  *               languages:
@@ -750,12 +755,12 @@ router.get('/', speakerLimiter, queryValidation, speakerController.getActiveSpea
  *                 minItems: 1
  *                 items:
  *                   type: string
- *                   enum: [spanish, english, french, german, italian, portuguese, other]
+ *                   enum: ["spanish", "english", "french", "german", "italian", "portuguese", "other"]
  *                 description: Idiomas hablados
  *                 example: ["spanish", "english"]
  *               category:
  *                 type: string
- *                 enum: [national, international, expert, special_guest]
+ *                 enum: ["national", "international", "expert", "special_guest"]
  *                 description: Categoría del speaker
  *                 example: "expert"
  *               specialtyIds:
@@ -778,7 +783,7 @@ router.get('/', speakerLimiter, queryValidation, speakerController.getActiveSpea
  *                 cui: "1234567890123"
  *                 rtu: "RTU-12345678"
  *                 shortBio: "Experta en transformación digital con 15 años de experiencia"
- *                 fullBio: "María González es una reconocida experta en transformación digital con más de 15 años de experiencia..."
+ *                 fullBio: "Experta en transformación digital."
  *                 linkedinUrl: "https://linkedin.com/in/mariagonzalez"
  *                 twitterUrl: "https://twitter.com/mariagonzalez"
  *                 websiteUrl: "https://mariagonzalez.com"
@@ -929,6 +934,7 @@ router.get('/', speakerLimiter, queryValidation, speakerController.getActiveSpea
  *                 error:
  *                   type: string
  *                   example: "RATE_LIMIT_EXCEEDED"
+ */
 router.post('/', authenticated, createEditLimiter, createSpeakerValidation, speakerController.createSpeaker);
 
 /**
@@ -937,7 +943,7 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
  *   get:
  *     tags: [Speakers]
  *     summary: Obtener speaker
- *     description: Obtiene información completa y detallada de un speaker específico
+ *     description: "Obtiene información completa y detallada de un speaker específico"
  *     parameters:
  *       - in: path
  *         name: id
@@ -945,7 +951,7 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
  *         schema:
  *           type: integer
  *           minimum: 1
- *         description: ID único del speaker
+ *         description: "ID único del speaker"
  *         example: 1
  *     responses:
  *       200:
@@ -1019,19 +1025,19 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
  *                           example: "https://mariagonzalez.com"
  *                         category:
  *                           type: string
- *                           enum: [national, international, expert, special_guest]
+ *                           enum: ["national", "international", "expert", "special_guest"]
  *                           example: "expert"
  *                         modalities:
  *                           type: array
  *                           items:
  *                             type: string
- *                             enum: [presential, virtual, hybrid]
+ *                             enum: ["presential", "virtual", "hybrid"]
  *                           example: ["virtual", "hybrid"]
  *                         languages:
  *                           type: array
  *                           items:
  *                             type: string
- *                             enum: [spanish, english, french, german, italian, portuguese, other]
+ *                             enum: ["spanish", "english", "french", "german", "italian", "portuguese", "other"]
  *                           example: ["spanish", "english"]
  *                         specialties:
  *                           type: array
@@ -1047,13 +1053,16 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
  *                               description:
  *                                 type: string
  *                                 example: "Estrategias para modernizar procesos empresariales"
- *                           example: [{ "id": 1, "name": "Transformación Digital", "description": "Estrategias para modernizar procesos empresariales" }]
+ *                           example:
+ *                             - id: 1
+ *                               name: "Transformación Digital"
+ *                               description: "Estrategias para modernizar procesos empresariales"
  *                         baseRate:
  *                           type: number
  *                           example: 150.00
  *                         rateType:
  *                           type: string
- *                           enum: [hourly, daily, event]
+ *                           enum: ["hourly", "daily", "event"]
  *                           example: "hourly"
  *                         rating:
  *                           type: number
@@ -1095,7 +1104,12 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
  *                               isRecurring:
  *                                 type: boolean
  *                                 example: false
- *                           example: [{ "id": 1, "startDate": "2023-12-01T00:00:00.000Z", "endDate": "2023-12-31T23:59:59.000Z", "reason": "Vacaciones de fin de año", "isRecurring": false }]
+ *                           example:
+ *                             - id: 1
+ *                               startDate: "2023-12-01T00:00:00.000Z"
+ *                               endDate: "2023-12-31T23:59:59.000Z"
+ *                               reason: "Vacaciones de fin de año"
+ *                               isRecurring: false
  *                         recentEvaluations:
  *                           type: array
  *                           items:
@@ -1122,7 +1136,13 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
  *                                 type: string
  *                                 format: date-time
  *                                 example: "2023-10-01T18:00:00.000Z"
- *                           example: [{ "id": 1, "eventId": 123, "eventTitle": "Conferencia Tech 2023", "overallRating": 5, "comments": "Excelente presentación, muy claro y didáctico", "evaluationDate": "2023-10-01T18:00:00.000Z" }]
+ *                           example:
+ *                             - id: 1
+ *                               eventId: 123
+ *                               eventTitle: "Conferencia Tech 2023"
+ *                               overallRating: 5
+ *                               comments: "Excelente presentación, muy claro y didáctico"
+ *                               evaluationDate: "2023-10-01T18:00:00.000Z"
  *                         createdAt:
  *                           type: string
  *                           format: date-time
@@ -1147,7 +1167,7 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
  *                       country: "Guatemala"
  *                       avatar: "https://example.com/avatar.jpg"
  *                       shortBio: "Experta en transformación digital con 15 años de experiencia"
- *                       fullBio: "María González es una reconocida experta en transformación digital..."
+ *                       fullBio: "Experta en transformación digital."
  *                       linkedinUrl: "https://linkedin.com/in/mariagonzalez"
  *                       category: "expert"
  *                       modalities: ["virtual", "hybrid"]
@@ -1196,6 +1216,7 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
  *                 error:
  *                   type: string
  *                   example: "RATE_LIMIT_EXCEEDED"
+ */
 router.get('/:id', speakerLimiter, speakerIdValidation, speakerController.getSpeaker);
 
 /**

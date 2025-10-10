@@ -1719,7 +1719,7 @@ router.get('/profile', authenticated, authController.getProfile);
  *   post:
  *     tags: [Authentication]
  *     summary: Subir avatar del usuario
- *     description: Sube una nueva imagen de avatar para el usuario (formatos: JPG, PNG, max 5MB)
+ *     description: "Sube una nueva imagen de avatar para el usuario (formatos: JPG, PNG, max 5MB)"
  *     security:
  *       - bearerAuth: []
  *     requestBody:
