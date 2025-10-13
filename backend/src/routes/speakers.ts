@@ -1220,93 +1220,1137 @@ router.post('/', authenticated, createEditLimiter, createSpeakerValidation, spea
 router.get('/:id', speakerLimiter, speakerIdValidation, speakerController.getSpeaker);
 
 /**
- * @swagger
- * /api/speakers/{id}:
- *   put:
- *     tags: [Speakers]
- *     summary: Actualizar speaker
- *     description: Actualiza información de un speaker específico
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- */
+  * @swagger
+  * /api/speakers/{id}:
+  *   put:
+  *     tags: [Speakers]
+  *     summary: Actualizar speaker
+  *     description: Actualiza información de un speaker específico con validación completa de datos
+  *     security:
+  *       - bearerAuth: []
+  *     parameters:
+  *       - in: path
+  *         name: id
+  *         required: true
+  *         schema:
+  *           type: integer
+  *           minimum: 1
+  *         description: ID único del speaker
+  *         example: 1
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             properties:
+  *               firstName:
+  *                 type: string
+  *                 minLength: 2
+  *                 maxLength: 100
+  *                 description: Nombre del speaker
+  *                 example: "María"
+  *               lastName:
+  *                 type: string
+  *                 minLength: 2
+  *                 maxLength: 100
+  *                 description: Apellido del speaker
+  *                 example: "González"
+  *               email:
+  *                 type: string
+  *                 format: email
+  *                 description: Correo electrónico único
+  *                 example: "maria.gonzalez@ejemplo.com"
+  *               phone:
+  *                 type: string
+  *                 minLength: 8
+  *                 maxLength: 20
+  *                 description: Número de teléfono
+  *                 example: "+502 5555-1234"
+  *               country:
+  *                 type: string
+  *                 minLength: 2
+  *                 maxLength: 100
+  *                 description: País de residencia
+  *                 example: "Guatemala"
+  *               nit:
+  *                 type: string
+  *                 minLength: 8
+  *                 maxLength: 20
+  *                 description: Número de Identificación Tributaria
+  *                 example: "12345678-9"
+  *               cui:
+  *                 type: string
+  *                 minLength: 8
+  *                 maxLength: 20
+  *                 description: Código Único de Identificación
+  *                 example: "1234567890123"
+  *               rtu:
+  *                 type: string
+  *                 minLength: 5
+  *                 maxLength: 50
+  *                 description: Registro Tributario Unificado
+  *                 example: "RTU-12345678"
+  *               shortBio:
+  *                 type: string
+  *                 maxLength: 200
+  *                 description: Biografía corta para listados
+  *                 example: "Experta en transformación digital con 16 años de experiencia"
+  *               fullBio:
+  *                 type: string
+  *                 maxLength: 2000
+  *                 description: Biografía completa detallada
+  *                 example: "María González es una reconocida experta en transformación digital con más de 16 años de experiencia..."
+  *               linkedinUrl:
+  *                 type: string
+  *                 format: uri
+  *                 description: URL del perfil de LinkedIn
+  *                 example: "https://linkedin.com/in/mariagonzalez"
+  *               twitterUrl:
+  *                 type: string
+  *                 format: uri
+  *                 description: URL del perfil de Twitter
+  *                 example: "https://twitter.com/mariagonzalez"
+  *               websiteUrl:
+  *                 type: string
+  *                 format: uri
+  *                 description: URL del sitio web personal
+  *                 example: "https://mariagonzalez.com"
+  *               baseRate:
+  *                 type: number
+  *                 minimum: 0
+  *                 description: Tarifa base por el servicio
+  *                 example: 160.00
+  *               rateType:
+  *                 type: string
+  *                 enum: ["hourly", "daily", "event"]
+  *                 description: "Tipo de tarifa (por hora, día o evento)"
+  *                 example: "hourly"
+  *               modalities:
+  *                 type: array
+  *                 minItems: 1
+  *                 items:
+  *                   type: string
+  *                   enum: ["presential", "virtual", "hybrid"]
+  *                 description: Modalidades disponibles
+  *                 example: ["virtual", "hybrid"]
+  *               languages:
+  *                 type: array
+  *                 minItems: 1
+  *                 items:
+  *                   type: string
+  *                   enum: ["spanish", "english", "french", "german", "italian", "portuguese", "other"]
+  *                 description: Idiomas hablados
+  *                 example: ["spanish", "english"]
+  *               category:
+  *                 type: string
+  *                 enum: ["national", "international", "expert", "special_guest"]
+  *                 description: Categoría del speaker
+  *                 example: "expert"
+  *               specialtyIds:
+  *                 type: array
+  *                 items:
+  *                   type: integer
+  *                   minimum: 1
+  *                 description: IDs de especialidades del speaker
+  *                 example: [1, 3, 5]
+  *           examples:
+  *             actualizar_speaker:
+  *               summary: Actualizar información del speaker
+  *               value:
+  *                 firstName: "María"
+  *                 lastName: "González"
+  *                 email: "maria.gonzalez@ejemplo.com"
+  *                 phone: "+502 5555-1234"
+  *                 shortBio: "Experta en transformación digital con 16 años de experiencia"
+  *                 baseRate: 160.00
+  *                 modalities: ["virtual", "hybrid"]
+  *                 languages: ["spanish", "english"]
+  *                 specialtyIds: [1, 3, 5]
+  *     responses:
+  *       200:
+  *         description: Speaker actualizado exitosamente
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 message:
+  *                   type: string
+  *                   example: "Speaker actualizado exitosamente"
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     speaker:
+  *                       type: object
+  *                       properties:
+  *                         id:
+  *                           type: integer
+  *                           example: 1
+  *                         firstName:
+  *                           type: string
+  *                           example: "María"
+  *                         lastName:
+  *                           type: string
+  *                           example: "González"
+  *                         email:
+  *                           type: string
+  *                           example: "maria.gonzalez@ejemplo.com"
+  *                         category:
+  *                           type: string
+  *                           example: "expert"
+  *                         modalities:
+  *                           type: array
+  *                           items:
+  *                             type: string
+  *                           example: ["virtual", "hybrid"]
+  *                         languages:
+  *                           type: array
+  *                           items:
+  *                             type: string
+  *                           example: ["spanish", "english"]
+  *                         baseRate:
+  *                           type: number
+  *                           example: 160.00
+  *                         rateType:
+  *                           type: string
+  *                           example: "hourly"
+  *                         isVerified:
+  *                           type: boolean
+  *                           example: true
+  *                         updatedAt:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-10-20T16:45:00.000Z"
+  *             examples:
+  *               speaker_actualizado:
+  *                 summary: Speaker actualizado exitosamente
+  *                 value:
+  *                   success: true
+  *                   message: "Speaker actualizado exitosamente"
+  *                   data:
+  *                     speaker:
+  *                       id: 1
+  *                       firstName: "María"
+  *                       lastName: "González"
+  *                       email: "maria.gonzalez@ejemplo.com"
+  *                       category: "expert"
+  *                       modalities: ["virtual", "hybrid"]
+  *                       languages: ["spanish", "english"]
+  *                       baseRate: 160.00
+  *                       rateType: "hourly"
+  *                       isVerified: true
+  *                       updatedAt: "2023-10-20T16:45:00.000Z"
+  *       400:
+  *         description: Datos inválidos o email ya registrado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "El email ya está registrado para otro speaker"
+  *                 error:
+  *                   type: string
+  *                   example: "SPEAKER_EMAIL_EXISTS"
+  *       401:
+  *         description: Token inválido
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Token de autenticación inválido"
+  *                 error:
+  *                   type: string
+  *                   example: "INVALID_TOKEN"
+  *       403:
+  *         description: Permisos insuficientes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "No tienes permisos para actualizar este speaker"
+  *                 error:
+  *                   type: string
+  *                   example: "INSUFFICIENT_PERMISSIONS"
+  *       404:
+  *         description: Speaker no encontrado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Speaker no encontrado"
+  *                 error:
+  *                   type: string
+  *                   example: "SPEAKER_NOT_FOUND"
+  *       429:
+  *         description: Demasiadas operaciones de edición
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Demasiadas operaciones de creación/edición. Intente más tarde."
+  *                 error:
+  *                   type: string
+  *                   example: "RATE_LIMIT_EXCEEDED"
+  */
 router.put('/:id', authenticated, createEditLimiter, speakerIdValidation, updateSpeakerValidation, speakerController.updateSpeaker);
 
 /**
- * @swagger
- * /api/speakers/{id}:
- *   delete:
- *     tags: [Speakers]
- *     summary: Eliminar speaker
- *     description: Elimina un speaker (soft delete)
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- */
+  * @swagger
+  * /api/speakers/{id}:
+  *   delete:
+  *     tags: [Speakers]
+  *     summary: Eliminar speaker
+  *     description: Elimina un speaker (soft delete - marca como inactivo)
+  *     security:
+  *       - bearerAuth: []
+  *     parameters:
+  *       - in: path
+  *         name: id
+  *         required: true
+  *         schema:
+  *           type: integer
+  *           minimum: 1
+  *         description: ID único del speaker
+  *         example: 1
+  *     responses:
+  *       200:
+  *         description: Speaker eliminado exitosamente
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 message:
+  *                   type: string
+  *                   example: "Speaker eliminado exitosamente"
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     speaker:
+  *                       type: object
+  *                       properties:
+  *                         id:
+  *                           type: integer
+  *                           example: 1
+  *                         firstName:
+  *                           type: string
+  *                           example: "María"
+  *                         lastName:
+  *                           type: string
+  *                           example: "González"
+  *                         email:
+  *                           type: string
+  *                           example: "maria.gonzalez@ejemplo.com"
+  *                         status:
+  *                           type: string
+  *                           example: "inactive"
+  *                         deletedAt:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-10-25T09:15:00.000Z"
+  *             examples:
+  *               speaker_eliminado:
+  *                 summary: Speaker eliminado exitosamente
+  *                 value:
+  *                   success: true
+  *                   message: "Speaker eliminado exitosamente"
+  *                   data:
+  *                     speaker:
+  *                       id: 1
+  *                       firstName: "María"
+  *                       lastName: "González"
+  *                       email: "maria.gonzalez@ejemplo.com"
+  *                       status: "inactive"
+  *                       deletedAt: "2023-10-25T09:15:00.000Z"
+  *       401:
+  *         description: Token inválido
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Token de autenticación inválido"
+  *                 error:
+  *                   type: string
+  *                   example: "INVALID_TOKEN"
+  *       403:
+  *         description: Permisos insuficientes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "No tienes permisos para eliminar este speaker"
+  *                 error:
+  *                   type: string
+  *                   example: "INSUFFICIENT_PERMISSIONS"
+  *       404:
+  *         description: Speaker no encontrado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Speaker no encontrado"
+  *                 error:
+  *                   type: string
+  *                   example: "SPEAKER_NOT_FOUND"
+  *       409:
+  *         description: No se puede eliminar speaker con contratos activos
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "No se puede eliminar un speaker que tiene contratos activos"
+  *                 error:
+  *                   type: string
+  *                   example: "SPEAKER_HAS_ACTIVE_CONTRACTS"
+  *       429:
+  *         description: Demasiadas solicitudes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Demasiadas solicitudes. Intente más tarde."
+  *                 error:
+  *                   type: string
+  *                   example: "RATE_LIMIT_EXCEEDED"
+  */
 router.delete('/:id', authenticated, speakerLimiter, speakerIdValidation, speakerController.deleteSpeaker);
 
 /**
- * @swagger
- * /api/speakers/{id}/verify:
- *   post:
- *     tags: [Speakers]
- *     summary: Verificar speaker
- *     description: Marca un speaker como verificado administrativamente
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- */
+  * @swagger
+  * /api/speakers/{id}/verify:
+  *   post:
+  *     tags: [Speakers]
+  *     summary: Verificar speaker
+  *     description: Marca un speaker como verificado administrativamente después de validar su información y credenciales
+  *     security:
+  *       - bearerAuth: []
+  *     parameters:
+  *       - in: path
+  *         name: id
+  *         required: true
+  *         schema:
+  *           type: integer
+  *           minimum: 1
+  *         description: ID único del speaker
+  *         example: 1
+  *     responses:
+  *       200:
+  *         description: Speaker verificado exitosamente
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 message:
+  *                   type: string
+  *                   example: "Speaker verificado exitosamente"
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     speaker:
+  *                       type: object
+  *                       properties:
+  *                         id:
+  *                           type: integer
+  *                           example: 1
+  *                         firstName:
+  *                           type: string
+  *                           example: "María"
+  *                         lastName:
+  *                           type: string
+  *                           example: "González"
+  *                         email:
+  *                           type: string
+  *                           example: "maria.gonzalez@ejemplo.com"
+  *                         isVerified:
+  *                           type: boolean
+  *                           example: true
+  *                         verifiedAt:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-10-15T10:00:00.000Z"
+  *                         verifiedBy:
+  *                           type: integer
+  *                           example: 5
+  *             examples:
+  *               speaker_verificado:
+  *                 summary: Speaker verificado exitosamente
+  *                 value:
+  *                   success: true
+  *                   message: "Speaker verificado exitosamente"
+  *                   data:
+  *                     speaker:
+  *                       id: 1
+  *                       firstName: "María"
+  *                       lastName: "González"
+  *                       email: "maria.gonzalez@ejemplo.com"
+  *                       isVerified: true
+  *                       verifiedAt: "2023-10-15T10:00:00.000Z"
+  *                       verifiedBy: 5
+  *       401:
+  *         description: Token inválido
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Token de autenticación inválido"
+  *                 error:
+  *                   type: string
+  *                   example: "INVALID_TOKEN"
+  *       403:
+  *         description: Permisos insuficientes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Solo administradores pueden verificar speakers"
+  *                 error:
+  *                   type: string
+  *                   example: "INSUFFICIENT_PERMISSIONS"
+  *       404:
+  *         description: Speaker no encontrado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Speaker no encontrado"
+  *                 error:
+  *                   type: string
+  *                   example: "SPEAKER_NOT_FOUND"
+  *       409:
+  *         description: Speaker ya verificado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "El speaker ya está verificado"
+  *                 error:
+  *                   type: string
+  *                   example: "SPEAKER_ALREADY_VERIFIED"
+  *       429:
+  *         description: Demasiadas solicitudes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Demasiadas solicitudes. Intente más tarde."
+  *                 error:
+  *                   type: string
+  *                   example: "RATE_LIMIT_EXCEEDED"
+  */
 router.post('/:id/verify', authenticated, speakerLimiter, speakerIdValidation, speakerController.verifySpeaker);
 
 /**
- * @swagger
- * /api/speakers/{id}/availability:
- *   post:
- *     tags: [Speakers]
- *     summary: Crear bloqueo de disponibilidad
- *     description: Crea un bloqueo de fechas no disponibles para un speaker
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- */
+  * @swagger
+  * /api/speakers/{id}/availability:
+  *   post:
+  *     tags: [Speakers]
+  *     summary: Crear bloqueo de disponibilidad
+  *     description: Crea un bloqueo de fechas no disponibles para un speaker, impidiendo que sea contratado en esas fechas
+  *     security:
+  *       - bearerAuth: []
+  *     parameters:
+  *       - in: path
+  *         name: id
+  *         required: true
+  *         schema:
+  *           type: integer
+  *           minimum: 1
+  *         description: ID único del speaker
+  *         example: 1
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             required:
+  *               - startDate
+  *               - endDate
+  *             properties:
+  *               startDate:
+  *                 type: string
+  *                 format: date-time
+  *                 description: Fecha y hora de inicio del bloqueo
+  *                 example: "2023-12-01T00:00:00.000Z"
+  *               endDate:
+  *                 type: string
+  *                 format: date-time
+  *                 description: Fecha y hora de fin del bloqueo
+  *                 example: "2023-12-31T23:59:59.000Z"
+  *               reason:
+  *                 type: string
+  *                 maxLength: 500
+  *                 description: Razón del bloqueo de disponibilidad
+  *                 example: "Vacaciones de fin de año"
+  *               isRecurring:
+  *                 type: boolean
+  *                 description: Indica si el bloqueo se repite anualmente
+  *                 example: false
+  *               recurrencePattern:
+  *                 type: string
+  *                 enum: ["daily", "weekly", "monthly", "yearly"]
+  *                 description: Patrón de recurrencia si isRecurring es true
+  *                 example: "yearly"
+  *           examples:
+  *             crear_bloqueo_vacaciones:
+  *               summary: Crear bloqueo por vacaciones
+  *               value:
+  *                 startDate: "2023-12-01T00:00:00.000Z"
+  *                 endDate: "2023-12-31T23:59:59.000Z"
+  *                 reason: "Vacaciones de fin de año"
+  *                 isRecurring: false
+  *             crear_bloqueo_recurring:
+  *               summary: Crear bloqueo recurrente
+  *               value:
+  *                 startDate: "2023-12-24T00:00:00.000Z"
+  *                 endDate: "2023-12-26T23:59:59.000Z"
+  *                 reason: "Navidad"
+  *                 isRecurring: true
+  *                 recurrencePattern: "yearly"
+  *     responses:
+  *       201:
+  *         description: Bloqueo de disponibilidad creado exitosamente
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 message:
+  *                   type: string
+  *                   example: "Bloqueo de disponibilidad creado exitosamente"
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     availabilityBlock:
+  *                       type: object
+  *                       properties:
+  *                         id:
+  *                           type: integer
+  *                           example: 1
+  *                         speakerId:
+  *                           type: integer
+  *                           example: 1
+  *                         startDate:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-12-01T00:00:00.000Z"
+  *                         endDate:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-12-31T23:59:59.000Z"
+  *                         reason:
+  *                           type: string
+  *                           example: "Vacaciones de fin de año"
+  *                         isRecurring:
+  *                           type: boolean
+  *                           example: false
+  *                         recurrencePattern:
+  *                           type: string
+  *                           example: null
+  *                         createdAt:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-10-15T10:00:00.000Z"
+  *             examples:
+  *               bloqueo_creado:
+  *                 summary: Bloqueo creado exitosamente
+  *                 value:
+  *                   success: true
+  *                   message: "Bloqueo de disponibilidad creado exitosamente"
+  *                   data:
+  *                     availabilityBlock:
+  *                       id: 1
+  *                       speakerId: 1
+  *                       startDate: "2023-12-01T00:00:00.000Z"
+  *                       endDate: "2023-12-31T23:59:59.000Z"
+  *                       reason: "Vacaciones de fin de año"
+  *                       isRecurring: false
+  *                       recurrencePattern: null
+  *                       createdAt: "2023-10-15T10:00:00.000Z"
+  *       400:
+  *         description: Datos inválidos o conflicto de fechas
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "La fecha de fin debe ser posterior a la fecha de inicio"
+  *                 error:
+  *                   type: string
+  *                   example: "VALIDATION_ERROR"
+  *       401:
+  *         description: Token inválido
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Token de autenticación inválido"
+  *                 error:
+  *                   type: string
+  *                   example: "INVALID_TOKEN"
+  *       403:
+  *         description: Permisos insuficientes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "No tienes permisos para gestionar la disponibilidad de este speaker"
+  *                 error:
+  *                   type: string
+  *                   example: "INSUFFICIENT_PERMISSIONS"
+  *       404:
+  *         description: Speaker no encontrado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Speaker no encontrado"
+  *                 error:
+  *                   type: string
+  *                   example: "SPEAKER_NOT_FOUND"
+  *       409:
+  *         description: Conflicto con bloqueos existentes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Ya existe un bloqueo de disponibilidad en estas fechas"
+  *                 error:
+  *                   type: string
+  *                   example: "AVAILABILITY_CONFLICT"
+  *       429:
+  *         description: Demasiadas operaciones de edición
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Demasiadas operaciones de creación/edición. Intente más tarde."
+  *                 error:
+  *                   type: string
+  *                   example: "RATE_LIMIT_EXCEEDED"
+  */
 router.post('/:id/availability', authenticated, createEditLimiter, speakerIdValidation, createAvailabilityBlockValidation, speakerController.createAvailabilityBlock);
 
 /**
- * @swagger
- * /api/speakers/{id}/evaluate:
- *   post:
- *     tags: [Speakers]
- *     summary: Evaluar speaker
- *     description: Crea una evaluación para un speaker después de un evento
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- */
+  * @swagger
+  * /api/speakers/{id}/evaluate:
+  *   post:
+  *     tags: [Speakers]
+  *     summary: Evaluar speaker
+  *     description: Crea una evaluación para un speaker después de un evento, permitiendo calificar su desempeño y dejar comentarios
+  *     security:
+  *       - bearerAuth: []
+  *     parameters:
+  *       - in: path
+  *         name: id
+  *         required: true
+  *         schema:
+  *           type: integer
+  *           minimum: 1
+  *         description: ID único del speaker
+  *         example: 1
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             required:
+  *               - eventId
+  *               - overallRating
+  *               - criteriaRatings
+  *               - isPublic
+  *               - evaluationDate
+  *             properties:
+  *               eventId:
+  *                 type: integer
+  *                 minimum: 1
+  *                 description: ID del evento donde participó el speaker
+  *                 example: 123
+  *               overallRating:
+  *                 type: number
+  *                 minimum: 1
+  *                 maximum: 5
+  *                 description: Rating general del 1 al 5
+  *                 example: 5
+  *               criteriaRatings:
+  *                 type: object
+  *                 description: Ratings por criterios específicos
+  *                 properties:
+  *                   content:
+  *                     type: number
+  *                     minimum: 1
+  *                     maximum: 5
+  *                     description: Calidad del contenido
+  *                     example: 5
+  *                   delivery:
+  *                     type: number
+  *                     minimum: 1
+  *                     maximum: 5
+  *                     description: Calidad de la presentación
+  *                     example: 5
+  *                   engagement:
+  *                     type: number
+  *                     minimum: 1
+  *                     maximum: 5
+  *                     description: Nivel de engagement con la audiencia
+  *                     example: 4
+  *                   punctuality:
+  *                     type: number
+  *                     minimum: 1
+  *                     maximum: 5
+  *                     description: Puntualidad
+  *                     example: 5
+  *                   professionalism:
+  *                     type: number
+  *                     minimum: 1
+  *                     maximum: 5
+  *                     description: Profesionalismo
+  *                     example: 5
+  *               comments:
+  *                 type: string
+  *                 maxLength: 1000
+  *                 description: Comentarios adicionales sobre la presentación
+  *                 example: "Excelente presentación, muy claro y didáctico. La audiencia quedó muy satisfecha con el contenido y la manera de transmitir los conceptos."
+  *               isPublic:
+  *                 type: boolean
+  *                 description: Indica si la evaluación es pública
+  *                 example: true
+  *               evaluationDate:
+  *                 type: string
+  *                 format: date-time
+  *                 description: Fecha cuando se realizó la evaluación
+  *                 example: "2023-10-01T18:00:00.000Z"
+  *           examples:
+  *             crear_evaluacion_completa:
+  *               summary: Crear evaluación completa
+  *               value:
+  *                 eventId: 123
+  *                 overallRating: 5
+  *                 criteriaRatings:
+  *                   content: 5
+  *                   delivery: 5
+  *                   engagement: 4
+  *                   punctuality: 5
+  *                   professionalism: 5
+  *                 comments: "Excelente presentación, muy claro y didáctico. La audiencia quedó muy satisfecha con el contenido y la manera de transmitir los conceptos."
+  *                 isPublic: true
+  *                 evaluationDate: "2023-10-01T18:00:00.000Z"
+  *     responses:
+  *       201:
+  *         description: Evaluación creada exitosamente
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 message:
+  *                   type: string
+  *                   example: "Evaluación creada exitosamente"
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     evaluation:
+  *                       type: object
+  *                       properties:
+  *                         id:
+  *                           type: integer
+  *                           example: 1
+  *                         speakerId:
+  *                           type: integer
+  *                           example: 1
+  *                         eventId:
+  *                           type: integer
+  *                           example: 123
+  *                         evaluatorId:
+  *                           type: integer
+  *                           example: 45
+  *                         overallRating:
+  *                           type: number
+  *                           example: 5
+  *                         criteriaRatings:
+  *                           type: object
+  *                           example:
+  *                             content: 5
+  *                             delivery: 5
+  *                             engagement: 4
+  *                             punctuality: 5
+  *                             professionalism: 5
+  *                         comments:
+  *                           type: string
+  *                           example: "Excelente presentación, muy claro y didáctico."
+  *                         isPublic:
+  *                           type: boolean
+  *                           example: true
+  *                         evaluationDate:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-10-01T18:00:00.000Z"
+  *                         createdAt:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-10-01T18:30:00.000Z"
+  *             examples:
+  *               evaluacion_creada:
+  *                 summary: Evaluación creada exitosamente
+  *                 value:
+  *                   success: true
+  *                   message: "Evaluación creada exitosamente"
+  *                   data:
+  *                     evaluation:
+  *                       id: 1
+  *                       speakerId: 1
+  *                       eventId: 123
+  *                       evaluatorId: 45
+  *                       overallRating: 5
+  *                       criteriaRatings:
+  *                         content: 5
+  *                         delivery: 5
+  *                         engagement: 4
+  *                         punctuality: 5
+  *                         professionalism: 5
+  *                       comments: "Excelente presentación, muy claro y didáctico."
+  *                       isPublic: true
+  *                       evaluationDate: "2023-10-01T18:00:00.000Z"
+  *                       createdAt: "2023-10-01T18:30:00.000Z"
+  *       400:
+  *         description: Datos inválidos
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "El rating general debe estar entre 1 y 5"
+  *                 error:
+  *                   type: string
+  *                   example: "VALIDATION_ERROR"
+  *       401:
+  *         description: Token inválido
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Token de autenticación inválido"
+  *                 error:
+  *                   type: string
+  *                   example: "INVALID_TOKEN"
+  *       403:
+  *         description: Permisos insuficientes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "No tienes permisos para evaluar este speaker"
+  *                 error:
+  *                   type: string
+  *                   example: "INSUFFICIENT_PERMISSIONS"
+  *       404:
+  *         description: Speaker o evento no encontrado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Speaker no encontrado"
+  *                 error:
+  *                   type: string
+  *                   example: "SPEAKER_NOT_FOUND"
+  *       409:
+  *         description: Ya existe evaluación para este evento
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Ya existe una evaluación para este speaker en este evento"
+  *                 error:
+  *                   type: string
+  *                   example: "EVALUATION_ALREADY_EXISTS"
+  *       429:
+  *         description: Demasiadas solicitudes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Demasiadas solicitudes. Intente más tarde."
+  *                 error:
+  *                   type: string
+  *                   example: "RATE_LIMIT_EXCEEDED"
+  */
 router.post('/:id/evaluate', authenticated, speakerLimiter, speakerIdValidation, createEvaluationValidation, speakerController.createSpeakerEvaluation);
 
 export default router;

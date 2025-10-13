@@ -58,19 +58,22 @@ Database configuration is in `backend/config/config.json` for Sequelize CLI and 
 
 ### Core Modules
 
-TradeConnect is organized into 17 feature modules:
+TradeConnect is organized into 17+ feature modules:
 
 1. **Authentication & Users** - JWT-based auth with 2FA, sessions, role-based access control (RBAC)
-2. **Events Management** - Core event CRUD, templates, duplication, categories, types, statuses
+2. **Events Management** - Core event CRUD, templates, duplication, categories, types, statuses, event sessions
 3. **Speakers** - Speaker profiles, specialties, availability, contracts, payments, evaluations
 4. **Registration System** - Individual and group registrations, cart management, abandoned cart tracking
-5. **Payment Processing** - PayPal, Stripe, NeoNet, BAM gateway integrations
-6. **FEL Integration** - Guatemala electronic invoicing system
-7. **QR Codes & Access Control** - Event access via QR validation
-8. **Certificate Generation** - PDF certificates with blockchain anchoring
-9. **Notifications** - Email, SMS (Twilio), WhatsApp
-10. **Hybrid Events** - Support for virtual, in-person, and hybrid events
+5. **Payment Processing** - PayPal, Stripe, NeoNet, BAM gateway integrations with refunds and reconciliation
+6. **FEL Integration** - Guatemala electronic invoicing system with NIT/CUI validation, tokens, error handling
+7. **QR Codes & Access Control** - Event access via QR validation, attendance tracking, access logs, sync logs
+8. **Certificate Generation** - PDF certificates with blockchain anchoring, certificate templates, validation logs
+9. **Notifications** - Email, SMS (Twilio), WhatsApp with templates, rules, user preferences
+10. **Hybrid Events** - Support for virtual, in-person, and hybrid events with virtual rooms and streaming
 11. **Reports & Analytics** - Event metrics, registration reports, financial reports
+12. **Promotions & Discounts** - Promo codes, volume discounts, early bird pricing, usage tracking
+13. **Capacity Management** - Event capacities, access types, overbooking rules, waitlists
+14. **Invoicing** - Complete invoicing system integrated with FEL
 
 ### Directory Structure
 
@@ -120,14 +123,24 @@ Configured in `tsconfig.json` under `paths`.
 
 ### Database Models & Relationships
 
-**Core Entities**:
+**Core Entities** (71+ models):
 - `User` → `UserRole` ← `Role` ← `RolePermission` → `Permission`
-- `User` → `Session` (JWT sessions), `TwoFactorAuth`, `AuditLog`
-- `Event` → `EventType`, `EventCategory`, `EventStatus`, `EventTemplate`, `EventMedia`
-- `Event` → `EventRegistration`, `SpeakerEvent` ← `Speaker`
+- `User` → `Session` (JWT sessions), `TwoFactorAuth`, `AuditLog`, `UserNotificationPreferences`
+- `Event` → `EventType`, `EventCategory`, `EventStatus`, `EventTemplate`, `EventMedia`, `EventDuplication`
+- `Event` → `EventRegistration`, `SpeakerEvent` ← `Speaker`, `EventSession`, `HybridEvent`
+- `Event` → `Promotion`, `PromoCode`, `VolumeDiscount`, `EarlyBirdDiscount`, `PromoCodeUsage`
+- `Event` → `Capacity`, `AccessType`, `Overbooking`, `CapacityRule`, `Waitlist`
 - `Speaker` → `Contract`, `SpeakerPayment`, `SpeakerEvaluation`, `SpeakerAvailabilityBlock`
+- `Speaker` → `SpeakerSpecialty` ← `Specialty`
 - `User` → `Registration`, `GroupRegistration`
 - `Cart` → `CartItem`, `CartSession`, `AbandonedCart`
+- `Payment` → `PaymentMethod`, `Refund`, `PaymentReconciliation`
+- `Invoice` → `FelDocument`, `FelToken`, `FelError`, `FelAuditLog`
+- `Registration` → `NitValidation`, `CuiValidation`
+- `Registration` → `QRCode`, `Attendance`, `AccessLog`, `QrSyncLog`
+- `Registration` → `Certificate`, `CertificateTemplate`, `CertificateValidationLog`, `BlockchainHash`
+- `Notification` → `NotificationLog`, `NotificationRule`, `EmailTemplate`
+- `HybridEvent` → `VirtualRoom`, `StreamingConfig`, `VirtualParticipant`
 
 All models use Sequelize TypeScript decorators (`@Table`, `@Column`, etc.) and are registered in `models/index.ts`.
 
@@ -208,11 +221,12 @@ router.post('/events',
 
 ### Database Migrations
 
-Migrations are in `backend/migrations/` numbered sequentially (000-032). When creating a new migration:
-- Follow existing naming: `0XX-create-table-name.js`
+Migrations are in `backend/migrations/` with 59 migration files. When creating a new migration:
+- Follow existing naming patterns: `0XX-create-table-name.js` or timestamp-based `YYYYMMDDHHMMSS-create-table-name.js`
 - Include both `up` and `down` methods
 - Run `npm run db:migrate` to apply
 - Sequelize CLI uses `config/config.json` for connection settings
+- Recent migrations use timestamp format for better collaboration
 
 ### Caching Strategy
 
@@ -239,6 +253,175 @@ eventEmitter.on('event.created', async (data) => {
 ```
 
 Events are initialized in `server.ts` via `eventListenersService(eventEmitter)`.
+
+### Queue System & Background Jobs
+
+The system uses Bull (Redis-backed queue) for background job processing:
+
+```typescript
+import { queueService } from '@services/queueService';
+
+// Add a job to the queue
+await queueService.addJob('send-email', {
+  to: 'user@example.com',
+  template: 'welcome',
+  data: { name: 'John' }
+});
+
+// Jobs are processed asynchronously
+// Configure queue workers in queueService.ts
+```
+
+Common queue jobs:
+- Email sending (to avoid blocking HTTP requests)
+- Certificate generation with blockchain anchoring
+- Abandoned cart reminders
+- Notification delivery (SMS, WhatsApp)
+- Report generation
+
+### Real-time Features with Socket.IO
+
+Socket.IO is configured for real-time updates:
+
+```typescript
+import { initializeSocketService } from '@services/socketService';
+
+// Initialized in server.ts
+const io = initializeSocketService(server);
+
+// Emit events from services
+socketService.emitToRoom(eventId, 'attendance.updated', attendanceData);
+```
+
+Real-time events:
+- Live attendance updates during events
+- Real-time capacity monitoring
+- Payment status updates
+- Notification delivery confirmations
+
+## Module-Specific Implementation Notes
+
+### FEL (Facturación Electrónica en Línea) Module
+
+The FEL integration handles Guatemala's electronic invoicing system:
+
+**Models**: `Invoice`, `FelDocument`, `FelToken`, `FelError`, `FelAuditLog`, `NitValidation`, `CuiValidation`
+
+**Key Services**:
+- `felService` - Main FEL API integration
+- `invoiceService` - Invoice generation and management
+- NIT/CUI validation services for tax ID verification
+
+**Routes**: `/api/fel/*`, `/api/invoices/*`, `/api/fel-validation/*`
+
+**Important**: FEL tokens expire and need automatic renewal. The system handles token refresh automatically.
+
+### Promotions & Discounts Module
+
+Flexible pricing system with multiple discount types:
+
+**Models**: `Promotion`, `PromoCode`, `VolumeDiscount`, `EarlyBirdDiscount`, `PromoCodeUsage`
+
+**Features**:
+- Promo codes with usage limits and expiration
+- Volume discounts based on quantity
+- Early bird pricing with time-based rules
+- Automatic discount application at checkout
+- Usage tracking and analytics
+
+**Routes**: `/api/promotions/*`, `/api/discounts/*`
+
+### Capacity Management Module
+
+Sophisticated capacity control for events:
+
+**Models**: `Capacity`, `AccessType`, `Overbooking`, `CapacityRule`, `Waitlist`
+
+**Features**:
+- Different capacity rules per access type
+- Overbooking configuration with percentage or fixed limits
+- Automatic waitlist management
+- Real-time capacity monitoring via Socket.IO
+
+**Routes**: `/api/capacity/*`, `/api/access-types/*`, `/api/overbooking/*`
+
+### QR Code & Access Control Module
+
+Complete access control system with QR codes:
+
+**Models**: `QRCode`, `Attendance`, `AccessLog`, `QrSyncLog`, `BlockchainHash`
+
+**Features**:
+- Dynamic QR code generation per registration
+- QR validation and check-in
+- Attendance tracking
+- Access log audit trail
+- Offline sync capability with sync logs
+- Optional blockchain anchoring for tamper-proof records
+
+**Routes**: `/api/qr/*`
+
+### Certificate Module
+
+PDF certificate generation with blockchain verification:
+
+**Models**: `Certificate`, `CertificateTemplate`, `CertificateValidationLog`, `BlockchainHash`
+
+**Features**:
+- Customizable certificate templates with variables
+- PDF generation using Puppeteer or pdf-lib
+- Blockchain anchoring on Ethereum testnet
+- Public certificate validation endpoint
+- Bulk certificate generation for events
+
+**Routes**: `/api/certificates/*`, `/api/certificate-templates/*`, `/api/certificate-validation/*`
+
+### Notifications Module
+
+Multi-channel notification system:
+
+**Models**: `Notification`, `NotificationLog`, `NotificationRule`, `EmailTemplate`, `UserNotificationPreferences`
+
+**Features**:
+- Email via SMTP/Nodemailer
+- SMS via Twilio
+- WhatsApp via Twilio or whatsapp-web.js
+- Template-based messaging with variable substitution
+- Rule-based automatic notifications (triggers)
+- User preference management (opt-in/opt-out)
+- Delivery tracking and logs
+
+**Routes**: `/api/notifications/*`, `/api/email-templates/*`, `/api/notification-rules/*`, `/api/user-preferences/*`
+
+**Configuration**: Initialize notification triggers with `notificationTriggersService` in `server.ts`
+
+### Hybrid Events Module
+
+Virtual and hybrid event support:
+
+**Models**: `HybridEvent`, `VirtualRoom`, `StreamingConfig`, `VirtualParticipant`
+
+**Features**:
+- Virtual room management
+- Streaming configuration (platform, URL, credentials)
+- Virtual participant tracking
+- Integration points for video platforms (Zoom, Teams, etc.)
+
+**Routes**: `/api/hybrid-events/*`, `/api/streaming/*`, `/api/virtual-participants/*`
+
+### Event Sessions Module
+
+Sub-events and agenda management:
+
+**Model**: `EventSession`
+
+**Features**:
+- Multiple sessions per event
+- Session scheduling with start/end times
+- Speaker assignment per session
+- Capacity per session
+
+**Routes**: `/api/event-sessions/*`
 
 ## Development Best Practices
 
@@ -281,13 +464,23 @@ res.status(400).json(errorResponse(message, error));
 ## Project Status
 
 Current implementation includes:
-- 113 API endpoints across all modules
-- 32 database migrations
-- 7 database seeders
-- 22 Sequelize models
+- 150+ API endpoints across all modules
+- 59 database migrations
+- 7+ database seeders
+- 71+ Sequelize models
 - Complete authentication system with 2FA
-- Events module with speakers and registrations
-- Cart and registration system (recently added)
+- Events module with speakers, registrations, and sessions
+- Cart and registration system with abandoned cart tracking
+- Payment processing with 4 gateway integrations (PayPal, Stripe, NeoNet, BAM)
+- FEL integration with NIT/CUI validation for Guatemala
+- QR code generation and access control system
+- Certificate generation with blockchain anchoring
+- Notification system (Email, SMS, WhatsApp) with templates and rules
+- Hybrid events with virtual rooms and streaming
+- Promotions and discount system (promo codes, volume, early bird)
+- Capacity management with overbooking and waitlists
 - Comprehensive security and rate limiting
+- Socket.IO for real-time features
+- Bull queue service for background jobs
 
 The frontend directory currently appears empty - backend API development is the focus.

@@ -729,13 +729,189 @@ router.post('/regenerate/:registrationId',
 );
 
 /**
- * @swagger
- * /api/qr/invalidate/{qrId}:
- *   post:
- *     tags: [QR Codes]
- *     summary: Invalidar código QR
- *     description: Invalida un código QR por razones de seguridad
- */
+  * @swagger
+  * /api/qr/invalidate/{qrId}:
+  *   post:
+  *     tags: [QR Codes]
+  *     summary: Invalidar código QR
+  *     description: Invalida un código QR por razones de seguridad, impidiendo su uso futuro
+  *     security:
+  *       - bearerAuth: []
+  *     parameters:
+  *       - in: path
+  *         name: qrId
+  *         required: true
+  *         schema:
+  *           type: integer
+  *           minimum: 1
+  *         description: ID único del código QR
+  *         example: 456
+  *     requestBody:
+  *       required: true
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             required:
+  *               - reason
+  *             properties:
+  *               reason:
+  *                 type: string
+  *                 minLength: 1
+  *                 maxLength: 500
+  *                 description: Razón de la invalidación del QR
+  *                 example: "Cancelación de registro por solicitud del participante"
+  *           examples:
+  *             invalidar_qr:
+  *               summary: Invalidar QR por cancelación
+  *               value:
+  *                 reason: "Cancelación de registro por solicitud del participante"
+  *     responses:
+  *       200:
+  *         description: Código QR invalidado exitosamente
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 message:
+  *                   type: string
+  *                   example: "Código QR invalidado exitosamente"
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     qr:
+  *                       type: object
+  *                       properties:
+  *                         id:
+  *                           type: integer
+  *                           example: 456
+  *                         qrHash:
+  *                           type: string
+  *                           example: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+  *                         status:
+  *                           type: string
+  *                           example: "invalidated"
+  *                         invalidatedAt:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-10-20T09:00:00.000Z"
+  *                         invalidationReason:
+  *                           type: string
+  *                           example: "Cancelación de registro por solicitud del participante"
+  *             examples:
+  *               qr_invalidado:
+  *                 summary: QR invalidado exitosamente
+  *                 value:
+  *                   success: true
+  *                   message: "Código QR invalidado exitosamente"
+  *                   data:
+  *                     qr:
+  *                       id: 456
+  *                       qrHash: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+  *                       status: "invalidated"
+  *                       invalidatedAt: "2023-10-20T09:00:00.000Z"
+  *                       invalidationReason: "Cancelación de registro por solicitud del participante"
+  *       400:
+  *         description: Datos inválidos
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Razón de invalidación es requerida"
+  *                 error:
+  *                   type: string
+  *                   example: "VALIDATION_ERROR"
+  *       401:
+  *         description: Token inválido
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Token de autenticación inválido"
+  *                 error:
+  *                   type: string
+  *                   example: "INVALID_TOKEN"
+  *       403:
+  *         description: Permisos insuficientes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "No tienes permisos para invalidar este QR"
+  *                 error:
+  *                   type: string
+  *                   example: "INSUFFICIENT_PERMISSIONS"
+  *       404:
+  *         description: QR no encontrado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Código QR no encontrado"
+  *                 error:
+  *                   type: string
+  *                   example: "QR_NOT_FOUND"
+  *       409:
+  *         description: QR ya invalidado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "El código QR ya está invalidado"
+  *                 error:
+  *                   type: string
+  *                   example: "QR_ALREADY_INVALIDATED"
+  *       429:
+  *         description: Demasiadas solicitudes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Demasiadas solicitudes. Intente más tarde."
+  *                 error:
+  *                   type: string
+  *                   example: "RATE_LIMIT_EXCEEDED"
+  */
 router.post('/invalidate/:qrId',
   authenticated,
   invalidateQRValidation,
@@ -743,13 +919,230 @@ router.post('/invalidate/:qrId',
 );
 
 /**
- * @swagger
- * /api/qr/stats/{eventId}:
- *   get:
- *     tags: [QR Codes]
- *     summary: Estadísticas de QR
- *     description: Obtiene estadísticas de uso de códigos QR para un evento
- */
+  * @swagger
+  * /api/qr/stats/{eventId}:
+  *   get:
+  *     tags: [QR Codes]
+  *     summary: Estadísticas de QR
+  *     description: Obtiene estadísticas detalladas de uso de códigos QR para un evento específico
+  *     security:
+  *       - bearerAuth: []
+  *     parameters:
+  *       - in: path
+  *         name: eventId
+  *         required: true
+  *         schema:
+  *           type: integer
+  *           minimum: 1
+  *         description: ID único del evento
+  *         example: 123
+  *     responses:
+  *       200:
+  *         description: Estadísticas obtenidas exitosamente
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 message:
+  *                   type: string
+  *                   example: "Estadísticas de QR obtenidas exitosamente"
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     eventId:
+  *                       type: integer
+  *                       example: 123
+  *                     totalQRs:
+  *                       type: integer
+  *                       description: Total de códigos QR generados
+  *                       example: 150
+  *                     activeQRs:
+  *                       type: integer
+  *                       description: Códigos QR activos
+  *                       example: 145
+  *                     usedQRs:
+  *                       type: integer
+  *                       description: Códigos QR utilizados
+  *                       example: 120
+  *                     expiredQRs:
+  *                       type: integer
+  *                       description: Códigos QR expirados
+  *                       example: 5
+  *                     invalidatedQRs:
+  *                       type: integer
+  *                       description: Códigos QR invalidados
+  *                       example: 2
+  *                     usageStats:
+  *                       type: object
+  *                       properties:
+  *                         totalScans:
+  *                           type: integer
+  *                           description: Total de escaneos realizados
+  *                           example: 180
+  *                         uniqueScans:
+  *                           type: integer
+  *                           description: Escaneos únicos (primer uso)
+  *                           example: 120
+  *                         averageScansPerQR:
+  *                           type: number
+  *                           description: Promedio de escaneos por QR
+  *                           example: 1.2
+  *                         peakUsageHour:
+  *                           type: integer
+  *                           description: Hora pico de uso (0-23)
+  *                           example: 14
+  *                     accessPoints:
+  *                       type: array
+  *                       description: Estadísticas por punto de acceso
+  *                       items:
+  *                         type: object
+  *                         properties:
+  *                           accessPoint:
+  *                             type: string
+  *                             example: "Entrada Principal"
+  *                           totalScans:
+  *                             type: integer
+  *                             example: 85
+  *                           uniqueScans:
+  *                             type: integer
+  *                             example: 75
+  *                     deviceStats:
+  *                       type: object
+  *                       description: Estadísticas por tipo de dispositivo
+  *                       properties:
+  *                         mobile:
+  *                           type: integer
+  *                           description: Escaneos desde móviles
+  *                           example: 120
+  *                         tablet:
+  *                           type: integer
+  *                           description: Escaneos desde tablets
+  *                           example: 30
+  *                         desktop:
+  *                           type: integer
+  *                           description: Escaneos desde desktop
+  *                           example: 15
+  *                         kiosk:
+  *                           type: integer
+  *                           description: Escaneos desde kioscos
+  *                           example: 15
+  *                     timeSeries:
+  *                       type: array
+  *                       description: Datos de uso por hora/día
+  *                       items:
+  *                         type: object
+  *                         properties:
+  *                           timestamp:
+  *                             type: string
+  *                             format: date-time
+  *                             example: "2023-10-15T14:00:00.000Z"
+  *                           scans:
+  *                             type: integer
+  *                             example: 25
+  *             examples:
+  *               estadisticas_qr:
+  *                 summary: Estadísticas de QR obtenidas
+  *                 value:
+  *                   success: true
+  *                   message: "Estadísticas de QR obtenidas exitosamente"
+  *                   data:
+  *                     eventId: 123
+  *                     totalQRs: 150
+  *                     activeQRs: 145
+  *                     usedQRs: 120
+  *                     expiredQRs: 5
+  *                     invalidatedQRs: 2
+  *                     usageStats:
+  *                       totalScans: 180
+  *                       uniqueScans: 120
+  *                       averageScansPerQR: 1.2
+  *                       peakUsageHour: 14
+  *                     accessPoints:
+  *                       - accessPoint: "Entrada Principal"
+  *                         totalScans: 85
+  *                         uniqueScans: 75
+  *                       - accessPoint: "Entrada VIP"
+  *                         totalScans: 45
+  *                         uniqueScans: 45
+  *                     deviceStats:
+  *                       mobile: 120
+  *                       tablet: 30
+  *                       desktop: 15
+  *                       kiosk: 15
+  *                     timeSeries:
+  *                       - timestamp: "2023-10-15T14:00:00.000Z"
+  *                         scans: 25
+  *                       - timestamp: "2023-10-15T15:00:00.000Z"
+  *                         scans: 30
+  *       401:
+  *         description: Token inválido
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Token de autenticación inválido"
+  *                 error:
+  *                   type: string
+  *                   example: "INVALID_TOKEN"
+  *       403:
+  *         description: Permisos insuficientes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "No tienes permisos para acceder a estas estadísticas"
+  *                 error:
+  *                   type: string
+  *                   example: "INSUFFICIENT_PERMISSIONS"
+  *       404:
+  *         description: Evento no encontrado
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Evento no encontrado"
+  *                 error:
+  *                   type: string
+  *                   example: "EVENT_NOT_FOUND"
+  *       429:
+  *         description: Demasiadas solicitudes
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Demasiadas solicitudes. Intente más tarde."
+  *                 error:
+  *                   type: string
+  *                   example: "RATE_LIMIT_EXCEEDED"
+  */
 router.get('/stats/:eventId',
   authenticated,
   qrStatsValidation,
@@ -1046,13 +1439,174 @@ router.post('/validate',
 );
 
 /**
- * @swagger
- * /api/qr/blockchain-verify/{code}:
- *   get:
- *     tags: [QR Codes]
- *     summary: Verificar QR en blockchain
- *     description: Verifica la autenticidad de un código QR consultando blockchain
- */
+  * @swagger
+  * /api/qr/blockchain-verify/{code}:
+  *   get:
+  *     tags: [QR Codes]
+  *     summary: Verificar QR en blockchain
+  *     description: Verifica la autenticidad e integridad de un código QR consultando su registro en blockchain (endpoint público)
+  *     parameters:
+  *       - in: path
+  *         name: code
+  *         required: true
+  *         schema:
+  *           type: string
+  *           minLength: 64
+  *           maxLength: 64
+  *           pattern: '^[a-f0-9]+$'
+  *         description: Hash único del QR de 64 caracteres hexadecimales
+  *         example: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+  *     responses:
+  *       200:
+  *         description: QR verificado exitosamente en blockchain
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: true
+  *                 message:
+  *                   type: string
+  *                   example: "Código QR verificado exitosamente en blockchain"
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     qrHash:
+  *                       type: string
+  *                       description: Hash del QR verificado
+  *                       example: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+  *                     blockchainVerified:
+  *                       type: boolean
+  *                       example: true
+  *                     blockchainHash:
+  *                       type: string
+  *                       description: Hash registrado en blockchain
+  *                       example: "0x1234567890abcdef..."
+  *                     verificationTimestamp:
+  *                       type: string
+  *                       format: date-time
+  *                       description: Timestamp de la verificación
+  *                       example: "2023-10-15T14:30:00.000Z"
+  *                     qrInfo:
+  *                       type: object
+  *                       description: Información básica del QR (si está disponible)
+  *                       properties:
+  *                         registrationId:
+  *                           type: integer
+  *                           example: 123
+  *                         eventId:
+  *                           type: integer
+  *                           example: 456
+  *                         status:
+  *                           type: string
+  *                           enum: [active, used, expired, invalidated]
+  *                           example: "active"
+  *                         generatedAt:
+  *                           type: string
+  *                           format: date-time
+  *                           example: "2023-10-01T10:00:00.000Z"
+  *             examples:
+  *               qr_verificado_blockchain:
+  *                 summary: QR verificado en blockchain
+  *                 value:
+  *                   success: true
+  *                   message: "Código QR verificado exitosamente en blockchain"
+  *                   data:
+  *                     qrHash: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+  *                     blockchainVerified: true
+  *                     blockchainHash: "0x1234567890abcdef..."
+  *                     verificationTimestamp: "2023-10-15T14:30:00.000Z"
+  *                     qrInfo:
+  *                       registrationId: 123
+  *                       eventId: 456
+  *                       status: "active"
+  *                       generatedAt: "2023-10-01T10:00:00.000Z"
+  *       400:
+  *         description: Hash inválido
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Hash del QR inválido"
+  *                 error:
+  *                   type: string
+  *                   example: "INVALID_QR_HASH"
+  *       404:
+  *         description: QR no encontrado en blockchain
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Código QR no encontrado en blockchain"
+  *                 error:
+  *                   type: string
+  *                   example: "QR_NOT_FOUND_IN_BLOCKCHAIN"
+  *                 data:
+  *                   type: object
+  *                   properties:
+  *                     qrHash:
+  *                       type: string
+  *                       example: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+  *                     blockchainVerified:
+  *                       type: boolean
+  *                       example: false
+  *             examples:
+  *               qr_no_encontrado_blockchain:
+  *                 summary: QR no encontrado en blockchain
+  *                 value:
+  *                   success: false
+  *                   message: "Código QR no encontrado en blockchain"
+  *                   error: "QR_NOT_FOUND_IN_BLOCKCHAIN"
+  *                   data:
+  *                     qrHash: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890"
+  *                     blockchainVerified: false
+  *       429:
+  *         description: Demasiadas consultas públicas
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Demasiadas consultas públicas. Intente más tarde."
+  *                 error:
+  *                   type: string
+  *                   example: "RATE_LIMIT_EXCEEDED"
+  *       500:
+  *         description: Error de conexión con blockchain
+  *         content:
+  *           application/json:
+  *             schema:
+  *               type: object
+  *               properties:
+  *                 success:
+  *                   type: boolean
+  *                   example: false
+  *                 message:
+  *                   type: string
+  *                   example: "Error al verificar en blockchain"
+  *                 error:
+  *                   type: string
+  *                   example: "BLOCKCHAIN_CONNECTION_ERROR"
+  */
 router.get('/blockchain-verify/:code',
   publicQRLimiter,
   blockchainVerifyValidation,

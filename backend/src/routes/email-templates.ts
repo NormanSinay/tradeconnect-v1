@@ -1255,7 +1255,6 @@ router.post('/:id/preview',
  *                         createdAt:
  *                           type: string
  *                           format: date-time
- *                           example: "2023-10-15T10:30:00.000Z"
  *             examples:
  *               plantilla_duplicada:
  *                 summary: Plantilla duplicada exitosamente
@@ -1270,201 +1269,6 @@ router.post('/:id/preview',
  *                       id: 2
  *                       codigo: "WELCOME_EMAIL_V2"
  *                       nombre: "Email de Bienvenida - Versión 2"
- *                       createdAt: "2023-10-15T10:30:00.000Z"
- *       400:
- *         description: Datos inválidos o código ya existe
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "El código WELCOME_EMAIL_V2 ya está en uso"
- *                 error:
- *                   type: string
- *                   example: "TEMPLATE_CODE_EXISTS"
- *       401:
- *         description: Token inválido
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Token de autenticación inválido"
- *                 error:
- *                   type: string
- *                   example: "INVALID_TOKEN"
- *       403:
- *         description: Permisos insuficientes
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "No tienes permisos para duplicar plantillas"
- *                 error:
- *                   type: string
- *                   example: "INSUFFICIENT_PERMISSIONS"
- *       404:
- *         description: Plantilla no encontrada
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Plantilla no encontrada"
- *                 error:
- *                   type: string
- *                   example: "TEMPLATE_NOT_FOUND"
- *       501:
- *         description: Funcionalidad pendiente de implementación
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Funcionalidad pendiente de implementación"
- *                 timestamp:
- *                   type: string
- *                   format: date-time
- *                   example: "2023-10-15T10:30:00.000Z"
- */
-/**
- * @swagger
- * /api/v1/email-templates/{id}/duplicate:
- *   post:
- *     tags: [Email Templates]
- *     summary: Duplicar plantilla de email
- *     description: Crea una copia de una plantilla existente con opción de modificar campos
- *     security: [{ bearerAuth: [] }]
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: integer
- *           minimum: 1
- *         description: ID de la plantilla a duplicar
- *         example: 1
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               code:
- *                 type: string
- *                 minLength: 3
- *                 maxLength: 50
- *                 pattern: '^[A-Z_]+$'
- *                 description: Nuevo código único para la plantilla duplicada
- *                 example: "WELCOME_EMAIL_V2"
- *               name:
- *                 type: string
- *                 minLength: 2
- *                 maxLength: 255
- *                 description: Nuevo nombre para la plantilla duplicada
- *                 example: "Email de Bienvenida - Versión 2"
- *               subject:
- *                 type: string
- *                 minLength: 1
- *                 maxLength: 200
- *                 description: Nuevo asunto para la plantilla duplicada
- *                 example: "¡Bienvenido a TradeConnect!"
- *               type:
- *                 type: string
- *                 enum: [TRANSACTIONAL, PROMOTIONAL, OPERATIONAL]
- *                 description: Nuevo tipo para la plantilla duplicada
- *                 example: "TRANSACTIONAL"
- *           examples:
- *             duplicar_plantilla:
- *               summary: Duplicar plantilla con cambios
- *               value:
- *                 code: "WELCOME_EMAIL_V2"
- *                 name: "Email de Bienvenida - Versión 2"
- *                 subject: "¡Bienvenido a TradeConnect!"
- *                 type: "TRANSACTIONAL"
- *     responses:
- *       201:
- *         description: Plantilla duplicada exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Plantilla duplicada exitosamente"
- *                 data:
- *                   type: object
- *                   properties:
- *                     originalTemplate:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: integer
- *                           example: 1
- *                         name:
- *                           type: string
- *                           example: "Email de Bienvenida"
- *                     duplicatedTemplate:
- *                       type: object
- *                       properties:
- *                         id:
- *                           type: integer
- *                           example: 2
- *                         code:
- *                           type: string
- *                           example: "WELCOME_EMAIL_V2"
- *                         name:
- *                           type: string
- *                           example: "Email de Bienvenida - Versión 2"
- *                         createdAt:
- *                           type: string
- *                           format: date-time
- *                           example: "2023-10-15T10:30:00.000Z"
- *             examples:
- *               plantilla_duplicada:
- *                 summary: Plantilla duplicada exitosamente
- *                 value:
- *                   success: true
- *                   message: "Plantilla duplicada exitosamente"
- *                   data:
- *                     originalTemplate:
- *                       id: 1
- *                       name: "Email de Bienvenida"
- *                     duplicatedTemplate:
- *                       id: 2
- *                       code: "WELCOME_EMAIL_V2"
- *                       name: "Email de Bienvenida - Versión 2"
  *                       createdAt: "2023-10-15T10:30:00.000Z"
  *       400:
  *         description: Datos inválidos o código ya existe
@@ -1566,10 +1370,8 @@ router.post('/:id/preview',
 router.post('/:id/duplicate',
   [
     param('id').isInt({ min: 1 }).withMessage('ID de plantilla inválido'),
-    body('code').optional().isString().isLength({ min: 3, max: 50 }).withMessage('Código inválido (3-50 caracteres)'),
-    body('name').optional().isString().isLength({ min: 2, max: 255 }).withMessage('Nombre inválido (2-255 caracteres)'),
-    body('subject').optional().isString().isLength({ min: 1, max: 200 }).withMessage('Asunto inválido (máx 200 caracteres)'),
-    body('type').optional().isIn(['TRANSACTIONAL', 'PROMOTIONAL', 'OPERATIONAL']).withMessage('Tipo inválido'),
+    body('codigo').optional().isString().isLength({ min: 3, max: 50 }).withMessage('Código inválido (3-50 caracteres)'),
+    body('nombre').optional().isString().isLength({ min: 2, max: 100 }).withMessage('Nombre inválido (2-100 caracteres)'),
     handleValidationErrors
   ],
   emailTemplateController.duplicateTemplate.bind(emailTemplateController)
@@ -1750,8 +1552,8 @@ router.post('/:id/duplicate',
  *                 error:
  *                   type: string
  *                   example: "TEMPLATE_NOT_FOUND"
- *       501:
- *         description: Funcionalidad pendiente de implementación
+ *       500:
+ *         description: Error interno del servidor
  *         content:
  *           application/json:
  *             schema:
@@ -1762,11 +1564,10 @@ router.post('/:id/duplicate',
  *                   example: false
  *                 message:
  *                   type: string
- *                   example: "Funcionalidad pendiente de implementación"
- *                 timestamp:
+ *                   example: "Error interno del servidor"
+ *                 error:
  *                   type: string
- *                   format: date-time
- *                   example: "2023-10-15T10:30:00.000Z"
+ *                   example: "INTERNAL_SERVER_ERROR"
  */
 router.get('/:id/versions',
   [

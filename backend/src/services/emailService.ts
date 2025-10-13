@@ -8,7 +8,7 @@ import {
   EmailTemplateAttributes,
   NotificationAttachment,
   NotificationStatus,
-  EmailTemplateType
+  EmailTemplateType,
 } from '../types/notification.types';
 import crypto from 'crypto';
 import path from 'path';
@@ -76,12 +76,12 @@ class EmailService {
       secure: process.env.SMTP_SECURE === 'true',
       auth: {
         user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASSWORD || ''
+        pass: process.env.SMTP_PASSWORD || '',
       },
       from: process.env.SMTP_FROM || 'noreply@tradeconnect.gt',
       name: process.env.SMTP_NAME || 'TradeConnect',
       maxConnections: parseInt(process.env.SMTP_MAX_CONNECTIONS || '5'),
-      timeout: parseInt(process.env.SMTP_TIMEOUT || '30000')
+      timeout: parseInt(process.env.SMTP_TIMEOUT || '30000'),
     };
 
     this.transporter = nodemailer.createTransport({
@@ -91,17 +91,20 @@ class EmailService {
       auth: this.smtpConfig.auth,
       pool: true,
       maxConnections: this.smtpConfig.maxConnections,
-      rateLimit: 10 // 10 emails por segundo
+      rateLimit: 10, // 10 emails por segundo
     });
   }
 
-  async sendEmailVerification(to: string, data: EmailVerificationData): Promise<void> {
+  async sendEmailVerification(
+    to: string,
+    data: EmailVerificationData
+  ): Promise<void> {
     try {
       const mailOptions = {
         from: process.env.SMTP_FROM || 'noreply@tradeconnect.gt',
-to,
-subject: 'Verifica tu cuenta - TradeConnect',
-html: `
+        to,
+        subject: 'Verifica tu cuenta - TradeConnect',
+        html: `
   <div style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 40px 0; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
       
@@ -138,9 +141,8 @@ html: `
 
     </div>
   </div>
-`
-};
-
+`,
+      };
 
       await this.transporter.sendMail(mailOptions);
       logger.info(`Email verification sent to ${to}`);
@@ -157,12 +159,43 @@ html: `
         to,
         subject: 'Restablece tu contraseña - TradeConnect',
         html: `
-          <h1>Restablece tu contraseña, ${data.firstName}</h1>
-          <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-          <a href="${data.resetUrl}">Restablecer Contraseña</a>
-          <p>Este enlace expirará en 1 hora.</p>
-          <p>Si no solicitaste este cambio, ignora este mensaje.</p>
-        `
+    <div style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 40px 0; color: #333;">
+      <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
+        
+        <div style="background: linear-gradient(90deg, #007BFF, #00C6FF); color: white; padding: 20px 30px; text-align: center;">
+          <h1 style="margin: 0; font-size: 24px;">Restablecer Contraseña</h1>
+        </div>
+
+        <div style="padding: 30px;">
+          <p style="font-size: 16px;">Hola <strong>${data.firstName}</strong>,</p>
+          <p style="font-size: 15px; line-height: 1.6;">
+            Hemos recibido una solicitud para restablecer tu contraseña. 
+            Para continuar, haz clic en el siguiente botón:
+          </p>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${data.resetUrl}" 
+               style="background: #007BFF; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; 
+                      font-size: 16px; display: inline-block; font-weight: bold;">
+               Restablecer Contraseña
+            </a>
+          </div>
+
+          <p style="font-size: 14px; color: #555;">
+            Este enlace expirará en <strong>1 hora</strong>.
+          </p>
+          <p style="font-size: 14px; color: #888;">
+            Si no solicitaste este cambio, puedes ignorar este mensaje y tu contraseña permanecerá igual.
+          </p>
+        </div>
+
+        <div style="background: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #777;">
+          © ${new Date().getFullYear()} TradeConnect. Todos los derechos reservados.
+        </div>
+
+      </div>
+    </div>
+  `,
       };
 
       await this.transporter.sendMail(mailOptions);
@@ -176,21 +209,46 @@ html: `
   async sendOTP(to: string, data: OTPData): Promise<void> {
     try {
       const mailOptions = {
-        from: process.env.SMTP_FROM || 'noreply@tradeconnect.gt',
-        to,
-        subject: 'Código de verificación 2FA - TradeConnect',
-        html: `
-          <h1>Verificación de dos factores</h1>
-          <p>Hola ${data.firstName},</p>
-          <p>Tu código de verificación de dos factores es:</p>
-          <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px;">
-            ${data.otpCode}
+  from: process.env.SMTP_FROM || 'noreply@tradeconnect.gt',
+  to,
+  subject: 'Código de verificación 2FA - TradeConnect',
+  html: `
+    <div style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 40px 0; color: #333;">
+      <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
+        
+        <div style="background: linear-gradient(90deg, #007BFF, #00C6FF); color: white; padding: 20px 30px; text-align: center;">
+          <h1 style="margin: 0; font-size: 24px;">Verificación de Dos Factores</h1>
+        </div>
+
+        <div style="padding: 30px;">
+          <p style="font-size: 16px;">Hola <strong>${data.firstName}</strong>,</p>
+          <p style="font-size: 15px; line-height: 1.6;">
+            Tu código de verificación de dos factores es el siguiente:
+          </p>
+
+          <div style="background-color: #f4f4f4; border-radius: 8px; padding: 25px; text-align: center; margin: 30px 0;">
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #007BFF;">
+              ${data.otpCode}
+            </span>
           </div>
-          <p>Este código expirará en 5 minutos.</p>
-          <p>Si no solicitaste este código, ignora este mensaje.</p>
-          <p style="color: #666; font-size: 12px;">TradeConnect - Plataforma E-commerce</p>
-        `
-      };
+
+          <p style="font-size: 14px; color: #555;">
+            Este código expirará en <strong>5 minutos</strong>.
+          </p>
+          <p style="font-size: 14px; color: #888;">
+            Si no solicitaste este código, puedes ignorar este mensaje.
+          </p>
+        </div>
+
+        <div style="background: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #777;">
+          TradeConnect - Plataforma E-commerce<br>
+          © ${new Date().getFullYear()} TradeConnect. Todos los derechos reservados.
+        </div>
+
+      </div>
+    </div>
+  `,
+};
 
       await this.transporter.sendMail(mailOptions);
       logger.info(`2FA OTP sent to ${to}`);
@@ -224,7 +282,10 @@ html: `
       if (template.type === EmailTemplateType.TRANSACTIONAL) {
         // Agregar pixel de tracking
         if (data.notificationId) {
-          const trackingToken = this.generateTrackingToken(data.notificationId, 'open');
+          const trackingToken = this.generateTrackingToken(
+            data.notificationId,
+            'open'
+          );
           trackingPixel = `<img src="${process.env.BASE_URL}/api/notifications/track/open/${trackingToken}" width="1" height="1" style="display:none;" alt="" />`;
         }
       } else if (template.type === EmailTemplateType.PROMOTIONAL) {
@@ -243,7 +304,7 @@ html: `
         to: data.to,
         subject: rendered.subject,
         html: htmlContent + trackingPixel + unsubscribeLink,
-        priority: data.priority || 'normal'
+        priority: data.priority || 'normal',
       };
 
       // Agregar attachments si existen
@@ -251,7 +312,7 @@ html: `
         mailOptions.attachments = data.attachments.map(att => ({
           filename: att.filename,
           path: att.path,
-          contentType: att.contentType
+          contentType: att.contentType,
         }));
       }
 
@@ -259,18 +320,30 @@ html: `
 
       // Actualizar estado de notificación si existe
       if (data.notificationId) {
-        await this.updateNotificationStatus(data.notificationId, NotificationStatus.SENT);
+        await this.updateNotificationStatus(
+          data.notificationId,
+          NotificationStatus.SENT
+        );
         await NotificationLog.logSendAttempt(data.notificationId, true);
       }
 
-      logger.info(`Template email sent to ${data.to} using ${data.templateCode}`);
+      logger.info(
+        `Template email sent to ${data.to} using ${data.templateCode}`
+      );
     } catch (error) {
       logger.error('Error sending template email:', error);
 
       if (data.notificationId) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        await this.updateNotificationStatus(data.notificationId, NotificationStatus.FAILED, errorMessage);
-        await NotificationLog.logSendAttempt(data.notificationId, false, { error: errorMessage });
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        await this.updateNotificationStatus(
+          data.notificationId,
+          NotificationStatus.FAILED,
+          errorMessage
+        );
+        await NotificationLog.logSendAttempt(data.notificationId, false, {
+          error: errorMessage,
+        });
       }
 
       throw error;
@@ -293,7 +366,7 @@ html: `
           templateCode: data.templateCode,
           variables,
           attachments: data.attachments,
-          priority: data.priority
+          priority: data.priority,
         });
       });
 
@@ -305,15 +378,24 @@ html: `
       }
     }
 
-    logger.info(`Bulk email campaign completed: ${data.recipients.length} recipients`);
+    logger.info(
+      `Bulk email campaign completed: ${data.recipients.length} recipients`
+    );
   }
 
   /**
    * Genera token de tracking para aperturas
    */
-  private generateTrackingToken(notificationId: number, action: string): string {
+  private generateTrackingToken(
+    notificationId: number,
+    action: string
+  ): string {
     const payload = `${notificationId}:${action}:${Date.now()}`;
-    return crypto.createHash('sha256').update(payload).digest('hex').substring(0, 16);
+    return crypto
+      .createHash('sha256')
+      .update(payload)
+      .digest('hex')
+      .substring(0, 16);
   }
 
   /**
@@ -321,7 +403,11 @@ html: `
    */
   private generateUnsubscribeToken(email: string): string {
     const payload = `${email}:${Date.now()}`;
-    return crypto.createHash('sha256').update(payload).digest('hex').substring(0, 16);
+    return crypto
+      .createHash('sha256')
+      .update(payload)
+      .digest('hex')
+      .substring(0, 16);
   }
 
   /**
@@ -331,14 +417,11 @@ html: `
     if (!notificationId) return html;
 
     // Reemplazar href con tracking
-    return html.replace(
-      /href="([^"]+)"/g,
-      (match, url) => {
-        const trackingToken = this.generateTrackingToken(notificationId, 'click');
-        const trackingUrl = `${process.env.BASE_URL}/api/notifications/track/click/${trackingToken}/${encodeURIComponent(url)}`;
-        return `href="${trackingUrl}"`;
-      }
-    );
+    return html.replace(/href="([^"]+)"/g, (match, url) => {
+      const trackingToken = this.generateTrackingToken(notificationId, 'click');
+      const trackingUrl = `${process.env.BASE_URL}/api/notifications/track/click/${trackingToken}/${encodeURIComponent(url)}`;
+      return `href="${trackingUrl}"`;
+    });
   }
 
   /**
@@ -367,7 +450,8 @@ html: `
       await this.transporter.verify();
       return { valid: true };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       return { valid: false, error: errorMessage };
     }
   }
@@ -375,7 +459,10 @@ html: `
   /**
    * Obtiene estadísticas de envío
    */
-  async getEmailStats(startDate: Date, endDate: Date): Promise<{
+  async getEmailStats(
+    startDate: Date,
+    endDate: Date
+  ): Promise<{
     sent: number;
     delivered: number;
     failed: number;
@@ -389,7 +476,7 @@ html: `
       delivered: 0,
       failed: 0,
       openRate: 0,
-      clickRate: 0
+      clickRate: 0,
     };
   }
 
@@ -401,14 +488,14 @@ html: `
       firstName: 'Usuario de Prueba',
       verificationUrl: `${process.env.BASE_URL}/verify/test`,
       resetUrl: `${process.env.BASE_URL}/reset/test`,
-      otpCode: '123456'
+      otpCode: '123456',
     };
 
     if (templateCode) {
       await this.sendTemplateEmail({
         to,
         templateCode,
-        variables: testData
+        variables: testData,
       });
     } else {
       // Enviar email básico de prueba
@@ -421,7 +508,7 @@ html: `
           <p>Este es un email de prueba del sistema de notificaciones de TradeConnect.</p>
           <p>Si recibiste este email, la configuración SMTP está funcionando correctamente.</p>
           <p>Fecha de envío: ${new Date().toISOString()}</p>
-        `
+        `,
       });
     }
 
