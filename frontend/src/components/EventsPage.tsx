@@ -131,7 +131,7 @@ const EventsPage: React.FC = () => {
           bgcolor: 'background.paper',
           borderBottom: 1,
           borderColor: 'divider',
-          py: 4,
+          py: { xs: 2, md: 4 },
         }}
       >
         <Container maxWidth="lg">
@@ -142,6 +142,7 @@ const EventsPage: React.FC = () => {
               mb: 2,
               fontWeight: 'bold',
               color: 'text.primary',
+              fontSize: { xs: '1.8rem', md: '2.125rem' },
             }}
           >
             Catálogo de Eventos
@@ -149,12 +150,19 @@ const EventsPage: React.FC = () => {
           <Typography
             variant="h6"
             color="text.secondary"
-            sx={{ mb: 1 }}
+            sx={{
+              mb: 1,
+              fontSize: { xs: '1rem', md: '1.25rem' }
+            }}
           >
             Descubre eventos empresariales y cursos de formación
           </Typography>
           {eventsData && (
-            <Typography variant="body1" color="text.secondary">
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ display: { xs: 'none', sm: 'block' } }}
+            >
               {eventsData.total} eventos encontrados
             </Typography>
           )}
@@ -162,9 +170,17 @@ const EventsPage: React.FC = () => {
       </Box>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ display: 'flex', gap: 4 }}>
+        <Box sx={{
+          display: 'flex',
+          gap: { xs: 2, md: 4 },
+          flexDirection: { xs: 'column', md: 'row' }
+        }}>
           {/* Filters Sidebar */}
-          <Box sx={{ width: 300, flexShrink: 0 }}>
+          <Box sx={{
+            width: { xs: '100%', md: 300 },
+            flexShrink: 0,
+            order: { xs: 2, md: 1 }
+          }}>
             <EventFilters
               filters={filters}
               onFiltersChange={handleFiltersChange}
@@ -175,7 +191,10 @@ const EventsPage: React.FC = () => {
           </Box>
 
           {/* Main Content */}
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{
+            flex: 1,
+            order: { xs: 1, md: 2 }
+          }}>
             {/* Sort Options */}
             <EventSortOptions
               sortBy={sortBy}
@@ -201,7 +220,12 @@ const EventsPage: React.FC = () => {
 
             {/* Pagination */}
             {paginationInfo && paginationInfo.totalPages > 1 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                mt: 4,
+                px: { xs: 2, sm: 0 }
+              }}>
                 <Pagination
                   count={paginationInfo.totalPages}
                   page={paginationInfo.currentPage}
@@ -210,6 +234,13 @@ const EventsPage: React.FC = () => {
                   size="large"
                   showFirstButton
                   showLastButton
+                  siblingCount={1}
+                  boundaryCount={1}
+                  sx={{
+                    '& .MuiPaginationItem-root': {
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
+                    },
+                  }}
                 />
               </Box>
             )}

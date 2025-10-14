@@ -7,15 +7,16 @@ import { useAuth } from '@/context/AuthContext';
 const HomePage = lazy(() => import('@/components/HomePage'));
 // Placeholder components for now - will be implemented later
 const EventsPage = lazy(() => import('@/components/EventsPage'));
-const EventDetailPage = () => <div>Event Detail Page - Coming Soon</div>;
-const CartPage = () => <div>Cart Page - Coming Soon</div>;
-const CheckoutPage = () => <div>Checkout Page - Coming Soon</div>;
-const ProfilePage = () => <div>Profile Page - Coming Soon</div>;
+const EventDetailPage = lazy(() => import('@/components/events/EventDetailPage'));
+const CartPage = lazy(() => import('@/components/cart/CartPage'));
+const CheckoutPage = lazy(() => import('@/components/checkout/CheckoutPage'));
+const CheckoutSuccessPage = lazy(() => import('@/components/checkout/CheckoutSuccessPage'));
+const ProfilePage = lazy(() => import('@/components/profile/ProfilePage'));
 const CertificatesPage = () => <div>Certificates Page - Coming Soon</div>;
-const CertificateDetailPage = () => <div>Certificate Detail Page - Coming Soon</div>;
-const LoginPage = () => <div>Login Page - Coming Soon</div>;
-const RegisterPage = () => <div>Register Page - Coming Soon</div>;
-const DashboardPage = () => <div>Dashboard Page - Coming Soon</div>;
+const CertificateDetailPage = lazy(() => import('@/components/certificates/CertificateDetailPage'));
+const LoginPage = lazy(() => import('@/components/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/components/auth/RegisterPage'));
+const DashboardPage = lazy(() => import('@/components/admin/DashboardPage'));
 
 // Loading component
 const LoadingFallback: React.FC = () => (
@@ -81,6 +82,14 @@ const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute requireAuth>
               <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout/success"
+          element={
+            <ProtectedRoute requireAuth>
+              <CheckoutSuccessPage />
             </ProtectedRoute>
           }
         />

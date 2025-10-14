@@ -256,7 +256,7 @@ export interface RegisterForm {
   email: string;
   password: string;
   confirmPassword: string;
-  phone?: string;
+  phone: string | undefined;
   acceptTerms: boolean;
 }
 

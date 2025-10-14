@@ -164,8 +164,16 @@ const themeOptions: ThemeOptions = {
           fontSize: TYPOGRAPHY.fontSize.sm,
           fontWeight: TYPOGRAPHY.fontWeight.medium,
           boxShadow: 'none',
+          transition: 'all 0.2s ease-in-out',
           '&:hover': {
             boxShadow: SHADOWS.md,
+            transform: 'translateY(-1px)',
+          },
+          // Mobile responsive
+          [BREAKPOINTS.sm]: {
+            padding: `${SPACING.xs}px ${SPACING.md}px`,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            minHeight: 44, // Touch-friendly size
           },
         },
         contained: {
@@ -177,6 +185,21 @@ const themeOptions: ThemeOptions = {
           borderWidth: 2,
           '&:hover': {
             borderWidth: 2,
+          },
+        },
+        // Size variants for mobile
+        sizeSmall: {
+          [`@media (max-width: ${BREAKPOINTS.sm}px)`]: {
+            padding: `${SPACING.xs}px ${SPACING.sm}px`,
+            fontSize: TYPOGRAPHY.fontSize.xs,
+            minHeight: 36,
+          },
+        },
+        sizeLarge: {
+          [`@media (max-width: ${BREAKPOINTS.sm}px)`]: {
+            padding: `${SPACING.md}px ${SPACING.xl}px`,
+            fontSize: TYPOGRAPHY.fontSize.base,
+            minHeight: 48,
           },
         },
       },
@@ -191,6 +214,14 @@ const themeOptions: ThemeOptions = {
           '&:hover': {
             boxShadow: SHADOWS.lg,
             transform: 'translateY(-2px)',
+          },
+          // Mobile responsive
+          [`@media (max-width: ${BREAKPOINTS.md}px)`]: {
+            borderRadius: BORDER_RADIUS.md,
+            boxShadow: SHADOWS.sm,
+            '&:hover': {
+              transform: 'none', // Disable hover transform on mobile
+            },
           },
         },
       },
@@ -235,6 +266,10 @@ const themeOptions: ThemeOptions = {
           backdropFilter: 'blur(10px)',
           borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
           boxShadow: 'none',
+          // Mobile responsive
+          [`@media (max-width: ${BREAKPOINTS.md}px)`]: {
+            padding: `0 ${SPACING.sm}px`,
+          },
         },
       },
     },

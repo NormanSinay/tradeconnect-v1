@@ -149,7 +149,7 @@ export const authService = {
     lastName: string;
     email: string;
     password: string;
-    phone?: string;
+    phone: string | undefined;
     acceptTerms: boolean;
   }) => apiService.post('/auth/register', data),
 

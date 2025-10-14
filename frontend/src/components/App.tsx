@@ -1,15 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import { Toaster } from 'react-hot-toast';
 import { theme } from '@/theme';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import AppRoutes from '@/components/AppRoutes';
 import BaseLayout from '@/components/layout/BaseLayout';
+import ToastContainer from '@/components/common/ToastContainer';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
+import {
+  performanceUtils,
+  registerServiceWorker,
+  preloadCriticalResources,
+  cacheUtils
+} from '@/utils/performance';
+import { securityUtils } from '@/utils/security';
 import '@/theme/global.css';
+import '@/i18n';
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -33,45 +42,52 @@ const queryClient = new QueryClient({
 });
 
 const App: React.FC = () => {
+  useEffect(() => {
+    // Initialize performance monitoring
+    performanceUtils.measureCoreWebVitals();
+
+    // Register service worker for PWA
+    registerServiceWorker();
+
+    // Preload critical resources
+    preloadCriticalResources();
+
+    // Clear cache on app start (optional)
+    cacheUtils.clear();
+
+    // Initialize security measures
+    securityUtils.sessionManager.startInactivityTimer(
+      15 * 60 * 1000, // 15 minutes
+      () => {
+        // Auto-logout callback
+        console.log('Session expired due to inactivity');
+        // Implement logout logic here
+      }
+    );
+
+    return () => {
+      // Cleanup
+    };
+  }, []);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Router>
-          <AuthProvider>
-            <CartProvider>
-              <BaseLayout>
-                <AppRoutes />
-              </BaseLayout>
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 5000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                  success: {
-                    duration: 3000,
-                    iconTheme: {
-                      primary: '#10B981',
-                      secondary: '#fff',
-                    },
-                  },
-                  error: {
-                    duration: 5000,
-                    iconTheme: {
-                      primary: '#EF4444',
-                      secondary: '#fff',
-                    },
-                  },
-                }}
-              />
-            </CartProvider>
-          </AuthProvider>
-        </Router>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Router>
+            <AuthProvider>
+              <CartProvider>
+                <BaseLayout>
+                  <AppRoutes />
+                </BaseLayout>
+                <ToastContainer />
+              </CartProvider>
+            </AuthProvider>
+          </Router>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

@@ -79,7 +79,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (data: RegisterForm): Promise<void> => {
     try {
       setIsLoading(true);
-      const response = await authService.register(data);
+      const registerData = {
+        ...data,
+        phone: data.phone || undefined,
+      };
+      const response = await authService.register(registerData);
 
       if (response.success) {
         toast.success('Registro exitoso. Verifica tu email para activar tu cuenta.');

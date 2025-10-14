@@ -16,6 +16,8 @@ import {
   ListItemButton,
   ListItemText,
   InputBase,
+  TextField,
+  InputAdornment,
   useTheme,
   useMediaQuery,
   Avatar,
@@ -35,6 +37,9 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { styled, alpha } from '@mui/material/styles';
+import MiniCart from '@/components/cart/MiniCart';
+import LanguageSelector from '@/components/common/LanguageSelector';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -86,14 +91,17 @@ const GlassmorphismAppBar = styled(AppBar)(({ theme }) => ({
 const Navbar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   const location = useLocation();
   const navigate = useNavigate();
 
   const { user, isAuthenticated, logout } = useAuth();
   const { cart } = useCart();
+  const { t } = useTranslation();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null);
+  const [cartMenuAnchor, setCartMenuAnchor] = useState<null | HTMLElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -108,11 +116,11 @@ const Navbar: React.FC = () => {
   }, []);
 
   const navigationItems = [
-    { label: 'Inicio', path: '/', icon: <EventIcon /> },
-    { label: 'Eventos', path: '/events', icon: <EventIcon /> },
-    { label: 'Speakers', path: '/speakers', icon: <PersonIcon /> },
-    { label: 'Catálogo', path: '/catalog', icon: <SchoolIcon /> },
-    ...(isAuthenticated && user?.role === 'admin' ? [{ label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> }] : []),
+    { label: t('nav.home'), path: '/', icon: <EventIcon /> },
+    { label: t('nav.events'), path: '/events', icon: <EventIcon /> },
+    { label: t('nav.speakers'), path: '/speakers', icon: <PersonIcon /> },
+    { label: t('nav.catalog'), path: '/catalog', icon: <SchoolIcon /> },
+    ...(isAuthenticated && user?.role === 'admin' ? [{ label: t('nav.dashboard'), path: '/dashboard', icon: <DashboardIcon /> }] : []),
   ];
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -175,7 +183,24 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Navigation */}
           {!isMobile && (
-            <Box sx={{ flexGrow: 1, display: 'flex', gap: 2 }}>
+            <Box sx={{
+              flexGrow: 1,
+              display: 'flex',
+              gap: isTablet ? 1 : 2,
+              // Tablet responsive
+              ...(isTablet && {
+                '& .MuiButton-root': {
+                  padding: '8px 12px',
+                  fontSize: '0.875rem',
+                  '& .MuiButton-startIcon': {
+                    marginRight: '4px',
+                    '& .MuiSvgIcon-root': {
+                      fontSize: '1rem',
+                    },
+                  },
+                },
+              }),
+            }}>
               {navigationItems.map((item) => (
                 <Button
                   key={item.path}
@@ -191,6 +216,13 @@ const Navbar: React.FC = () => {
                     '&:hover': {
                       backgroundColor: 'rgba(107, 30, 34, 0.1)',
                     },
+                    // Responsive text
+                    display: isTablet && item.label.length > 8 ? 'none' : 'flex',
+                    [theme.breakpoints.down('lg')]: {
+                      '& .MuiButton-startIcon': {
+                        marginRight: '4px',
+                      },
+                    },
                   }}
                 >
                   {item.label}
@@ -200,39 +232,42 @@ const Navbar: React.FC = () => {
           )}
 
           {/* Search Bar */}
-          <Box sx={{ flexGrow: 1, maxWidth: 400 }}>
+          <Box sx={{
+            flexGrow: 1,
+            maxWidth: isTablet ? 300 : 400,
+            // Hide search on mobile, show only on tablet+
+            display: isMobile ? 'none' : 'block',
+          }}>
             <form onSubmit={handleSearch}>
               <Search>
                 <SearchIconWrapper>
                   <SearchIcon />
                 </SearchIconWrapper>
                 <StyledInputBase
-                  placeholder="Buscar eventos..."
+                  placeholder={t('events.search')}
                   inputProps={{ 'aria-label': 'search' }}
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                 />
               </Search>
             </form>
           </Box>
 
           {/* Right Side Actions */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {/* Cart */}
-            <IconButton
-              component={Link}
-              to="/cart"
-              color="inherit"
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'rgba(107, 30, 34, 0.1)',
-                },
-              }}
-            >
-              <Badge badgeContent={cartItemCount} color="error">
-                <CartIcon />
-              </Badge>
-            </IconButton>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: isTablet ? 0.5 : 1,
+          }}>
+            {/* Language Selector - Hide on mobile */}
+            {!isMobile && <LanguageSelector />}
+
+            {/* Mini Cart */}
+            <MiniCart
+              anchorEl={cartMenuAnchor}
+              onClose={() => setCartMenuAnchor(null)}
+              onOpen={(event) => setCartMenuAnchor(event.currentTarget)}
+            />
 
             {/* Profile/Login */}
             {isAuthenticated ? (
@@ -243,6 +278,14 @@ const Navbar: React.FC = () => {
                     '&:hover': {
                       backgroundColor: 'rgba(107, 30, 34, 0.1)',
                     },
+                    // Smaller on tablet
+                    ...(isTablet && {
+                      padding: '8px',
+                      '& .MuiAvatar-root': {
+                        width: 28,
+                        height: 28,
+                      },
+                    }),
                   }}
                 >
                   <Avatar
@@ -259,30 +302,45 @@ const Navbar: React.FC = () => {
                   PaperProps={{
                     sx: {
                       mt: 1,
-                      minWidth: 200,
+                      minWidth: isTablet ? 180 : 200,
                     },
                   }}
                 >
                   <MenuItem component={Link} to="/profile" onClick={handleProfileMenuClose}>
-                    <PersonIcon sx={{ mr: 1 }} />
-                    Mi Perfil
+                    <PersonIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                    {t('profile.title')}
                   </MenuItem>
                   <MenuItem component={Link} to="/certificates" onClick={handleProfileMenuClose}>
-                    <SchoolIcon sx={{ mr: 1 }} />
-                    Mis Certificados
+                    <SchoolIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                    {t('profile.certificates')}
                   </MenuItem>
                   <MenuItem onClick={handleLogout}>
-                    <LogoutIcon sx={{ mr: 1 }} />
-                    Cerrar Sesión
+                    <LogoutIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                    {t('nav.logout')}
                   </MenuItem>
                 </Menu>
               </>
             ) : (
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{
+                display: 'flex',
+                gap: isTablet ? 0.5 : 1,
+                // Stack vertically on mobile, hide register button
+                ...(isMobile && {
+                  flexDirection: 'column',
+                  gap: 0,
+                  '& .MuiButton-root': {
+                    display: 'none',
+                  },
+                  '& .MuiButton-root:first-of-type': {
+                    display: 'flex',
+                  },
+                }),
+              }}>
                 <Button
                   component={Link}
                   to="/login"
                   variant="outlined"
+                  size={isTablet ? "small" : "medium"}
                   sx={{
                     borderColor: 'primary.main',
                     color: 'primary.main',
@@ -290,22 +348,29 @@ const Navbar: React.FC = () => {
                       backgroundColor: 'primary.main',
                       color: 'white',
                     },
+                    // Smaller text on tablet
+                    fontSize: isTablet ? '0.8rem' : '0.875rem',
+                    padding: isTablet ? '4px 12px' : '6px 16px',
                   }}
                 >
-                  Iniciar Sesión
+                  {t('nav.login')}
                 </Button>
                 <Button
                   component={Link}
                   to="/register"
                   variant="contained"
+                  size={isTablet ? "small" : "medium"}
                   sx={{
                     backgroundColor: 'primary.main',
                     '&:hover': {
                       backgroundColor: 'primary.dark',
                     },
+                    // Smaller text on tablet
+                    fontSize: isTablet ? '0.8rem' : '0.875rem',
+                    padding: isTablet ? '4px 12px' : '6px 16px',
                   }}
                 >
-                  Registrarse
+                  {t('nav.register')}
                 </Button>
               </Box>
             )}
@@ -319,6 +384,7 @@ const Navbar: React.FC = () => {
                   '&:hover': {
                     backgroundColor: 'rgba(107, 30, 34, 0.1)',
                   },
+                  padding: '8px',
                 }}
               >
                 <MenuIcon />
@@ -333,9 +399,35 @@ const Navbar: React.FC = () => {
         anchor="right"
         open={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
+        PaperProps={{
+          sx: {
+            width: '280px',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+          },
+        }}
       >
-        <Box sx={{ width: 250, pt: 2 }}>
-          <List>
+        <Box sx={{ width: '100%', pt: 2 }}>
+          {/* Mobile Search */}
+          <Box sx={{ px: 2, pb: 2, borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
+            <form onSubmit={handleSearch}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder={t('events.search')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </form>
+          </Box>
+
+          <List sx={{ pt: 1 }}>
             {navigationItems.map((item) => (
               <ListItem key={item.path} disablePadding>
                 <ListItemButton
@@ -343,25 +435,60 @@ const Navbar: React.FC = () => {
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
                   selected={location.pathname === item.path}
+                  sx={{
+                    py: 1.5,
+                    px: 3,
+                    '&.Mui-selected': {
+                      backgroundColor: 'rgba(107, 30, 34, 0.1)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(107, 30, 34, 0.15)',
+                      },
+                    },
+                  }}
                 >
-                  {item.icon}
-                  <ListItemText primary={item.label} sx={{ ml: 2 }} />
+                  <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                    {item.icon}
+                  </Box>
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontSize: '1rem',
+                      fontWeight: location.pathname === item.path ? 600 : 400,
+                    }}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}
 
+            {/* Language selector in mobile menu */}
+            <ListItem sx={{ borderTop: '1px solid rgba(0, 0, 0, 0.08)', mt: 1 }}>
+              <Box sx={{ width: '100%', px: 1 }}>
+                <LanguageSelector />
+              </Box>
+            </ListItem>
+
             {!isAuthenticated && (
               <>
-                <ListItem disablePadding>
-                  <ListItemButton component={Link} to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <PersonIcon />
-                    <ListItemText primary="Iniciar Sesión" sx={{ ml: 2 }} />
+                <ListItem disablePadding sx={{ borderTop: '1px solid rgba(0, 0, 0, 0.08)', mt: 1 }}>
+                  <ListItemButton
+                    component={Link}
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    sx={{ py: 1.5, px: 3 }}
+                  >
+                    <PersonIcon sx={{ mr: 2 }} />
+                    <ListItemText primary={t('nav.login')} />
                   </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                  <ListItemButton component={Link} to="/register" onClick={() => setMobileMenuOpen(false)}>
-                    <PersonIcon />
-                    <ListItemText primary="Registrarse" sx={{ ml: 2 }} />
+                  <ListItemButton
+                    component={Link}
+                    to="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    sx={{ py: 1.5, px: 3 }}
+                  >
+                    <PersonIcon sx={{ mr: 2 }} />
+                    <ListItemText primary={t('nav.register')} />
                   </ListItemButton>
                 </ListItem>
               </>
