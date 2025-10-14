@@ -4,9 +4,9 @@ import { Box, CircularProgress } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
 
 // Lazy load components for better performance
-const HomePage = lazy(() => import('@/pages/HomePage'));
+const HomePage = lazy(() => import('@/components/HomePage'));
 // Placeholder components for now - will be implemented later
-const EventsPage = lazy(() => import('@/pages/EventsPage'));
+const EventsPage = lazy(() => import('@/components/EventsPage'));
 const EventDetailPage = () => <div>Event Detail Page - Coming Soon</div>;
 const CartPage = () => <div>Cart Page - Coming Soon</div>;
 const CheckoutPage = () => <div>Checkout Page - Coming Soon</div>;

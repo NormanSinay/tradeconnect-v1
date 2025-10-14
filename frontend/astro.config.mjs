@@ -5,9 +5,7 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: 'https://tradeconnect.gt',
   integrations: [
-    react({
-      include: ['**/react/*'],
-    }),
+    react(),
   ],
   vite: {
     resolve: {
