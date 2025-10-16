@@ -11,6 +11,21 @@ import { Event as EventIcon, People as PeopleIcon, School as SchoolIcon, Trendin
 const HomePage: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+
+  // Parallax effect on mouse move
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 30;
+      const y = (e.clientY / window.innerHeight - 0.5) * 30;
+      setMousePosition({ x, y });
+    };
+
+    if (!isMobile) {
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, [isMobile]);
 
   // Fetch featured events
   const { data: featuredEvents, isLoading: eventsLoading } = useQuery({
@@ -46,6 +61,21 @@ const HomePage: React.FC = () => {
       y: 0,
       transition: {
         duration: 0.6,
+        type: 'spring',
+        stiffness: 100,
+      },
+    },
+  };
+
+  const cardHoverVariants = {
+    initial: { scale: 1, y: 0 },
+    hover: {
+      scale: 1.05,
+      y: -10,
+      transition: {
+        type: 'spring',
+        stiffness: 400,
+        damping: 10,
       },
     },
   };
@@ -89,28 +119,201 @@ const HomePage: React.FC = () => {
                           radial-gradient(circle at 80% 20%, ${secondaryColor}15 0%, transparent 50%),
                           radial-gradient(circle at 40% 40%, ${primaryColor}10 0%, transparent 50%)`,
               animation: 'float 20s ease-in-out infinite',
+              transform: `translate(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px)`,
+              transition: 'transform 0.3s ease-out',
               '@keyframes float': {
                 '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
-                '33%': { transform: 'translateY(-10px) rotate(1deg)' },
-                '66%': { transform: 'translateY(5px) rotate(-1deg)' },
+                '33%': { transform: 'translateY(-20px) rotate(2deg)' },
+                '66%': { transform: 'translateY(10px) rotate(-2deg)' },
               },
             }}
           >
-            {/* Floating geometric shapes */}
+            {/* Large floating circles - Layer 1 */}
             <Box
               component={"div" as any}
               sx={{
                 position: 'absolute',
-                top: '20%',
-                left: '10%',
+                top: '15%',
+                left: '8%',
+                width: 100,
+                height: 100,
+                background: `linear-gradient(135deg, ${primaryColor}35, ${secondaryColor}25)`,
+                borderRadius: '50%',
+                animation: 'bounce1 7s ease-in-out infinite',
+                filter: 'blur(1px)',
+                '@keyframes bounce1': {
+                  '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+                  '25%': { transform: 'translate(15px, -25px) scale(1.1)' },
+                  '50%': { transform: 'translate(-10px, -40px) scale(0.95)' },
+                  '75%': { transform: 'translate(-20px, -15px) scale(1.05)' },
+                },
+              }}
+            />
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                top: '10%',
+                right: '12%',
+                width: 120,
+                height: 120,
+                background: `linear-gradient(225deg, ${primaryColor}25, #D4AF3730)`,
+                borderRadius: '50%',
+                animation: 'bounce2 9s ease-in-out infinite',
+                filter: 'blur(2px)',
+                '@keyframes bounce2': {
+                  '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+                  '30%': { transform: 'translate(-20px, 30px) scale(1.15)' },
+                  '60%': { transform: 'translate(10px, 50px) scale(0.9)' },
+                },
+              }}
+            />
+
+            {/* Medium floating circles - Layer 2 */}
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                top: '45%',
+                left: '5%',
+                width: 70,
+                height: 70,
+                background: `radial-gradient(circle, ${primaryColor}40, ${secondaryColor}20)`,
+                borderRadius: '50%',
+                animation: 'drift1 11s ease-in-out infinite',
+                '@keyframes drift1': {
+                  '0%, 100%': { transform: 'translate(0, 0) rotate(0deg)' },
+                  '33%': { transform: 'translate(25px, -20px) rotate(120deg)' },
+                  '66%': { transform: 'translate(-15px, 15px) rotate(240deg)' },
+                },
+              }}
+            />
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                top: '55%',
+                right: '10%',
+                width: 90,
+                height: 90,
+                background: `linear-gradient(45deg, #D4AF3740, ${primaryColor}25)`,
+                borderRadius: '50%',
+                animation: 'drift2 13s ease-in-out infinite',
+                filter: 'blur(1px)',
+                '@keyframes drift2': {
+                  '0%, 100%': { transform: 'translate(0, 0)' },
+                  '25%': { transform: 'translate(-30px, 20px)' },
+                  '50%': { transform: 'translate(20px, -30px)' },
+                  '75%': { transform: 'translate(-10px, -10px)' },
+                },
+              }}
+            />
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                bottom: '20%',
+                left: '15%',
+                width: 85,
+                height: 85,
+                background: `linear-gradient(135deg, ${secondaryColor}30, ${primaryColor}35)`,
+                borderRadius: '50%',
+                animation: 'orbit1 15s linear infinite',
+                '@keyframes orbit1': {
+                  '0%': { transform: 'rotate(0deg) translateX(30px) rotate(0deg)' },
+                  '100%': { transform: 'rotate(360deg) translateX(30px) rotate(-360deg)' },
+                },
+              }}
+            />
+
+            {/* Small accent circles - Layer 3 */}
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                top: '30%',
+                left: '25%',
+                width: 50,
+                height: 50,
+                background: `radial-gradient(circle, ${primaryColor}50, transparent)`,
+                borderRadius: '50%',
+                animation: 'pulse1 5s ease-in-out infinite',
+                '@keyframes pulse1': {
+                  '0%, 100%': { transform: 'scale(1)', opacity: 0.6 },
+                  '50%': { transform: 'scale(1.4)', opacity: 1 },
+                },
+              }}
+            />
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                top: '70%',
+                left: '35%',
                 width: 60,
                 height: 60,
-                background: `linear-gradient(45deg, ${primaryColor}30, ${secondaryColor}20)`,
+                background: `radial-gradient(circle, #D4AF3745, transparent)`,
                 borderRadius: '50%',
-                animation: 'bounce 8s ease-in-out infinite',
-                '@keyframes bounce': {
-                  '0%, 100%': { transform: 'translateY(0px)' },
-                  '50%': { transform: 'translateY(-20px)' },
+                animation: 'pulse2 6s ease-in-out infinite 1s',
+                '@keyframes pulse2': {
+                  '0%, 100%': { transform: 'scale(1)', opacity: 0.7 },
+                  '50%': { transform: 'scale(1.3)', opacity: 0.95 },
+                },
+              }}
+            />
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                bottom: '35%',
+                right: '20%',
+                width: 55,
+                height: 55,
+                background: `linear-gradient(45deg, ${primaryColor}40, ${secondaryColor}35)`,
+                borderRadius: '50%',
+                animation: 'pulse3 7s ease-in-out infinite 2s',
+                '@keyframes pulse3': {
+                  '0%, 100%': { transform: 'scale(1)', opacity: 0.65 },
+                  '50%': { transform: 'scale(1.35)', opacity: 0.9 },
+                },
+              }}
+            />
+
+            {/* Geometric shapes with rotation */}
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                top: '25%',
+                right: '25%',
+                width: 50,
+                height: 50,
+                background: `linear-gradient(45deg, ${secondaryColor}35, ${primaryColor}25)`,
+                borderRadius: 2,
+                animation: 'spin1 10s linear infinite',
+                '@keyframes spin1': {
+                  '0%': { transform: 'rotate(0deg) scale(1)' },
+                  '50%': { transform: 'rotate(180deg) scale(1.2)' },
+                  '100%': { transform: 'rotate(360deg) scale(1)' },
+                },
+              }}
+            />
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                bottom: '40%',
+                left: '60%',
+                width: 45,
+                height: 45,
+                background: `linear-gradient(225deg, #D4AF3730, ${primaryColor}30)`,
+                borderRadius: 2,
+                transform: 'rotate(45deg)',
+                animation: 'spin2 14s linear infinite reverse',
+                '@keyframes spin2': {
+                  '0%': { transform: 'rotate(45deg) scale(1)' },
+                  '50%': { transform: 'rotate(225deg) scale(0.9)' },
+                  '100%': { transform: 'rotate(405deg) scale(1)' },
                 },
               }}
             />
@@ -119,16 +322,36 @@ const HomePage: React.FC = () => {
               sx={{
                 position: 'absolute',
                 top: '60%',
-                right: '15%',
+                right: '30%',
                 width: 40,
                 height: 40,
-                background: `linear-gradient(45deg, ${secondaryColor}25, ${primaryColor}15)`,
-                borderRadius: 2,
-                transform: 'rotate(45deg)',
-                animation: 'spin 12s linear infinite',
-                '@keyframes spin': {
-                  '0%': { transform: 'rotate(45deg)' },
-                  '100%': { transform: 'rotate(405deg)' },
+                background: `linear-gradient(135deg, ${primaryColor}28, ${secondaryColor}32)`,
+                clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)',
+                animation: 'rotate1 12s ease-in-out infinite',
+                '@keyframes rotate1': {
+                  '0%, 100%': { transform: 'rotate(0deg) translateY(0)' },
+                  '50%': { transform: 'rotate(180deg) translateY(-20px)' },
+                },
+              }}
+            />
+
+            {/* Floating particles */}
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                top: '40%',
+                left: '45%',
+                width: 25,
+                height: 25,
+                background: `radial-gradient(circle, ${primaryColor}60, transparent)`,
+                borderRadius: '50%',
+                animation: 'float1 8s ease-in-out infinite',
+                '@keyframes float1': {
+                  '0%, 100%': { transform: 'translate(0, 0)' },
+                  '25%': { transform: 'translate(40px, -60px)' },
+                  '50%': { transform: 'translate(80px, -20px)' },
+                  '75%': { transform: 'translate(40px, 20px)' },
                 },
               }}
             />
@@ -136,16 +359,17 @@ const HomePage: React.FC = () => {
               component={"div" as any}
               sx={{
                 position: 'absolute',
-                bottom: '30%',
-                left: '70%',
-                width: 80,
-                height: 80,
-                background: `linear-gradient(45deg, ${primaryColor}20, ${secondaryColor}30)`,
+                bottom: '45%',
+                right: '40%',
+                width: 30,
+                height: 30,
+                background: `radial-gradient(circle, #D4AF3765, transparent)`,
                 borderRadius: '50%',
-                animation: 'pulse 6s ease-in-out infinite',
-                '@keyframes pulse': {
-                  '0%, 100%': { transform: 'scale(1)', opacity: 0.7 },
-                  '50%': { transform: 'scale(1.1)', opacity: 1 },
+                animation: 'float2 10s ease-in-out infinite 1.5s',
+                '@keyframes float2': {
+                  '0%, 100%': { transform: 'translate(0, 0)' },
+                  '33%': { transform: 'translate(-50px, 40px)' },
+                  '66%': { transform: 'translate(-25px, -30px)' },
                 },
               }}
             />
@@ -166,10 +390,16 @@ const HomePage: React.FC = () => {
                     fontSize: { xs: '2.5rem', md: '3.5rem' },
                     fontWeight: 'bold',
                     mb: 2,
-                    background: `linear-gradient(135deg, ${primaryColor}, #D4AF37)`,
+                    background: `linear-gradient(135deg, ${primaryColor}, #D4AF37, ${primaryColor})`,
+                    backgroundSize: '200% 200%',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
+                    animation: 'gradientShift 4s ease infinite',
+                    '@keyframes gradientShift': {
+                      '0%, 100%': { backgroundPosition: '0% 50%' },
+                      '50%': { backgroundPosition: '100% 50%' },
+                    },
                   }}
                 >
                   TradeConnect
@@ -272,7 +502,13 @@ const HomePage: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -8 }}
+                    transition={{
+                      duration: 0.6,
+                      delay: index * 0.1,
+                      type: 'spring',
+                      stiffness: 300,
+                    }}
                     viewport={{ once: true }}
                   >
                     <Card
@@ -282,7 +518,8 @@ const HomePage: React.FC = () => {
                         height: '100%',
                         borderRadius: 3,
                         boxShadow: 3,
-                        '&:hover': { boxShadow: 6 },
+                        transition: 'box-shadow 0.3s ease',
+                        '&:hover': { boxShadow: 8 },
                       }}
                     >
                       <Box component={"div" as any} sx={{ color: 'primary.main', fontSize: 48, mb: 2 }}>
@@ -327,6 +564,16 @@ const HomePage: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
+                    whileHover={{
+                      scale: 1.03,
+                      y: -12,
+                      rotateY: 2,
+                      transition: {
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 15,
+                      },
+                    }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
                   >
@@ -336,10 +583,9 @@ const HomePage: React.FC = () => {
                       sx={{
                         height: '100%',
                         textDecoration: 'none',
-                        transition: 'all 0.3s ease',
+                        transition: 'box-shadow 0.3s ease',
                         '&:hover': {
-                          transform: 'translateY(-8px)',
-                          boxShadow: 6,
+                          boxShadow: 8,
                         },
                       }}
                     >
@@ -416,8 +662,19 @@ const HomePage: React.FC = () => {
               ].map((category, index) => (
                 <Grid item xs={6} md={4} key={category.name}>
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, scale: 0.8, rotateZ: -5 }}
+                    whileInView={{ opacity: 1, scale: 1, rotateZ: 0 }}
+                    whileHover={{
+                      scale: 1.08,
+                      rotateZ: 3,
+                      y: -8,
+                      transition: {
+                        type: 'spring',
+                        stiffness: 500,
+                        damping: 12,
+                      },
+                    }}
+                    whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     viewport={{ once: true }}
                   >
@@ -427,10 +684,9 @@ const HomePage: React.FC = () => {
                         p: 3,
                         height: '100%',
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease',
+                        transition: 'box-shadow 0.3s ease',
                         '&:hover': {
-                          transform: 'scale(1.05)',
-                          boxShadow: 6,
+                          boxShadow: 8,
                         },
                       }}
                     >
