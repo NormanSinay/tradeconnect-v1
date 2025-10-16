@@ -1,11 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import {
   Box,
   Container,
   Grid,
   Typography,
-  Link as MuiLink,
   IconButton,
   Divider,
   useTheme,
@@ -88,8 +86,8 @@ const Footer: React.FC = () => {
             <Box component={"div" as any} sx={{ mb: 3 }}>
               <Typography
                 variant="h6"
-                component={Link}
-                to="/"
+                component="a"
+                href="/"
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -113,23 +111,27 @@ const Footer: React.FC = () => {
             <Box component={"div" as any} sx={{ mb: 3 }}>
               <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <EmailIcon sx={{ mr: 1, fontSize: 18, color: 'primary.main' }} />
-                <MuiLink
+                <Typography
+                  component="a"
                   href="mailto:info@tradeconnect.gt"
+                  variant="body2"
                   color="inherit"
                   sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
                 >
                   info@tradeconnect.gt
-                </MuiLink>
+                </Typography>
               </Box>
               <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <PhoneIcon sx={{ mr: 1, fontSize: 18, color: 'primary.main' }} />
-                <MuiLink
+                <Typography
+                  component="a"
                   href="tel:+50212345678"
+                  variant="body2"
                   color="inherit"
                   sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
                 >
                   +502 1234-5678
-                </MuiLink>
+                </Typography>
               </Box>
               <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'flex-start' }}>
                 <LocationIcon sx={{ mr: 1, mt: 0.5, fontSize: 18, color: 'primary.main' }} />
@@ -176,11 +178,12 @@ const Footer: React.FC = () => {
               <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
                 {section.items.map((item) => (
                   <Box component="li" key={item.label} sx={{ mb: 1 }}>
-                    <MuiLink
-                      component={Link}
-                      to={item.href}
-                      color="grey.300"
+                    <Typography
+                      component="a"
+                      href={item.href}
+                      variant="body2"
                       sx={{
+                        color: 'grey.300',
                         textDecoration: 'none',
                         fontSize: '0.875rem',
                         '&:hover': {
@@ -190,7 +193,7 @@ const Footer: React.FC = () => {
                       }}
                     >
                       {item.label}
-                    </MuiLink>
+                    </Typography>
                   </Box>
                 ))}
               </Box>
@@ -267,30 +270,32 @@ const Footer: React.FC = () => {
           </Typography>
 
           <Box component={"div" as any} sx={{ display: 'flex', gap: 3 }}>
-            <MuiLink
-              component={Link}
-              to="/terms"
-              color="grey.400"
+            <Typography
+              component="a"
+              href="/terms"
+              variant="body2"
               sx={{
+                color: 'grey.400',
                 textDecoration: 'none',
                 fontSize: '0.875rem',
                 '&:hover': { color: 'primary.main' },
               }}
             >
               Términos
-            </MuiLink>
-            <MuiLink
-              component={Link}
-              to="/privacy"
-              color="grey.400"
+            </Typography>
+            <Typography
+              component="a"
+              href="/privacy"
+              variant="body2"
               sx={{
+                color: 'grey.400',
                 textDecoration: 'none',
                 fontSize: '0.875rem',
                 '&:hover': { color: 'primary.main' },
               }}
             >
               Privacidad
-            </MuiLink>
+            </Typography>
             <Typography variant="body2" color="grey.400" sx={{ fontSize: '0.875rem' }}>
               SAT/FEL Certificado
             </Typography>

@@ -9,6 +9,9 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
   <div class="how-it-works-page">
     <section class="hero-section">
       <div class="container">
+        <div class="breadcrumb">
+          <a href="/" class="breadcrumb-link">← Volver al Inicio</a>
+        </div>
         <h1>Cómo Funciona TradeConnect</h1>
         <p class="hero-description">
           Una plataforma intuitiva que simplifica la gestión de eventos empresariales
@@ -223,6 +226,27 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
     color: white;
     padding: var(--spacing-2xl) 0;
     text-align: center;
+  }
+
+  .breadcrumb {
+    text-align: left;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .breadcrumb-link {
+    color: white;
+    text-decoration: none;
+    font-size: 0.95rem;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .breadcrumb-link:hover {
+    opacity: 1;
+    text-decoration: underline;
   }
 
   .hero-section h1 {

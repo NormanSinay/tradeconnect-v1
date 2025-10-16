@@ -50,6 +50,18 @@ const { title, description = "Plataforma E-commerce de Eventos y Cursos Empresar
       </div>
     </div>
     <slot />
+    <script>
+      // Hide loader when page is fully loaded
+      window.addEventListener('DOMContentLoaded', () => {
+        const loader = document.getElementById('app-loader');
+        if (loader) {
+          loader.style.opacity = '0';
+          setTimeout(() => {
+            loader.style.display = 'none';
+          }, 300);
+        }
+      });
+    </script>
   </body>
 </html>
 
@@ -60,7 +72,8 @@ const { title, description = "Plataforma E-commerce de Eventos y Cursos Empresar
     --primary-light: #8B2E32;
     --primary-dark: #4B1518;
     --accent: #D4AF37;
-    --secondary: #F5F5F5;
+    --secondary: #1976D2;
+    --secondary-dark: #115293;
     --text-primary: #333333;
     --text-secondary: #666666;
     --error: #D32F2F;
@@ -69,6 +82,8 @@ const { title, description = "Plataforma E-commerce de Eventos y Cursos Empresar
     --info: #1976D2;
     --background: #FFFFFF;
     --surface: #FAFAFA;
+    --border-color: #E0E0E0;
+    --border-radius-full: 9999px;
 
     /* Typography */
     --font-primary: 'Roboto', sans-serif;

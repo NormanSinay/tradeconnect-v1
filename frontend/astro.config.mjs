@@ -6,7 +6,9 @@ import { fileURLToPath, URL } from 'node:url';
 export default defineConfig({
   site: 'https://tradeconnect.gt',
   integrations: [
-    react(),
+    react({
+      include: ['**/ClientApp.tsx', '**/ContactPage.tsx', '**/ReportIssuePage.tsx', '**/Footer.tsx'],
+    }),
   ],
   vite: {
     resolve: {
