@@ -10,6 +10,7 @@ import { CartProvider } from '@/context/CartContext';
 import AppRoutes from '@/components/AppRoutes';
 import BaseLayout from '@/components/layout/BaseLayout';
 import '@/theme/global.css';
+import '@/i18n';
 
 // Create a client for React Query
 const queryClient = new QueryClient({
@@ -37,7 +38,7 @@ const ClientApp: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AuthProvider>
             <CartProvider>
               <BaseLayout>

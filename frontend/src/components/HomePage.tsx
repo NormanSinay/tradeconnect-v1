@@ -6,8 +6,7 @@ import { publicEventsService } from '@/services/api';
 import { Link } from 'react-router-dom';
 import { Event as EventIcon, People as PeopleIcon, School as SchoolIcon, TrendingUp as TrendingUpIcon } from '@mui/icons-material';
 
-// Lazy load 3D canvas for performance
-const HeroCanvas = React.lazy(() => import('@/components/home/HeroCanvas'));
+// Removed 3D canvas import for better performance and compatibility
 
 const HomePage: React.FC = () => {
   const theme = useTheme();
@@ -56,7 +55,14 @@ const HomePage: React.FC = () => {
   const secondaryColor = String(theme.palette.secondary.main);
 
   const content = (
-    <Box component={"div" as any}>
+    <Box
+      component={"div" as any}
+      sx={{
+        minHeight: '100vh',
+        background: `linear-gradient(135deg, ${primaryColor}10, ${secondaryColor}05)`,
+        backgroundColor: 'background.default'
+      }}
+    >
       {/* Hero Section */}
       <Box
         component={"section" as any}
@@ -69,11 +75,81 @@ const HomePage: React.FC = () => {
           overflow: 'hidden',
         }}
       >
-        {/* 3D Canvas Background */}
+        {/* Animated Background Pattern */}
         {!isMobile && (
-          <Suspense fallback={null}>
-            <HeroCanvas />
-          </Suspense>
+          <Box
+            component={"div" as any}
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: `radial-gradient(circle at 20% 80%, ${primaryColor}20 0%, transparent 50%),
+                          radial-gradient(circle at 80% 20%, ${secondaryColor}15 0%, transparent 50%),
+                          radial-gradient(circle at 40% 40%, ${primaryColor}10 0%, transparent 50%)`,
+              animation: 'float 20s ease-in-out infinite',
+              '@keyframes float': {
+                '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                '33%': { transform: 'translateY(-10px) rotate(1deg)' },
+                '66%': { transform: 'translateY(5px) rotate(-1deg)' },
+              },
+            }}
+          >
+            {/* Floating geometric shapes */}
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                top: '20%',
+                left: '10%',
+                width: 60,
+                height: 60,
+                background: `linear-gradient(45deg, ${primaryColor}30, ${secondaryColor}20)`,
+                borderRadius: '50%',
+                animation: 'bounce 8s ease-in-out infinite',
+                '@keyframes bounce': {
+                  '0%, 100%': { transform: 'translateY(0px)' },
+                  '50%': { transform: 'translateY(-20px)' },
+                },
+              }}
+            />
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                top: '60%',
+                right: '15%',
+                width: 40,
+                height: 40,
+                background: `linear-gradient(45deg, ${secondaryColor}25, ${primaryColor}15)`,
+                borderRadius: 2,
+                transform: 'rotate(45deg)',
+                animation: 'spin 12s linear infinite',
+                '@keyframes spin': {
+                  '0%': { transform: 'rotate(45deg)' },
+                  '100%': { transform: 'rotate(405deg)' },
+                },
+              }}
+            />
+            <Box
+              component={"div" as any}
+              sx={{
+                position: 'absolute',
+                bottom: '30%',
+                left: '70%',
+                width: 80,
+                height: 80,
+                background: `linear-gradient(45deg, ${primaryColor}20, ${secondaryColor}30)`,
+                borderRadius: '50%',
+                animation: 'pulse 6s ease-in-out infinite',
+                '@keyframes pulse': {
+                  '0%, 100%': { transform: 'scale(1)', opacity: 0.7 },
+                  '50%': { transform: 'scale(1.1)', opacity: 1 },
+                },
+              }}
+            />
+          </Box>
         )}
 
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
@@ -375,7 +451,15 @@ const HomePage: React.FC = () => {
     </Box>
   );
 
-  return content;
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {content}
+    </motion.div>
+  );
 };
 
 export default HomePage;
