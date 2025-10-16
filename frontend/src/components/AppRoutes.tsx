@@ -20,14 +20,16 @@ const DashboardPage = lazy(() => import('@/components/admin/DashboardPage'));
 
 // Loading component
 const LoadingFallback: React.FC = () => (
-  <Box
-    display="flex"
-    justifyContent="center"
-    alignItems="center"
-    minHeight="50vh"
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '50vh'
+    }}
   >
     <CircularProgress size={60} thickness={4} />
-  </Box>
+  </div>
 );
 
 // Protected Route component

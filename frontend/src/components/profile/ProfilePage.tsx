@@ -60,7 +60,7 @@ interface TabPanelProps {
 
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index}>
-    {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    {value === index && <Box component={"div" as any} sx={{ py: 3 }}>{children}</Box>}
   </div>
 );
 
@@ -222,7 +222,7 @@ const ProfilePage: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box component={"div" as any} sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Mi Perfil
         </Typography>
@@ -248,7 +248,7 @@ const ProfilePage: React.FC = () => {
             <Typography variant="body1" color="text.secondary" gutterBottom>
               {user.email}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+            <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mb: 2 }}>
               <Chip
                 label={user.role === 'admin' ? 'Administrador' : user.role === 'organizer' ? 'Organizador' : 'Usuario'}
                 color="primary"
@@ -290,7 +290,7 @@ const ProfilePage: React.FC = () => {
                 Información Personal
               </Typography>
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Typography variant="body1">
                   Actualiza tu información personal y preferencias
                 </Typography>
@@ -356,7 +356,7 @@ const ProfilePage: React.FC = () => {
               </Grid>
 
               {isEditing && (
-                <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+                <Box component={"div" as any} sx={{ mt: 3, display: 'flex', gap: 2 }}>
                   <Button
                     variant="contained"
                     startIcon={<Save />}
@@ -429,7 +429,7 @@ const ProfilePage: React.FC = () => {
               <Grid item xs={12} md={6} key={registration.id}>
                 <Card>
                   <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                    <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                       <Typography variant="h6" component="h3">
                         {registration.event?.title}
                       </Typography>
@@ -440,22 +440,22 @@ const ProfilePage: React.FC = () => {
                       />
                     </Box>
 
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <CalendarToday sx={{ fontSize: 16, color: 'text.secondary' }} />
                         <Typography variant="body2" color="text.secondary">
                           {formatDate(registration.event?.startDate || '')}
                         </Typography>
                       </Box>
 
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <LocationOn sx={{ fontSize: 16, color: 'text.secondary' }} />
                         <Typography variant="body2" color="text.secondary">
                           {registration.event?.location || registration.event?.virtualLocation || 'Ubicación por confirmar'}
                         </Typography>
                       </Box>
 
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Receipt sx={{ fontSize: 16, color: 'text.secondary' }} />
                         <Typography variant="body2" color="text.secondary">
                           Q{registration.totalAmount} • {registration.participantType === 'individual' ? 'Individual' : 'Empresa'}
@@ -463,7 +463,7 @@ const ProfilePage: React.FC = () => {
                       </Box>
                     </Box>
 
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
                       <Button
                         size="small"
                         startIcon={<QrCode />}
@@ -497,8 +497,8 @@ const ProfilePage: React.FC = () => {
               <Grid item xs={12} md={6} key={certificate.id}>
                 <Card>
                   <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                      <Box>
+                    <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                      <Box component={"div" as any}>
                         <Typography variant="h6" component="h3" gutterBottom>
                           {certificate.eventTitle}
                         </Typography>
@@ -512,7 +512,7 @@ const ProfilePage: React.FC = () => {
                       <CheckCircle sx={{ fontSize: 40, color: 'success.main' }} />
                     </Box>
 
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
                       <Button
                         fullWidth
                         variant="contained"
@@ -535,7 +535,7 @@ const ProfilePage: React.FC = () => {
             ))}
           </Grid>
 
-          <Box sx={{ mt: 3 }}>
+          <Box component={"div" as any} sx={{ mt: 3 }}>
             <Button
               variant="outlined"
               startIcon={<Download />}
@@ -561,7 +561,7 @@ const ProfilePage: React.FC = () => {
                 <ListItemText
                   primary={registration.event?.title}
                   secondary={
-                    <Box>
+                    <Box component={"div" as any}>
                       <Typography variant="body2" component="span">
                         Fecha: {formatDate(registration.registeredAt)} •
                       </Typography>

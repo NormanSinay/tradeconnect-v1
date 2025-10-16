@@ -56,7 +56,7 @@ const LoginPage: React.FC = () => {
     setValue,
     watch,
   } = useForm<LoginFormData>({
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(loginSchema) as any,
     defaultValues: {
       email: '',
       password: '',
@@ -102,7 +102,7 @@ const LoginPage: React.FC = () => {
         }}
       >
         {/* Logo/Brand */}
-        <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Box component={"div" as any} sx={{ mb: 3, textAlign: 'center' }}>
           <Typography
             component="h1"
             variant="h4"
@@ -190,6 +190,7 @@ const LoginPage: React.FC = () => {
             {/* Remember Me & Forgot Password */}
             <Grid item xs={12}>
               <Box
+                component={"div" as any}
                 sx={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -236,7 +237,7 @@ const LoginPage: React.FC = () => {
         </Box>
 
         {/* Divider */}
-        <Box sx={{ width: '100%', my: 3 }}>
+        <Box component={"div" as any} sx={{ width: '100%', my: 3 }}>
           <Divider>
             <Typography variant="body2" color="text.secondary" sx={{ px: 2 }}>
               o
@@ -266,7 +267,7 @@ const LoginPage: React.FC = () => {
         </Button>
 
         {/* Register Link */}
-        <Box sx={{ mt: 3, textAlign: 'center' }}>
+        <Box component={"div" as any} sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
             ¿No tienes una cuenta?{' '}
             <Link
@@ -287,7 +288,7 @@ const LoginPage: React.FC = () => {
         </Box>
 
         {/* Terms and Privacy */}
-        <Box sx={{ mt: 3, textAlign: 'center' }}>
+        <Box component={"div" as any} sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="caption" color="text.secondary">
             Al iniciar sesión, aceptas nuestros{' '}
             <Link href="/terms" target="_blank" sx={{ textDecoration: 'none' }}>

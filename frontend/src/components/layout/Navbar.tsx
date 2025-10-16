@@ -183,7 +183,7 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Navigation */}
           {!isMobile && (
-            <Box sx={{
+            <Box component={"div" as any} sx={{
               flexGrow: 1,
               display: 'flex',
               gap: isTablet ? 1 : 2,
@@ -232,7 +232,7 @@ const Navbar: React.FC = () => {
           )}
 
           {/* Search Bar */}
-          <Box sx={{
+          <Box component={"div" as any} sx={{
             flexGrow: 1,
             maxWidth: isTablet ? 300 : 400,
             // Hide search on mobile, show only on tablet+
@@ -254,7 +254,7 @@ const Navbar: React.FC = () => {
           </Box>
 
           {/* Right Side Actions */}
-          <Box sx={{
+          <Box component={"div" as any} sx={{
             display: 'flex',
             alignItems: 'center',
             gap: isTablet ? 0.5 : 1,
@@ -321,7 +321,7 @@ const Navbar: React.FC = () => {
                 </Menu>
               </>
             ) : (
-              <Box sx={{
+              <Box component={"div" as any} sx={{
                 display: 'flex',
                 gap: isTablet ? 0.5 : 1,
                 // Stack vertically on mobile, hide register button
@@ -406,9 +406,9 @@ const Navbar: React.FC = () => {
           },
         }}
       >
-        <Box sx={{ width: '100%', pt: 2 }}>
+        <Box component={"div" as any} sx={{ width: '100%', pt: 2 }}>
           {/* Mobile Search */}
-          <Box sx={{ px: 2, pb: 2, borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
+          <Box component={"div" as any} sx={{ px: 2, pb: 2, borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
             <form onSubmit={handleSearch}>
               <TextField
                 fullWidth
@@ -446,7 +446,7 @@ const Navbar: React.FC = () => {
                     },
                   }}
                 >
-                  <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                  <Box component={"div" as any} sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
                     {item.icon}
                   </Box>
                   <ListItemText
@@ -462,7 +462,7 @@ const Navbar: React.FC = () => {
 
             {/* Language selector in mobile menu */}
             <ListItem sx={{ borderTop: '1px solid rgba(0, 0, 0, 0.08)', mt: 1 }}>
-              <Box sx={{ width: '100%', px: 1 }}>
+              <Box component={"div" as any} sx={{ width: '100%', px: 1 }}>
                 <LanguageSelector />
               </Box>
             </ListItem>
@@ -498,7 +498,7 @@ const Navbar: React.FC = () => {
       </Drawer>
 
       {/* Spacer for fixed navbar */}
-      <Box sx={{ height: 64 }} />
+      <Box component={"div" as any} sx={{ height: 64 }} />
     </>
   );
 };

@@ -72,7 +72,7 @@ const CheckoutSuccessPage: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       {/* Success Header */}
-      <Box sx={{ textAlign: 'center', mb: 6 }}>
+      <Box component={"div" as any} sx={{ textAlign: 'center', mb: 6 }}>
         <CheckCircle sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
         <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
           ¡Pago Exitoso!
@@ -93,7 +93,7 @@ const CheckoutSuccessPage: React.FC = () => {
 
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6}>
-            <Box sx={{ mb: 2 }}>
+            <Box component={"div" as any} sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Número de Orden
               </Typography>
@@ -103,7 +103,7 @@ const CheckoutSuccessPage: React.FC = () => {
             </Box>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <Box sx={{ mb: 2 }}>
+            <Box component={"div" as any} sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 ID de Transacción
               </Typography>
@@ -121,7 +121,7 @@ const CheckoutSuccessPage: React.FC = () => {
         </Grid>
 
         {/* Purchased Items */}
-        <Box sx={{ mt: 2 }}>
+        <Box component={"div" as any} sx={{ mt: 2 }}>
           {mockOrderData.items.map((item) => (
             <Card key={item.id} sx={{ mb: 2, display: 'flex' }}>
               <CardMedia
@@ -131,11 +131,11 @@ const CheckoutSuccessPage: React.FC = () => {
                 alt={item.event?.title}
               />
               <CardContent sx={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box>
+                <Box component={"div" as any}>
                   <Typography variant="h6" component="h3">
                     {item.event?.title}
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                  <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mt: 1 }}>
                     <Chip
                       label={item.event?.eventCategory?.name}
                       size="small"
@@ -151,7 +151,7 @@ const CheckoutSuccessPage: React.FC = () => {
                     />
                   </Box>
                 </Box>
-                <Box sx={{ textAlign: 'right' }}>
+                <Box component={"div" as any} sx={{ textAlign: 'right' }}>
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                     {formatPrice(item.total)}
                   </Typography>
@@ -167,7 +167,7 @@ const CheckoutSuccessPage: React.FC = () => {
         <Divider sx={{ my: 3 }} />
 
         {/* Order Summary */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
             Total Pagado
           </Typography>
@@ -285,7 +285,7 @@ const CheckoutSuccessPage: React.FC = () => {
       </Alert>
 
       {/* Navigation */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+      <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
         <Button
           variant="outlined"
           startIcon={<Home />}

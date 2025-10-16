@@ -87,66 +87,6 @@ export const performanceUtils = {
       });
     }
   },
-
-  // Image optimization
-  optimizeImage: (src: string, options: {
-    width?: number;
-    height?: number;
-    quality?: number;
-    format?: 'webp' | 'jpg' | 'png';
-  } = {}) => {
-    const { width, height, quality = 80, format = 'webp' } = options;
-
-    // Add query parameters for optimization
-    const params = new URLSearchParams();
-    if (width) params.set('w', width.toString());
-    if (height) params.set('h', height.toString());
-    params.set('q', quality.toString());
-    params.set('f', format);
-
-    return `${src}?${params.toString()}`;
-  },
-
-  // Bundle size monitoring
-  logBundleSize: () => {
-    if (import.meta.env.DEV) {
-      // Log bundle size in development
-      import('vite-bundle-analyzer').then(({ analyzeBundle }) => {
-        console.log('Bundle analysis available');
-      }).catch(() => {
-        console.log('Bundle analyzer not available');
-      });
-    }
-  },
-
-  // Memory usage monitoring
-  monitorMemoryUsage: () => {
-    if ('memory' in performance) {
-      const memInfo = (performance as any).memory;
-      console.log('Memory usage:', {
-        used: Math.round(memInfo.usedJSHeapSize / 1048576 * 100) / 100 + ' MB',
-        total: Math.round(memInfo.totalJSHeapSize / 1048576 * 100) / 100 + ' MB',
-        limit: Math.round(memInfo.jsHeapSizeLimit / 1048576 * 100) / 100 + ' MB',
-      });
-    }
-  },
-
-  // Network monitoring
-  monitorNetworkRequests: () => {
-    if ('PerformanceObserver' in window) {
-      new PerformanceObserver((list) => {
-        list.getEntries().forEach((entry: any) => {
-          if (entry.initiatorType === 'fetch' || entry.initiatorType === 'xmlhttprequest') {
-            console.log('Network request:', {
-              url: entry.name,
-              duration: entry.duration,
-              size: entry.transferSize,
-            });
-          }
-        });
-      }).observe({ entryTypes: ['resource'] });
-    }
-  },
 };
 
 // Service Worker registration for PWA

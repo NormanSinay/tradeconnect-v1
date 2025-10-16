@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Box, Container, Typography, Grid, useTheme, useMediaQuery, Button, Card, CardContent, CardMedia, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { publicEventsService } from '@/services/api';
 import { Link } from 'react-router-dom';
 import { Event as EventIcon, People as PeopleIcon, School as SchoolIcon, TrendingUp as TrendingUpIcon } from '@mui/icons-material';
+
+// Lazy load 3D canvas for performance
+const HeroCanvas = React.lazy(() => import('@/components/home/HeroCanvas'));
 
 const HomePage: React.FC = () => {
   const theme = useTheme();
@@ -48,20 +51,32 @@ const HomePage: React.FC = () => {
     },
   };
 
-  return (
-    <Box>
+  // Extract gradient colors to avoid TypeScript union complexity
+  const primaryColor = String(theme.palette.primary.main);
+  const secondaryColor = String(theme.palette.secondary.main);
+
+  const content = (
+    <Box component={"div" as any}>
       {/* Hero Section */}
       <Box
+        component={"section" as any}
         sx={{
           minHeight: '100vh',
           display: 'flex',
           alignItems: 'center',
-          background: `linear-gradient(135deg, ${theme.palette.primary.main}15, ${theme.palette.secondary.main}10)`,
+          background: `linear-gradient(135deg, ${primaryColor}15, ${secondaryColor}10)`,
           position: 'relative',
           overflow: 'hidden',
         }}
       >
-        <Container maxWidth="lg">
+        {/* 3D Canvas Background */}
+        {!isMobile && (
+          <Suspense fallback={null}>
+            <HeroCanvas />
+          </Suspense>
+        )}
+
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
               <motion.div
@@ -75,7 +90,7 @@ const HomePage: React.FC = () => {
                     fontSize: { xs: '2.5rem', md: '3.5rem' },
                     fontWeight: 'bold',
                     mb: 2,
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, #D4AF37)`,
+                    background: `linear-gradient(135deg, ${primaryColor}, #D4AF37)`,
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -97,7 +112,7 @@ const HomePage: React.FC = () => {
                   Conectamos empresas con profesionales para el desarrollo continuo.
                   Facturación FEL Guatemala incluida.
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Box component={"div" as any} sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Button
                     variant="contained"
                     size="large"
@@ -128,35 +143,38 @@ const HomePage: React.FC = () => {
                 </Box>
               </motion.div>
             </Grid>
-            <Grid item xs={12} md={6}>
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-              >
-                <Box
-                  sx={{
-                    height: 400,
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main}20, #D4AF37)`,
-                    borderRadius: 4,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: `2px solid ${theme.palette.primary.main}30`,
-                  }}
+            {isMobile && (
+              <Grid item xs={12} md={6}>
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                  <Typography variant="h4" color="primary">
-                    Canvas 3D Interactivo
-                  </Typography>
-                </Box>
-              </motion.div>
-            </Grid>
+                  <Box
+                    component={"div" as any}
+                    sx={{
+                      height: 300,
+                      background: `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}20)`,
+                      borderRadius: 4,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: `2px solid ${primaryColor}30`,
+                    }}
+                  >
+                    <Typography variant="h5" color="primary" textAlign="center">
+                      Plataforma E-commerce<br/>de Eventos
+                    </Typography>
+                  </Box>
+                </motion.div>
+              </Grid>
+            )}
           </Grid>
         </Container>
       </Box>
 
       {/* Stats Section */}
-      <Box sx={{ py: 8, backgroundColor: 'background.paper' }}>
+      <Box component={"section" as any} sx={{ py: 8, backgroundColor: 'background.paper' }}>
         <Container maxWidth="lg">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -191,7 +209,7 @@ const HomePage: React.FC = () => {
                         '&:hover': { boxShadow: 6 },
                       }}
                     >
-                      <Box sx={{ color: 'primary.main', fontSize: 48, mb: 2 }}>
+                      <Box component={"div" as any} sx={{ color: 'primary.main', fontSize: 48, mb: 2 }}>
                         {stat.icon}
                       </Box>
                       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -210,7 +228,7 @@ const HomePage: React.FC = () => {
       </Box>
 
       {/* Featured Events Section */}
-      <Box sx={{ py: 8 }}>
+      <Box component={"section" as any} sx={{ py: 8 }}>
         <Container maxWidth="lg">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -218,7 +236,7 @@ const HomePage: React.FC = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Box sx={{ textAlign: 'center', mb: 6 }}>
+            <Box component={"header" as any} sx={{ textAlign: 'center', mb: 6 }}>
               <Typography variant="h3" sx={{ mb: 2, fontWeight: 'bold' }}>
                 Eventos Destacados
               </Typography>
@@ -259,7 +277,7 @@ const HomePage: React.FC = () => {
                         <Typography variant="h6" sx={{ mb: 1, fontWeight: 'bold' }}>
                           {event.title}
                         </Typography>
-                        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                        <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mb: 2 }}>
                           <Chip label={event.category} size="small" color="primary" />
                           <Chip label={event.modality} size="small" variant="outlined" />
                         </Box>
@@ -276,7 +294,7 @@ const HomePage: React.FC = () => {
               ))}
             </Grid>
 
-            <Box sx={{ textAlign: 'center', mt: 4 }}>
+            <Box component={"div" as any} sx={{ textAlign: 'center', mt: 4 }}>
               <Button
                 variant="outlined"
                 size="large"
@@ -300,7 +318,7 @@ const HomePage: React.FC = () => {
       </Box>
 
       {/* Categories Section */}
-      <Box sx={{ py: 8, backgroundColor: 'background.paper' }}>
+      <Box component={"section" as any} sx={{ py: 8, backgroundColor: 'background.paper' }}>
         <Container maxWidth="lg">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -340,7 +358,7 @@ const HomePage: React.FC = () => {
                         },
                       }}
                     >
-                      <Box sx={{ fontSize: 48, mb: 2 }}>
+                      <Box component={"div" as any} sx={{ fontSize: 48, mb: 2 }}>
                         {category.icon}
                       </Box>
                       <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -356,6 +374,8 @@ const HomePage: React.FC = () => {
       </Box>
     </Box>
   );
+
+  return content;
 };
 
 export default HomePage;

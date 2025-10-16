@@ -110,7 +110,7 @@ const EventsPage: React.FC = () => {
   }, [eventsData]);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box component={"div" as any} sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* Breadcrumbs */}
       <Container maxWidth="lg" sx={{ py: 2 }}>
         <Breadcrumbs
@@ -127,6 +127,7 @@ const EventsPage: React.FC = () => {
 
       {/* Header */}
       <Box
+        component={"div" as any}
         sx={{
           bgcolor: 'background.paper',
           borderBottom: 1,
@@ -170,13 +171,13 @@ const EventsPage: React.FC = () => {
       </Box>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{
+        <Box component={"div" as any} sx={{
           display: 'flex',
           gap: { xs: 2, md: 4 },
           flexDirection: { xs: 'column', md: 'row' }
         }}>
           {/* Filters Sidebar */}
-          <Box sx={{
+          <Box component={"div" as any} sx={{
             width: { xs: '100%', md: 300 },
             flexShrink: 0,
             order: { xs: 2, md: 1 }
@@ -191,7 +192,7 @@ const EventsPage: React.FC = () => {
           </Box>
 
           {/* Main Content */}
-          <Box sx={{
+          <Box component={"div" as any} sx={{
             flex: 1,
             order: { xs: 1, md: 2 }
           }}>
@@ -220,7 +221,7 @@ const EventsPage: React.FC = () => {
 
             {/* Pagination */}
             {paginationInfo && paginationInfo.totalPages > 1 && (
-              <Box sx={{
+              <Box component={"div" as any} sx={{
                 display: 'flex',
                 justifyContent: 'center',
                 mt: 4,
@@ -247,7 +248,7 @@ const EventsPage: React.FC = () => {
 
             {/* Loading State */}
             {eventsLoading && events.length === 0 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
                 <CircularProgress size={40} />
               </Box>
             )}
@@ -255,6 +256,7 @@ const EventsPage: React.FC = () => {
             {/* Empty State */}
             {!eventsLoading && events.length === 0 && !eventsError && (
               <Box
+                component={"div" as any}
                 sx={{
                   textAlign: 'center',
                   py: 8,

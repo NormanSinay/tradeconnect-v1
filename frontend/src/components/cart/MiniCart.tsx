@@ -80,7 +80,7 @@ const MiniCart: React.FC<MiniCartProps> = ({ anchorEl, onClose, onOpen }) => {
           sx: { width: 400, maxHeight: 600 },
         }}
       >
-        <Box sx={{ p: 2 }}>
+        <Box component={"div" as any} sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
             Carrito de Compras
           </Typography>
@@ -113,11 +113,11 @@ const MiniCart: React.FC<MiniCartProps> = ({ anchorEl, onClose, onOpen }) => {
                         </Typography>
                       }
                       secondary={
-                        <Box>
+                        <Box component={"div" as any}>
                           <Typography variant="caption" color="text.secondary">
                             {formatPrice(item.finalPrice)} x {item.quantity}
                           </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
                             <IconButton
                               size="small"
                               onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
@@ -156,26 +156,26 @@ const MiniCart: React.FC<MiniCartProps> = ({ anchorEl, onClose, onOpen }) => {
 
               <Divider sx={{ my: 2 }} />
 
-              <Box sx={{ mb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Box component={"div" as any} sx={{ mb: 2 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2">Subtotal:</Typography>
                   <Typography variant="body2">{formatPrice(cart.subtotal)}</Typography>
                 </Box>
                 {cart.discountAmount > 0 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" color="success.main">Descuento:</Typography>
                     <Typography variant="body2" color="success.main">
                       -{formatPrice(cart.discountAmount)}
                     </Typography>
                   </Box>
                 )}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
                   <Typography variant="body1">Total:</Typography>
                   <Typography variant="body1">{formatPrice(cart.total)}</Typography>
                 </Box>
               </Box>
 
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Button
                   variant="outlined"
                   fullWidth
@@ -193,7 +193,7 @@ const MiniCart: React.FC<MiniCartProps> = ({ anchorEl, onClose, onOpen }) => {
               </Box>
             </>
           ) : (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Box component={"div" as any} sx={{ textAlign: 'center', py: 4 }}>
               <ShoppingCart sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
               <Typography variant="body1" color="text.secondary" gutterBottom>
                 Tu carrito está vacío

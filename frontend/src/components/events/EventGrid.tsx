@@ -20,6 +20,7 @@ const EventGrid: React.FC<EventGridViewProps> = ({
   if (loading && events.length === 0) {
     return (
       <Box
+        component={"div" as any}
         sx={{
           display: 'grid',
           gridTemplateColumns: {
@@ -50,6 +51,7 @@ const EventGrid: React.FC<EventGridViewProps> = ({
   if (events.length === 0 && !loading) {
     return (
       <Box
+        component={"div" as any}
         sx={{
           textAlign: 'center',
           py: 8,
@@ -67,8 +69,9 @@ const EventGrid: React.FC<EventGridViewProps> = ({
   }
 
   return (
-    <Box>
+    <Box component={"div" as any}>
       <Box
+        component={"div" as any}
         sx={{
           display: 'grid',
           gridTemplateColumns: `repeat(${getColumns()}, 1fr)`,
@@ -86,7 +89,7 @@ const EventGrid: React.FC<EventGridViewProps> = ({
 
       {/* Load More Button */}
       {hasMore && (
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
+        <Box component={"div" as any} sx={{ textAlign: 'center', mt: 4 }}>
           <Button
             variant="contained"
             onClick={onLoadMore}

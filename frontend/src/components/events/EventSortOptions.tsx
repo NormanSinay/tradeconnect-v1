@@ -33,6 +33,7 @@ const EventSortOptions: React.FC<EventSortOptionsProps> = ({
 
   return (
     <Box
+      component={"div" as any}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -73,7 +74,7 @@ const EventSortOptions: React.FC<EventSortOptionsProps> = ({
       </ToggleButtonGroup>
 
       {/* View Toggle (for future use) */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
+      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
         <Typography variant="body2" color="text.secondary">
           Vista:
         </Typography>

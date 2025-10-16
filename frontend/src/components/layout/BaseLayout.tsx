@@ -13,6 +13,7 @@ interface BaseLayoutProps {
 const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
   return (
     <Box
+      component={"div" as any}
       sx={{
         minHeight: '100vh',
         display: 'flex',

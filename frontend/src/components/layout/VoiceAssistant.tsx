@@ -240,7 +240,7 @@ const VoiceAssistant: React.FC = () => {
       {/* Chat Bubble */}
       {isOpen && (
         <ChatBubble elevation={0}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
               Asistente TradeConnect
             </Typography>
@@ -250,14 +250,14 @@ const VoiceAssistant: React.FC = () => {
           </Box>
 
           {transcript && (
-            <Box sx={{ mb: 1 }}>
+            <Box component={"div" as any} sx={{ mb: 1 }}>
               <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
                 " {transcript} "
               </Typography>
             </Box>
           )}
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {isProcessing ? (
               <CircularProgress size={16} />
             ) : (

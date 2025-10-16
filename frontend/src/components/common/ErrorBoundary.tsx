@@ -59,6 +59,7 @@ class ErrorBoundary extends Component<Props, State> {
 
       return (
         <Box
+          component={"div" as any}
           sx={{
             display: 'flex',
             flexDirection: 'column',
@@ -100,7 +101,7 @@ class ErrorBoundary extends Component<Props, State> {
               </Typography>
             </Alert>
 
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Box component={"div" as any} sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
                 variant="contained"
                 startIcon={<Refresh />}
@@ -128,7 +129,7 @@ class ErrorBoundary extends Component<Props, State> {
             </Box>
 
             {import.meta.env.DEV && this.state.errorInfo && (
-              <Box sx={{ mt: 3, textAlign: 'left' }}>
+              <Box component={"div" as any} sx={{ mt: 3, textAlign: 'left' }}>
                 <Typography variant="h6" gutterBottom>
                   Detalles técnicos (desarrollo):
                 </Typography>

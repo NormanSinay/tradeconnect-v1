@@ -177,7 +177,7 @@ const CheckoutPage: React.FC = () => {
     switch (step) {
       case 0:
         return (
-          <Box sx={{ mt: 3 }}>
+          <Box component={"div" as any} sx={{ mt: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               Información Personal
             </Typography>
@@ -349,7 +349,7 @@ const CheckoutPage: React.FC = () => {
 
       case 1:
         return (
-          <Box sx={{ mt: 3 }}>
+          <Box component={"div" as any} sx={{ mt: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               Método de Pago
             </Typography>
@@ -367,9 +367,9 @@ const CheckoutPage: React.FC = () => {
                     value="card"
                     control={<Radio />}
                     label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <CreditCard color="primary" />
-                        <Box>
+                        <Box component={"div" as any}>
                           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                             Tarjeta de Crédito/Débito
                           </Typography>
@@ -387,9 +387,9 @@ const CheckoutPage: React.FC = () => {
                     value="paypal"
                     control={<Radio />}
                     label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Payment color="primary" />
-                        <Box>
+                        <Box component={"div" as any}>
                           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                             PayPal
                           </Typography>
@@ -407,9 +407,9 @@ const CheckoutPage: React.FC = () => {
                     value="bank_transfer"
                     control={<Radio />}
                     label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Business color="primary" />
-                        <Box>
+                        <Box component={"div" as any}>
                           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                             Transferencia Bancaria
                           </Typography>
@@ -425,7 +425,7 @@ const CheckoutPage: React.FC = () => {
             </FormControl>
 
             {formData.paymentMethod === 'card' && (
-              <Box sx={{ mt: 3 }}>
+              <Box component={"div" as any} sx={{ mt: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   Información de Tarjeta
                 </Typography>
@@ -492,7 +492,7 @@ const CheckoutPage: React.FC = () => {
             )}
 
             {formData.paymentMethod === 'bank_transfer' && (
-              <Box sx={{ mt: 3 }}>
+              <Box component={"div" as any} sx={{ mt: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   Información de Transferencia
                 </Typography>
@@ -508,7 +508,7 @@ const CheckoutPage: React.FC = () => {
 
       case 2:
         return (
-          <Box sx={{ mt: 3 }}>
+          <Box component={"div" as any} sx={{ mt: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
               Confirmación de Orden
             </Typography>
@@ -526,7 +526,7 @@ const CheckoutPage: React.FC = () => {
               </Typography>
 
               {cart.items.map((item) => (
-                <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Box key={item.id} component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2">
                     {item.event?.title} x {item.quantity}
                   </Typography>
@@ -536,19 +536,19 @@ const CheckoutPage: React.FC = () => {
 
               <Divider sx={{ my: 2 }} />
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Subtotal:</Typography>
                 <Typography variant="body2">{formatPrice(cart.subtotal)}</Typography>
               </Box>
 
               {cart.discountAmount > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, color: 'success.main' }}>
+                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, color: 'success.main' }}>
                   <Typography variant="body2">Descuento:</Typography>
                   <Typography variant="body2">-{formatPrice(cart.discountAmount)}</Typography>
                 </Box>
               )}
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
                 <Typography variant="body1">Total:</Typography>
                 <Typography variant="body1">{formatPrice(cart.total)}</Typography>
               </Box>
@@ -609,7 +609,7 @@ const CheckoutPage: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box component={"div" as any} sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Checkout
         </Typography>
@@ -644,16 +644,16 @@ const CheckoutPage: React.FC = () => {
               Resumen del Pedido
             </Typography>
 
-            <Box sx={{ mb: 3 }}>
+            <Box component={"div" as any} sx={{ mb: 3 }}>
               {cart.items.map((item) => (
-                <Box key={item.id} sx={{ display: 'flex', mb: 2 }}>
+                <Box key={item.id} component={"div" as any} sx={{ display: 'flex', mb: 2 }}>
                   <CardMedia
                     component="img"
                     sx={{ width: 60, height: 60, borderRadius: 1, mr: 2, objectFit: 'cover' }}
                     image={item.event?.media?.find(m => m.isPrimary)?.filePath || '/placeholder-event.jpg'}
                     alt={item.event?.title}
                   />
-                  <Box sx={{ flex: 1 }}>
+                  <Box component={"div" as any} sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
                       {item.event?.title}
                     </Typography>
@@ -670,20 +670,20 @@ const CheckoutPage: React.FC = () => {
 
             <Divider sx={{ my: 2 }} />
 
-            <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Box component={"div" as any} sx={{ mb: 2 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="body2">Subtotal:</Typography>
                 <Typography variant="body2">{formatPrice(cart.subtotal)}</Typography>
               </Box>
 
               {cart.discountAmount > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, color: 'success.main' }}>
+                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, color: 'success.main' }}>
                   <Typography variant="body2">Descuento:</Typography>
                   <Typography variant="body2">-{formatPrice(cart.discountAmount)}</Typography>
                 </Box>
               )}
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.1rem' }}>
+              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.1rem' }}>
                 <Typography variant="body1">Total a Pagar:</Typography>
                 <Typography variant="body1" color="primary.main">
                   {formatPrice(cart.total)}
@@ -701,7 +701,7 @@ const CheckoutPage: React.FC = () => {
       </Grid>
 
       {/* Navigation Buttons */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+      <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
         <Button
           variant="outlined"
           onClick={() => navigate('/cart')}
@@ -710,7 +710,7 @@ const CheckoutPage: React.FC = () => {
           Volver al Carrito
         </Button>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box component={"div" as any} sx={{ display: 'flex', gap: 2 }}>
           {activeStep > 0 && (
             <Button
               variant="outlined"

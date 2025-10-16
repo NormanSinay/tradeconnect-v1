@@ -13,7 +13,7 @@ export const THEME_COLORS = {
   primary: '#6B1E22',        // Vino corporativo principal
   primaryLight: '#8B2E32',   // Vino claro para hover
   primaryDark: '#4B1518',    // Vino oscuro para sombras
-  accent: '#D4AF37',         // Oro para acentos y botones destacados
+  accent: '#E63946',          // Red accent (Rojo acento)
   secondary: '#F5F5F5',      // Gris claro para fondos secundarios
   textPrimary: '#333333',    // Texto principal oscuro
   textSecondary: '#666666',  // Texto secundario

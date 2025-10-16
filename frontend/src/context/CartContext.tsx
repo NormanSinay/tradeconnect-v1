@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Cart, CartItem, CartContextType, ParticipantData } from '@/types';
 import type { ReactNode } from 'react';
-import { cartService } from '@/services/api';
+// Import from cartService instead of api to avoid circular dependency
+// cartService is implemented locally in this context for now
 import { SESSION_KEYS } from '@/utils/constants';
 import toast from 'react-hot-toast';
 

@@ -120,7 +120,7 @@ const CartPage: React.FC = () => {
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
           ¡Explora nuestros eventos y agrega algunos a tu carrito!
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+        <Box component={"div" as any} sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
           <Button
             variant="outlined"
             startIcon={<ArrowBack />}
@@ -142,7 +142,7 @@ const CartPage: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box component={"div" as any} sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Carrito de Compras
         </Typography>
@@ -155,7 +155,7 @@ const CartPage: React.FC = () => {
         {/* Cart Items */}
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6">Productos</Typography>
               <Button
                 color="error"
@@ -166,7 +166,7 @@ const CartPage: React.FC = () => {
               </Button>
             </Box>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {cart.items.map((item: CartItem) => (
                 <Card key={item.id} sx={{ display: 'flex', p: 2 }}>
                   {/* Event Image */}
@@ -178,12 +178,12 @@ const CartPage: React.FC = () => {
                   />
 
                   {/* Event Details */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, ml: 2 }}>
+                  <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', flex: 1, ml: 2 }}>
                     <Typography variant="h6" component="h2" sx={{ mb: 1 }}>
                       {item.event?.title || 'Evento'}
                     </Typography>
 
-                    <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+                    <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mb: 1 }}>
                       <Chip
                         label={item.event?.eventCategory?.name || 'Categoría'}
                         size="small"
@@ -210,9 +210,9 @@ const CartPage: React.FC = () => {
                   </Box>
 
                   {/* Quantity and Actions */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+                  <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
                     {/* Quantity Controls */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <IconButton
                         size="small"
                         onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
@@ -269,14 +269,14 @@ const CartPage: React.FC = () => {
               Resumen de la Orden
             </Typography>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography>Subtotal:</Typography>
                 <Typography>{formatPrice(cart.subtotal)}</Typography>
               </Box>
 
               {cart.discountAmount > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', color: 'success.main' }}>
+                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', color: 'success.main' }}>
                   <Typography>Descuento:</Typography>
                   <Typography>-{formatPrice(cart.discountAmount)}</Typography>
                 </Box>
@@ -284,18 +284,18 @@ const CartPage: React.FC = () => {
 
               <Divider />
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
                 <Typography variant="h6">Total:</Typography>
                 <Typography variant="h6">{formatPrice(cart.total)}</Typography>
               </Box>
             </Box>
 
             {/* Promo Code */}
-            <Box sx={{ mb: 3 }}>
+            <Box component={"div" as any} sx={{ mb: 3 }}>
               <Typography variant="subtitle2" gutterBottom>
                 Código Promocional
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
                 <TextField
                   fullWidth
                   size="small"

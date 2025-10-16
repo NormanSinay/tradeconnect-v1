@@ -85,7 +85,7 @@ const Footer: React.FC = () => {
         <Grid container spacing={4} sx={{ mb: 4 }}>
           {/* Brand Section */}
           <Grid item xs={12} md={4}>
-            <Box sx={{ mb: 3 }}>
+            <Box component={"div" as any} sx={{ mb: 3 }}>
               <Typography
                 variant="h6"
                 component={Link}
@@ -110,8 +110,8 @@ const Footer: React.FC = () => {
             </Box>
 
             {/* Contact Info */}
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <Box component={"div" as any} sx={{ mb: 3 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <EmailIcon sx={{ mr: 1, fontSize: 18, color: 'primary.main' }} />
                 <MuiLink
                   href="mailto:info@tradeconnect.gt"
@@ -121,7 +121,7 @@ const Footer: React.FC = () => {
                   info@tradeconnect.gt
                 </MuiLink>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <PhoneIcon sx={{ mr: 1, fontSize: 18, color: 'primary.main' }} />
                 <MuiLink
                   href="tel:+50212345678"
@@ -131,7 +131,7 @@ const Footer: React.FC = () => {
                   +502 1234-5678
                 </MuiLink>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'flex-start' }}>
                 <LocationIcon sx={{ mr: 1, mt: 0.5, fontSize: 18, color: 'primary.main' }} />
                 <Typography variant="body2" color="grey.300">
                   Ciudad de Guatemala, Guatemala
@@ -140,11 +140,11 @@ const Footer: React.FC = () => {
             </Box>
 
             {/* Social Links */}
-            <Box>
+            <Box component={"div" as any}>
               <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
                 Síguenos
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
                 {socialLinks.map((social) => (
                   <IconButton
                     key={social.label}
@@ -201,7 +201,7 @@ const Footer: React.FC = () => {
         <Divider sx={{ bgcolor: 'grey.700', my: 3 }} />
 
         {/* Newsletter Section */}
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
+        <Box component={"div" as any} sx={{ textAlign: 'center', mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
             Mantente informado
           </Typography>
@@ -253,6 +253,7 @@ const Footer: React.FC = () => {
 
         {/* Bottom Section */}
         <Box
+          component={"div" as any}
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
@@ -265,7 +266,7 @@ const Footer: React.FC = () => {
             © {new Date().getFullYear()} TradeConnect. Todos los derechos reservados.
           </Typography>
 
-          <Box sx={{ display: 'flex', gap: 3 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', gap: 3 }}>
             <MuiLink
               component={Link}
               to="/terms"

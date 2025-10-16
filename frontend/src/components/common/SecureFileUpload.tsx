@@ -146,7 +146,7 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
   };
 
   return (
-    <Box>
+    <Box component={"div" as any}>
       {/* Upload Area */}
       <Paper
         sx={{
@@ -177,6 +177,7 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
 
         <label htmlFor="file-upload" style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}>
           <Box
+            component={"div" as any}
             sx={{
               display: 'flex',
               flexDirection: 'column',
@@ -191,7 +192,7 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
                 color: disabled ? 'grey.400' : dragOver ? 'primary.main' : 'grey.500',
               }}
             />
-            <Box sx={{ textAlign: 'center' }}>
+            <Box component={"div" as any} sx={{ textAlign: 'center' }}>
               <Typography variant="h6" color={disabled ? 'text.disabled' : 'text.primary'}>
                 {label}
               </Typography>
@@ -211,7 +212,7 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
 
       {/* Upload Progress */}
       {uploadProgress > 0 && uploadProgress < 100 && (
-        <Box sx={{ mt: 2 }}>
+        <Box component={"div" as any} sx={{ mt: 2 }}>
           <Typography variant="body2" gutterBottom>
             Subiendo archivo...
           </Typography>
@@ -246,11 +247,11 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
 
       {/* Selected Files Preview */}
       {showPreview && selectedFiles.length > 0 && (
-        <Box sx={{ mt: 2 }}>
+        <Box component={"div" as any} sx={{ mt: 2 }}>
           <Typography variant="subtitle2" gutterBottom>
             Archivos seleccionados:
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {selectedFiles.map((file, index) => (
               <Chip
                 key={index}
@@ -267,11 +268,11 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
 
       {/* File Preview for Images */}
       {showPreview && selectedFiles.some(file => file.type.startsWith('image/')) && (
-        <Box sx={{ mt: 2 }}>
+        <Box component={"div" as any} sx={{ mt: 2 }}>
           <Typography variant="subtitle2" gutterBottom>
             Vista previa:
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
             {selectedFiles
               .filter(file => file.type.startsWith('image/'))
               .map((file, index) => (

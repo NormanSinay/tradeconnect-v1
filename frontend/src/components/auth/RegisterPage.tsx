@@ -50,6 +50,7 @@ const registerSchema = yup.object({
     .required('El email es requerido'),
   phone: yup
     .string()
+    .optional()
     .matches(/^\+502\s\d{4}-\d{4}$/, 'Formato: +502 XXXX-XXXX'),
   password: yup
     .string()
@@ -89,7 +90,7 @@ const RegisterPage: React.FC = () => {
     trigger,
     watch,
   } = useForm<RegisterFormData>({
-    resolver: yupResolver(registerSchema),
+    resolver: yupResolver(registerSchema) as any,
     mode: 'onChange',
     defaultValues: {
       firstName: '',
@@ -294,13 +295,14 @@ const RegisterPage: React.FC = () => {
 
               {/* Password Strength Indicator */}
               {watchedValues.password && (
-                <Box sx={{ mt: 1 }}>
+                <Box component={"div" as any} sx={{ mt: 1 }}>
                   <Typography variant="caption" color="text.secondary">
                     Fortaleza de la contraseña:
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
+                  <Box component={"div" as any} sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
                     {[1, 2, 3, 4, 5].map((level) => (
                       <Box
+                        component={"div" as any}
                         key={level}
                         sx={{
                           height: 4,
@@ -375,12 +377,12 @@ const RegisterPage: React.FC = () => {
 
       case 2:
         return (
-          <Box>
+          <Box component={"div" as any}>
             <Typography variant="h6" gutterBottom>
               Confirma tu registro
             </Typography>
 
-            <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+            <Box component={"div" as any} sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 <strong>Nombre:</strong> {watchedValues.firstName} {watchedValues.lastName}
               </Typography>
@@ -453,7 +455,7 @@ const RegisterPage: React.FC = () => {
         }}
       >
         {/* Logo/Brand */}
-        <Box sx={{ mb: 3, textAlign: 'center' }}>
+        <Box component={"div" as any} sx={{ mb: 3, textAlign: 'center' }}>
           <Typography
             component="h1"
             variant="h4"
@@ -471,7 +473,7 @@ const RegisterPage: React.FC = () => {
         </Box>
 
         {/* Stepper */}
-        <Box sx={{ width: '100%', mb: 4 }}>
+        <Box component={"div" as any} sx={{ width: '100%', mb: 4 }}>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}>
@@ -497,7 +499,7 @@ const RegisterPage: React.FC = () => {
           {renderStepContent(activeStep)}
 
           {/* Navigation Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
             <Button
               disabled={activeStep === 0 || isLoading}
               onClick={handleBack}
@@ -506,7 +508,7 @@ const RegisterPage: React.FC = () => {
               Anterior
             </Button>
 
-            <Box>
+            <Box component={"div" as any}>
               {activeStep === steps.length - 1 ? (
                 <Button
                   type="submit"
@@ -531,7 +533,7 @@ const RegisterPage: React.FC = () => {
         </Box>
 
         {/* Divider */}
-        <Box sx={{ width: '100%', my: 3 }}>
+        <Box component={"div" as any} sx={{ width: '100%', my: 3 }}>
           <Divider>
             <Typography variant="body2" color="text.secondary" sx={{ px: 2 }}>
               o
@@ -561,7 +563,7 @@ const RegisterPage: React.FC = () => {
         </Button>
 
         {/* Login Link */}
-        <Box sx={{ mt: 3, textAlign: 'center' }}>
+        <Box component={"div" as any} sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
             ¿Ya tienes una cuenta?{' '}
             <Link

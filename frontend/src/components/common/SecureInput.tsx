@@ -149,7 +149,7 @@ const SecureInput: React.FC<SecureInputProps> = ({
   const inputType = type === 'password' && showPassword ? 'text' : type;
 
   return (
-    <Box>
+    <Box component={"div" as any}>
       <TextField
         fullWidth
         label={label}
@@ -182,9 +182,10 @@ const SecureInput: React.FC<SecureInputProps> = ({
 
       {/* Password Strength Indicator */}
       {type === 'password' && showStrengthIndicator && passwordStrength && value && (
-        <Box sx={{ mt: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+        <Box component={"div" as any} sx={{ mt: 1 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
             <Box
+              component={"div" as any}
               sx={{
                 width: '100%',
                 height: 4,
@@ -194,6 +195,7 @@ const SecureInput: React.FC<SecureInputProps> = ({
               }}
             >
               <Box
+                component={"div" as any}
                 sx={{
                   width: `${(passwordStrength.score / 5) * 100}%`,
                   height: '100%',
@@ -202,7 +204,7 @@ const SecureInput: React.FC<SecureInputProps> = ({
                 }}
               />
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               {passwordStrength.isValid ? (
                 <CheckCircle sx={{ color: 'success.main', fontSize: 16 }} />
               ) : (

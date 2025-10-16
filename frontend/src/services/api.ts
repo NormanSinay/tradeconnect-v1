@@ -179,6 +179,8 @@ export const authService = {
   disable2FA: (code: string) => apiService.post('/auth/2fa/disable', { code }),
 
   verify2FA: (code: string) => apiService.post('/auth/2fa/verify', { code }),
+
+  get2FAStatus: () => apiService.get('/auth/2fa/status'),
 };
 
 // Events API service
@@ -221,8 +223,9 @@ export const publicEventsService = {
   verifyCertificate: (hash: string) => apiService.get(`/public/certificates/verify/${hash}`),
 };
 
-// Cart API service
-export const cartService = {
+// Cart API service (deprecated - use cartService.ts instead)
+// Kept for backward compatibility
+export const cartServiceLegacy = {
   getCart: (params?: any) => apiService.get('/cart', { params }),
 
   addItem: (data: any, params?: any) => apiService.post('/cart/add', data, { params }),
@@ -241,6 +244,7 @@ export const cartService = {
 };
 
 // Payments API service
+// Maintained for backward compatibility - enhanced version in paymentService.ts
 export const paymentsService = {
   processPayment: (data: any) => apiService.post('/payments/process', data),
 
@@ -260,8 +264,9 @@ export const paymentsService = {
   getPaymentHistory: (params?: any) => apiService.get('/payments/history', { params }),
 };
 
-// FEL API service
-export const felService = {
+// FEL API service (deprecated - use felService.ts instead)
+// Kept for backward compatibility
+export const felServiceLegacy = {
   validateNIT: (nit: string) => apiService.post('/fel/validate-nit', { nit }),
 
   validateCUI: (cui: string) => apiService.post('/fel/validate-cui', { cui }),
@@ -285,6 +290,7 @@ export const felService = {
 };
 
 // Certificates API service
+// Maintained for backward compatibility - enhanced version in certificateService.ts
 export const certificatesService = {
   getCertificates: (params?: any) => apiService.get('/certificates', { params }),
 

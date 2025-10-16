@@ -176,7 +176,7 @@ const EventFilters: React.FC<EventFiltersProps> = ({
   return (
     <Paper sx={{ p: 2, mb: 3 }}>
       {/* Search Bar */}
-      <Box sx={{ mb: 3 }}>
+      <Box component={"div" as any} sx={{ mb: 3 }}>
         <TextField
           fullWidth
           placeholder="Buscar eventos..."
@@ -202,11 +202,11 @@ const EventFilters: React.FC<EventFiltersProps> = ({
 
       {/* Active Filters */}
       {activeFiltersCount > 0 && (
-        <Box sx={{ mb: 2 }}>
+        <Box component={"div" as any} sx={{ mb: 2 }}>
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
             Filtros activos ({activeFiltersCount}):
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {filters.search && (
               <Chip
                 label={`Búsqueda: ${filters.search}`}
@@ -255,10 +255,10 @@ const EventFilters: React.FC<EventFiltersProps> = ({
       )}
 
       {/* Filters Accordion */}
-      <Box>
+      <Box component={"div" as any}>
         <Accordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMore />}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <FilterList />
               <Typography>Filtros avanzados</Typography>
               {activeFiltersCount > 0 && (
@@ -267,13 +267,13 @@ const EventFilters: React.FC<EventFiltersProps> = ({
             </Box>
           </AccordionSummary>
           <AccordionDetails>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {/* Categories */}
-              <Box>
+              <Box component={"div" as any}>
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Categorías
                 </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {categories.map((category) => (
                     <FormControlLabel
                       key={category.id}
@@ -291,11 +291,11 @@ const EventFilters: React.FC<EventFiltersProps> = ({
               </Box>
 
               {/* Types */}
-              <Box>
+              <Box component={"div" as any}>
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Tipos de Evento
                 </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {types.map((type) => (
                     <FormControlLabel
                       key={type.id}
@@ -313,11 +313,11 @@ const EventFilters: React.FC<EventFiltersProps> = ({
               </Box>
 
               {/* Modality */}
-              <Box>
+              <Box component={"div" as any}>
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Modalidad
                 </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {[
                     { value: 'presencial', label: 'Presencial' },
                     { value: 'virtual', label: 'Virtual' },
@@ -339,7 +339,7 @@ const EventFilters: React.FC<EventFiltersProps> = ({
               </Box>
 
               {/* Price Range */}
-              <Box>
+              <Box component={"div" as any}>
                 <Typography variant="subtitle2" sx={{ mb: 2 }}>
                   Rango de Precio (Q)
                 </Typography>
@@ -354,7 +354,7 @@ const EventFilters: React.FC<EventFiltersProps> = ({
                   disabled={loading}
                   sx={{ mx: 1 }}
                 />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                   <Typography variant="body2" color="text.secondary">
                     Q{priceRange[0]}
                   </Typography>
@@ -365,7 +365,7 @@ const EventFilters: React.FC<EventFiltersProps> = ({
               </Box>
 
               {/* Dates - Temporarily disabled */}
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', gap: 2 }}>
                 <TextField
                   fullWidth
                   label="Fecha desde"
@@ -437,7 +437,7 @@ const EventFilters: React.FC<EventFiltersProps> = ({
       </Box>
 
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <CircularProgress size={24} />
         </Box>
       )}

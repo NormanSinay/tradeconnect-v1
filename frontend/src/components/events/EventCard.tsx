@@ -153,7 +153,7 @@ const EventCard: React.FC<EventCardProps> = ({
       onClick={handleViewDetails}
     >
       {/* Image */}
-      <Box sx={{ position: 'relative', height: compact ? 160 : 200 }}>
+      <Box component={"div" as any} sx={{ position: 'relative', height: compact ? 160 : 200 }}>
         {imageLoading && (
           <Skeleton
             variant="rectangular"
@@ -177,6 +177,7 @@ const EventCard: React.FC<EventCardProps> = ({
 
         {/* Badges */}
         <Box
+          component={"div" as any}
           sx={{
             position: 'absolute',
             top: 8,
@@ -234,6 +235,7 @@ const EventCard: React.FC<EventCardProps> = ({
 
         {/* Price Badge */}
         <Box
+          component={"div" as any}
           sx={{
             position: 'absolute',
             bottom: 8,
@@ -272,7 +274,7 @@ const EventCard: React.FC<EventCardProps> = ({
         </Typography>
 
         {/* Category */}
-        <Box sx={{ mb: 1 }}>
+        <Box component={"div" as any} sx={{ mb: 1 }}>
           <Chip
             label={event.category.name}
             size="small"
@@ -285,15 +287,15 @@ const EventCard: React.FC<EventCardProps> = ({
         </Box>
 
         {/* Date and Location */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Schedule sx={{ fontSize: 16, color: 'text.secondary' }} />
             <Typography variant="body2" color="text.secondary">
               {formatDate(event.startDate)} • {formatTime(event.startDate)}
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <LocationOn sx={{ fontSize: 16, color: 'text.secondary' }} />
             <Typography
               variant="body2"
@@ -311,7 +313,7 @@ const EventCard: React.FC<EventCardProps> = ({
         </Box>
 
         {/* Capacity */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+        <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
           <Person sx={{ fontSize: 16, color: 'text.secondary' }} />
           <Typography variant="body2" color="text.secondary">
             {event.availableSpots} plazas disponibles

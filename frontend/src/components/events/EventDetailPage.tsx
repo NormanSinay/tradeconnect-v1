@@ -201,7 +201,7 @@ const EventDetailPage: React.FC = () => {
         <Grid container spacing={4}>
           <Grid item xs={12} md={8}>
             <Skeleton variant="rectangular" height={400} />
-            <Box sx={{ mt: 2 }}>
+            <Box component={"div" as any} sx={{ mt: 2 }}>
               <Skeleton variant="text" height={60} />
               <Skeleton variant="text" height={30} width="60%" />
               <Skeleton variant="text" height={20} width="40%" />
@@ -268,7 +268,7 @@ const EventDetailPage: React.FC = () => {
         <Grid item xs={12} md={8}>
           {/* Image Gallery */}
           <Paper sx={{ mb: 3, overflow: 'hidden' }}>
-            <Box sx={{ position: 'relative', height: 400 }}>
+            <Box component={"div" as any} sx={{ position: 'relative', height: 400 }}>
               <CardMedia
                 component="img"
                 height="100%"
@@ -314,7 +314,7 @@ const EventDetailPage: React.FC = () => {
               )}
 
               {/* Action buttons */}
-              <Box sx={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 1 }}>
+              <Box component={"div" as any} sx={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 1 }}>
                 <Tooltip title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}>
                   <IconButton
                     sx={{
@@ -342,7 +342,7 @@ const EventDetailPage: React.FC = () => {
 
             {/* Thumbnail gallery */}
             {event.images.length > 1 && (
-              <Box sx={{ p: 2, display: 'flex', gap: 1, overflowX: 'auto' }}>
+              <Box component={"div" as any} sx={{ p: 2, display: 'flex', gap: 1, overflowX: 'auto' }}>
                 {event.images.map((image, index) => (
                   <Box
                     key={image.id}
@@ -368,13 +368,13 @@ const EventDetailPage: React.FC = () => {
           </Paper>
 
           {/* Event Info */}
-          <Box sx={{ mb: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-              <Box sx={{ flex: 1 }}>
+          <Box component={"div" as any} sx={{ mb: 3 }}>
+            <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+              <Box component={"div" as any} sx={{ flex: 1 }}>
                 <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
                   {event.title}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mb: 2 }}>
                   <Chip
                     label={event.category.name}
                     sx={{
@@ -402,9 +402,9 @@ const EventDetailPage: React.FC = () => {
             {/* Date and Location */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <CalendarToday color="action" />
-                  <Box>
+                  <Box component={"div" as any}>
                     <Typography variant="body2" color="text.secondary">
                       Fecha
                     </Typography>
@@ -415,9 +415,9 @@ const EventDetailPage: React.FC = () => {
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <AccessTime color="action" />
-                  <Box>
+                  <Box component={"div" as any}>
                     <Typography variant="body2" color="text.secondary">
                       Hora
                     </Typography>
@@ -428,9 +428,9 @@ const EventDetailPage: React.FC = () => {
                 </Box>
               </Grid>
               <Grid item xs={12}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <LocationOn color="action" />
-                  <Box sx={{ flex: 1 }}>
+                  <Box component={"div" as any} sx={{ flex: 1 }}>
                     <Typography variant="body2" color="text.secondary">
                       Ubicación
                     </Typography>
@@ -452,7 +452,7 @@ const EventDetailPage: React.FC = () => {
 
             {/* Speakers */}
             {event.speakers && event.speakers.length > 0 && (
-              <Box sx={{ mb: 3 }}>
+              <Box component={"div" as any} sx={{ mb: 3 }}>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Ponentes
                 </Typography>
@@ -469,7 +469,7 @@ const EventDetailPage: React.FC = () => {
                             speaker.name.charAt(0)
                           )}
                         </Avatar>
-                        <Box sx={{ flex: 1 }}>
+                        <Box component={"div" as any} sx={{ flex: 1 }}>
                           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                             {speaker.name}
                           </Typography>
@@ -480,7 +480,7 @@ const EventDetailPage: React.FC = () => {
                             {speaker.bio}
                           </Typography>
                           {speaker.socialLinks && (
-                            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+                            <Box component={"div" as any} sx={{ mt: 1, display: 'flex', gap: 1 }}>
                               {speaker.socialLinks.linkedin && (
                                 <IconButton size="small" href={speaker.socialLinks.linkedin} target="_blank">
                                   <Public fontSize="small" />
@@ -502,7 +502,7 @@ const EventDetailPage: React.FC = () => {
             )}
 
             {/* Agenda */}
-            <Box sx={{ mb: 3 }}>
+            <Box component={"div" as any} sx={{ mb: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Agenda del Evento
               </Typography>
@@ -512,7 +512,7 @@ const EventDetailPage: React.FC = () => {
             </Box>
 
             {/* What includes */}
-            <Box sx={{ mb: 3 }}>
+            <Box component={"div" as any} sx={{ mb: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                 ¿Qué incluye?
               </Typography>
@@ -554,7 +554,7 @@ const EventDetailPage: React.FC = () => {
             </Typography>
 
             {/* Price */}
-            <Box sx={{ mb: 3 }}>
+            <Box component={"div" as any} sx={{ mb: 3 }}>
               <Typography variant="h3" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                 {event.price === 0 ? 'Gratis' : `Q${event.price}`}
               </Typography>
@@ -566,21 +566,21 @@ const EventDetailPage: React.FC = () => {
             </Box>
 
             {/* Capacity */}
-            <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <Box component={"div" as any} sx={{ mb: 3 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <Person color="action" />
                 <Typography variant="body2">
                   {event.availableSpots} plazas disponibles de {event.capacity}
                 </Typography>
               </Box>
-              <Box sx={{
+              <Box component={"div" as any} sx={{
                 width: '100%',
                 height: 8,
                 bgcolor: 'grey.200',
                 borderRadius: 4,
                 overflow: 'hidden'
               }}>
-                <Box sx={{
+                <Box component={"div" as any} sx={{
                   width: `${(event.availableSpots / event.capacity) * 100}%`,
                   height: '100%',
                   bgcolor: event.availableSpots > 0 ? 'success.main' : 'error.main',
@@ -590,7 +590,7 @@ const EventDetailPage: React.FC = () => {
             </Box>
 
             {/* Action Buttons */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Button
                 variant="contained"
                 size="large"
@@ -617,20 +617,20 @@ const EventDetailPage: React.FC = () => {
             <Divider sx={{ my: 3 }} />
 
             {/* Event Details */}
-            <Box sx={{ mb: 2 }}>
+            <Box component={"div" as any} sx={{ mb: 2 }}>
               <Typography variant="h6" gutterBottom>
                 Detalles del evento
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body2" color="text.secondary">Tipo:</Typography>
                   <Typography variant="body2">{event.type.name}</Typography>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body2" color="text.secondary">Categoría:</Typography>
                   <Typography variant="body2">{event.category.name}</Typography>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body2" color="text.secondary">Duración:</Typography>
                   <Typography variant="body2">
                     {Math.ceil((new Date(event.endDate).getTime() - new Date(event.startDate).getTime()) / (1000 * 60 * 60))} horas
@@ -640,15 +640,15 @@ const EventDetailPage: React.FC = () => {
             </Box>
 
             {/* Organizer Info */}
-            <Box>
+            <Box component={"div" as any}>
               <Typography variant="h6" gutterBottom>
                 Organizador
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Avatar sx={{ bgcolor: 'primary.main' }}>
                   <Business />
                 </Avatar>
-                <Box>
+                <Box component={"div" as any}>
                   <Typography variant="subtitle2">TradeConnect</Typography>
                   <Typography variant="body2" color="text.secondary">
                     Eventos Empresariales
@@ -662,7 +662,7 @@ const EventDetailPage: React.FC = () => {
 
       {/* Related Events */}
       {relatedEvents && relatedEvents.length > 0 && (
-        <Box sx={{ mt: 6 }}>
+        <Box component={"div" as any} sx={{ mt: 6 }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
             Eventos relacionados
           </Typography>
@@ -710,7 +710,7 @@ const EventDetailPage: React.FC = () => {
       >
         <DialogTitle>Video del Evento</DialogTitle>
         <DialogContent>
-          <Box sx={{ position: 'relative', paddingTop: '56.25%', bgcolor: 'black' }}>
+          <Box component={"div" as any} sx={{ position: 'relative', paddingTop: '56.25%', bgcolor: 'black' }}>
             <iframe
               src="https://www.youtube.com/embed/dQw4w9WgXcQ"
               title="Video del evento"

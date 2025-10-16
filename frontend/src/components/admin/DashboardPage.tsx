@@ -56,7 +56,7 @@ interface TabPanelProps {
 
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index}>
-    {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    {value === index && <Box component={"div" as any} sx={{ py: 3 }}>{children}</Box>}
   </div>
 );
 
@@ -191,7 +191,7 @@ const DashboardPage: React.FC = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box component={"div" as any} sx={{ mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Dashboard Administrativo
         </Typography>
@@ -205,8 +205,8 @@ const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
+              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box component={"div" as any}>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     {mockStats.totalEvents}
                   </Typography>
@@ -221,8 +221,8 @@ const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ bgcolor: 'success.main', color: 'success.contrastText' }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
+              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box component={"div" as any}>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     {mockStats.activeEvents}
                   </Typography>
@@ -237,8 +237,8 @@ const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ bgcolor: 'info.main', color: 'info.contrastText' }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
+              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box component={"div" as any}>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     {mockStats.totalUsers}
                   </Typography>
@@ -253,8 +253,8 @@ const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ bgcolor: 'warning.main', color: 'warning.contrastText' }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
+              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box component={"div" as any}>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                     {formatCurrency(mockStats.totalRevenue)}
                   </Typography>
@@ -305,7 +305,7 @@ const DashboardPage: React.FC = () => {
                       {mockEvents.slice(0, 5).map((event) => (
                         <TableRow key={event.id}>
                           <TableCell>
-                            <Box>
+                            <Box component={"div" as any}>
                               <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                                 {event.title}
                               </Typography>
@@ -346,7 +346,7 @@ const DashboardPage: React.FC = () => {
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                   Acciones Rápidas
                 </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Button
                     variant="contained"
                     startIcon={<Add />}
@@ -377,7 +377,7 @@ const DashboardPage: React.FC = () => {
 
         {/* Events Management Tab */}
         <TabPanel value={activeTab} index={1}>
-          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box component={"div" as any} sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
               Gestión de Eventos
             </Typography>
@@ -407,7 +407,7 @@ const DashboardPage: React.FC = () => {
                 {mockEvents.map((event) => (
                   <TableRow key={event.id}>
                     <TableCell>
-                      <Box>
+                      <Box component={"div" as any}>
                         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                           {event.title}
                         </Typography>
@@ -464,7 +464,7 @@ const DashboardPage: React.FC = () => {
                 {mockUsers.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar sx={{ width: 32, height: 32 }}>
                           {user.name.charAt(0)}
                         </Avatar>
@@ -545,7 +545,7 @@ const DashboardPage: React.FC = () => {
                 <Typography variant="h6" gutterBottom>
                   Acciones de Reportes
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Box component={"div" as any} sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Button variant="outlined" startIcon={<Payment />}>
                     Reporte de Ventas
                   </Button>
@@ -576,7 +576,7 @@ const DashboardPage: React.FC = () => {
           {selectedEvent ? 'Editar Evento' : 'Crear Nuevo Evento'}
         </DialogTitle>
         <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Box component={"div" as any} sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
             <TextField
               fullWidth
               label="Título del Evento"

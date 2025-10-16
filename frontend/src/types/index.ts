@@ -29,6 +29,8 @@ export interface Event {
   availableSpots: number;
   minAge?: number;
   maxAge?: number;
+  earlyBirdPrice?: number;
+  earlyBirdDeadline?: string;
   tags: string[];
   requirements?: string;
   isFeatured: boolean;
@@ -256,8 +258,9 @@ export interface RegisterForm {
   email: string;
   password: string;
   confirmPassword: string;
-  phone: string | undefined;
+  phone?: string;
   acceptTerms: boolean;
+  newsletter?: boolean;
 }
 
 export interface CheckoutForm {

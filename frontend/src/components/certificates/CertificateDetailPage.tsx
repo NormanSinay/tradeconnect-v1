@@ -155,7 +155,7 @@ const CertificateDetailPage: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box component={"div" as any} sx={{ mb: 4 }}>
         <Button
           startIcon={<ArrowBack />}
           onClick={() => navigate('/profile')}
@@ -190,6 +190,7 @@ const CertificateDetailPage: React.FC = () => {
       >
         {/* Decorative Border */}
         <Box
+          component={"div" as any}
           sx={{
             position: 'absolute',
             top: 0,
@@ -205,9 +206,9 @@ const CertificateDetailPage: React.FC = () => {
           }}
         />
 
-        <Box sx={{ position: 'relative', zIndex: 1 }}>
+        <Box component={"div" as any} sx={{ position: 'relative', zIndex: 1 }}>
           {/* Header */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Box component={"div" as any} sx={{ textAlign: 'center', mb: 4 }}>
             <Avatar
               sx={{
                 width: 80,
@@ -229,7 +230,7 @@ const CertificateDetailPage: React.FC = () => {
           </Box>
 
           {/* Certificate Content */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Box component={"div" as any} sx={{ textAlign: 'center', mb: 4 }}>
             <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
               Se certifica que
             </Typography>
@@ -256,21 +257,21 @@ const CertificateDetailPage: React.FC = () => {
                     <Event color="primary" />
                     Detalles del Evento
                   </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <CalendarToday sx={{ fontSize: 18, color: 'text.secondary' }} />
                       <Typography variant="body2">
                         <strong>Fecha:</strong> {formatDate(mockCertificate.eventDate)}
                       </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <LocationOn sx={{ fontSize: 18, color: 'text.secondary' }} />
                       <Typography variant="body2">
                         <strong>Lugar:</strong> {mockCertificate.eventLocation}
                       </Typography>
                     </Box>
                     {mockCertificate.hours && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <School sx={{ fontSize: 18, color: 'text.secondary' }} />
                         <Typography variant="body2">
                           <strong>Duración:</strong> {mockCertificate.hours} horas
@@ -289,7 +290,7 @@ const CertificateDetailPage: React.FC = () => {
                     <Verified color="primary" />
                     Información del Certificado
                   </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography variant="body2">
                       <strong>Número:</strong> {mockCertificate.certificateNumber}
                     </Typography>
@@ -318,11 +319,11 @@ const CertificateDetailPage: React.FC = () => {
 
           {/* Skills */}
           {mockCertificate.skills && mockCertificate.skills.length > 0 && (
-            <Box sx={{ mb: 4 }}>
+            <Box component={"div" as any} sx={{ mb: 4 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
                 Competencias Desarrolladas
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+              <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
                 {mockCertificate.skills.map((skill, index) => (
                   <Chip
                     key={index}
@@ -339,7 +340,7 @@ const CertificateDetailPage: React.FC = () => {
           {/* Signatures */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} md={6}>
-              <Box sx={{ textAlign: 'center', p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+              <Box component={"div" as any} sx={{ textAlign: 'center', p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Organizador
                 </Typography>
@@ -349,11 +350,11 @@ const CertificateDetailPage: React.FC = () => {
                 <Typography variant="body2" color="text.secondary">
                   Director Ejecutivo
                 </Typography>
-                <Box sx={{ mt: 2, height: 40, borderBottom: '1px solid', borderColor: 'text.secondary', mx: 4 }} />
+                <Box component={"div" as any} sx={{ mt: 2, height: 40, borderBottom: '1px solid', borderColor: 'text.secondary', mx: 4 }} />
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Box sx={{ textAlign: 'center', p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+              <Box component={"div" as any} sx={{ textAlign: 'center', p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   Fecha de Emisión
                 </Typography>
@@ -363,14 +364,14 @@ const CertificateDetailPage: React.FC = () => {
                 <Typography variant="body2" color="text.secondary">
                   Certificado Digital
                 </Typography>
-                <Box sx={{ mt: 2, height: 40, borderBottom: '1px solid', borderColor: 'text.secondary', mx: 4 }} />
+                <Box component={"div" as any} sx={{ mt: 2, height: 40, borderBottom: '1px solid', borderColor: 'text.secondary', mx: 4 }} />
               </Box>
             </Grid>
           </Grid>
 
           {/* QR Code */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-            <Box sx={{ textAlign: 'center' }}>
+          <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+            <Box component={"div" as any} sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Código QR de Verificación
               </Typography>
