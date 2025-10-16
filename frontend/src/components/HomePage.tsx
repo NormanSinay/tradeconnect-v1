@@ -25,6 +25,7 @@ const HomePage: React.FC = () => {
       window.addEventListener('mousemove', handleMouseMove);
       return () => window.removeEventListener('mousemove', handleMouseMove);
     }
+    return () => {}; // Explicit return for all code paths
   }, [isMobile]);
 
   // Fetch featured events

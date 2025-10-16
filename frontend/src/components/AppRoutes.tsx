@@ -18,6 +18,10 @@ const LoginPage = lazy(() => import('@/components/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/components/auth/RegisterPage'));
 const DashboardPage = lazy(() => import('@/components/admin/DashboardPage'));
 
+// Static pages
+const ContactPage = lazy(() => import('@/components/ContactPage'));
+const ReportIssuePage = lazy(() => import('@/components/ReportIssuePage'));
+
 // Loading component
 const LoadingFallback: React.FC = () => (
   <div
@@ -65,6 +69,20 @@ const AppRoutes: React.FC = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
+
+        {/* Static Pages */}
+        <Route path="/about" element={<div>About Page - Coming Soon</div>} />
+        <Route path="/how-it-works" element={<div>How It Works Page - Coming Soon</div>} />
+        <Route path="/organizers" element={<div>Organizers Page - Coming Soon</div>} />
+        <Route path="/business" element={<div>Business Page - Coming Soon</div>} />
+        <Route path="/help" element={<div>Help Page - Coming Soon</div>} />
+        <Route path="/faq" element={<div>FAQ Page - Coming Soon</div>} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/report-issue" element={<ReportIssuePage />} />
+        <Route path="/terms" element={<div>Terms Page - Coming Soon</div>} />
+        <Route path="/privacy" element={<div>Privacy Page - Coming Soon</div>} />
+        <Route path="/cookies" element={<div>Cookies Page - Coming Soon</div>} />
+        <Route path="/fel-info" element={<div>FEL Info Page - Coming Soon</div>} />
 
         {/* Auth Routes */}
         <Route path="/login" element={<LoginPage />} />

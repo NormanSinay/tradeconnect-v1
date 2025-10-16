@@ -1,0 +1,755 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Facturación FEL - TradeConnect"
+  description="Información sobre Facturación Electrónica en Línea (FEL) en TradeConnect. Cómo funciona la facturación certificada por el SAT en Guatemala."
+>
+  <div class="fel-page">
+    <section class="hero-section">
+      <div class="container">
+        <h1>Facturación Electrónica FEL</h1>
+        <p class="hero-description">
+          Certificados por la Superintendencia de Administración Tributaria (SAT) de Guatemala
+        </p>
+      </div>
+    </section>
+
+    <section class="fel-intro-section">
+      <div class="container">
+        <div class="fel-intro-content">
+          <div class="fel-intro-text">
+            <h2>¿Qué es la Facturación FEL?</h2>
+            <p>
+              La Facturación Electrónica en Línea (FEL) es el sistema obligatorio de
+              facturación electrónica implementado por la Superintendencia de Administración
+              Tributaria (SAT) de Guatemala. TradeConnect está autorizado y certificado
+              para emitir facturas FEL válidas en todo el territorio guatemalteco.
+            </p>
+            <p>
+              Todas las transacciones en nuestra plataforma generan automáticamente
+              facturas electrónicas certificadas, garantizando cumplimiento tributario
+              y validez legal de sus comprobantes fiscales.
+            </p>
+          </div>
+          <div class="fel-intro-image">
+            <div class="sat-certification">
+              <div class="cert-icon">🏛️</div>
+              <h3>SAT Certificado</h3>
+              <p>Autorización oficial para emitir facturas FEL</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fel-process-section">
+      <div class="container">
+        <h2>Cómo Funciona la Facturación FEL en TradeConnect</h2>
+        <div class="fel-process-steps">
+          <div class="process-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h3>Registro de Transacción</h3>
+              <p>
+                Al realizar una compra o inscripción, el sistema registra automáticamente
+                todos los datos requeridos por el SAT.
+              </p>
+            </div>
+          </div>
+
+          <div class="process-arrow">→</div>
+
+          <div class="process-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h3>Generación Automática</h3>
+              <p>
+                El sistema genera la factura FEL con código único, sello digital
+                y todos los elementos requeridos por la normativa.
+              </p>
+            </div>
+          </div>
+
+          <div class="process-arrow">→</div>
+
+          <div class="process-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h3>Certificación SAT</h3>
+              <p>
+                La factura se envía automáticamente al SAT para certificación
+                y obtención del Código de Autorización (CAE).
+              </p>
+            </div>
+          </div>
+
+          <div class="process-arrow">→</div>
+
+          <div class="process-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <h3>Entrega al Cliente</h3>
+              <p>
+                Recibe su factura FEL certificada por email y en su perfil,
+                lista para presentarla ante cualquier autoridad.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fel-benefits-section">
+      <div class="container">
+        <h2>Beneficios de la Facturación FEL</h2>
+        <div class="fel-benefits-grid">
+          <div class="benefit-card">
+            <div class="benefit-icon">✅</div>
+            <h3>Cumplimiento Automático</h3>
+            <p>
+              Nunca más preocuparse por emitir facturas manualmente.
+              El sistema garantiza cumplimiento con la normativa tributaria.
+            </p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">🔒</div>
+            <h3>Seguridad Total</h3>
+            <p>
+              Facturas inalterables con sello digital y certificación
+              oficial del SAT. Imposible falsificar o modificar.
+            </p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">⚡</div>
+            <h3>Emisión Instantánea</h3>
+            <p>
+              Facturas generadas y certificadas en tiempo real.
+              Disponibles inmediatamente después del pago.
+            </p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">📊</div>
+            <h3>Reportes Automáticos</h3>
+            <p>
+              Generación automática de libros de IVA y reportes
+              tributarios para su contabilidad.
+            </p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">💰</div>
+            <h3>Ahorro de Costos</h3>
+            <p>
+              Eliminación de costos de impresión, envío postal
+              y almacenamiento físico de comprobantes.
+            </p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon">🌍</div>
+            <h3>Acceso Global</h3>
+            <p>
+              Sus facturas FEL son válidas internacionalmente
+              y aceptadas por todas las autoridades guatemaltecas.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fel-requirements-section">
+      <div class="container">
+        <h2>Requisitos para Emisión de Facturas FEL</h2>
+        <div class="requirements-content">
+          <div class="requirements-list">
+            <h3>Datos Obligatorios del Emisor</h3>
+            <ul>
+              <li>NIT (Número de Identificación Tributaria)</li>
+              <li>Nombre o razón social</li>
+              <li>Dirección fiscal completa</li>
+              <li>Actividad económica principal</li>
+              <li>Registro en SAT como contribuyente</li>
+            </ul>
+
+            <h3>Datos Obligatorios del Receptor</h3>
+            <ul>
+              <li>NIT o CUI (para guatemaltecos)</li>
+              <li>Nombre completo</li>
+              <li>Dirección de facturación</li>
+              <li>Correo electrónico</li>
+            </ul>
+
+            <h3>Elementos de la Factura</h3>
+            <ul>
+              <li>Serie y número correlativo único</li>
+              <li>Fecha y hora de emisión</li>
+              <li>Descripción detallada de bienes/servicios</li>
+              <li>Precios unitarios y totales</li>
+              <li>IVA desglosado (si aplica)</li>
+              <li>Código de Autorización (CAE)</li>
+              <li>Sello digital del SAT</li>
+            </ul>
+          </div>
+
+          <div class="requirements-note">
+            <div class="note-box">
+              <h4>💡 Importante</h4>
+              <p>
+                TradeConnect maneja automáticamente todos estos requisitos.
+                Solo necesitamos verificar su identidad al registrarse para
+                garantizar la validez de las facturas emitidas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fel-validation-section">
+      <div class="container">
+        <h2>Validación de Facturas FEL</h2>
+        <div class="validation-methods">
+          <div class="validation-card">
+            <h3>Portal SAT</h3>
+            <p>
+              Verifique la autenticidad de cualquier factura FEL en el
+              portal oficial del SAT usando el Código de Autorización (CAE).
+            </p>
+            <a href="https://www.sat.gob.gt/" target="_blank" class="validation-link">
+              Ir al Portal SAT →
+            </a>
+          </div>
+
+          <div class="validation-card">
+            <h3>App SAT</h3>
+            <p>
+              Utilice la aplicación móvil oficial del SAT para validar
+              facturas mediante código QR o CAE.
+            </p>
+            <a href="#" class="validation-link">
+              Descargar App →
+            </a>
+          </div>
+
+          <div class="validation-card">
+            <h3>TradeConnect Validator</h3>
+            <p>
+              Herramienta integrada en nuestra plataforma para validar
+              cualquier factura FEL de forma instantánea.
+            </p>
+            <a href="#" class="validation-link">
+              Usar Validador →
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fel-compliance-section">
+      <div class="container">
+        <h2>Cumplimiento y Regulaciones</h2>
+        <div class="compliance-content">
+          <div class="compliance-text">
+            <h3>Marco Legal</h3>
+            <p>
+              La facturación FEL está regulada por:
+            </p>
+            <ul>
+              <li>Decreto Legislativo 10-2012 (Ley de Facturación)</li>
+              <li>Acuerdos Gubernativos del SAT</li>
+              <li>Normas técnicas de facturación electrónica</li>
+              <li>Resoluciones administrativas del SAT</li>
+            </ul>
+
+            <h3>Certificación TradeConnect</h3>
+            <p>
+              Nuestra plataforma cuenta con:
+            </p>
+            <ul>
+              <li>Certificación oficial del SAT como Proveedor Autorizado</li>
+              <li>Auditorías anuales de cumplimiento</li>
+              <li>Sistemas de respaldo y contingencia</li>
+              <li>Monitoreo continuo de operaciones</li>
+            </ul>
+          </div>
+
+          <div class="compliance-stats">
+            <div class="stat-item">
+              <div class="stat-number">99.9%</div>
+              <div class="stat-label">Tasa de Éxito FEL</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">24/7</div>
+              <div class="stat-label">Monitoreo Continuo</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">100%</div>
+              <div class="stat-label">Cumplimiento SAT</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fel-support-section">
+      <div class="container">
+        <h2>Soporte FEL</h2>
+        <p>
+          ¿Necesita ayuda con facturación FEL o tiene preguntas sobre sus comprobantes?
+          Nuestro equipo especializado está aquí para ayudarle.
+        </p>
+        <div class="support-options">
+          <div class="support-card">
+            <h4>📧 Soporte por Email</h4>
+            <p>fel@tradeconnect.gt</p>
+            <p>Respuesta en 24 horas</p>
+          </div>
+          <div class="support-card">
+            <h4>📞 Línea Directa FEL</h4>
+            <p>+502 1234-FEL1</p>
+            <p>Lunes a Viernes, 8:00-17:00</p>
+          </div>
+          <div class="support-card">
+            <h4>💬 Chat Especializado</h4>
+            <p>Soporte técnico FEL</p>
+            <p>Disponible en plataforma</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .fel-page {
+    min-height: 100vh;
+  }
+
+  .hero-section {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: var(--spacing-2xl) 0;
+    text-align: center;
+  }
+
+  .hero-section h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-md);
+    font-family: var(--font-secondary);
+  }
+
+  .hero-description {
+    font-size: 1.25rem;
+    max-width: 600px;
+    margin: 0 auto;
+    opacity: 0.9;
+  }
+
+  .fel-intro-section {
+    padding: var(--spacing-2xl) 0;
+    background-color: var(--background);
+  }
+
+  .fel-intro-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2xl);
+    align-items: center;
+  }
+
+  .fel-intro-text h2 {
+    color: var(--text-primary);
+    font-family: var(--font-secondary);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .fel-intro-text p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .sat-certification {
+    background: white;
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    border: 2px solid var(--primary);
+  }
+
+  .cert-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .sat-certification h3 {
+    color: var(--primary);
+    font-family: var(--font-secondary);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .sat-certification p {
+    color: var(--text-secondary);
+  }
+
+  .fel-process-section {
+    padding: var(--spacing-2xl) 0;
+    background: white;
+  }
+
+  .fel-process-section h2 {
+    text-align: center;
+    color: var(--text-primary);
+    font-family: var(--font-secondary);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .fel-process-steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+  }
+
+  .process-step {
+    background: var(--surface);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    max-width: 200px;
+    position: relative;
+  }
+
+  .step-number {
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin: 0 auto var(--spacing-md);
+  }
+
+  .step-content h3 {
+    color: var(--primary);
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .step-content p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .process-arrow {
+    font-size: 2rem;
+    color: var(--primary);
+    font-weight: bold;
+  }
+
+  .fel-benefits-section {
+    padding: var(--spacing-2xl) 0;
+    background-color: var(--background);
+  }
+
+  .fel-benefits-section h2 {
+    text-align: center;
+    color: var(--text-primary);
+    font-family: var(--font-secondary);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .fel-benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-xl);
+  }
+
+  .benefit-card {
+    background: white;
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    border-left: 4px solid var(--primary);
+  }
+
+  .benefit-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .benefit-card h3 {
+    color: var(--primary);
+    font-family: var(--font-secondary);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .benefit-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .fel-requirements-section {
+    padding: var(--spacing-2xl) 0;
+    background: white;
+  }
+
+  .fel-requirements-section h2 {
+    text-align: center;
+    color: var(--text-primary);
+    font-family: var(--font-secondary);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .requirements-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-2xl);
+  }
+
+  .requirements-list h3 {
+    color: var(--primary);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .requirements-list ul {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .requirements-list li {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+    padding-left: var(--spacing-md);
+    position: relative;
+  }
+
+  .requirements-list li::before {
+    content: "•";
+    color: var(--primary);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+  }
+
+  .note-box {
+    background: var(--primary-light);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    border-left: 4px solid var(--primary);
+  }
+
+  .note-box h4 {
+    color: var(--primary);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .note-box p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .fel-validation-section {
+    padding: var(--spacing-2xl) 0;
+    background-color: var(--background);
+  }
+
+  .fel-validation-section h2 {
+    text-align: center;
+    color: var(--text-primary);
+    font-family: var(--font-secondary);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .validation-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-xl);
+  }
+
+  .validation-card {
+    background: white;
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .validation-card h3 {
+    color: var(--primary);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .validation-card p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+    font-size: 0.9rem;
+  }
+
+  .validation-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .validation-link:hover {
+    text-decoration: underline;
+  }
+
+  .fel-compliance-section {
+    padding: var(--spacing-2xl) 0;
+    background: white;
+  }
+
+  .fel-compliance-section h2 {
+    text-align: center;
+    color: var(--text-primary);
+    font-family: var(--font-secondary);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .compliance-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-2xl);
+  }
+
+  .compliance-text h3 {
+    color: var(--primary);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .compliance-text ul {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .compliance-text li {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+    padding-left: var(--spacing-md);
+    position: relative;
+  }
+
+  .compliance-text li::before {
+    content: "•";
+    color: var(--primary);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+  }
+
+  .compliance-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .stat-item {
+    background: var(--surface);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    font-family: var(--font-secondary);
+  }
+
+  .stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: var(--spacing-xs);
+  }
+
+  .fel-support-section {
+    padding: var(--spacing-2xl) 0;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    text-align: center;
+  }
+
+  .fel-support-section h2 {
+    font-family: var(--font-secondary);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .fel-support-section p {
+    max-width: 600px;
+    margin: 0 auto var(--spacing-xl);
+    opacity: 0.9;
+    font-size: 1.1rem;
+  }
+
+  .support-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-xl);
+  }
+
+  .support-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .support-card h4 {
+    color: white;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .support-card p {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .hero-section h1 {
+      font-size: 2rem;
+    }
+
+    .fel-intro-content,
+    .requirements-content,
+    .compliance-content {
+      grid-template-columns: 1fr;
+    }
+
+    .fel-process-steps {
+      flex-direction: column;
+    }
+
+    .process-arrow {
+      transform: rotate(90deg);
+    }
+
+    .fel-benefits-grid,
+    .validation-methods,
+    .support-options {
+      grid-template-columns: 1fr;
+    }
+
+    .compliance-stats {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
+</style>
