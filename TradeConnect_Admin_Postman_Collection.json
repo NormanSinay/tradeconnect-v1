@@ -1,0 +1,1588 @@
+
+{
+  "info": {
+    "name": "TradeConnect - Administrador",
+    "description": "Colección completa de endpoints para el flujo de administrador en TradeConnect. Incluye todas las fases de gestión administrativa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@tradeconnect.com",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "AdminPass123",
+      "type": "string"
+    },
+    {
+      "key": "admin_access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "event_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "speaker_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "registration_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "promotion_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "template_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 AUTENTICACIÓN ADMIN",
+      "item": [
+        {
+          "name": "Login Administrador",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"admin_access_token\", response.data.tokens.accessToken);",
+                  "    pm.collectionVariables.set(\"admin_refresh_token\", response.data.tokens.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{admin_refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh-token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh-token"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"admin_access_token\", response.data.tokens.accessToken);",
+                  "    pm.collectionVariables.set(\"admin_refresh_token\", response.data.tokens.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📊 DASHBOARD Y MÉTRICAS",
+      "item": [
+        {
+          "name": "Métricas Generales",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "metrics"]
+            }
+          }
+        },
+        {
+          "name": "Actividad Reciente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/recent-activity",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "recent-activity"]
+            }
+          }
+        },
+        {
+          "name": "Resumen Financiero",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/financial-summary",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "financial-summary"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 GESTIÓN DE EVENTOS",
+      "item": [
+        {
+          "name": "Listar Todos los Eventos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events?page=1&limit=20&status=draft",
+              "host": ["{{base_url}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "draft"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear Nuevo Evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Conferencia Tech 2024\",\n  \"description\": \"Conferencia anual de tecnología\",\n  \"eventTypeId\": 1,\n  \"eventCategoryId\": 1,\n  \"startDate\": \"2024-12-01T09:00:00.000Z\",\n  \"endDate\": \"2024-12-01T18:00:00.000Z\",\n  \"location\": \"Centro de Convenciones Guatemala\",\n  \"maxCapacity\": 500,\n  \"basePrice\": 150.00,\n  \"currency\": \"GTQ\",\n  \"isVirtual\": false,\n  \"isHybrid\": false,\n  \"status\": \"draft\",\n  \"organizerId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events",
+              "host": ["{{base_url}}"],
+              "path": ["events"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"event_id\", response.data.event.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver Evento Específico",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Evento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Conferencia Tech 2024 - Actualizada\",\n  \"description\": \"Conferencia anual de tecnología y innovación\",\n  \"maxCapacity\": 600,\n  \"basePrice\": 175.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Duplicar Evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Conferencia Tech 2025\",\n  \"startDate\": \"2025-12-01T09:00:00.000Z\",\n  \"endDate\": \"2025-12-01T18:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/duplicate",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}", "duplicate"]
+            }
+          }
+        },
+        {
+          "name": "Cambiar Estado del Evento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"published\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Publicar Evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}/publish",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}", "publish"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Evento",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["events", "{{event_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎤 GESTIÓN DE SPEAKERS",
+      "item": [
+        {
+          "name": "Listar Speakers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/speakers?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["speakers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear Speaker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"María\",\n  \"lastName\": \"González\",\n  \"email\": \"maria.gonzalez@empresa.com\",\n  \"phone\": \"+502 5555-1234\",\n  \"bio\": \"Experta en desarrollo de software con 10 años de experiencia\",\n  \"specialties\": [\"JavaScript\", \"React\", \"Node.js\"],\n  \"socialLinks\": {\n    \"linkedin\": \"https://linkedin.com/in/mariagonzalez\",\n    \"twitter\": \"@mariag_dev\"\n  },\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/speakers",
+              "host": ["{{base_url}}"],
+              "path": ["speakers"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"speaker_id\", response.data.speaker.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver Speaker",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/speakers/{{speaker_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["speakers", "{{speaker_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Speaker",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Experta en desarrollo de software con 12 años de experiencia\",\n  \"specialties\": [\"JavaScript\", \"React\", \"Node.js\", \"TypeScript\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/speakers/{{speaker_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["speakers", "{{speaker_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Invitar Speaker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": {{event_id}},\n  \"message\": \"Nos gustaría invitarte a participar como speaker en nuestra conferencia\",\n  \"proposedTopics\": [\"Desarrollo con React\", \"Arquitectura de Microservicios\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/speakers/{{speaker_id}}/invite",
+              "host": ["{{base_url}}"],
+              "path": ["speakers", "{{speaker_id}}", "invite"]
+            }
+          }
+        },
+        {
+          "name": "Asignar Speaker a Evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speakerId\": {{speaker_id}},\n  \"eventId\": {{event_id}},\n  \"sessionTitle\": \"Desarrollo con React\",\n  \"startTime\": \"2024-12-01T10:00:00.000Z\",\n  \"endTime\": \"2024-12-01T11:30:00.000Z\",\n  \"description\": \"Introducción a React y mejores prácticas\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/speakers/events/{{event_id}}/assign",
+              "host": ["{{base_url}}"],
+              "path": ["speakers", "events", "{{event_id}}", "assign"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Speaker",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/speakers/{{speaker_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["speakers", "{{speaker_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 GESTIÓN DE USUARIOS",
+      "item": [
+        {
+          "name": "Listar Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users?page=1&limit=20&role=user",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "role",
+                  "value": "user"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.usuario@empresa.com\",\n  \"password\": \"TempPass123\",\n  \"firstName\": \"Carlos\",\n  \"lastName\": \"Rodríguez\",\n  \"phone\": \"+502 7777-9999\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"user_id\", response.data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Carlos Alberto\",\n  \"isActive\": true,\n  \"role\": \"speaker\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Auditoría de Usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/audit?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "audit"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏷️ GESTIÓN DE PROMOCIONES",
+      "item": [
+        {
+          "name": "Listar Promociones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/promotions?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["promotions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear Promoción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Descuento Estudiantes\",\n  \"description\": \"20% de descuento para estudiantes\",\n  \"code\": \"ESTUDIANTE20\",\n  \"discountType\": \"percentage\",\n  \"discountValue\": 20.00,\n  \"maxUses\": 100,\n  \"maxUsesPerUser\": 1,\n  \"startDate\": \"2024-10-01T00:00:00.000Z\",\n  \"endDate\": \"2024-12-31T23:59:59.000Z\",\n  \"eventIds\": [{{event_id}}],\n  \"conditions\": {\n    \"minPurchase\": 0,\n    \"requiresValidation\": true\n  },\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/promotions",
+              "host": ["{{base_url}}"],
+              "path": ["promotions"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"promotion_id\", response.data.promotion.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Promoción",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Descuento Estudiantes - Actualizado\",\n  \"maxUses\": 150,\n  \"discountValue\": 25.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/promotions/{{promotion_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["promotions", "{{promotion_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Activar Promoción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/promotions/{{promotion_id}}/activate",
+              "host": ["{{base_url}}"],
+              "path": ["promotions", "{{promotion_id}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "Desactivar Promoción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/promotions/{{promotion_id}}/deactivate",
+              "host": ["{{base_url}}"],
+              "path": ["promotions", "{{promotion_id}}", "deactivate"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Promoción",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/promotions/{{promotion_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["promotions", "{{promotion_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎫 GESTIÓN DE ACCESO Y QR",
+      "item": [
+        {
+          "name": "Descargar Lista Offline",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/qr/offline/download-list/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["qr", "offline", "download-list", "{{event_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Estado Sincronización",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/qr/offline/sync-status",
+              "host": ["{{base_url}}"],
+              "path": ["qr", "offline", "sync-status"]
+            }
+          }
+        },
+        {
+          "name": "Regenerar QR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"QR perdido por el usuario\",\n  \"notifyUser\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/qr/regenerate/{{registration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["qr", "regenerate", "{{registration_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Logs de Acceso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/access-logs/events/{{event_id}}?page=1&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["access-logs", "events", "{{event_id}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Accesos en Tiempo Real",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/access-logs/real-time/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["access-logs", "real-time", "{{event_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 GESTIÓN DE INSCRIPCIONES",
+      "item": [
+        {
+          "name": "Inscripciones del Evento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/registrations/events/{{event_id}}?page=1&limit=50&status=PAGADO",
+              "host": ["{{base_url}}"],
+              "path": ["registrations", "events", "{{event_id}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "status",
+                  "value": "PAGADO"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Todas las Inscripciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/registrations?page=1&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["registrations"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ver Inscripción Específica",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/registrations/{{registration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["registrations", "{{registration_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Inscripción",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMADO\",\n  \"notes\": \"Inscripción confirmada por administrador\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/registrations/{{registration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["registrations", "{{registration_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Cancelar Inscripción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Cancelación solicitada por el usuario\",\n  \"processRefund\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/registrations/{{registration_id}}/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["registrations", "{{registration_id}}", "cancel"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 GESTIÓN DE PAGOS Y REEMBOLSOS",
+      "item": [
+        {
+          "name": "Historial de Pagos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payments/history?page=1&limit=50&startDate=2024-01-01&endDate=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "history"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear Reembolso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentId\": 123,\n  \"amount\": 150.00,\n  \"reason\": \"Cancelación del evento\",\n  \"processImmediately\": true,\n  \"notifyUser\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/refunds",
+              "host": ["{{base_url}}"],
+              "path": ["refunds"]
+            }
+          }
+        },
+        {
+          "name": "Ver Reembolso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/refunds/456",
+              "host": ["{{base_url}}"],
+              "path": ["refunds", "456"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎓 GESTIÓN DE CERTIFICADOS",
+      "item": [
+        {
+          "name": "Templates de Certificados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/certificate-templates?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["certificate-templates"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear Template",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Certificado Participación\",\n  \"eventTypes\": [\"conference\", \"workshop\"],\n  \"htmlTemplate\": \"<div class='certificate'><h1>Certificado de Participación</h1><p>Se certifica que {{participantName}} participó en {{eventName}}</p></div>\",\n  \"requiredVariables\": [\"participantName\", \"eventName\", \"completionDate\"],\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/certificate-templates",
+              "host": ["{{base_url}}"],
+              "path": ["certificate-templates"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"template_id\", response.data.template.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generar Certificados Masivos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"templateId\": \"{{template_id}}\",\n  \"notifyUsers\": true,\n  \"customVariables\": {\n    \"issuerName\": \"TradeConnect\",\n    \"signature\": \"Director General\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/certificates/bulk-generate/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["certificates", "bulk-generate", "{{event_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Verificar Certificado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"certificateId\": 789\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/certificates/validate",
+              "host": ["{{base_url}}"],
+              "path": ["certificates", "validate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 REPORTES Y ANALYTICS",
+      "item": [
+        {
+          "name": "Reporte de Ventas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/event-reports/sales?startDate=2024-01-01&endDate=2024-12-31&eventId={{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["event-reports", "sales"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                },
+                {
+                  "key": "eventId",
+                  "value": "{{event_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Exportar Reporte de Ventas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/event-reports/sales/export?startDate=2024-01-01&endDate=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["event-reports", "sales", "export"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reporte de Asistencia",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/event-reports/attendance?startDate=2024-01-01&endDate=2024-12-31&eventId={{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["event-reports", "attendance"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                },
+                {
+                  "key": "eventId",
+                  "value": "{{event_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Analytics de Evento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analytics/events/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["analytics", "events", "{{event_id}}"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.request.headers.get('Authorization')) {",
+          "    // Verificar si el token está expirando",
+          "    const token = pm.collectionVariables.get('admin_access_token');",
+          "    if (token) {",
+          "        try {",
+          "            const payload = JSON.parse(atob(token.split('.')[1]));",
+          "            const now = Math.floor(Date.now() / 1000);",
+          "            if (payload.exp - now < 300) { // 5 minutos antes de expirar",
+          "                console.log('Token admin expirando pronto, considera hacer refresh');",
+          "            }",
+          "        } catch (e) {",
+          "            console.log('Error parsing token:', e);",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Verificar respuesta exitosa",
+          "pm.test(\"Status code is not 5xx\", function () {",
+          "    pm.response.to.not.be.serverError;",
+          "});",
+          "",
+          "// Verificar estructura de respuesta",
+          "pm.test(\"Response has success field\", function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('success');",
+          "});",
+          "",
+          "// Log de respuesta para debugging",
+          "console.log('Admin Response:', pm.response.json());"
+        ]
+      }
+    }
+  ]
+}

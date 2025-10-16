@@ -71,7 +71,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       path: '/admin/dashboard',
     },
     {
-      title: 'Eventos',
+      title: 'Eventos y Cursos',
       icon: <EventIcon />,
       path: '/admin/events',
       children: [

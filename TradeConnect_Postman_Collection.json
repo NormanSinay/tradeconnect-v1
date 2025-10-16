@@ -1,0 +1,1373 @@
+{
+  "info": {
+    "name": "TradeConnect - Usuario Final",
+    "description": "Colección completa de endpoints para el flujo de usuario final en TradeConnect. Incluye todas las fases desde registro hasta certificación.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "user_email",
+      "value": "usuario@ejemplo.com",
+      "type": "string"
+    },
+    {
+      "key": "user_password",
+      "value": "Contraseña123",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "event_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "registration_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cart_session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "certificate_hash",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 AUTENTICACIÓN",
+      "item": [
+        {
+          "name": "Registro de Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"Contraseña123\",\n  \"confirmPassword\": \"Contraseña123\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Pérez\",\n  \"phone\": \"+502 1234-5678\",\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"termsAccepted\": true,\n  \"marketingAccepted\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set(\"user_email\", pm.request.body.raw.email);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verificación de Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"verification_token_from_email\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify-email",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify-email"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"access_token\", response.data.tokens.accessToken);",
+                  "    pm.collectionVariables.set(\"refresh_token\", response.data.tokens.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh-token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh-token"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"access_token\", response.data.tokens.accessToken);",
+                  "    pm.collectionVariables.set(\"refresh_token\", response.data.tokens.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📅 CATÁLOGO PÚBLICO",
+      "item": [
+        {
+          "name": "Listar Eventos Públicos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public/events?page=1&limit=10&search=conferencia",
+              "host": ["{{base_url}}"],
+              "path": ["public", "events"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "conferencia"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Eventos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public/events/search?q=blockchain&location=Guatemala&priceMin=0&priceMax=500",
+              "host": ["{{base_url}}"],
+              "path": ["public", "events", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "blockchain"
+                },
+                {
+                  "key": "location",
+                  "value": "Guatemala"
+                },
+                {
+                  "key": "priceMin",
+                  "value": "0"
+                },
+                {
+                  "key": "priceMax",
+                  "value": "500"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalle de Evento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public/events/{{event_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["public", "events", "{{event_id}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"event_id\", response.data.event.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Vista Calendario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public/events/calendar?month=10&year=2024",
+              "host": ["{{base_url}}"],
+              "path": ["public", "events", "calendar"],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "10"
+                },
+                {
+                  "key": "year",
+                  "value": "2024"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Categorías Disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public/events/categories",
+              "host": ["{{base_url}}"],
+              "path": ["public", "events", "categories"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛒 CARRITO DE COMPRAS",
+      "item": [
+        {
+          "name": "Obtener Carrito Actual",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart",
+              "host": ["{{base_url}}"],
+              "path": ["cart"]
+            }
+          }
+        },
+        {
+          "name": "Agregar Evento al Carrito",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": {{event_id}},\n  \"quantity\": 1,\n  \"accessTypeId\": 1,\n  \"sessionId\": \"{{cart_session_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/add",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "add"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Item del Carrito",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": 1,\n  \"quantity\": 2,\n  \"sessionId\": \"{{cart_session_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/update",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "update"]
+            }
+          }
+        },
+        {
+          "name": "Aplicar Código Promocional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DESCUENTO20\",\n  \"sessionId\": \"{{cart_session_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/apply-promo",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "apply-promo"]
+            }
+          }
+        },
+        {
+          "name": "Calcular Totales",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart/calculate?sessionId={{cart_session_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "calculate"],
+              "query": [
+                {
+                  "key": "sessionId",
+                  "value": "{{cart_session_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Remover Item del Carrito",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/cart/remove/1?sessionId={{cart_session_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["cart", "remove", "1"],
+              "query": [
+                {
+                  "key": "sessionId",
+                  "value": "{{cart_session_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📝 INSCRIPCIONES",
+      "item": [
+        {
+          "name": "Crear Inscripción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": {{event_id}},\n  \"accessTypeId\": 1,\n  \"quantity\": 1,\n  \"attendeeInfo\": {\n    \"firstName\": \"Juan\",\n    \"lastName\": \"Pérez\",\n    \"email\": \"{{user_email}}\",\n    \"phone\": \"+502 1234-5678\"\n  },\n  \"affiliationData\": {\n    \"nit\": \"12345678-9\",\n    \"cui\": \"1234567890123\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/registrations",
+              "host": ["{{base_url}}"],
+              "path": ["registrations"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"registration_id\", response.data.registration.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validar Afiliación CCG",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"email\": \"{{user_email}}\",\n  \"phone\": \"+502 1234-5678\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/registrations/validate-affiliation",
+              "host": ["{{base_url}}"],
+              "path": ["registrations", "validate-affiliation"]
+            }
+          }
+        },
+        {
+          "name": "Listar Mis Inscripciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/registrations?page=1&limit=10&status=PAGADO",
+              "host": ["{{base_url}}"],
+              "path": ["registrations"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "PAGADO"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 PROCESAMIENTO DE PAGOS",
+      "item": [
+        {
+          "name": "Métodos de Pago Disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payments/methods",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "methods"]
+            }
+          }
+        },
+        {
+          "name": "Procesar Pago con PayPal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"registrationId\": {{registration_id}},\n  \"amount\": 150.00,\n  \"currency\": \"GTQ\",\n  \"returnUrl\": \"https://tradeconnect.com/payment/success\",\n  \"cancelUrl\": \"https://tradeconnect.com/payment/cancel\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/paypal/create",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "paypal", "create"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set(\"payment_id\", response.data.payment.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Procesar Pago con Stripe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"registrationId\": {{registration_id}},\n  \"amount\": 150.00,\n  \"currency\": \"GTQ\",\n  \"paymentMethodId\": \"pm_card_visa\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/stripe/create",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "stripe", "create"]
+            }
+          }
+        },
+        {
+          "name": "Procesar Pago con NeoNet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"registrationId\": {{registration_id}},\n  \"amount\": 150.00,\n  \"currency\": \"GTQ\",\n  \"cardInfo\": {\n    \"number\": \"4111111111111111\",\n    \"expiryMonth\": \"12\",\n    \"expiryYear\": \"2025\",\n    \"cvv\": \"123\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/neonet/create",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "neonet", "create"]
+            }
+          }
+        },
+        {
+          "name": "Consultar Estado de Pago",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payments/{{payment_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "{{payment_id}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Historial de Pagos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payments/history?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "history"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧾 FACTURACIÓN FEL",
+      "item": [
+        {
+          "name": "Generar Factura Automática",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentId\": {{payment_id}},\n  \"notes\": \"Factura generada automáticamente\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fel/auto-generate/{{registration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["fel", "auto-generate", "{{registration_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Consultar Estado DTE",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fel/consult-dte/factura-uuid-123",
+              "host": ["{{base_url}}"],
+              "path": ["fel", "consult-dte", "factura-uuid-123"]
+            }
+          }
+        },
+        {
+          "name": "Descargar PDF de Factura",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/fel/download-pdf/factura-uuid-123",
+              "host": ["{{base_url}}"],
+              "path": ["fel", "download-pdf", "factura-uuid-123"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎫 CÓDIGOS QR Y ACCESO",
+      "item": [
+        {
+          "name": "Generar Código QR",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"expiresAt\": \"2024-12-31T23:59:59.000Z\",\n  \"metadata\": {\n    \"accessLevel\": \"standard\",\n    \"specialRequirements\": [\"vegetarian\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/qr/generate/{{registration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["qr", "generate", "{{registration_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Obtener QR Existente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/qr/{{registration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["qr", "{{registration_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Validar Código QR (Entrada)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qrHash\": \"a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890\",\n  \"eventId\": {{event_id}},\n  \"accessPoint\": \"Entrada Principal\",\n  \"deviceInfo\": {\n    \"deviceType\": \"mobile\",\n    \"appVersion\": \"1.0.0\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/qr/validate",
+              "host": ["{{base_url}}"],
+              "path": ["qr", "validate"]
+            }
+          }
+        },
+        {
+          "name": "Marcar Asistencia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"registrationId\": {{registration_id}},\n  \"eventId\": {{event_id}},\n  \"accessPoint\": \"Entrada Principal\",\n  \"deviceInfo\": {\n    \"deviceType\": \"mobile\",\n    \"appVersion\": \"1.0.0\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/attendance/mark",
+              "host": ["{{base_url}}"],
+              "path": ["attendance", "mark"]
+            }
+          }
+        },
+        {
+          "name": "Consultar Mi Asistencia",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/participant/{{registration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["attendance", "participant", "{{registration_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎓 CERTIFICADOS",
+      "item": [
+        {
+          "name": "Generar Certificado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/certificates/generate/{{registration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["certificates", "generate", "{{registration_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Mis Certificados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/certificates/participant/123",
+              "host": ["{{base_url}}"],
+              "path": ["certificates", "participant", "123"]
+            }
+          }
+        },
+        {
+          "name": "Descargar Certificado PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/certificates/download/456",
+              "host": ["{{base_url}}"],
+              "path": ["certificates", "download", "456"]
+            }
+          }
+        },
+        {
+          "name": "Verificar Certificado (Público)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public/certificates/verify/{{certificate_hash}}",
+              "host": ["{{base_url}}"],
+              "path": ["public", "certificates", "verify", "{{certificate_hash}}"]
+            }
+          }
+        },
+        {
+          "name": "Validar Autenticidad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"certificateId\": 456,\n  \"validationCode\": \"VALIDATION123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/certificates/validate",
+              "host": ["{{base_url}}"],
+              "path": ["certificates", "validate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 GESTIÓN DE PERFIL",
+      "item": [
+        {
+          "name": "Obtener Perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Perfil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Juan Carlos\",\n  \"lastName\": \"Pérez González\",\n  \"phone\": \"+502 8765-4321\",\n  \"nit\": \"12345678-9\",\n  \"cui\": \"1234567890123\",\n  \"timezone\": \"America/Guatemala\",\n  \"locale\": \"es-GT\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Cambiar Contraseña",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"{{user_password}}\",\n  \"newPassword\": \"NuevaContraseña123\",\n  \"confirmNewPassword\": \"NuevaContraseña123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/password/change",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "password", "change"]
+            }
+          }
+        },
+        {
+          "name": "Sesiones Activas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sessions/active",
+              "host": ["{{base_url}}"],
+              "path": ["sessions", "active"]
+            }
+          }
+        },
+        {
+          "name": "Cerrar Sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 NOTIFICACIONES",
+      "item": [
+        {
+          "name": "Mis Notificaciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications?page=1&limit=10&status=unread",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "unread"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Marcar Notificación como Leída",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/789/read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "789", "read"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏷️ PROMOCIONES Y DESCUENTOS",
+      "item": [
+        {
+          "name": "Validar Código Promocional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"DESCUENTO20\",\n  \"eventId\": {{event_id}},\n  \"cartTotal\": 150.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/discounts/validate-code",
+              "host": ["{{base_url}}"],
+              "path": ["discounts", "validate-code"]
+            }
+          }
+        },
+        {
+          "name": "Descuentos por Volumen",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/discounts/volume/{{event_id}}?isActive=true",
+              "host": ["{{base_url}}"],
+              "path": ["discounts", "volume", "{{event_id}}"],
+              "query": [
+                {
+                  "key": "isActive",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Descuentos Early Bird",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/discounts/early-bird/{{event_id}}?registrationDate=2024-10-01T00:00:00.000Z",
+              "host": ["{{base_url}}"],
+              "path": ["discounts", "early-bird", "{{event_id}}"],
+              "query": [
+                {
+                  "key": "registrationDate",
+                  "value": "2024-10-01T00:00:00.000Z"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.request.headers.get('Authorization')) {",
+          "    // Verificar si el token está expirando",
+          "    const token = pm.collectionVariables.get('access_token');",
+          "    if (token) {",
+          "        try {",
+          "            const payload = JSON.parse(atob(token.split('.')[1]));",
+          "            const now = Math.floor(Date.now() / 1000);",
+          "            if (payload.exp - now < 300) { // 5 minutos antes de expirar",
+          "                console.log('Token expirando pronto, considera hacer refresh');",
+          "            }",
+          "        } catch (e) {",
+          "            console.log('Error parsing token:', e);",
+          "        }",
+          "    }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Verificar respuesta exitosa",
+          "pm.test(\"Status code is not 5xx\", function () {",
+          "    pm.response.to.not.be.serverError;",
+          "});",
+          "",
+          "// Verificar estructura de respuesta",
+          "pm.test(\"Response has success field\", function () {",
+          "    const jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('success');",
+          "});",
+          "",
+          "// Log de respuesta para debugging",
+          "console.log('Response:', pm.response.json());"
+        ]
+      }
+    }
+  ]
+}

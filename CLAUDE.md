@@ -15,12 +15,10 @@ All backend commands are run from the `backend/` directory:
 ```bash
 # Development
 npm run dev              # Start dev server with nodemon
-
-# Building
-npm run build            # Compile TypeScript to dist/
 npm start                # Run compiled code from dist/
 
-# Testing
+# Building & Testing
+npm run build            # Compile TypeScript to dist/
 npm test                 # Run Jest tests
 npm run test:watch       # Run tests in watch mode
 npm run test:coverage    # Generate coverage report
@@ -36,9 +34,13 @@ npm run db:seed          # Seed database with initial data
 
 # Documentation
 npm run docs:generate    # Generate Swagger API docs
+
+# Setup Scripts (from project root)
+node scripts/verify-payment-setup.js      # Verify payment gateway configuration
+node scripts/setup-payment-webhooks.js    # Configure payment webhooks
 ```
 
-### Database Setup
+### Initial Setup
 
 The project uses PostgreSQL and Redis. Start both services with Docker:
 
@@ -46,34 +48,64 @@ The project uses PostgreSQL and Redis. Start both services with Docker:
 # From project root
 docker-compose up -d     # Start PostgreSQL, Redis, and MailHog
 
-# Then run migrations and seeds
+# Then install dependencies and setup backend
 cd backend
-npm run db:migrate
-npm run db:seed
+npm install
+
+# Configure environment
+cp .env.example .env      # Edit .env with your configurations
+
+# Setup database
+npm run db:migrate        # Run migrations
+npm run db:seed           # (Optional) Seed with initial data
+
+# Verify payment setup (optional)
+cd ..
+node scripts/verify-payment-setup.js
+node scripts/setup-payment-webhooks.js
+
+# Start development server
+cd backend
+npm run dev
 ```
 
-Database configuration is in `backend/config/config.json` for Sequelize CLI and `backend/src/config/database.ts` for the application.
+**Docker Services**:
+- PostgreSQL (port 5432): Database `tradeconnect_dev`, user `tradeconnect_user`, password `tradeconnect123`
+- Redis (port 6379): Password `tradeconnect_redis_password`
+- MailHog (ports 8025 UI, 1025 SMTP): Email testing tool
+
+**Configuration Files**:
+- `backend/.env` - Environment variables (copy from `.env.example`)
+- `backend/config/config.json` - Sequelize CLI database config
+- `backend/src/config/database.ts` - Application database config
 
 ## Architecture
 
 ### Core Modules
 
-TradeConnect is organized into 17+ feature modules:
+TradeConnect is organized into **36 functional modules** across **14 major feature areas**:
 
-1. **Authentication & Users** - JWT-based auth with 2FA, sessions, role-based access control (RBAC)
-2. **Events Management** - Core event CRUD, templates, duplication, categories, types, statuses, event sessions
-3. **Speakers** - Speaker profiles, specialties, availability, contracts, payments, evaluations
-4. **Registration System** - Individual and group registrations, cart management, abandoned cart tracking
-5. **Payment Processing** - PayPal, Stripe, NeoNet, BAM gateway integrations with refunds and reconciliation
-6. **FEL Integration** - Guatemala electronic invoicing system with NIT/CUI validation, tokens, error handling
-7. **QR Codes & Access Control** - Event access via QR validation, attendance tracking, access logs, sync logs
-8. **Certificate Generation** - PDF certificates with blockchain anchoring, certificate templates, validation logs
-9. **Notifications** - Email, SMS (Twilio), WhatsApp with templates, rules, user preferences
-10. **Hybrid Events** - Support for virtual, in-person, and hybrid events with virtual rooms and streaming
-11. **Reports & Analytics** - Event metrics, registration reports, financial reports
-12. **Promotions & Discounts** - Promo codes, volume discounts, early bird pricing, usage tracking
-13. **Capacity Management** - Event capacities, access types, overbooking rules, waitlists
-14. **Invoicing** - Complete invoicing system integrated with FEL
+1. **Authentication & Users** (3 modules) - JWT-based auth with 2FA, sessions, user management, role-based access control (RBAC)
+2. **Events Management** (6 modules) - Core event CRUD, templates, duplication, categories, types, statuses, event sessions, registrations, reports & analytics
+3. **Speakers** (2 modules) - Speaker profiles, specialties, availability, contracts, payments, evaluations
+4. **Registration System** (2 modules) - Individual and group registrations, cart management, abandoned cart tracking
+5. **Payment Processing** (3 modules) - PayPal, Stripe, NeoNet, BAM gateway integrations with refunds, webhooks, and reconciliation
+6. **FEL Integration** (3 modules) - Guatemala electronic invoicing system with NIT/CUI validation, tokens, error handling, invoice management
+7. **Promotions & Discounts** (2 modules) - Promo codes, volume discounts, early bird pricing, usage tracking
+8. **Capacity Management** (3 modules) - Event capacities, access types, overbooking rules, waitlists
+9. **QR Codes & Access Control** (1 module) - Event access via QR validation, attendance tracking, access logs, sync logs
+10. **Certificate Generation** (3 modules) - PDF certificates with blockchain anchoring, certificate templates, validation logs
+11. **Notifications** (3 modules) - Email, SMS (Twilio), WhatsApp with templates, rules, user preferences
+12. **Hybrid Events** (3 modules) - Support for virtual, in-person, and hybrid events with virtual rooms, streaming, and virtual participants
+13. **User Preferences** (1 module) - Notification preferences and user settings
+14. **Public APIs** (1 module) - Public endpoints for validations and system information
+
+**Module Breakdown by Component**:
+- 36 Controllers
+- 36 Route files
+- 60 Service files
+- 69 Database models
+- 59 Database migrations
 
 ### Directory Structure
 
@@ -89,11 +121,18 @@ backend/src/
 └── utils/           # Helpers (logger, constants, validators, etc.)
 
 backend/
-├── migrations/      # Sequelize migration files (000-032)
+├── migrations/      # Sequelize migration files (59 total)
 ├── seeders/         # Database seed files
 ├── config/          # Sequelize CLI config
 └── dist/            # Compiled JavaScript output
 ```
+
+**File Counts**:
+- `src/controllers/`: 36 controllers
+- `src/routes/`: 36 route files
+- `src/services/`: 60 service files
+- `src/models/`: 69 models + index.ts
+- `migrations/`: 59 migration files
 
 ### Key Architectural Patterns
 
@@ -123,7 +162,7 @@ Configured in `tsconfig.json` under `paths`.
 
 ### Database Models & Relationships
 
-**Core Entities** (71+ models):
+**Core Entities** (69 models):
 - `User` → `UserRole` ← `Role` ← `RolePermission` → `Permission`
 - `User` → `Session` (JWT sessions), `TwoFactorAuth`, `AuditLog`, `UserNotificationPreferences`
 - `Event` → `EventType`, `EventCategory`, `EventStatus`, `EventTemplate`, `EventMedia`, `EventDuplication`
@@ -166,17 +205,56 @@ All models use Sequelize TypeScript decorators (`@Table`, `@Column`, etc.) and a
 ### API Documentation
 
 Swagger/OpenAPI docs are auto-generated and available at:
-- UI: `http://localhost:3000/api/docs`
-- JSON: `http://localhost:3000/api/docs.json`
+- **UI**: `http://localhost:3000/api/docs`
+- **JSON**: `http://localhost:3000/api/docs.json`
+- **Health Check**: `http://localhost:3000/health`
+- **System Info**: `http://localhost:3000/info`
 
 Generate updated docs: `npm run docs:generate`
+
+**Key API Endpoints**:
+- Authentication: `/api/v1/auth/*`
+- Events: `/api/v1/events/*`
+- Registrations: `/api/v1/registrations/*`
+- Payments: `/api/v1/payments/*`
+- Cart: `/api/v1/cart/*`
+- FEL/Invoicing: `/api/v1/fel/*`, `/api/v1/invoices/*`
+- QR Codes: `/api/v1/qr/*`
+- Certificates: `/api/v1/certificates/*`
+- Notifications: `/api/v1/notifications/*`
+- Webhooks: `/api/v1/webhooks/*`
 
 ### Testing Strategy
 
 - **Unit Tests**: Test services and utilities in isolation
 - **Integration Tests**: Test API endpoints with supertest
+- **Payment Tests**: Mock implementations available for NeoNet and BAM gateways
 - **Test Database**: Uses `tradeconnect_test` database (see `config/config.json`)
-- Run single test: `npm test -- path/to/test.spec.ts`
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test file
+npm test -- path/to/test.spec.ts
+
+# Run tests matching pattern
+npm test -- --testPathPattern=payment
+npm test -- --testPathPattern=event
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode for development
+npm run test:watch
+```
+
+**Payment Gateway Mocks**: Configure in `.env` for testing:
+```
+NEONET_MOCK=true
+BAM_MOCK=true
+NEONET_MOCK_SUCCESS_RATE=0.9  # 90% success rate for testing
+```
 
 ### Logging & Monitoring
 
@@ -221,12 +299,27 @@ router.post('/events',
 
 ### Database Migrations
 
-Migrations are in `backend/migrations/` with 59 migration files. When creating a new migration:
+Migrations are in `backend/migrations/` with 59+ migration files. When creating a new migration:
 - Follow existing naming patterns: `0XX-create-table-name.js` or timestamp-based `YYYYMMDDHHMMSS-create-table-name.js`
 - Include both `up` and `down` methods
 - Run `npm run db:migrate` to apply
 - Sequelize CLI uses `config/config.json` for connection settings
 - Recent migrations use timestamp format for better collaboration
+
+**Migration Naming Examples**:
+- Early migrations: `000-create-users.js`, `001-create-permissions.js`
+- Recent migrations: `20251005234331-create-qr-codes.js`, `20251007142317-create-notification-tables.js`
+
+```bash
+# Run all pending migrations
+npm run db:migrate
+
+# Undo last migration
+npx sequelize-cli db:migrate:undo
+
+# Create new migration
+npx sequelize-cli migration:generate --name create-your-table-name
+```
 
 ### Caching Strategy
 
@@ -461,26 +554,92 @@ res.status(400).json(errorResponse(message, error));
 - Log security events via `securityService.logSecurityEvent()`
 - Never commit secrets - use environment variables
 
+## Payment Gateway Integration
+
+The platform supports multiple payment gateways with comprehensive security features:
+
+### Supported Gateways
+
+| Gateway | Status | Currencies | Fee Structure |
+|---------|--------|------------|---------------|
+| PayPal  | Production | USD, GTQ | 2.9% + $0.49 |
+| Stripe  | Production | USD, GTQ | 2.9% + $0.30 |
+| NeoNet  | Production | GTQ | 2.5% |
+| BAM     | Production | GTQ | 2.5% |
+
+### Payment Security
+
+- **Tokenization**: No card numbers stored in database
+- **Encryption**: AES-256 encryption for sensitive credentials
+- **Validation**: Luhn algorithm for card number validation
+- **Rate Limiting**: 5 payment attempts per 15 minutes per IP
+- **Circuit Breaker**: Gateway isolation on failures
+- **Audit Trail**: Complete transaction logging via `AuditLog` model
+
+### Payment Services Architecture
+
+```typescript
+// Main payment orchestrator
+paymentService.processPayment(gateway, amount, currency, metadata)
+
+// Gateway-specific services
+paypalService.createOrder(...)
+stripeService.createPaymentIntent(...)
+neonetService.processPayment(...)
+bamService.processPayment(...)
+
+// Refund handling
+refundService.processRefund(paymentId, amount, reason)
+```
+
+**Key Files**:
+- `services/paymentService.ts` - Main payment orchestrator
+- `services/paypalService.ts` - PayPal integration
+- `services/stripeService.ts` - Stripe integration
+- `services/neonetService.ts` - NeoNet integration (with mock mode)
+- `services/bamService.ts` - BAM integration (with mock mode)
+- `services/refundService.ts` - Refund processing
+- `controllers/paymentController.ts` - Payment endpoints
+- `controllers/webhookController.ts` - Payment webhooks
+
 ## Project Status
 
-Current implementation includes:
-- 150+ API endpoints across all modules
-- 59 database migrations
-- 7+ database seeders
-- 71+ Sequelize models
-- Complete authentication system with 2FA
-- Events module with speakers, registrations, and sessions
-- Cart and registration system with abandoned cart tracking
-- Payment processing with 4 gateway integrations (PayPal, Stripe, NeoNet, BAM)
-- FEL integration with NIT/CUI validation for Guatemala
-- QR code generation and access control system
-- Certificate generation with blockchain anchoring
-- Notification system (Email, SMS, WhatsApp) with templates and rules
-- Hybrid events with virtual rooms and streaming
-- Promotions and discount system (promo codes, volume, early bird)
-- Capacity management with overbooking and waitlists
-- Comprehensive security and rate limiting
-- Socket.IO for real-time features
-- Bull queue service for background jobs
+### Current Implementation
 
-The frontend directory currently appears empty - backend API development is the focus.
+**Scale & Architecture**:
+- **Modules**: 36 functional modules across 14 feature areas
+- **API Endpoints**: 150+ RESTful endpoints
+- **Controllers**: 36 controller files
+- **Services**: 60 service files (business logic layer)
+- **Database**:
+  - 69 Sequelize models with TypeScript decorators
+  - 59 migration files (numbered 000-047, plus timestamped)
+  - 7+ seeder files for initial data
+
+**Feature Completeness**:
+- ✅ **Authentication**: JWT-based auth with 2FA, sessions, RBAC (8 roles, multiple permissions)
+- ✅ **Events**: Full CRUD, templates, duplication, categories, types, sessions, reports
+- ✅ **Speakers**: Profiles, specialties, contracts, payments, evaluations, availability
+- ✅ **Registration**: Individual/group registrations, cart, abandoned cart tracking
+- ✅ **Payments**: 4 gateway integrations (PayPal, Stripe, NeoNet, BAM) with refunds, webhooks
+- ✅ **FEL**: Guatemala electronic invoicing with NIT/CUI validation, token management
+- ✅ **QR Codes**: Dynamic generation, validation, attendance tracking, offline sync
+- ✅ **Certificates**: PDF generation with blockchain anchoring on Ethereum testnet
+- ✅ **Notifications**: Multi-channel (Email, SMS, WhatsApp) with templates, rules, preferences
+- ✅ **Hybrid Events**: Virtual rooms, streaming config, virtual participant tracking
+- ✅ **Promotions**: Promo codes, volume discounts, early bird pricing, usage tracking
+- ✅ **Capacity**: Sophisticated capacity rules, access types, overbooking, waitlists
+- ✅ **Real-time**: Socket.IO for live updates (attendance, capacity, payments)
+- ✅ **Background Jobs**: Bull queue for async processing (emails, certificates, reports)
+- ✅ **Security**: Helmet, CORS, rate limiting, AES-256 encryption, comprehensive audit logging
+
+**Technology Stack**:
+- Node.js + Express.js + TypeScript
+- PostgreSQL with Sequelize ORM
+- Redis for caching, sessions, queues
+- Socket.IO for WebSocket connections
+- Bull for job queues
+- Puppeteer/pdf-lib for PDF generation
+- Ethers.js for blockchain integration
+
+**Project Focus**: Backend API development (frontend directory is currently empty)
