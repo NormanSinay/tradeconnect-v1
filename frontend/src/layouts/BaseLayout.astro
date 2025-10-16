@@ -50,18 +50,6 @@ const { title, description = "Plataforma E-commerce de Eventos y Cursos Empresar
       </div>
     </div>
     <slot />
-    <script>
-      // Hide loader once the app is ready
-      window.addEventListener('load', () => {
-        const loader = document.getElementById('app-loader');
-        if (loader) {
-          loader.style.opacity = '0';
-          setTimeout(() => {
-            loader.style.display = 'none';
-          }, 300);
-        }
-      });
-    </script>
   </body>
 </html>
 

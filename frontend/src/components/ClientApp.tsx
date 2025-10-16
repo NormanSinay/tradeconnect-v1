@@ -34,6 +34,17 @@ const queryClient = new QueryClient({
 });
 
 const ClientApp: React.FC = () => {
+  // Hide the loader when React mounts
+  React.useEffect(() => {
+    const loader = document.getElementById('app-loader');
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => {
+        loader.style.display = 'none';
+      }, 300);
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
