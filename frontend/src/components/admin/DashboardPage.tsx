@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
 import {
   Container,
   Typography,
@@ -43,13 +44,12 @@ import {
   Edit,
   Delete,
   Add,
-  Search,
-  FilterList,
   MoreVert,
   CheckCircle,
-  Cancel,
-  Schedule,
-  LocationOn,
+  Settings,
+  Security,
+  Code,
+  Api,
 } from '@mui/icons-material';
 
 interface TabPanelProps {
@@ -69,17 +69,23 @@ const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Check if user is super admin
+  const isSuperAdmin = user?.roles?.includes('super_admin');
+  const maxTabs = isSuperAdmin ? 7 : 3; // Super admin tiene más tabs
 
   // Read tab from URL query parameter on mount and when it changes
   useEffect(() => {
     const tabParam = searchParams.get('tab');
     if (tabParam !== null) {
       const tabIndex = parseInt(tabParam, 10);
-      if (!isNaN(tabIndex) && tabIndex >= 0 && tabIndex <= 3) {
+      if (!isNaN(tabIndex) && tabIndex >= 0 && tabIndex <= maxTabs) {
         setActiveTab(tabIndex);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, maxTabs]);
 
   // Fetch dashboard stats from backend
   const { data: dashboardData, isLoading: statsLoading } = useQuery({
@@ -267,12 +273,28 @@ const DashboardPage: React.FC = () => {
           onChange={handleTabChange}
           indicatorColor="primary"
           textColor="primary"
-          variant="fullWidth"
+          variant={isSuperAdmin ? "scrollable" : "fullWidth"}
+          scrollButtons={isSuperAdmin ? "auto" : false}
+          sx={{
+            borderBottom: 1,
+            borderColor: 'divider',
+            '& .MuiTab-root': {
+              minWidth: isSuperAdmin ? 120 : 'auto',
+            },
+          }}
         >
-          <Tab icon={<Dashboard />} label="Dashboard" />
-          <Tab icon={<Event />} label="Gestión de Eventos" />
-          <Tab icon={<People />} label="Gestión de Usuarios" />
-          <Tab icon={<Payment />} label="Reportes" />
+          <Tab icon={<Dashboard />} label="Dashboard" iconPosition="start" />
+          <Tab icon={<Event />} label="Eventos" iconPosition="start" />
+          <Tab icon={<People />} label="Usuarios" iconPosition="start" />
+          <Tab icon={<Payment />} label="Reportes" iconPosition="start" />
+
+          {/* Tabs exclusivos para Super Admin */}
+          {isSuperAdmin && [
+            <Tab key="config" icon={<Settings />} label="Configuración" iconPosition="start" />,
+            <Tab key="security" icon={<Security />} label="Seguridad" iconPosition="start" />,
+            <Tab key="integrations" icon={<Api />} label="Integraciones" iconPosition="start" />,
+            <Tab key="system" icon={<Code />} label="Sistema" iconPosition="start" />
+          ]}
         </Tabs>
 
         {/* Dashboard Tab */}
@@ -510,8 +532,18 @@ const DashboardPage: React.FC = () => {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
                         <Chip
-                          label={user.roles?.[0] || 'user'}
-                          color={user.roles?.includes('admin') ? 'error' : user.roles?.includes('manager') ? 'warning' : 'default'}
+                          label={
+                            typeof user.roles?.[0] === 'object'
+                              ? (user.roles[0]?.name || user.roles[0]?.displayName || 'user')
+                              : (user.roles?.[0] || 'user')
+                          }
+                          color={
+                            (typeof user.roles?.[0] === 'object' ? user.roles?.[0]?.name : user.roles?.[0])?.includes('admin')
+                              ? 'error'
+                              : (typeof user.roles?.[0] === 'object' ? user.roles?.[0]?.name : user.roles?.[0])?.includes('manager')
+                              ? 'warning'
+                              : 'default'
+                          }
                           size="small"
                         />
                       </TableCell>
@@ -598,6 +630,51 @@ const DashboardPage: React.FC = () => {
             </Grid>
           </Grid>
         </TabPanel>
+
+        {/* Super Admin Only Tabs */}
+        {isSuperAdmin && (
+          <>
+            {/* Settings Tab - Index 4 */}
+            <TabPanel value={activeTab} index={4}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Configuración del Sistema
+              </Typography>
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Las configuraciones del sistema se cargan dinámicamente desde el backend. Próximamente disponibles.
+              </Alert>
+            </TabPanel>
+
+            {/* Security Tab - Index 5 */}
+            <TabPanel value={activeTab} index={5}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Seguridad y Accesos
+              </Typography>
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Los registros de seguridad y configuración se cargan dinámicamente desde el backend. Próximamente disponibles.
+              </Alert>
+            </TabPanel>
+
+            {/* Integrations Tab - Index 6 */}
+            <TabPanel value={activeTab} index={6}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Integraciones y APIs
+              </Typography>
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Las configuraciones de integraciones (Pasarelas de pago, FEL, QR, API Keys) se cargan dinámicamente desde el backend. Próximamente disponibles.
+              </Alert>
+            </TabPanel>
+
+            {/* System Tab - Index 7 */}
+            <TabPanel value={activeTab} index={7}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                Información del Sistema
+              </Typography>
+              <Alert severity="info" sx={{ mb: 3 }}>
+                La información del sistema (versiones, métricas, estado) se carga dinámicamente desde el backend. Próximamente disponible.
+              </Alert>
+            </TabPanel>
+          </>
+        )}
       </Paper>
 
       {/* Event Dialog */}

@@ -373,22 +373,20 @@ const Navbar: React.FC = () => {
                   </MenuItem>
 
                   {/* Speaker-specific menu items */}
-                  {isSpeaker && (
-                    <>
-                      <MenuItem component={Link} to="/speaker/events" onClick={handleProfileMenuClose}>
-                        <EventIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
-                        Mis Eventos
-                      </MenuItem>
-                      <MenuItem component={Link} to="/speaker/schedule" onClick={handleProfileMenuClose}>
-                        <CalendarIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
-                        Mi Agenda
-                      </MenuItem>
-                      <MenuItem component={Link} to="/speaker/profile" onClick={handleProfileMenuClose}>
-                        <PersonIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
-                        Perfil de Speaker
-                      </MenuItem>
-                    </>
-                  )}
+                  {isSpeaker && [
+                    <MenuItem key="speaker-events" component={Link} to="/speaker/events" onClick={handleProfileMenuClose}>
+                      <EventIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                      Mis Eventos
+                    </MenuItem>,
+                    <MenuItem key="speaker-schedule" component={Link} to="/speaker/schedule" onClick={handleProfileMenuClose}>
+                      <CalendarIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                      Mi Agenda
+                    </MenuItem>,
+                    <MenuItem key="speaker-profile" component={Link} to="/speaker/profile" onClick={handleProfileMenuClose}>
+                      <PersonIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                      Perfil de Speaker
+                    </MenuItem>
+                  ]}
 
                   {/* Operator-specific menu items */}
                   {isOperator && (
@@ -407,35 +405,34 @@ const Navbar: React.FC = () => {
                   )}
 
                   {/* Admin Menu Items - Only visible for admin users */}
-                  {isAdmin && (
-                    <>
-                      <MenuItem
-                        component={Link}
-                        to="/dashboard?tab=0"
-                        onClick={handleProfileMenuClose}
-                        sx={{
-                          borderTop: '1px solid rgba(0, 0, 0, 0.08)',
-                          mt: 1,
-                          pt: 1.5
-                        }}
-                      >
-                        <DashboardIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
-                        Dashboard
-                      </MenuItem>
-                      <MenuItem component={Link} to="/dashboard?tab=1" onClick={handleProfileMenuClose}>
-                        <EventIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
-                        Gestión de Eventos
-                      </MenuItem>
-                      <MenuItem component={Link} to="/dashboard?tab=2" onClick={handleProfileMenuClose}>
-                        <ManageAccountsIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
-                        Gestión de Usuarios
-                      </MenuItem>
-                      <MenuItem component={Link} to="/dashboard?tab=3" onClick={handleProfileMenuClose}>
-                        <AssessmentIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
-                        Reportes
-                      </MenuItem>
-                    </>
-                  )}
+                  {isAdmin && [
+                    <MenuItem
+                      key="admin-dashboard"
+                      component={Link}
+                      to="/dashboard?tab=0"
+                      onClick={handleProfileMenuClose}
+                      sx={{
+                        borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+                        mt: 1,
+                        pt: 1.5
+                      }}
+                    >
+                      <DashboardIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                      Dashboard
+                    </MenuItem>,
+                    <MenuItem key="admin-events" component={Link} to="/dashboard?tab=1" onClick={handleProfileMenuClose}>
+                      <EventIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                      Gestión de Eventos
+                    </MenuItem>,
+                    <MenuItem key="admin-users" component={Link} to="/dashboard?tab=2" onClick={handleProfileMenuClose}>
+                      <ManageAccountsIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                      Gestión de Usuarios
+                    </MenuItem>,
+                    <MenuItem key="admin-reports" component={Link} to="/dashboard?tab=3" onClick={handleProfileMenuClose}>
+                      <AssessmentIcon sx={{ mr: 1, fontSize: isTablet ? '1rem' : '1.2rem' }} />
+                      Reportes
+                    </MenuItem>
+                  ]}
 
                   {/* Logout - always visible */}
                   <MenuItem

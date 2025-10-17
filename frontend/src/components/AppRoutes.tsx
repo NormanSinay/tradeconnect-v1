@@ -1,7 +1,9 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
+import BaseLayout from '@/components/layout/BaseLayout';
+import AdminLayout from '@/components/layout/AdminLayout';
 
 // Lazy load components for better performance
 const HomePage = lazy(() => import('@/components/HomePage'));
@@ -51,6 +53,7 @@ interface ProtectedRouteProps {
   requireAuth?: boolean;
   requireAdmin?: boolean;
   requiredRoles?: string[]; // New: specific roles required
+  requireSuperAdmin?: boolean; // New: require super_admin specifically
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
@@ -58,11 +61,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAuth = false,
   requireAdmin = false,
   requiredRoles = [],
+  requireSuperAdmin = false,
 }) => {
   const { isAuthenticated, user } = useAuth();
 
   if (requireAuth && !isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Check for super_admin specifically
+  if (requireSuperAdmin) {
+    const isSuperAdmin = user?.roles?.includes('super_admin');
+    if (!user || !isSuperAdmin) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   if (requireAdmin) {
@@ -86,134 +98,150 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return <>{children}</>;
 };
 
+// Layout wrapper based on user role
+const LayoutWrapper: React.FC = () => {
+  const { user } = useAuth();
+
+  // Super admin gets dedicated admin layout without public navbar
+  const isSuperAdmin = user?.roles?.includes('super_admin');
+
+  return isSuperAdmin ? <AdminLayout /> : <BaseLayout><Outlet /></BaseLayout>;
+};
+
 const AppRoutes: React.FC = () => {
+  const { user } = useAuth();
+  const isSuperAdmin = user?.roles?.includes('super_admin');
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/events/:id" element={<EventDetailPage />} />
+        {/* Routes con Layout dinámico (BaseLayout para usuarios normales, AdminLayout para super_admin) */}
+        <Route element={<LayoutWrapper />}>
+          {/* Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
 
-        {/* Static Pages */}
-        <Route path="/about" element={<div>About Page - Coming Soon</div>} />
-        <Route path="/how-it-works" element={<div>How It Works Page - Coming Soon</div>} />
-        <Route path="/organizers" element={<div>Organizers Page - Coming Soon</div>} />
-        <Route path="/business" element={<div>Business Page - Coming Soon</div>} />
-        <Route path="/help" element={<div>Help Page - Coming Soon</div>} />
-        <Route path="/faq" element={<div>FAQ Page - Coming Soon</div>} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/report-issue" element={<ReportIssuePage />} />
-        <Route path="/terms" element={<div>Terms Page - Coming Soon</div>} />
-        <Route path="/privacy" element={<div>Privacy Page - Coming Soon</div>} />
-        <Route path="/cookies" element={<div>Cookies Page - Coming Soon</div>} />
-        <Route path="/fel-info" element={<div>FEL Info Page - Coming Soon</div>} />
+          {/* Static Pages */}
+          <Route path="/about" element={<div>About Page - Coming Soon</div>} />
+          <Route path="/how-it-works" element={<div>How It Works Page - Coming Soon</div>} />
+          <Route path="/organizers" element={<div>Organizers Page - Coming Soon</div>} />
+          <Route path="/business" element={<div>Business Page - Coming Soon</div>} />
+          <Route path="/help" element={<div>Help Page - Coming Soon</div>} />
+          <Route path="/faq" element={<div>FAQ Page - Coming Soon</div>} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/report-issue" element={<ReportIssuePage />} />
+          <Route path="/terms" element={<div>Terms Page - Coming Soon</div>} />
+          <Route path="/privacy" element={<div>Privacy Page - Coming Soon</div>} />
+          <Route path="/cookies" element={<div>Cookies Page - Coming Soon</div>} />
+          <Route path="/fel-info" element={<div>FEL Info Page - Coming Soon</div>} />
 
-        {/* Auth Routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+          {/* Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
-        {/* Protected Routes */}
-        <Route
-          path="/cart"
-          element={
-            <ProtectedRoute requireAuth>
-              <CartPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/checkout"
-          element={
-            <ProtectedRoute requireAuth>
-              <CheckoutPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/checkout/success"
-          element={
-            <ProtectedRoute requireAuth>
-              <CheckoutSuccessPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute requireAuth>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/certificates"
-          element={
-            <ProtectedRoute requireAuth>
-              <CertificatesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/certificates/:id"
-          element={
-            <ProtectedRoute requireAuth>
-              <CertificateDetailPage />
-            </ProtectedRoute>
-          }
-        />
+          {/* Protected Routes */}
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute requireAuth>
+                <CartPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute requireAuth>
+                <CheckoutPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checkout/success"
+            element={
+              <ProtectedRoute requireAuth>
+                <CheckoutSuccessPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute requireAuth>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/certificates"
+            element={
+              <ProtectedRoute requireAuth>
+                <CertificatesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/certificates/:id"
+            element={
+              <ProtectedRoute requireAuth>
+                <CertificateDetailPage />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Admin Routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute requireAuth requireAdmin>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
+          {/* Admin Routes - Super admin usa AdminLayout, otros admin usan BaseLayout */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute requireAuth requireAdmin>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Speaker Routes */}
-        <Route
-          path="/speaker/events"
-          element={
-            <ProtectedRoute requireAuth requiredRoles={['speaker']}>
-              <SpeakerEventsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/speaker/schedule"
-          element={
-            <ProtectedRoute requireAuth requiredRoles={['speaker']}>
-              <SpeakerSchedulePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/speaker/profile"
-          element={
-            <ProtectedRoute requireAuth requiredRoles={['speaker']}>
-              <SpeakerProfilePage />
-            </ProtectedRoute>
-          }
-        />
+          {/* Speaker Routes */}
+          <Route
+            path="/speaker/events"
+            element={
+              <ProtectedRoute requireAuth requiredRoles={['speaker']}>
+                <SpeakerEventsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/speaker/schedule"
+            element={
+              <ProtectedRoute requireAuth requiredRoles={['speaker']}>
+                <SpeakerSchedulePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/speaker/profile"
+            element={
+              <ProtectedRoute requireAuth requiredRoles={['speaker']}>
+                <SpeakerProfilePage />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Operator Routes */}
-        <Route
-          path="/operator/checkin"
-          element={
-            <ProtectedRoute requireAuth requiredRoles={['operator']}>
-              <OperatorCheckinPage />
-            </ProtectedRoute>
-          }
-        />
+          {/* Operator Routes */}
+          <Route
+            path="/operator/checkin"
+            element={
+              <ProtectedRoute requireAuth requiredRoles={['operator']}>
+                <OperatorCheckinPage />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Debug Route */}
-        <Route path="/debug" element={<DebugDashboard />} />
+          {/* Debug Route */}
+          <Route path="/debug" element={<DebugDashboard />} />
 
-        {/* Catch all route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
       </Routes>
     </Suspense>
   );

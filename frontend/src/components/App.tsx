@@ -78,9 +78,7 @@ const App: React.FC = () => {
           <Router>
             <AuthProvider>
               <CartProvider>
-                <BaseLayout>
-                  <AppRoutes />
-                </BaseLayout>
+                <AppRoutes />
                 <ToastContainer />
               </CartProvider>
             </AuthProvider>
