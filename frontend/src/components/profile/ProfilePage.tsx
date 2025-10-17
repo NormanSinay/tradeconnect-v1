@@ -250,7 +250,7 @@ const ProfilePage: React.FC = () => {
             </Typography>
             <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mb: 2 }}>
               <Chip
-                label={user.role === 'admin' ? 'Administrador' : user.role === 'organizer' ? 'Organizador' : 'Usuario'}
+                label={user.roles?.includes('admin') ? 'Administrador' : user.roles?.includes('organizer') ? 'Organizador' : 'Usuario'}
                 color="primary"
                 variant="outlined"
               />

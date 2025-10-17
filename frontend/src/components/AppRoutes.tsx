@@ -17,6 +17,15 @@ const CertificateDetailPage = lazy(() => import('@/components/certificates/Certi
 const LoginPage = lazy(() => import('@/components/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/components/auth/RegisterPage'));
 const DashboardPage = lazy(() => import('@/components/admin/DashboardPage'));
+const DebugDashboard = lazy(() => import('@/components/admin/DebugDashboard'));
+
+// Speaker pages
+const SpeakerEventsPage = lazy(() => import('@/components/speaker/SpeakerEventsPage'));
+const SpeakerSchedulePage = lazy(() => import('@/components/speaker/SpeakerSchedulePage'));
+const SpeakerProfilePage = lazy(() => import('@/components/speaker/SpeakerProfilePage'));
+
+// Operator pages
+const OperatorCheckinPage = lazy(() => import('@/components/operator/OperatorCheckinPage'));
 
 // Static pages
 const ContactPage = lazy(() => import('@/components/ContactPage'));
@@ -41,12 +50,14 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
   requireAdmin?: boolean;
+  requiredRoles?: string[]; // New: specific roles required
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requireAuth = false,
   requireAdmin = false,
+  requiredRoles = [],
 }) => {
   const { isAuthenticated, user } = useAuth();
 
@@ -54,8 +65,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" replace />;
   }
 
-  if (requireAdmin && user?.role !== 'admin') {
-    return <Navigate to="/" replace />;
+  if (requireAdmin) {
+    const adminRoles = ['super_admin', 'admin', 'manager'];
+    // El backend retorna roles como array
+    const hasAdminRole = user?.roles?.some(role => adminRoles.includes(role));
+
+    if (!user || !hasAdminRole) {
+      return <Navigate to="/" replace />;
+    }
+  }
+
+  // Check for specific roles
+  if (requiredRoles.length > 0) {
+    const hasRequiredRole = user?.roles?.some(role => requiredRoles.includes(role));
+    if (!user || !hasRequiredRole) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <>{children}</>;
@@ -147,6 +172,45 @@ const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* Speaker Routes */}
+        <Route
+          path="/speaker/events"
+          element={
+            <ProtectedRoute requireAuth requiredRoles={['speaker']}>
+              <SpeakerEventsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/speaker/schedule"
+          element={
+            <ProtectedRoute requireAuth requiredRoles={['speaker']}>
+              <SpeakerSchedulePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/speaker/profile"
+          element={
+            <ProtectedRoute requireAuth requiredRoles={['speaker']}>
+              <SpeakerProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Operator Routes */}
+        <Route
+          path="/operator/checkin"
+          element={
+            <ProtectedRoute requireAuth requiredRoles={['operator']}>
+              <OperatorCheckinPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Debug Route */}
+        <Route path="/debug" element={<DebugDashboard />} />
 
         {/* Catch all route */}
         <Route path="*" element={<Navigate to="/" replace />} />

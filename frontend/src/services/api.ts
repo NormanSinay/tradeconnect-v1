@@ -320,14 +320,55 @@ export const usersService = {
 
 // Admin API service
 export const adminService = {
-  getDashboard: () => apiService.get('/admin/dashboard'),
+  // Dashboard stats
+  getDashboard: async () => {
+    // Obtener estadísticas desde múltiples endpoints
+    const [events, users] = await Promise.all([
+      apiService.get('/events'),
+      apiService.get('/users')
+    ]);
 
-  getEvents: (params?: any) => apiService.get('/admin/events', { params }),
+    // Calcular estadísticas
+    return {
+      success: true,
+      data: {
+        totalEvents: events.data?.pagination?.total || 0,
+        activeEvents: events.data?.events?.filter((e: any) => e.isPublished).length || 0,
+        totalUsers: users.data?.pagination?.total || 0,
+        totalRevenue: 0, // TODO: Implementar cuando exista endpoint de pagos
+        monthlyRevenue: 0,
+        newRegistrations: 0,
+      }
+    };
+  },
 
-  getUsers: (params?: any) => apiService.get('/admin/users', { params }),
+  // Events management
+  getEvents: (params?: any) => apiService.get('/events', { params }),
 
-  getReports: (params?: any) => apiService.get('/admin/reports', { params }),
+  createEvent: (data: any) => apiService.post('/events', data),
 
+  updateEvent: (id: number, data: any) => apiService.put(`/events/${id}`, data),
+
+  deleteEvent: (id: number) => apiService.delete(`/events/${id}`),
+
+  publishEvent: (id: number) => apiService.post(`/events/${id}/publish`),
+
+  // Users management
+  getUsers: (params?: any) => apiService.get('/users', { params }),
+
+  createUser: (data: any) => apiService.post('/users', data),
+
+  updateUser: (id: number, data: any) => apiService.put(`/users/${id}`, data),
+
+  deleteUser: (id: number) => apiService.delete(`/users/${id}`),
+
+  // Reports (using existing endpoints)
+  getReports: async (params?: any) => {
+    const events = await apiService.get('/events', { params });
+    return events;
+  },
+
+  // Settings
   getSettings: () => apiService.get('/admin/settings'),
 
   updateSettings: (data: any) => apiService.put('/admin/settings', data),

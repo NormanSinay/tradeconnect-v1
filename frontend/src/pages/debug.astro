@@ -1,0 +1,97 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Debug - TradeConnect" description="Página de diagnóstico">
+  <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+    <h1>🔍 Dashboard de Diagnóstico</h1>
+
+    <div style="margin-top: 2rem;">
+      <h2>Estado de Autenticación:</h2>
+      <div id="auth-status" style="background: #f5f5f5; padding: 1rem; border-radius: 4px; margin-top: 1rem;">
+        Cargando...
+      </div>
+
+      <h2 style="margin-top: 2rem;">Datos del Usuario:</h2>
+      <pre id="user-data" style="background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow: auto; margin-top: 1rem;">
+Cargando...
+      </pre>
+
+      <h2 style="margin-top: 2rem;">LocalStorage:</h2>
+      <pre id="storage-data" style="background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow: auto; margin-top: 1rem;">
+Cargando...
+      </pre>
+
+      <h2 style="margin-top: 2rem;">URL Actual:</h2>
+      <div id="current-url" style="background: #f5f5f5; padding: 1rem; border-radius: 4px; margin-top: 1rem;">
+        Cargando...
+      </div>
+
+      <h2 style="margin-top: 2rem;">Errores en Consola:</h2>
+      <div id="console-errors" style="background: #f5f5f5; padding: 1rem; border-radius: 4px; margin-top: 1rem;">
+        Revisa la consola del navegador (F12)
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get user data from localStorage
+    const userStr = localStorage.getItem('tradeconnect_user');
+    const token = localStorage.getItem('tradeconnect_auth_token');
+    const refreshToken = localStorage.getItem('tradeconnect_refresh_token');
+
+    // Update auth status
+    const authStatusEl = document.getElementById('auth-status');
+    if (authStatusEl) {
+      authStatusEl.innerHTML = `
+        <p><strong>Token Existe:</strong> ${token ? '✅ Sí' : '❌ No'}</p>
+        <p><strong>Refresh Token Existe:</strong> ${refreshToken ? '✅ Sí' : '❌ No'}</p>
+        <p><strong>Usuario en LocalStorage:</strong> ${userStr ? '✅ Sí' : '❌ No'}</p>
+      `;
+    }
+
+    // Update user data
+    const userDataEl = document.getElementById('user-data');
+    if (userDataEl) {
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          userDataEl.textContent = JSON.stringify(user, null, 2);
+        } catch (e) {
+          userDataEl.textContent = `Error al parsear usuario: ${e.message}\n\nDatos crudos:\n${userStr}`;
+        }
+      } else {
+        userDataEl.textContent = 'No hay datos de usuario en localStorage';
+      }
+    }
+
+    // Update storage data
+    const storageDataEl = document.getElementById('storage-data');
+    if (storageDataEl) {
+      const storageData = {
+        'tradeconnect_user': userStr ? 'Existe (ver arriba)' : 'No existe',
+        'tradeconnect_auth_token': token ? `Existe (${token.substring(0, 20)}...)` : 'No existe',
+        'tradeconnect_refresh_token': refreshToken ? `Existe (${refreshToken.substring(0, 20)}...)` : 'No existe',
+        'Todas las keys en localStorage': Object.keys(localStorage).filter(k => k.startsWith('tradeconnect_'))
+      };
+      storageDataEl.textContent = JSON.stringify(storageData, null, 2);
+    }
+
+    // Update current URL
+    const urlEl = document.getElementById('current-url');
+    if (urlEl) {
+      urlEl.innerHTML = `
+        <p><strong>URL:</strong> ${window.location.href}</p>
+        <p><strong>Pathname:</strong> ${window.location.pathname}</p>
+        <p><strong>Hash:</strong> ${window.location.hash || '(ninguno)'}</p>
+      `;
+    }
+
+    // Log to console for easy copying
+    console.log('=== DIAGNÓSTICO DEL DASHBOARD ===');
+    console.log('User:', userStr ? JSON.parse(userStr) : null);
+    console.log('Token:', token ? 'Existe' : 'No existe');
+    console.log('Refresh Token:', refreshToken ? 'Existe' : 'No existe');
+    console.log('URL actual:', window.location.href);
+  </script>
+</BaseLayout>

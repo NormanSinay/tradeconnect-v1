@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -29,7 +31,9 @@ import {
   Select,
   MenuItem,
   Alert,
+  CircularProgress,
 } from '@mui/material';
+import { adminService } from '@/services/api';
 import {
   Dashboard,
   Event,
@@ -61,76 +65,59 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 );
 
 const DashboardPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(0);
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
-  // Mock data for dashboard
-  const mockStats = {
-    totalEvents: 24,
-    activeEvents: 8,
-    totalUsers: 1250,
-    totalRevenue: 45000,
-    monthlyRevenue: 8500,
-    newRegistrations: 45,
+  // Read tab from URL query parameter on mount and when it changes
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam !== null) {
+      const tabIndex = parseInt(tabParam, 10);
+      if (!isNaN(tabIndex) && tabIndex >= 0 && tabIndex <= 3) {
+        setActiveTab(tabIndex);
+      }
+    }
+  }, [searchParams]);
+
+  // Fetch dashboard stats from backend
+  const { data: dashboardData, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: () => adminService.getDashboard(),
+    staleTime: 30000, // 30 segundos
+  });
+
+  // Fetch events from backend
+  const { data: eventsData, isLoading: eventsLoading } = useQuery({
+    queryKey: ['admin-events'],
+    queryFn: () => adminService.getEvents({ limit: 10 }),
+    staleTime: 30000,
+  });
+
+  // Fetch users from backend
+  const { data: usersData, isLoading: usersLoading } = useQuery({
+    queryKey: ['admin-users'],
+    queryFn: () => adminService.getUsers({ limit: 10 }),
+    staleTime: 30000,
+  });
+
+  const stats = dashboardData?.data || {
+    totalEvents: 0,
+    activeEvents: 0,
+    totalUsers: 0,
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    newRegistrations: 0,
   };
 
-  const mockEvents = [
-    {
-      id: 1,
-      title: 'Conferencia de Tecnología 2024',
-      status: 'active',
-      registrations: 150,
-      capacity: 200,
-      startDate: '2024-02-20T09:00:00Z',
-      price: 150,
-      category: 'Tecnología',
-    },
-    {
-      id: 2,
-      title: 'Workshop de Marketing Digital',
-      status: 'draft',
-      registrations: 0,
-      capacity: 50,
-      startDate: '2024-03-15T10:00:00Z',
-      price: 200,
-      category: 'Marketing',
-    },
-    {
-      id: 3,
-      title: 'Seminario de Liderazgo',
-      status: 'completed',
-      registrations: 75,
-      capacity: 80,
-      startDate: '2024-01-15T14:00:00Z',
-      price: 120,
-      category: 'Liderazgo',
-    },
-  ];
-
-  const mockUsers = [
-    {
-      id: 1,
-      name: 'Juan Pérez',
-      email: 'juan@email.com',
-      role: 'user',
-      status: 'active',
-      registeredAt: '2024-01-10T00:00:00Z',
-      eventsCount: 3,
-    },
-    {
-      id: 2,
-      name: 'María García',
-      email: 'maria@email.com',
-      role: 'organizer',
-      status: 'active',
-      registeredAt: '2024-01-05T00:00:00Z',
-      eventsCount: 5,
-    },
-  ];
+  const events = eventsData?.data?.events || [];
+  const users = usersData?.data?.users || [];
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+    // Update URL with tab parameter
+    setSearchParams({ tab: newValue.toString() });
   };
 
   const handleCreateEvent = () => {
@@ -201,71 +188,77 @@ const DashboardPage: React.FC = () => {
       </Box>
 
       {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
-            <CardContent>
-              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box component={"div" as any}>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {mockStats.totalEvents}
-                  </Typography>
-                  <Typography variant="body2">Total Eventos</Typography>
+      {statsLoading ? (
+        <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
+              <CardContent>
+                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box component={"div" as any}>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                      {stats.totalEvents}
+                    </Typography>
+                    <Typography variant="body2">Total Eventos</Typography>
+                  </Box>
+                  <Event sx={{ fontSize: 40, opacity: 0.8 }} />
                 </Box>
-                <Event sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: 'success.main', color: 'success.contrastText' }}>
-            <CardContent>
-              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box component={"div" as any}>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {mockStats.activeEvents}
-                  </Typography>
-                  <Typography variant="body2">Eventos Activos</Typography>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ bgcolor: 'success.main', color: 'success.contrastText' }}>
+              <CardContent>
+                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box component={"div" as any}>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                      {stats.activeEvents}
+                    </Typography>
+                    <Typography variant="body2">Eventos Activos</Typography>
+                  </Box>
+                  <CheckCircle sx={{ fontSize: 40, opacity: 0.8 }} />
                 </Box>
-                <CheckCircle sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: 'info.main', color: 'info.contrastText' }}>
-            <CardContent>
-              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box component={"div" as any}>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {mockStats.totalUsers}
-                  </Typography>
-                  <Typography variant="body2">Total Usuarios</Typography>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ bgcolor: 'info.main', color: 'info.contrastText' }}>
+              <CardContent>
+                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box component={"div" as any}>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                      {stats.totalUsers}
+                    </Typography>
+                    <Typography variant="body2">Total Usuarios</Typography>
+                  </Box>
+                  <People sx={{ fontSize: 40, opacity: 0.8 }} />
                 </Box>
-                <People sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: 'warning.main', color: 'warning.contrastText' }}>
-            <CardContent>
-              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box component={"div" as any}>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {formatCurrency(mockStats.totalRevenue)}
-                  </Typography>
-                  <Typography variant="body2">Ingresos Totales</Typography>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ bgcolor: 'warning.main', color: 'warning.contrastText' }}>
+              <CardContent>
+                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box component={"div" as any}>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                      {formatCurrency(stats.totalRevenue)}
+                    </Typography>
+                    <Typography variant="body2">Ingresos Totales</Typography>
+                  </Box>
+                  <Payment sx={{ fontSize: 40, opacity: 0.8 }} />
                 </Box>
-                <Payment sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
+      )}
 
       {/* Main Content Tabs */}
       <Paper sx={{ width: '100%' }}>
@@ -302,39 +295,53 @@ const DashboardPage: React.FC = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {mockEvents.slice(0, 5).map((event) => (
-                        <TableRow key={event.id}>
-                          <TableCell>
-                            <Box component={"div" as any}>
-                              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                {event.title}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {event.category}
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>{formatDate(event.startDate)}</TableCell>
-                          <TableCell>
-                            {event.registrations}/{event.capacity}
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={getStatusText(event.status)}
-                              color={getStatusColor(event.status) as any}
-                              size="small"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <IconButton size="small" onClick={() => handleEditEvent(event)}>
-                              <Edit />
-                            </IconButton>
-                            <IconButton size="small" onClick={() => handleDeleteEvent(event.id)}>
-                              <Delete />
-                            </IconButton>
+                      {eventsLoading ? (
+                        <TableRow>
+                          <TableCell colSpan={5} align="center">
+                            <CircularProgress size={30} />
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : events.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} align="center">
+                            <Typography color="text.secondary">No hay eventos registrados</Typography>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        events.slice(0, 5).map((event: any) => (
+                          <TableRow key={event.id}>
+                            <TableCell>
+                              <Box component={"div" as any}>
+                                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                  {event.title}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {event.eventCategory?.name || 'Sin categoría'}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell>{formatDate(event.startDate)}</TableCell>
+                            <TableCell>
+                              {event.registrationsCount || 0}/{event.capacity}
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={event.isPublished ? 'Publicado' : 'Borrador'}
+                                color={event.isPublished ? 'success' : 'warning'}
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <IconButton size="small" onClick={() => handleEditEvent(event)}>
+                                <Edit />
+                              </IconButton>
+                              <IconButton size="small" onClick={() => handleDeleteEvent(event.id)}>
+                                <Delete />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -404,38 +411,52 @@ const DashboardPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {mockEvents.map((event) => (
-                  <TableRow key={event.id}>
-                    <TableCell>
-                      <Box component={"div" as any}>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                          {event.title}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>{event.category}</TableCell>
-                    <TableCell>{formatDate(event.startDate)}</TableCell>
-                    <TableCell>{formatCurrency(event.price)}</TableCell>
-                    <TableCell>
-                      {event.registrations}/{event.capacity}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={getStatusText(event.status)}
-                        color={getStatusColor(event.status) as any}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <IconButton size="small" onClick={() => handleEditEvent(event)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton size="small" onClick={() => handleDeleteEvent(event.id)}>
-                        <Delete />
-                      </IconButton>
+                {eventsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <CircularProgress size={30} />
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : events.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <Typography color="text.secondary">No hay eventos registrados</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  events.map((event: any) => (
+                    <TableRow key={event.id}>
+                      <TableCell>
+                        <Box component={"div" as any}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            {event.title}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>{event.eventCategory?.name || 'Sin categoría'}</TableCell>
+                      <TableCell>{formatDate(event.startDate)}</TableCell>
+                      <TableCell>{formatCurrency(event.price || 0)}</TableCell>
+                      <TableCell>
+                        {event.registrationsCount || 0}/{event.capacity}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={event.isPublished ? 'Publicado' : 'Borrador'}
+                          color={event.isPublished ? 'success' : 'warning'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <IconButton size="small" onClick={() => handleEditEvent(event)}>
+                          <Edit />
+                        </IconButton>
+                        <IconButton size="small" onClick={() => handleDeleteEvent(event.id)}>
+                          <Delete />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -461,45 +482,59 @@ const DashboardPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {mockUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ width: 32, height: 32 }}>
-                          {user.name.charAt(0)}
-                        </Avatar>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                          {user.name}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={user.role === 'admin' ? 'Admin' : user.role === 'organizer' ? 'Organizador' : 'Usuario'}
-                        color={user.role === 'admin' ? 'error' : user.role === 'organizer' ? 'warning' : 'default'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={user.status === 'active' ? 'Activo' : 'Inactivo'}
-                        color={user.status === 'active' ? 'success' : 'error'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{user.eventsCount}</TableCell>
-                    <TableCell>{formatDate(user.registeredAt)}</TableCell>
-                    <TableCell>
-                      <IconButton size="small">
-                        <Edit />
-                      </IconButton>
-                      <IconButton size="small">
-                        <MoreVert />
-                      </IconButton>
+                {usersLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <CircularProgress size={30} />
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <Typography color="text.secondary">No hay usuarios registrados</Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map((user: any) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Avatar sx={{ width: 32, height: 32 }}>
+                            {user.firstName?.charAt(0) || user.email?.charAt(0)}
+                          </Avatar>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            {user.fullName || `${user.firstName} ${user.lastName}`}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={user.roles?.[0] || 'user'}
+                          color={user.roles?.includes('admin') ? 'error' : user.roles?.includes('manager') ? 'warning' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={user.isActive ? 'Activo' : 'Inactivo'}
+                          color={user.isActive ? 'success' : 'error'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>{user.eventsCount || 0}</TableCell>
+                      <TableCell>{formatDate(user.createdAt)}</TableCell>
+                      <TableCell>
+                        <IconButton size="small">
+                          <Edit />
+                        </IconButton>
+                        <IconButton size="small">
+                          <MoreVert />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -518,7 +553,7 @@ const DashboardPage: React.FC = () => {
                   Ingresos Mensuales
                 </Typography>
                 <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
-                  {formatCurrency(mockStats.monthlyRevenue)}
+                  {formatCurrency(stats.monthlyRevenue)}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   +12% vs mes anterior
@@ -532,7 +567,7 @@ const DashboardPage: React.FC = () => {
                   Nuevas Inscripciones
                 </Typography>
                 <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
-                  {mockStats.newRegistrations}
+                  {stats.newRegistrations}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Este mes

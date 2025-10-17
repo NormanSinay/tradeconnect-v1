@@ -69,12 +69,29 @@ const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setLoginError(null);
-      await login({
+      const result = await login({
         email: data.email,
         password: data.password,
         rememberMe: data.rememberMe || false,
       });
-      navigate('/');
+
+      // Redirect based on user role
+      const storedUser = localStorage.getItem('tradeconnect_user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const adminRoles = ['super_admin', 'admin', 'manager'];
+
+        // El backend retorna roles como array
+        const hasAdminRole = user.roles?.some((role: string) => adminRoles.includes(role));
+
+        if (hasAdminRole) {
+          navigate('/dashboard');
+        } else {
+          navigate('/');
+        }
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       setLoginError('Credenciales inválidas. Por favor, verifica tu email y contraseña.');
     }

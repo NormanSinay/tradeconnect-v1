@@ -5,10 +5,18 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  fullName?: string;
   phone?: string;
   avatar?: string;
-  role: 'user' | 'organizer' | 'admin';
+  nit?: string;
+  cui?: string;
+  timezone?: string;
+  locale?: string;
+  roles: string[]; // Array de roles del backend
   isActive: boolean;
+  isEmailVerified?: boolean;
+  is2faEnabled?: boolean;
+  lastLoginAt?: string;
   createdAt: string;
   updatedAt: string;
 }
