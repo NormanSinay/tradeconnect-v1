@@ -18,6 +18,8 @@ const CertificatesPage = () => <div>Certificates Page - Coming Soon</div>;
 const CertificateDetailPage = lazy(() => import('@/components/certificates/CertificateDetailPage'));
 const LoginPage = lazy(() => import('@/components/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/components/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/components/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('@/components/auth/ResetPasswordPage'));
 const DashboardPage = lazy(() => import('@/components/admin/DashboardPage'));
 const DebugDashboard = lazy(() => import('@/components/admin/DebugDashboard'));
 
@@ -139,6 +141,8 @@ const AppRoutes: React.FC = () => {
           {/* Auth Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Protected Routes */}
           <Route

@@ -33,8 +33,10 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
+  Menu,
 } from '@mui/material';
 import { adminService } from '@/services/api';
+import toast from 'react-hot-toast';
 import {
   Dashboard,
   Event,
@@ -69,6 +71,20 @@ const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [userDialogOpen, setUserDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+  const [selectedUserForMenu, setSelectedUserForMenu] = useState<any>(null);
+  const [userFormData, setUserFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    phone: '',
+    role: 'user',
+    isActive: true,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -180,6 +196,152 @@ const DashboardPage: React.FC = () => {
   };
 
   const formatCurrency = (amount: number) => `Q${amount.toLocaleString()}`;
+
+  // User management handlers
+  const handleCreateUser = () => {
+    setSelectedUser(null);
+    setUserFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      phone: '',
+      role: 'user',
+      isActive: true,
+    });
+    setUserDialogOpen(true);
+  };
+
+  const handleEditUser = (user: any) => {
+    setSelectedUser(user);
+    setUserFormData({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      password: '',
+      phone: user.phone || '',
+      role: typeof user.roles?.[0] === 'object' ? user.roles[0]?.name : (user.roles?.[0] || 'user'),
+      isActive: user.isActive !== false,
+    });
+    setUserDialogOpen(true);
+  };
+
+  const handleUserFormChange = (field: string, value: any) => {
+    setUserFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveUser = async () => {
+    try {
+      setIsSubmitting(true);
+
+      // Validaciones
+      if (!userFormData.firstName.trim()) {
+        toast.error('El nombre es requerido');
+        return;
+      }
+      if (!userFormData.lastName.trim()) {
+        toast.error('El apellido es requerido');
+        return;
+      }
+      if (!userFormData.email.trim()) {
+        toast.error('El email es requerido');
+        return;
+      }
+      if (!selectedUser && !userFormData.password.trim()) {
+        toast.error('La contraseña es requerida para nuevos usuarios');
+        return;
+      }
+      if (!selectedUser && userFormData.password.length < 8) {
+        toast.error('La contraseña debe tener al menos 8 caracteres');
+        return;
+      }
+
+      // Preparar datos en el formato que espera el backend
+      const userData: any = {
+        firstName: userFormData.firstName.trim(),
+        lastName: userFormData.lastName.trim(),
+        email: userFormData.email.trim(),
+        phone: userFormData.phone.trim() || undefined,
+        role: userFormData.role,
+        isActive: userFormData.isActive,
+      };
+
+      // Solo incluir password si es nuevo usuario o si se proporcionó
+      if (!selectedUser) {
+        userData.password = userFormData.password;
+        // Agregar campos adicionales para registro
+        userData.confirmPassword = userFormData.password;
+        userData.termsAccepted = true; // Usuario creado por admin acepta términos automáticamente
+        userData.marketingAccepted = false;
+      } else if (userFormData.password.trim()) {
+        userData.password = userFormData.password;
+      }
+
+      // Crear o actualizar
+      if (selectedUser) {
+        await adminService.updateUser(selectedUser.id, userData);
+        toast.success('Usuario actualizado exitosamente');
+      } else {
+        await adminService.createUser(userData);
+        toast.success('Usuario creado exitosamente');
+      }
+
+      // Cerrar dialog y refrescar
+      setUserDialogOpen(false);
+      window.location.reload();
+    } catch (error: any) {
+      console.error('Error al guardar usuario:', error);
+      const errorMessage = error.response?.data?.message
+        || error.response?.data?.error
+        || error.message
+        || 'Error al guardar usuario';
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>, user: any) => {
+    setUserMenuAnchor(event.currentTarget);
+    setSelectedUserForMenu(user);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+    setSelectedUserForMenu(null);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!selectedUserForMenu) return;
+
+    if (window.confirm(`¿Estás seguro de eliminar al usuario ${selectedUserForMenu.email}?`)) {
+      try {
+        await adminService.deleteUser(selectedUserForMenu.id);
+        toast.success('Usuario eliminado exitosamente');
+        // Refetch users
+        window.location.reload();
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || 'Error al eliminar usuario');
+      }
+    }
+    handleUserMenuClose();
+  };
+
+  const handleToggleUserActive = async () => {
+    if (!selectedUserForMenu) return;
+
+    try {
+      await adminService.updateUser(selectedUserForMenu.id, {
+        isActive: !selectedUserForMenu.isActive,
+      });
+      toast.success(`Usuario ${selectedUserForMenu.isActive ? 'desactivado' : 'activado'} exitosamente`);
+      // Refetch users
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Error al actualizar usuario');
+    }
+    handleUserMenuClose();
+  };
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -486,9 +648,18 @@ const DashboardPage: React.FC = () => {
 
         {/* Users Management Tab */}
         <TabPanel value={activeTab} index={2}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Gestión de Usuarios
-          </Typography>
+          <Box component={"div" as any} sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+              Gestión de Usuarios
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleCreateUser}
+            >
+              Nuevo Usuario
+            </Button>
+          </Box>
 
           <TableContainer component={Paper}>
             <Table>
@@ -557,10 +728,10 @@ const DashboardPage: React.FC = () => {
                       <TableCell>{user.eventsCount || 0}</TableCell>
                       <TableCell>{formatDate(user.createdAt)}</TableCell>
                       <TableCell>
-                        <IconButton size="small">
+                        <IconButton size="small" onClick={() => handleEditUser(user)}>
                           <Edit />
                         </IconButton>
-                        <IconButton size="small">
+                        <IconButton size="small" onClick={(e) => handleUserMenuOpen(e, user)}>
                           <MoreVert />
                         </IconButton>
                       </TableCell>
@@ -757,6 +928,129 @@ const DashboardPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* User Dialog */}
+      <Dialog
+        open={userDialogOpen}
+        onClose={() => !isSubmitting && setUserDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {selectedUser ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
+        </DialogTitle>
+        <DialogContent>
+          <Box component={"div" as any} sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Nombre"
+                  value={userFormData.firstName}
+                  onChange={(e) => handleUserFormChange('firstName', e.target.value)}
+                  disabled={isSubmitting}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Apellido"
+                  value={userFormData.lastName}
+                  onChange={(e) => handleUserFormChange('lastName', e.target.value)}
+                  disabled={isSubmitting}
+                  required
+                />
+              </Grid>
+            </Grid>
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={userFormData.email}
+              onChange={(e) => handleUserFormChange('email', e.target.value)}
+              disabled={isSubmitting}
+              required
+            />
+            <TextField
+              fullWidth
+              label="Contraseña"
+              type="password"
+              value={userFormData.password}
+              onChange={(e) => handleUserFormChange('password', e.target.value)}
+              disabled={isSubmitting}
+              helperText={selectedUser ? 'Dejar en blanco para mantener la contraseña actual' : 'La contraseña debe tener al menos 8 caracteres'}
+              required={!selectedUser}
+            />
+            <TextField
+              fullWidth
+              label="Teléfono"
+              value={userFormData.phone}
+              onChange={(e) => handleUserFormChange('phone', e.target.value)}
+              disabled={isSubmitting}
+            />
+            <FormControl fullWidth required>
+              <InputLabel>Rol</InputLabel>
+              <Select
+                value={userFormData.role}
+                onChange={(e) => handleUserFormChange('role', e.target.value)}
+                disabled={isSubmitting}
+                label="Rol"
+              >
+                <MenuItem value="user">Usuario</MenuItem>
+                <MenuItem value="participant">Participante</MenuItem>
+                <MenuItem value="speaker">Ponente</MenuItem>
+                <MenuItem value="operator">Operador</MenuItem>
+                <MenuItem value="manager">Manager</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+                {isSuperAdmin && <MenuItem value="super_admin">Super Admin</MenuItem>}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth required>
+              <InputLabel>Estado</InputLabel>
+              <Select
+                value={userFormData.isActive ? 'active' : 'inactive'}
+                onChange={(e) => handleUserFormChange('isActive', e.target.value === 'active')}
+                disabled={isSubmitting}
+                label="Estado"
+              >
+                <MenuItem value="active">Activo</MenuItem>
+                <MenuItem value="inactive">Inactivo</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUserDialogOpen(false)} disabled={isSubmitting}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveUser}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              selectedUser ? 'Actualizar Usuario' : 'Crear Usuario'
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* User Actions Menu */}
+      <Menu
+        anchorEl={userMenuAnchor}
+        open={Boolean(userMenuAnchor)}
+        onClose={handleUserMenuClose}
+      >
+        <MenuItem onClick={handleToggleUserActive}>
+          {selectedUserForMenu?.isActive ? 'Desactivar' : 'Activar'} Usuario
+        </MenuItem>
+        <MenuItem onClick={handleDeleteUser} sx={{ color: 'error.main' }}>
+          Eliminar Usuario
+        </MenuItem>
+      </Menu>
     </Container>
   );
 };

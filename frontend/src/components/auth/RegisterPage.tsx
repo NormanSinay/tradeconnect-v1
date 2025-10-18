@@ -139,17 +139,20 @@ const RegisterPage: React.FC = () => {
         lastName: data.lastName,
         email: data.email,
         password: data.password,
-        confirmPassword: data.confirmPassword,
         phone: data.phone,
         acceptTerms: data.acceptTerms,
+        marketingAccepted: data.newsletter || false, // Mapear newsletter a marketingAccepted
       });
       navigate('/login', {
         state: {
           message: 'Registro exitoso. Verifica tu email para activar tu cuenta.',
         },
       });
-    } catch (error) {
-      setRegisterError('Error al registrarse. Por favor, intenta nuevamente.');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message
+        || error.message
+        || 'Error al registrarse. Por favor, intenta nuevamente.';
+      setRegisterError(errorMessage);
     }
   };
 

@@ -63,13 +63,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
 
         setUser(userData);
-        toast.success('Inicio de sesión exitoso');
+        toast.success('Inicio de sesión exitoso', {
+          duration: 2000, // 2 segundos
+        });
       } else {
         throw new Error(response.message || 'Error al iniciar sesión');
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Error al iniciar sesión';
-      toast.error(message);
+      toast.error(message, {
+        duration: 4000, // 4 segundos para errores
+      });
       throw error;
     } finally {
       setIsLoading(false);
@@ -86,13 +90,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authService.register(registerData);
 
       if (response.success) {
-        toast.success('Registro exitoso. Verifica tu email para activar tu cuenta.');
+        toast.success('Registro exitoso. Verifica tu email para activar tu cuenta.', {
+          duration: 4000, // 4 segundos para mensaje importante
+        });
       } else {
         throw new Error(response.message || 'Error al registrarse');
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Error al registrarse';
-      toast.error(message);
+      toast.error(message, {
+        duration: 4000, // 4 segundos para errores
+      });
       throw error;
     } finally {
       setIsLoading(false);
@@ -106,7 +114,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem(STORAGE_KEYS.USER);
 
     setUser(null);
-    toast.success('Sesión cerrada exitosamente');
+    toast.success('Sesión cerrada exitosamente', {
+      duration: 2000, // 2 segundos
+    });
   };
 
   const refreshToken = async (): Promise<void> => {

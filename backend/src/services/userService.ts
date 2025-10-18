@@ -15,6 +15,7 @@ import { UserProfile, UserUpdateData } from '../types/auth.types';
 import { ApiResponse } from '../types/global.types';
 import { logger } from '../utils/logger';
 import { Op } from 'sequelize';
+import { emailService } from './emailService';
 
 /**
  * Servicio para manejo de operaciones de usuario
@@ -359,6 +360,19 @@ export class UserService {
           userAgent: 'system'
         }
       );
+
+      // Enviar correo de bienvenida
+      try {
+        await emailService.sendWelcomeEmail(newUser.email, {
+          firstName: newUser.firstName,
+          email: newUser.email,
+          // No incluimos la contraseña en el correo por seguridad
+        });
+        logger.info(`Welcome email sent to ${newUser.email}`);
+      } catch (emailError) {
+        logger.error('Error sending welcome email:', emailError);
+        // No fallar la creación del usuario si el email falla
+      }
 
       return {
         success: true,

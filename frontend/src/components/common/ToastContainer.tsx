@@ -6,20 +6,11 @@ import { Box } from '@mui/material';
 const ToastContainer: React.FC = () => {
   const theme = useTheme();
 
-  // Configure toast defaults
-  useEffect(() => {
-    // Set default toast options
-    toast.success('Sistema de notificaciones inicializado', {
-      duration: 2000,
-      icon: '🚀',
-    });
-  }, []);
-
   return (
     <Toaster
       position="top-right"
       toastOptions={{
-        duration: 5000,
+        duration: 3000, // 3 segundos por defecto
         style: {
           background: theme.palette.background.paper,
           color: theme.palette.text.primary,
@@ -29,6 +20,7 @@ const ToastContainer: React.FC = () => {
           fontFamily: theme.typography.fontFamily,
         },
         success: {
+          duration: 3000, // 3 segundos para mensajes de éxito
           style: {
             background: theme.palette.success.main,
             color: theme.palette.success.contrastText,
@@ -37,6 +29,7 @@ const ToastContainer: React.FC = () => {
           icon: '✅',
         },
         error: {
+          duration: 4000, // 4 segundos para errores
           style: {
             background: theme.palette.error.main,
             color: theme.palette.error.contrastText,

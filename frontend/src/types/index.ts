@@ -265,10 +265,9 @@ export interface RegisterForm {
   lastName: string;
   email: string;
   password: string;
-  confirmPassword: string;
   phone?: string;
   acceptTerms: boolean;
-  newsletter?: boolean;
+  marketingAccepted?: boolean;
 }
 
 export interface CheckoutForm {
