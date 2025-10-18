@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
 import {
-  Box,
   Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-  Avatar,
-  Chip,
-  Divider,
-  Paper,
-} from '@mui/material';
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import {
-  ExpandMore,
-  AccessTime,
-  Person,
-  Room,
-  Schedule,
-} from '@mui/icons-material';
+  Clock,
+  User,
+  MapPin,
+  Calendar,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export interface EventSession {
   id: number;
@@ -90,11 +87,11 @@ const EventAgenda: React.FC<EventAgendaProps> = ({ sessions }) => {
 
   if (!sessions || sessions.length === 0) {
     return (
-      <Paper sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="body1" color="text.secondary">
+      <div className="p-6 text-center bg-muted rounded-lg">
+        <p className="text-muted-foreground">
           La agenda del evento estará disponible próximamente
-        </Typography>
-      </Paper>
+        </p>
+      </div>
     );
   }
 
@@ -104,22 +101,11 @@ const EventAgenda: React.FC<EventAgendaProps> = ({ sessions }) => {
   );
 
   return (
-    <Box component={"div" as any}>
+    <div>
       {/* Timeline indicator */}
-      <Box component={"div" as any} sx={{ position: 'relative' }}>
+      <div className="relative">
         {/* Vertical timeline line */}
-        <Box
-          component={"div" as any}
-          sx={{
-            position: 'absolute',
-            left: 40,
-            top: 0,
-            bottom: 0,
-            width: 2,
-            bgcolor: 'primary.light',
-            display: { xs: 'none', md: 'block' },
-          }}
-        />
+        <div className="absolute left-10 top-0 bottom-0 w-0.5 bg-primary/30 hidden md:block" />
 
         {sortedSessions.map((session, index) => (
           <motion.div

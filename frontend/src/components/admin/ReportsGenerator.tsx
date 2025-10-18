@@ -1,44 +1,25 @@
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Box,
-  Paper,
-  Grid,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  IconButton,
-  Tooltip,
-  CircularProgress,
-  useTheme,
-  Divider,
-} from '@mui/material';
-import {
-  PictureAsPdf as PdfIcon,
-  TableChart as ExcelIcon,
-  Description as CsvIcon,
-  GetApp as DownloadIcon,
-  Visibility as PreviewIcon,
-  Assessment as ReportIcon,
-  Event as EventIcon,
-  AttachMoney as MoneyIcon,
-  CardMembership as CertificateIcon,
-} from '@mui/icons-material';
+  FileText,
+  FileSpreadsheet,
+  File,
+  Download,
+  Eye,
+  BarChart3,
+  Calendar,
+  DollarSign,
+  Award,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 type ReportType = 'events' | 'financial' | 'certificates' | 'registrations' | 'attendance';
 type ReportFormat = 'pdf' | 'excel' | 'csv';

@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { Box, TextField, Typography, Grid } from '@mui/material';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { VALIDATION_RULES } from '@/utils/constants';
+import { cn } from '@/lib/utils';
 
 // Validation schema
 const personalInfoSchema = yup.object({
@@ -70,91 +72,102 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   }, [isValid, onValidChange]);
 
   return (
-    <Box component={"div" as any} sx={{ width: '100%' }}>
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: 'primary.main' }}>
+    <div className="w-full">
+      <h3 className="text-lg font-bold text-primary mb-4">
         Información Personal
-      </Typography>
+      </h3>
 
-      <Grid container spacing={2}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* First Name */}
-        <Grid item xs={12} sm={6}>
+        <div className="space-y-2">
+          <Label htmlFor="firstName">Nombre *</Label>
           <Controller
             name="firstName"
             control={control}
             render={({ field }) => (
-              <TextField
+              <Input
                 {...field}
-                fullWidth
-                label="Nombre *"
+                id="firstName"
                 placeholder="Juan"
-                error={!!errors.firstName}
-                helperText={errors.firstName?.message}
+                className={cn(errors.firstName && 'border-red-500')}
               />
             )}
           />
-        </Grid>
+          {errors.firstName && (
+            <p className="text-sm text-red-500">{errors.firstName.message}</p>
+          )}
+        </div>
 
         {/* Last Name */}
-        <Grid item xs={12} sm={6}>
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Apellido *</Label>
           <Controller
             name="lastName"
             control={control}
             render={({ field }) => (
-              <TextField
+              <Input
                 {...field}
-                fullWidth
-                label="Apellido *"
+                id="lastName"
                 placeholder="Pérez"
-                error={!!errors.lastName}
-                helperText={errors.lastName?.message}
+                className={cn(errors.lastName && 'border-red-500')}
               />
             )}
           />
-        </Grid>
+          {errors.lastName && (
+            <p className="text-sm text-red-500">{errors.lastName.message}</p>
+          )}
+        </div>
 
         {/* Email */}
-        <Grid item xs={12}>
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="email">Email *</Label>
           <Controller
             name="email"
             control={control}
             render={({ field }) => (
-              <TextField
+              <Input
                 {...field}
-                fullWidth
+                id="email"
                 type="email"
-                label="Email *"
                 placeholder="juan.perez@example.com"
-                error={!!errors.email}
-                helperText={
-                  errors.email?.message ||
-                  'Se enviará confirmación a este correo'
-                }
+                className={cn(errors.email && 'border-red-500')}
               />
             )}
           />
-        </Grid>
+          {errors.email ? (
+            <p className="text-sm text-red-500">{errors.email.message}</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Se enviará confirmación a este correo
+            </p>
+          )}
+        </div>
 
         {/* Phone */}
-        <Grid item xs={12}>
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="phone">Teléfono *</Label>
           <Controller
             name="phone"
             control={control}
             render={({ field }) => (
-              <TextField
+              <Input
                 {...field}
-                fullWidth
-                label="Teléfono *"
+                id="phone"
                 placeholder="+502 1234-5678"
-                error={!!errors.phone}
-                helperText={
-                  errors.phone?.message || 'Formato: +502 XXXX-XXXX'
-                }
+                className={cn(errors.phone && 'border-red-500')}
               />
             )}
           />
-        </Grid>
-      </Grid>
-    </Box>
+          {errors.phone ? (
+            <p className="text-sm text-red-500">{errors.phone.message}</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Formato: +502 XXXX-XXXX
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,32 +1,21 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  IconButton,
-  Button,
-  TablePagination,
-  CircularProgress,
-  Alert,
-  Tooltip,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Download,
   Receipt,
   Refresh,
-  Visibility,
-} from '@mui/icons-material';
+  Eye,
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { paymentsService } from '@/services/api';
 import type { Payment, ApiResponse } from '@/types';
 import { toast } from 'react-hot-toast';
+import { cn } from '@/lib/utils';
 
 const PaymentHistory: React.FC = () => {
   const [page, setPage] = useState(0);

@@ -1,34 +1,24 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Button,
-  Chip,
-  CircularProgress,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-} from '@mui/material';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Download,
   Share,
   CheckCircle,
-  School,
-  Verified,
-  Close,
+  GraduationCap,
+  ShieldCheck,
+  X,
   QrCode,
-} from '@mui/icons-material';
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { certificatesService } from '@/services/api';
 import type { Certificate, ApiResponse } from '@/types';
 import { toast } from 'react-hot-toast';
+import { cn } from '@/lib/utils';
 
 const MyCertificates: React.FC = () => {
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(

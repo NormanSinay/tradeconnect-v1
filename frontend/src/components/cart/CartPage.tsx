@@ -1,40 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Container,
-  Typography,
-  Box,
-  Grid,
-  Paper,
-  Button,
-  TextField,
-  Divider,
-  IconButton,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  Skeleton,
-  Alert,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-} from '@mui/material';
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
-  Add,
-  Remove,
-  Delete,
+  Plus,
+  Minus,
+  Trash2,
   ShoppingCart,
-  ArrowBack,
-  LocalOffer,
+  ArrowLeft,
+  Tag,
   CheckCircle,
-  Warning,
-} from '@mui/icons-material';
+  AlertTriangle,
+} from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-hot-toast';
 import type { CartItem } from '@/types';
+import { cn } from '@/lib/utils';
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
@@ -97,131 +88,127 @@ const CartPage: React.FC = () => {
 
   if (isLoading && !cart) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={8}>
-            <Skeleton variant="rectangular" height={400} />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Skeleton variant="rectangular" height={300} />
-          </Grid>
-        </Grid>
-      </Container>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Skeleton className="h-96 w-full rounded-lg" />
+          </div>
+          <div className="lg:col-span-1">
+            <Skeleton className="h-80 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (!cart || cart.items.length === 0) {
     return (
-      <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
-        <ShoppingCart sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
-        <Typography variant="h4" gutterBottom>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <ShoppingCart className="h-20 w-20 text-muted-foreground mx-auto mb-4" />
+        <h2 className="text-2xl font-bold mb-2">
           Tu carrito está vacío
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        </h2>
+        <p className="text-muted-foreground mb-8">
           ¡Explora nuestros eventos y agrega algunos a tu carrito!
-        </Typography>
-        <Box component={"div" as any} sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+        </p>
+        <div className="flex gap-4 justify-center">
           <Button
-            variant="outlined"
-            startIcon={<ArrowBack />}
+            variant="outline"
             onClick={() => navigate('/events')}
           >
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Ver Eventos
           </Button>
-          <Button
-            variant="contained"
-            onClick={() => navigate('/')}
-          >
+          <Button onClick={() => navigate('/')}>
             Ir al Inicio
           </Button>
-        </Box>
-      </Container>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <Box component={"div" as any} sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">
           Carrito de Compras
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+        </h1>
+        <p className="text-muted-foreground">
           {cart.totalItems} {cart.totalItems === 1 ? 'producto' : 'productos'} en tu carrito
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <Grid container spacing={4}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6">Productos</Typography>
+        <div className="lg:col-span-2">
+          <Card className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold">Productos</h3>
               <Button
-                color="error"
+                variant="destructive"
                 onClick={() => setShowClearDialog(true)}
                 disabled={isLoading}
               >
                 Vaciar carrito
               </Button>
-            </Box>
+            </div>
 
-            <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div className="space-y-4">
               {cart.items.map((item: CartItem) => (
-                <Card key={item.id} sx={{ display: 'flex', p: 2 }}>
+                <Card key={item.id} className="flex p-4">
                   {/* Event Image */}
-                  <CardMedia
-                    component="img"
-                    sx={{ width: 100, height: 100, borderRadius: 1, objectFit: 'cover' }}
-                    image={item.event?.media?.find(m => m.isPrimary)?.filePath || '/placeholder-event.jpg'}
-                    alt={item.event?.title || 'Evento'}
-                  />
+                  <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                    <img
+                      src={item.event?.media?.find(m => m.isPrimary)?.filePath || '/placeholder-event.jpg'}
+                      alt={item.event?.title || 'Evento'}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
 
                   {/* Event Details */}
-                  <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', flex: 1, ml: 2 }}>
-                    <Typography variant="h6" component="h2" sx={{ mb: 1 }}>
+                  <div className="flex flex-col flex-1 ml-4">
+                    <h4 className="text-lg font-semibold mb-2">
                       {item.event?.title || 'Evento'}
-                    </Typography>
+                    </h4>
 
-                    <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                      <Chip
-                        label={item.event?.eventCategory?.name || 'Categoría'}
-                        size="small"
-                        sx={{
-                          bgcolor: item.event?.eventCategory?.color,
+                    <div className="flex gap-2 mb-2">
+                      <Badge
+                        style={{
+                          backgroundColor: item.event?.eventCategory?.color,
                           color: 'white',
                         }}
-                      />
-                      <Chip
-                        label={item.participantType === 'individual' ? 'Individual' : 'Empresa'}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
-                    </Box>
+                      >
+                        {item.event?.eventCategory?.name || 'Categoría'}
+                      </Badge>
+                      <Badge variant="outline">
+                        {item.participantType === 'individual' ? 'Individual' : 'Empresa'}
+                      </Badge>
+                    </div>
 
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    <p className="text-sm text-gray-600 mb-1">
                       {item.event?.startDate ? new Date(item.event.startDate).toLocaleDateString('es-GT') : ''}
-                    </Typography>
+                    </p>
 
-                    <Typography variant="body2" color="text.secondary">
+                    <p className="text-sm text-gray-600">
                       Precio unitario: {formatPrice(item.finalPrice)}
-                    </Typography>
-                  </Box>
+                    </p>
+                  </div>
 
                   {/* Quantity and Actions */}
-                  <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+                  <div className="flex flex-col items-end gap-2">
                     {/* Quantity Controls */}
-                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <IconButton
-                        size="small"
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                         disabled={item.quantity <= 1 || isLoading}
                       >
-                        <Remove />
-                      </IconButton>
-                      <TextField
-                        size="small"
+                        <Minus className="w-4 h-4" />
+                      </Button>
+                      <Input
+                        type="number"
                         value={item.quantity}
                         onChange={(e) => {
                           const value = parseInt(e.target.value);
@@ -229,148 +216,148 @@ const CartPage: React.FC = () => {
                             handleQuantityChange(item.id, value);
                           }
                         }}
-                        inputProps={{ min: 1, style: { textAlign: 'center', width: '60px' } }}
+                        className="w-16 text-center"
+                        min={1}
                         disabled={isLoading}
                       />
-                      <IconButton
-                        size="small"
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                         disabled={isLoading}
                       >
-                        <Add />
-                      </IconButton>
-                    </Box>
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
 
                     {/* Total Price */}
-                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    <p className="text-lg font-bold">
                       {formatPrice(item.total)}
-                    </Typography>
+                    </p>
 
                     {/* Remove Button */}
-                    <IconButton
-                      color="error"
+                    <Button
+                      variant="destructive"
+                      size="sm"
                       onClick={() => handleRemoveItem(item.id)}
                       disabled={isLoading}
-                      size="small"
                     >
-                      <Delete />
-                    </IconButton>
-                  </Box>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </Card>
               ))}
-            </Box>
-          </Paper>
-        </Grid>
+            </div>
+          </Card>
+        </div>
 
         {/* Order Summary */}
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, position: 'sticky', top: 24 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+        <div className="lg:col-span-1">
+          <Card className="p-6 sticky top-6">
+            <h3 className="text-lg font-bold mb-4">
               Resumen de la Orden
-            </Typography>
+            </h3>
 
-            <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography>Subtotal:</Typography>
-                <Typography>{formatPrice(cart.subtotal)}</Typography>
-              </Box>
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>{formatPrice(cart.subtotal)}</span>
+              </div>
 
               {cart.discountAmount > 0 && (
-                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', color: 'success.main' }}>
-                  <Typography>Descuento:</Typography>
-                  <Typography>-{formatPrice(cart.discountAmount)}</Typography>
-                </Box>
+                <div className="flex justify-between text-green-600">
+                  <span>Descuento:</span>
+                  <span>-{formatPrice(cart.discountAmount)}</span>
+                </div>
               )}
 
-              <Divider />
+              <hr />
 
-              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
-                <Typography variant="h6">Total:</Typography>
-                <Typography variant="h6">{formatPrice(cart.total)}</Typography>
-              </Box>
-            </Box>
+              <div className="flex justify-between font-bold">
+                <span className="text-lg">Total:</span>
+                <span className="text-lg">{formatPrice(cart.total)}</span>
+              </div>
+            </div>
 
             {/* Promo Code */}
-            <Box component={"div" as any} sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" gutterBottom>
+            <div className="mb-6">
+              <h4 className="text-sm font-medium mb-2">
                 Código Promocional
-              </Typography>
-              <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
-                <TextField
-                  fullWidth
-                  size="small"
+              </h4>
+              <div className="flex gap-2">
+                <Input
                   placeholder="Ingresa código"
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
                   disabled={isLoading}
                 />
                 <Button
-                  variant="outlined"
+                  variant="outline"
                   onClick={handleApplyPromoCode}
                   disabled={isLoading || !promoCode.trim()}
-                  startIcon={<LocalOffer />}
                 >
+                  <Tag className="w-4 h-4 mr-2" />
                   Aplicar
                 </Button>
-              </Box>
+              </div>
               {cart.promoCode && (
-                <Alert severity="success" sx={{ mt: 1 }}>
+                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
                   Código "{cart.promoCode}" aplicado
-                </Alert>
+                </div>
               )}
-            </Box>
+            </div>
 
             {/* Checkout Button */}
             <Button
-              variant="contained"
-              fullWidth
-              size="large"
+              className="w-full py-3 text-lg mb-3"
               onClick={handleCheckout}
               disabled={isLoading}
-              sx={{ py: 1.5, fontSize: '1.1rem' }}
             >
               Proceder al Pago
             </Button>
 
             <Button
-              variant="outlined"
-              fullWidth
+              variant="outline"
+              className="w-full"
               onClick={() => navigate('/events')}
-              sx={{ mt: 2 }}
             >
               Continuar Comprando
             </Button>
 
             {/* Security Notice */}
-            <Alert severity="info" sx={{ mt: 3 }} icon={<CheckCircle />}>
-              <Typography variant="body2">
-                <strong>Pago seguro</strong> - Todas las transacciones están protegidas con encriptación SSL
-              </Typography>
-            </Alert>
-          </Paper>
-        </Grid>
-      </Grid>
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-blue-600" />
+                <p className="text-sm text-blue-800">
+                  <strong>Pago seguro</strong> - Todas las transacciones están protegidas con encriptación SSL
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
 
       {/* Clear Cart Dialog */}
-      <Dialog
-        open={showClearDialog}
-        onClose={() => setShowClearDialog(false)}
-      >
-        <DialogTitle>¿Vaciar carrito?</DialogTitle>
+      <Dialog open={showClearDialog} onOpenChange={setShowClearDialog}>
         <DialogContent>
-          <Typography>
+          <DialogHeader>
+            <DialogTitle>¿Vaciar carrito?</DialogTitle>
+          </DialogHeader>
+          <p className="mb-4">
             ¿Estás seguro de que quieres remover todos los productos de tu carrito?
             Esta acción no se puede deshacer.
-          </Typography>
+          </p>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowClearDialog(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleClearCart}>
+              Vaciar Carrito
+            </Button>
+          </div>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowClearDialog(false)}>Cancelar</Button>
-          <Button onClick={handleClearCart} color="error" variant="contained">
-            Vaciar Carrito
-          </Button>
-        </DialogActions>
       </Dialog>
-    </Container>
+    </div>
   );
 };
 

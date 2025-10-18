@@ -1,30 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  Box,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Divider,
-  Alert,
-  Chip,
-} from '@mui/material';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   CheckCircle,
   Download,
   Share,
-  Event,
-  Email,
+  Calendar,
+  Mail,
   Receipt,
-  ArrowForward,
+  ArrowRight,
   Home,
-} from '@mui/icons-material';
+} from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { cn } from '@/lib/utils';
 
 const CheckoutSuccessPage: React.FC = () => {
   const navigate = useNavigate();
@@ -70,20 +61,20 @@ const CheckoutSuccessPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 6 }}>
+    <div className="container mx-auto px-4 py-12 max-w-4xl">
       {/* Success Header */}
-      <Box component={"div" as any} sx={{ textAlign: 'center', mb: 6 }}>
-        <CheckCircle sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
-        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+      <div className="text-center mb-12">
+        <CheckCircle className="h-20 w-20 text-green-600 mx-auto mb-4" />
+        <h1 className="text-4xl font-bold mb-2">
           ¡Pago Exitoso!
-        </Typography>
-        <Typography variant="h5" color="text.secondary" gutterBottom>
+        </h1>
+        <h2 className="text-xl text-muted-foreground mb-2">
           Su inscripción ha sido confirmada
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+        </h2>
+        <p className="text-muted-foreground">
           Recibirá un email de confirmación con todos los detalles
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       {/* Order Details */}
       <Paper sx={{ p: 4, mb: 4 }}>
@@ -303,7 +294,7 @@ const CheckoutSuccessPage: React.FC = () => {
           Explorar Más Eventos
         </Button>
       </Box>
-    </Container>
+    </div>
   );
 };
 

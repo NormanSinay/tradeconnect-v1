@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
+import tailwind from '@astrojs/tailwind';
 import { fileURLToPath, URL } from 'node:url';
 
 // https://astro.build/config
@@ -8,6 +9,9 @@ export default defineConfig({
   integrations: [
     react({
       include: ['**/ClientApp.tsx', '**/ContactPage.tsx', '**/ReportIssuePage.tsx', '**/Footer.tsx'],
+    }),
+    tailwind({
+      applyBaseStyles: false, // We'll apply our own base styles
     }),
   ],
   vite: {
@@ -22,10 +26,11 @@ export default defineConfig({
           manualChunks: {
             // Vendor chunks for better caching
             'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-            'mui-vendor': ['@mui/material', '@mui/icons-material', '@mui/system', '@emotion/react', '@emotion/styled'],
+            'ui-vendor': ['@radix-ui/react-slot', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
             'query-vendor': ['@tanstack/react-query'],
             'utils-vendor': ['axios', 'date-fns', 'framer-motion', 'react-hot-toast'],
             'i18n-vendor': ['i18next', 'i18next-browser-languagedetector', 'i18next-http-backend', 'react-i18next'],
+            'icons-vendor': ['react-icons/fa', 'react-icons/md', 'lucide-react'],
           },
         },
       },
@@ -44,10 +49,13 @@ export default defineConfig({
       include: [
         'react',
         'react-dom',
-        '@mui/material',
+        '@radix-ui/react-slot',
+        '@radix-ui/react-dialog',
         '@tanstack/react-query',
         'axios',
         'react-router-dom',
+        'react-icons',
+        'lucide-react',
       ],
     },
   },

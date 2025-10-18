@@ -1,12 +1,11 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { Box, CircularProgress } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
 import BaseLayout from '@/components/layout/BaseLayout';
 import AdminLayout from '@/components/layout/AdminLayout';
 
 // Lazy load components for better performance
-const HomePage = lazy(() => import('@/components/HomePage'));
+const HomePage = lazy(() => import('@/components/HomePageNew'));
 // Placeholder components for now - will be implemented later
 const EventsPage = lazy(() => import('@/components/EventsPage'));
 const EventDetailPage = lazy(() => import('@/components/events/EventDetailPage'));
@@ -37,15 +36,8 @@ const ReportIssuePage = lazy(() => import('@/components/ReportIssuePage'));
 
 // Loading component
 const LoadingFallback: React.FC = () => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '50vh'
-    }}
-  >
-    <CircularProgress size={60} thickness={4} />
+  <div className="flex justify-center items-center min-h-[50vh]">
+    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary-500"></div>
   </div>
 );
 

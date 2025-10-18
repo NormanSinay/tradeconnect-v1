@@ -1,23 +1,18 @@
 import React, { useCallback, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import {
-  Box,
-  Button,
-  Typography,
-  Paper,
-  LinearProgress,
-  Alert,
-  IconButton,
-  Chip,
-} from '@mui/material';
-import {
-  CloudUpload,
-  Delete,
-  InsertDriveFile,
+  Upload,
+  X,
+  File,
   Image,
-  VideoFile,
-  PictureAsPdf,
-} from '@mui/icons-material';
+  Video,
+  FileText,
+} from 'lucide-react';
 import { securityUtils } from '@/utils/security';
+import { cn } from '@/lib/utils';
 
 interface SecureFileUploadProps {
   onFileSelect: (file: File) => void;

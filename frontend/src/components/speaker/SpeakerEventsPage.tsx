@@ -1,29 +1,15 @@
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
-  Container,
-  Typography,
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
-import {
-  Event as EventIcon,
-  LocationOn,
-  CalendarToday,
-  People,
+  Calendar,
+  MapPin,
+  Users,
   Info,
-} from '@mui/icons-material';
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const SpeakerEventsPage: React.FC = () => {
   // Mock data - Replace with actual API call

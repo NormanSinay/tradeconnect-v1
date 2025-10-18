@@ -1,20 +1,15 @@
 import React from 'react';
+import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import {
-  Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from '@mui/material';
-import {
-  Sort as SortIcon,
-  ViewList,
-  ViewModule,
-} from '@mui/icons-material';
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  List,
+  Grid3X3,
+} from 'lucide-react';
 import type { EventSortOptionsProps } from '@/types/event.types';
+import { cn } from '@/lib/utils';
 
 const EventSortOptions: React.FC<EventSortOptionsProps> = ({
   sortBy,
@@ -32,67 +27,60 @@ const EventSortOptions: React.FC<EventSortOptionsProps> = ({
   };
 
   return (
-    <Box
-      component={"div" as any}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        flexWrap: 'wrap',
-        mb: 3,
-      }}
-    >
+    <div className="flex items-center gap-4 flex-wrap mb-6">
       {/* Sort By */}
-      <FormControl size="small" sx={{ minWidth: 150 }}>
-        <InputLabel>Ordenar por</InputLabel>
-        <Select
-          value={sortBy}
-          label="Ordenar por"
-          onChange={handleSortByChange}
-          startAdornment={<SortIcon sx={{ mr: 1, color: 'text.secondary' }} />}
-        >
-          <MenuItem value="relevance">Relevancia</MenuItem>
-          <MenuItem value="date">Fecha</MenuItem>
-          <MenuItem value="price">Precio</MenuItem>
-          <MenuItem value="popularity">Popularidad</MenuItem>
+      <div className="min-w-[150px]">
+        <Select value={sortBy} onChange={(e) => onSortChange(e.target.value as any, sortOrder)}>
+          <option value="relevance">Relevancia</option>
+          <option value="date">Fecha</option>
+          <option value="price">Precio</option>
+          <option value="popularity">Popularidad</option>
         </Select>
-      </FormControl>
+      </div>
 
       {/* Sort Order */}
-      <ToggleButtonGroup
-        value={sortOrder}
-        exclusive
-        onChange={handleSortOrderChange}
-        size="small"
-      >
-        <ToggleButton value="asc" aria-label="ascendente">
-          ↑ Asc
-        </ToggleButton>
-        <ToggleButton value="desc" aria-label="descendente">
-          ↓ Desc
-        </ToggleButton>
-      </ToggleButtonGroup>
+      <div className="flex gap-1">
+        <Button
+          variant={sortOrder === 'asc' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onSortChange(sortBy, 'asc')}
+        >
+          <ArrowUp className="h-4 w-4 mr-1" />
+          Asc
+        </Button>
+        <Button
+          variant={sortOrder === 'desc' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onSortChange(sortBy, 'desc')}
+        >
+          <ArrowDown className="h-4 w-4 mr-1" />
+          Desc
+        </Button>
+      </div>
 
       {/* View Toggle (for future use) */}
-      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto' }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="flex items-center gap-2 ml-auto">
+        <span className="text-sm text-muted-foreground">
           Vista:
-        </Typography>
-        <ToggleButtonGroup
-          value="grid"
-          exclusive
-          size="small"
-          disabled // For now, only grid view
-        >
-          <ToggleButton value="list" aria-label="vista lista">
-            <ViewList />
-          </ToggleButton>
-          <ToggleButton value="grid" aria-label="vista grid">
-            <ViewModule />
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
-    </Box>
+        </span>
+        <div className="flex gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            disabled
+          >
+            <Grid3X3 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Box } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -12,29 +11,14 @@ interface BaseLayoutProps {
 
 const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
   return (
-    <Box
-      component={"div" as any}
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: 'background.default',
-      }}
-    >
+    <div className="min-h-screen flex flex-col bg-background">
       {/* Navigation */}
       <Navbar />
 
       {/* Main Content */}
-      <Box
-        component="main"
-        sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <main className="flex-1 flex flex-col">
         {children || <Outlet />}
-      </Box>
+      </main>
 
       {/* Footer */}
       <Footer />
@@ -67,7 +51,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({ children }) => {
           },
         }}
       />
-    </Box>
+    </div>
   );
 };
 

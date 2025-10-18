@@ -1,65 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Box,
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  Button,
-  Chip,
-  Divider,
-  Avatar,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Skeleton,
-  Breadcrumbs,
-  Link as MuiLink,
-  IconButton,
-  Tooltip,
-  Card,
-  CardMedia,
-  CardContent,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-} from '@mui/material';
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
-  ExpandMore,
-  LocationOn,
-  Schedule,
-  Person,
+  MapPin,
+  Calendar,
+  Clock,
+  Users,
   CheckCircle,
   Share,
-  Favorite,
-  FavoriteBorder,
+  Heart,
   ShoppingCart,
-  ArrowBack,
-  NavigateNext,
-  PlayArrow,
-  CalendarToday,
-  AccessTime,
-  Group,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Play,
   Star,
-  StarBorder,
   Link as LinkIcon,
-  Email,
+  Mail,
   Phone,
-  Public,
-  Business,
-} from '@mui/icons-material';
+  Globe,
+  Building,
+  CalendarDays,
+  Clock as AccessTime,
+  LocateIcon as LocationOn,
+  Heart as Favorite,
+  Heart as FavoriteBorder,
+  Globe as Public,
+  ChevronRight as NavigateNext,
+} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { eventsService } from '@/services/eventsService';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import type { Event } from '@/types/event.types';
+import { cn } from '@/lib/utils';
 
 const EventDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -197,41 +182,38 @@ const EventDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={8}>
-            <Skeleton variant="rectangular" height={400} />
-            <Box component={"div" as any} sx={{ mt: 2 }}>
-              <Skeleton variant="text" height={60} />
-              <Skeleton variant="text" height={30} width="60%" />
-              <Skeleton variant="text" height={20} width="40%" />
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Skeleton variant="rectangular" height={300} />
-          </Grid>
-        </Grid>
-      </Container>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Skeleton className="h-96 w-full rounded-lg" />
+            <div className="mt-4 space-y-2">
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-5 w-1/2" />
+            </div>
+          </div>
+          <div className="lg:col-span-1">
+            <Skeleton className="h-80 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (error || !event) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
-        <Typography variant="h4" color="error" gutterBottom>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">
           Evento no encontrado
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+        </h2>
+        <p className="text-muted-foreground mb-6">
           El evento que buscas no existe o ha sido eliminado.
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<ArrowBack />}
-          onClick={() => navigate('/events')}
-        >
+        </p>
+        <Button onClick={() => navigate('/events')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Volver al catálogo
         </Button>
-      </Container>
+      </div>
     );
   }
 
@@ -239,216 +221,168 @@ const EventDetailPage: React.FC = () => {
   const galleryImages = event.images.filter(img => !img.isPrimary);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="container mx-auto px-4 py-8">
       {/* Breadcrumbs */}
-      <Breadcrumbs sx={{ mb: 3 }}>
-        <MuiLink
-          component="button"
-          variant="body2"
+      <nav className="mb-6 text-sm text-muted-foreground">
+        <button
           onClick={() => navigate('/')}
-          sx={{ cursor: 'pointer' }}
+          className="hover:text-foreground transition-colors"
         >
           Inicio
-        </MuiLink>
-        <MuiLink
-          component="button"
-          variant="body2"
+        </button>
+        <span className="mx-2">/</span>
+        <button
           onClick={() => navigate('/events')}
-          sx={{ cursor: 'pointer' }}
+          className="hover:text-foreground transition-colors"
         >
           Eventos
-        </MuiLink>
-        <Typography variant="body2" color="text.primary">
-          {event.title}
-        </Typography>
-      </Breadcrumbs>
+        </button>
+        <span className="mx-2">/</span>
+        <span className="text-foreground">{event.title}</span>
+      </nav>
 
-      <Grid container spacing={4}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
-        <Grid item xs={12} md={8}>
+        <div className="lg:col-span-2">
           {/* Image Gallery */}
-          <Paper sx={{ mb: 3, overflow: 'hidden' }}>
-            <Box component={"div" as any} sx={{ position: 'relative', height: 400 }}>
-              <CardMedia
-                component="img"
-                height="100%"
-                image={event.images[selectedImageIndex]?.url || primaryImage?.url || '/placeholder-event.jpg'}
+          <Card className="mb-6 overflow-hidden">
+            <div className="relative h-96">
+              <img
+                src={event.images[selectedImageIndex]?.url || primaryImage?.url || '/placeholder-event.jpg'}
                 alt={event.title}
-                sx={{ objectFit: 'cover' }}
+                className="w-full h-full object-cover"
               />
 
               {/* Navigation arrows for gallery */}
               {event.images.length > 1 && (
                 <>
-                  <IconButton
-                    sx={{
-                      position: 'absolute',
-                      left: 8,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      bgcolor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
-                    }}
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white/90"
                     onClick={() => setSelectedImageIndex(prev =>
                       prev > 0 ? prev - 1 : event.images.length - 1
                     )}
                   >
-                    <NavigateNext sx={{ transform: 'rotate(180deg)' }} />
-                  </IconButton>
-                  <IconButton
-                    sx={{
-                      position: 'absolute',
-                      right: 8,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      bgcolor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
-                    }}
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white/90"
                     onClick={() => setSelectedImageIndex(prev =>
                       prev < event.images.length - 1 ? prev + 1 : 0
                     )}
                   >
-                    <NavigateNext />
-                  </IconButton>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </>
               )}
 
               {/* Action buttons */}
-              <Box component={"div" as any} sx={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 1 }}>
-                <Tooltip title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}>
-                  <IconButton
-                    sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
-                    }}
-                    onClick={handleToggleFavorite}
-                  >
-                    {isFavorite ? <Favorite sx={{ color: 'error.main' }} /> : <FavoriteBorder />}
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Compartir">
-                  <IconButton
-                    sx={{
-                      bgcolor: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
-                    }}
-                    onClick={handleShare}
-                  >
-                    <Share />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Box>
+              <div className="absolute top-4 right-4 flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="bg-white/80 hover:bg-white/90"
+                  onClick={handleToggleFavorite}
+                  title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                >
+                  <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="bg-white/80 hover:bg-white/90"
+                  onClick={handleShare}
+                  title="Compartir"
+                >
+                  <Share className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
 
             {/* Thumbnail gallery */}
             {event.images.length > 1 && (
-              <Box component={"div" as any} sx={{ p: 2, display: 'flex', gap: 1, overflowX: 'auto' }}>
+              <div className="p-4 flex gap-2 overflow-x-auto">
                 {event.images.map((image, index) => (
-                  <Box
+                  <img
                     key={image.id}
-                    component="img"
                     src={image.url}
                     alt={image.alt}
-                    sx={{
-                      width: 80,
-                      height: 60,
-                      objectFit: 'cover',
-                      borderRadius: 1,
-                      cursor: 'pointer',
-                      border: selectedImageIndex === index ? '2px solid' : '2px solid transparent',
-                      borderColor: selectedImageIndex === index ? 'primary.main' : 'transparent',
-                      opacity: selectedImageIndex === index ? 1 : 0.7,
-                      '&:hover': { opacity: 1 },
-                    }}
+                    className={`w-20 h-16 object-cover rounded cursor-pointer border-2 transition-opacity ${
+                      selectedImageIndex === index
+                        ? 'border-primary opacity-100'
+                        : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
                     onClick={() => setSelectedImageIndex(index)}
                   />
                 ))}
-              </Box>
+              </div>
             )}
-          </Paper>
+          </Card>
 
           {/* Event Info */}
-          <Box component={"div" as any} sx={{ mb: 3 }}>
-            <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-              <Box component={"div" as any} sx={{ flex: 1 }}>
-                <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+          <div className="mb-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold mb-4">
                   {event.title}
-                </Typography>
-                <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                  <Chip
-                    label={event.category.name}
-                    sx={{
-                      bgcolor: event.category.color,
-                      color: 'white',
-                    }}
-                  />
-                  <Chip
-                    label={`${getModalityIcon(event.type.name)} ${event.type.name}`}
-                    color={getModalityColor(event.type.name) as any}
-                  />
+                </h1>
+                <div className="flex gap-2 mb-4">
+                  <Badge
+                    style={{ backgroundColor: event.category.color, color: 'white' }}
+                  >
+                    {event.category.name}
+                  </Badge>
+                  <Badge variant="outline">
+                    {getModalityIcon(event.type.name)} {event.type.name}
+                  </Badge>
                   {event.isFeatured && (
-                    <Chip
-                      label="⭐ Destacado"
-                      sx={{
-                        bgcolor: 'warning.main',
-                        color: 'warning.contrastText',
-                      }}
-                    />
+                    <Badge variant="secondary">
+                      ⭐ Destacado
+                    </Badge>
                   )}
-                </Box>
-              </Box>
-            </Box>
+                </div>
+              </div>
+            </div>
 
             {/* Date and Location */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid item xs={12} sm={6}>
-                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CalendarToday color="action" />
-                  <Box component={"div" as any}>
-                    <Typography variant="body2" color="text.secondary">
-                      Fecha
-                    </Typography>
-                    <Typography variant="body1">
-                      {formatDate(event.startDate)}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <AccessTime color="action" />
-                  <Box component={"div" as any}>
-                    <Typography variant="body2" color="text.secondary">
-                      Hora
-                    </Typography>
-                    <Typography variant="body1">
-                      {formatTime(event.startDate)} - {formatTime(event.endDate)}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <LocationOn color="action" />
-                  <Box component={"div" as any} sx={{ flex: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Ubicación
-                    </Typography>
-                    <Typography variant="body1">
-                      {event.location || event.virtualLink || 'Por confirmar'}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <CalendarDays className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Fecha</p>
+                  <p className="font-medium">{formatDate(event.startDate)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <AccessTime className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Hora</p>
+                  <p className="font-medium">
+                    {formatTime(event.startDate)} - {formatTime(event.endDate)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 sm:col-span-2">
+                <LocationOn className="h-5 w-5 text-muted-foreground" />
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground">Ubicación</p>
+                  <p className="font-medium">
+                    {event.location || event.virtualLink || 'Por confirmar'}
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Description */}
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+            <h2 className="text-xl font-bold mb-3">
               Descripción del Evento
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.7 }}>
+            </h2>
+            <p className="text-muted-foreground mb-6 leading-relaxed">
               {event.description}
-            </Typography>
+            </p>
 
             {/* Speakers */}
             {event.speakers && event.speakers.length > 0 && (
@@ -543,11 +477,11 @@ const EventDetailPage: React.FC = () => {
                 </ListItem>
               </List>
             </Box>
-          </Box>
-        </Grid>
+          </div>
+        </div>
 
         {/* Sidebar */}
-        <Grid item xs={12} md={4}>
+        <div className="lg:col-span-1">
           <Paper sx={{ p: 3, position: 'sticky', top: 24 }}>
             <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
               Reserva tu lugar
@@ -657,8 +591,8 @@ const EventDetailPage: React.FC = () => {
               </Box>
             </Box>
           </Paper>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
 
       {/* Related Events */}
       {relatedEvents && relatedEvents.length > 0 && (
@@ -730,7 +664,7 @@ const EventDetailPage: React.FC = () => {
           <Button onClick={() => setShowVideoDialog(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </div>
   );
 };
 

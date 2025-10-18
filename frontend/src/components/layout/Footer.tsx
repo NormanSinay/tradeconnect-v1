@@ -1,27 +1,20 @@
 import React from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Typography,
-  IconButton,
-  Divider,
-  useTheme,
-} from '@mui/material';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import {
   Facebook as FacebookIcon,
   Twitter as TwitterIcon,
   Instagram as InstagramIcon,
-  LinkedIn as LinkedInIcon,
-  Email as EmailIcon,
+  Linkedin as LinkedInIcon,
+  Mail as EmailIcon,
   Phone as PhoneIcon,
-  LocationOn as LocationIcon,
-  Business as BusinessIcon,
-} from '@mui/icons-material';
+  MapPin as LocationIcon,
+  Building as BusinessIcon,
+} from 'lucide-react';
 
 const Footer: React.FC = () => {
-  const theme = useTheme();
-
   const footerSections = [
     {
       title: 'TradeConnect',
@@ -62,247 +55,149 @@ const Footer: React.FC = () => {
   ];
 
   const socialLinks = [
-    { icon: <FacebookIcon />, href: 'https://facebook.com/tradeconnect', label: 'Facebook' },
-    { icon: <TwitterIcon />, href: 'https://twitter.com/tradeconnect', label: 'Twitter' },
-    { icon: <InstagramIcon />, href: 'https://instagram.com/tradeconnect', label: 'Instagram' },
-    { icon: <LinkedInIcon />, href: 'https://linkedin.com/company/tradeconnect', label: 'LinkedIn' },
+    { icon: <FacebookIcon className="h-5 w-5" />, href: 'https://facebook.com/tradeconnect', label: 'Facebook' },
+    { icon: <TwitterIcon className="h-5 w-5" />, href: 'https://twitter.com/tradeconnect', label: 'Twitter' },
+    { icon: <InstagramIcon className="h-5 w-5" />, href: 'https://instagram.com/tradeconnect', label: 'Instagram' },
+    { icon: <LinkedInIcon className="h-5 w-5" />, href: 'https://linkedin.com/company/tradeconnect', label: 'LinkedIn' },
   ];
 
   return (
-    <Box
-      component="footer"
-      sx={{
-        background: `linear-gradient(135deg, ${theme.palette.grey[900]}, ${theme.palette.grey[800]})`,
-        color: 'white',
-        mt: 'auto',
-        py: 6,
-      }}
-    >
-      <Container maxWidth="lg">
+    <footer className="bg-gradient-to-br from-gray-900 to-gray-800 text-white mt-auto py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
-        <Grid container spacing={4} sx={{ mb: 4 }}>
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-8 mb-8">
           {/* Brand Section */}
-          <Grid item xs={12} md={4}>
-            <Box component={"div" as any} sx={{ mb: 3 }}>
-              <Typography
-                variant="h6"
-                component="a"
-                href="/"
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  textDecoration: 'none',
-                  color: 'primary.main',
-                  fontWeight: 'bold',
-                  mb: 2,
-                }}
+          <div className="md:col-span-2">
+            <div className="mb-6">
+              <Link
+                to="/"
+                className="flex items-center space-x-2 text-primary font-bold text-xl hover:opacity-80 transition-opacity mb-4"
               >
-                <BusinessIcon sx={{ fontSize: 28 }} />
-                TradeConnect
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, color: 'grey.300' }}>
+                <BusinessIcon className="h-7 w-7" />
+                <span>TradeConnect</span>
+              </Link>
+              <p className="text-gray-300 text-sm mb-4">
                 Plataforma E-commerce de Eventos y Cursos Empresariales con facturación FEL Guatemala.
                 Conectamos empresas con profesionales para el desarrollo continuo.
-              </Typography>
-            </Box>
+              </p>
+            </div>
 
             {/* Contact Info */}
-            <Box component={"div" as any} sx={{ mb: 3 }}>
-              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <EmailIcon sx={{ mr: 1, fontSize: 18, color: 'primary.main' }} />
-                <Typography
-                  component="a"
+            <div className="mb-6">
+              <div className="flex items-center mb-2">
+                <EmailIcon className="h-4 w-4 text-primary mr-2" />
+                <a
                   href="mailto:info@tradeconnect.gt"
-                  variant="body2"
-                  color="inherit"
-                  sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
+                  className="text-white hover:text-primary transition-colors text-sm"
                 >
                   info@tradeconnect.gt
-                </Typography>
-              </Box>
-              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <PhoneIcon sx={{ mr: 1, fontSize: 18, color: 'primary.main' }} />
-                <Typography
-                  component="a"
+                </a>
+              </div>
+              <div className="flex items-center mb-2">
+                <PhoneIcon className="h-4 w-4 text-primary mr-2" />
+                <a
                   href="tel:+50212345678"
-                  variant="body2"
-                  color="inherit"
-                  sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
+                  className="text-white hover:text-primary transition-colors text-sm"
                 >
                   +502 1234-5678
-                </Typography>
-              </Box>
-              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                <LocationIcon sx={{ mr: 1, mt: 0.5, fontSize: 18, color: 'primary.main' }} />
-                <Typography variant="body2" color="grey.300">
+                </a>
+              </div>
+              <div className="flex items-start">
+                <LocationIcon className="h-4 w-4 text-primary mr-2 mt-0.5" />
+                <span className="text-gray-300 text-sm">
                   Ciudad de Guatemala, Guatemala
-                </Typography>
-              </Box>
-            </Box>
+                </span>
+              </div>
+            </div>
 
             {/* Social Links */}
-            <Box component={"div" as any}>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                Síguenos
-              </Typography>
-              <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
+            <div>
+              <h3 className="font-semibold mb-2 text-sm">Síguenos</h3>
+              <div className="flex space-x-2">
                 {socialLinks.map((social) => (
-                  <IconButton
+                  <a
                     key={social.label}
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    sx={{
-                      color: 'grey.400',
-                      '&:hover': {
-                        color: 'primary.main',
-                        backgroundColor: 'rgba(107, 30, 34, 0.1)',
-                      },
-                    }}
+                    className="text-gray-400 hover:text-primary transition-colors p-2 rounded hover:bg-primary/10"
                     aria-label={social.label}
                   >
                     {social.icon}
-                  </IconButton>
+                  </a>
                 ))}
-              </Box>
-            </Box>
-          </Grid>
+              </div>
+            </div>
+          </div>
 
           {/* Footer Links */}
           {footerSections.map((section) => (
-            <Grid item xs={6} sm={3} md={2} key={section.title}>
-              <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
-                {section.title}
-              </Typography>
-              <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
+            <div key={section.title} className="col-span-1">
+              <h3 className="font-semibold mb-4 text-sm">{section.title}</h3>
+              <ul className="space-y-2">
                 {section.items.map((item) => (
-                  <Box component="li" key={item.label} sx={{ mb: 1 }}>
-                    <Typography
-                      component="a"
+                  <li key={item.label}>
+                    <a
                       href={item.href}
-                      variant="body2"
-                      sx={{
-                        color: 'grey.300',
-                        textDecoration: 'none',
-                        fontSize: '0.875rem',
-                        '&:hover': {
-                          color: 'primary.main',
-                          textDecoration: 'underline',
-                        },
-                      }}
+                      className="text-gray-300 hover:text-primary transition-colors text-sm"
                     >
                       {item.label}
-                    </Typography>
-                  </Box>
+                    </a>
+                  </li>
                 ))}
-              </Box>
-            </Grid>
+              </ul>
+            </div>
           ))}
-        </Grid>
+        </div>
 
-        <Divider sx={{ bgcolor: 'grey.700', my: 3 }} />
+        <Separator className="my-8 bg-gray-700" />
 
         {/* Newsletter Section */}
-        <Box component={"div" as any} sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2, color: 'primary.main' }}>
-            Mantente informado
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 2, color: 'grey.300' }}>
+        <div className="text-center mb-8">
+          <h3 className="text-primary font-semibold mb-4">Mantente informado</h3>
+          <p className="text-gray-300 text-sm mb-4">
             Suscríbete a nuestro newsletter para recibir las últimas novedades sobre eventos y cursos.
-          </Typography>
-          <Box
-            component="form"
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              maxWidth: 400,
-              mx: 'auto',
-              gap: 1,
-            }}
-          >
-            <input
+          </p>
+          <form className="flex justify-center max-w-md mx-auto gap-2">
+            <Input
               type="email"
               placeholder="Tu email"
-              style={{
-                flex: 1,
-                padding: '8px 16px',
-                border: '1px solid #555',
-                borderRadius: '4px',
-                backgroundColor: '#333',
-                color: 'white',
-                fontSize: '14px',
-              }}
+              className="flex-1 bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
             />
-            <button
-              type="submit"
-              style={{
-                padding: '8px 16px',
-                backgroundColor: theme.palette.primary.main,
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 'bold',
-              }}
-            >
+            <Button type="submit" className="px-6">
               Suscribirse
-            </button>
-          </Box>
-        </Box>
+            </Button>
+          </form>
+        </div>
 
-        <Divider sx={{ bgcolor: 'grey.700', my: 3 }} />
+        <Separator className="my-8 bg-gray-700" />
 
         {/* Bottom Section */}
-        <Box
-          component={"div" as any}
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <Typography variant="body2" color="grey.400">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-gray-400 text-sm">
             © {new Date().getFullYear()} TradeConnect. Todos los derechos reservados.
-          </Typography>
+          </p>
 
-          <Box component={"div" as any} sx={{ display: 'flex', gap: 3 }}>
-            <Typography
-              component="a"
+          <div className="flex space-x-6">
+            <a
               href="/terms"
-              variant="body2"
-              sx={{
-                color: 'grey.400',
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                '&:hover': { color: 'primary.main' },
-              }}
+              className="text-gray-400 hover:text-primary transition-colors text-sm"
             >
               Términos
-            </Typography>
-            <Typography
-              component="a"
+            </a>
+            <a
               href="/privacy"
-              variant="body2"
-              sx={{
-                color: 'grey.400',
-                textDecoration: 'none',
-                fontSize: '0.875rem',
-                '&:hover': { color: 'primary.main' },
-              }}
+              className="text-gray-400 hover:text-primary transition-colors text-sm"
             >
               Privacidad
-            </Typography>
-            <Typography variant="body2" color="grey.400" sx={{ fontSize: '0.875rem' }}>
+            </a>
+            <span className="text-gray-400 text-sm">
               SAT/FEL Certificado
-            </Typography>
-          </Box>
-        </Box>
-      </Container>
-    </Box>
+            </span>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 };
 

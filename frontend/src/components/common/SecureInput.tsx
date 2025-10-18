@@ -1,18 +1,15 @@
 import React, { useState, useCallback } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
-  TextField,
-  InputAdornment,
-  IconButton,
-  FormHelperText,
-  Box,
-} from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  Error,
+  Eye,
+  EyeOff,
+  X,
   CheckCircle,
-} from '@mui/icons-material';
+} from 'lucide-react';
 import { securityUtils } from '@/utils/security';
+import { cn } from '@/lib/utils';
 
 interface SecureInputProps {
   label: string;

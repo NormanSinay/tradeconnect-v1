@@ -1,15 +1,10 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Divider,
-  Alert,
-  CardMedia,
-  Chip,
-} from '@mui/material';
-import { Security, CheckCircle } from '@mui/icons-material';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Shield, CheckCircle } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { cn } from '@/lib/utils';
 
 interface CheckoutSummaryProps {
   showSecurityBadge?: boolean;
@@ -27,18 +22,10 @@ const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
   }
 
   return (
-    <Paper
-      sx={{
-        p: 3,
-        position: 'sticky',
-        top: 24,
-        maxHeight: 'calc(100vh - 48px)',
-        overflowY: 'auto',
-      }}
-    >
-      <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+    <Card className="p-6 sticky top-6 max-h-[calc(100vh-48px)] overflow-y-auto">
+      <h3 className="text-lg font-bold mb-6">
         Resumen del Pedido
-      </Typography>
+      </h3>
 
       {/* Cart Items */}
       <Box component={"div" as any} sx={{ mb: 3 }}>

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install -D tailwindcss@latest postcss@latest autoprefixer@latest @astrojs/tailwind@latest)",
+      "Bash(npm install -D tailwindcss@^3.4.0 postcss@latest autoprefixer@latest @astrojs/tailwind@^5.1.0)",
+      "Bash(npm install -D tailwindcss@^3.4.0 postcss@latest autoprefixer@latest @astrojs/tailwind@^5.1.0 --legacy-peer-deps)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

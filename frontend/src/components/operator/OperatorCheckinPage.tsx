@@ -1,34 +1,21 @@
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
-  Container,
-  Typography,
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Paper,
-  Button,
-  TextField,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Avatar,
-  Chip,
-  Alert,
-  Divider,
-  IconButton,
-} from '@mui/material';
-import {
-  QrCodeScanner,
+  QrCode,
   CheckCircle,
-  Cancel,
-  Person,
-  Event,
-  AccessTime,
-  Refresh,
+  X,
+  User,
+  Calendar,
+  Clock,
+  RefreshCw,
   Search,
-} from '@mui/icons-material';
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const OperatorCheckinPage: React.FC = () => {
   const [scanResult, setScanResult] = useState<any>(null);

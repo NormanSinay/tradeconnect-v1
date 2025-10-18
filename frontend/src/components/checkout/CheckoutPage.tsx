@@ -1,49 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Container,
-  Typography,
-  Box,
-  Paper,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Grid,
-  TextField,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Divider,
-  Alert,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  CircularProgress,
-  InputAdornment,
-  IconButton,
-} from '@mui/material';
-import {
-  Person,
+  User,
   CreditCard,
   CheckCircle,
-  ArrowBack,
-  ArrowForward,
+  ArrowLeft,
+  ArrowRight,
   Phone,
-  Email,
-  Business,
-  LocationOn,
-  Payment,
-  Security,
+  Mail,
+  Building2,
+  MapPin,
+  Wallet,
+  Shield,
   Lock,
-} from '@mui/icons-material';
+} from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-hot-toast';
 import type { CheckoutForm } from '@/types';
+import { cn } from '@/lib/utils';
 
 const steps = ['Información Personal', 'Método de Pago', 'Confirmación'];
 

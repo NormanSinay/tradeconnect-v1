@@ -1,37 +1,20 @@
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
 import {
-  Container,
-  Typography,
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Paper,
-  Tabs,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Avatar,
-  Button,
-  TextField,
-  Rating,
-  LinearProgress,
-  Divider,
-} from '@mui/material';
-import {
-  Person,
-  AttachMoney,
-  Description,
+  FileText,
+  DollarSign,
   Star,
   Edit,
-  LinkedIn,
-  Language,
-} from '@mui/icons-material';
+  Linkedin,
+  Globe,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface TabPanelProps {
   children?: React.ReactNode;

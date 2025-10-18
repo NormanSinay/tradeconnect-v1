@@ -1,27 +1,18 @@
 import React from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Box,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Drawer,
-  useMediaQuery,
-  useTheme,
-  IconButton,
-  Typography,
-} from '@mui/material';
-import {
-  Person,
-  Event,
-  School,
+  User,
+  Calendar,
+  GraduationCap,
   Receipt,
   Settings,
   Lock,
   Shield,
-  Close,
-} from '@mui/icons-material';
+  X,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export type ProfileSection =
   | 'profile'

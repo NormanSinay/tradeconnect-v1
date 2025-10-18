@@ -1,22 +1,20 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  Badge,
-  IconButton,
   Popover,
-  Box,
-  Typography,
-  Button,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Avatar,
-  Chip,
-} from '@mui/material';
-import { ShoppingCart, Add, Remove } from '@mui/icons-material';
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  ShoppingCart,
+  Plus,
+  Minus,
+} from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { cn } from '@/lib/utils';
 
 interface MiniCartProps {
   anchorEl: HTMLElement | null;

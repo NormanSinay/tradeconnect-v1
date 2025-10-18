@@ -1,20 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
-  Fab,
-  Box,
-  Typography,
-  Paper,
-  IconButton,
-  CircularProgress,
-  useTheme,
-} from '@mui/material';
-import {
-  Mic as MicIcon,
-  MicOff as MicOffIcon,
-  Close as CloseIcon,
-  VolumeUp as VolumeUpIcon,
-} from '@mui/icons-material';
-import { styled, keyframes } from '@mui/material/styles';
+  Mic,
+  MicOff,
+  X,
+  Volume2,
+  Loader2,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Animations
 const pulse = keyframes`

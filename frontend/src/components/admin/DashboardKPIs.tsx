@@ -1,23 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  useTheme,
-  Skeleton,
-  Tooltip,
-} from '@mui/material';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   TrendingUp,
   TrendingDown,
-  Event as EventIcon,
-  AttachMoney,
-  People,
-  CardMembership,
-} from '@mui/icons-material';
+  Calendar,
+  DollarSign,
+  Users,
+  Award,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export interface KPIData {
   label: string;

@@ -1,31 +1,20 @@
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
-  Box,
-  Container,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Alert,
-  IconButton,
-  Divider,
-} from '@mui/material';
-import {
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  LocationOn as LocationIcon,
-  Send as SendIcon,
-  Business as BusinessIcon,
-  Support as SupportIcon,
-  ReportProblem as ReportIcon,
-} from '@mui/icons-material';
-import { useTheme } from '@mui/material/styles';
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+  Building,
+  HeadphonesIcon,
+  AlertTriangle,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const ContactPage: React.FC = () => {
   const theme = useTheme();

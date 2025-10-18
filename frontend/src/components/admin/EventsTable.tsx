@@ -1,46 +1,26 @@
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Chip,
-  TextField,
-  InputAdornment,
-  Button,
-  Menu,
-  MenuItem,
-  Checkbox,
-  Toolbar,
-  Typography,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  TableSortLabel,
-  useTheme,
-} from '@mui/material';
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Visibility as ViewIcon,
-  MoreVert as MoreVertIcon,
-  Search as SearchIcon,
-  FilterList as FilterIcon,
-  Publish as PublishIcon,
-  ContentCopy as DuplicateIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
+  Edit,
+  Trash2,
+  Eye,
+  MoreVertical,
+  Search,
+  Filter,
+  Upload,
+  Copy,
+  Plus,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 export interface Event {
   id: string | number;

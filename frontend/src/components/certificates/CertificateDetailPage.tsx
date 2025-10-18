@@ -1,44 +1,28 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  Box,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Divider,
-  Avatar,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  IconButton,
-  Tooltip,
-  Skeleton,
-} from '@mui/material';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Download,
   Share,
   QrCode,
   CheckCircle,
-  Business,
-  School,
-  Event,
-  CalendarToday,
-  LocationOn,
-  Person,
-  Verified,
-  ArrowBack,
-  Print,
-  Email,
-} from '@mui/icons-material';
+  Building,
+  GraduationCap,
+  Calendar,
+  MapPin,
+  User,
+  ShieldCheck,
+  ArrowLeft,
+  Printer,
+  Mail,
+} from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { cn } from '@/lib/utils';
 
 interface Certificate {
   id: string;

@@ -1,36 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Divider,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  IconButton,
-  Chip,
-  Alert,
-  LinearProgress,
-  Tooltip,
-  Stack,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   ShoppingCart,
-  Add,
-  Remove,
-  Person,
-  Business,
-  LocalOffer,
+  Plus,
+  Minus,
+  User,
+  Building,
+  Tag,
   Info,
   CheckCircle,
-  Schedule,
-  Group,
-} from '@mui/icons-material';
+  Calendar,
+  Users,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Event } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface ReservationSidebarProps {
   event: Event;
@@ -113,109 +103,94 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
   };
 
   return (
-    <Box
-      component={motion.div}
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      sx={{
-        position: 'sticky',
-        top: isSticky ? 24 : 100,
-        transition: 'top 0.3s ease',
-      }}
+      className={cn(
+        'sticky transition-all duration-300',
+        isSticky ? 'top-6' : 'top-24'
+      )}
     >
-      <Paper
-        elevation={isSticky ? 8 : 3}
-        sx={{
-          p: 3,
-          transition: 'all 0.3s ease',
-          border: 2,
-          borderColor: isSticky ? 'primary.main' : 'transparent',
-        }}
-      >
+      <Card className={cn(
+        'p-6 transition-all duration-300',
+        isSticky ? 'border-2 border-primary' : 'border'
+      )}>
         {/* Price Section */}
-        <Box component={"div" as any} sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+        <div className="mb-6">
+          <h3 className="text-xl font-bold mb-2">
             Reserva tu lugar
-          </Typography>
+          </h3>
 
-          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1 }}>
-            <Typography variant="h3" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+          <div className="flex items-baseline gap-2 mb-2">
+            <span className="text-3xl font-bold text-primary">
               {basePrice === 0 ? 'Gratis' : `Q${basePrice.toLocaleString()}`}
-            </Typography>
+            </span>
             {event.earlyBirdPrice && event.earlyBirdDeadline && (
-              <Typography
-                variant="h6"
-                sx={{
-                  textDecoration: 'line-through',
-                  color: 'text.secondary',
-                }}
-              >
+              <span className="text-lg text-muted-foreground line-through">
                 Q{event.earlyBirdPrice.toLocaleString()}
-              </Typography>
+              </span>
             )}
-          </Box>
+          </div>
 
           {event.earlyBirdPrice && event.earlyBirdDeadline && (
-            <Chip
-              icon={<LocalOffer />}
-              label={`Descuento early bird hasta ${formatDate(event.earlyBirdDeadline)}`}
-              color="warning"
-              size="small"
-              sx={{ mb: 2 }}
-            />
+            <Badge variant="secondary" className="mb-3 bg-yellow-100 text-yellow-800">
+              <Tag className="h-3 w-3 mr-1" />
+              Descuento early bird hasta {formatDate(event.earlyBirdDeadline)}
+            </Badge>
           )}
 
-          <Typography variant="caption" color="text.secondary">
+          <p className="text-xs text-muted-foreground">
             Por participante
-          </Typography>
-        </Box>
+          </p>
+        </div>
 
-        <Divider sx={{ mb: 3 }} />
+        <hr className="mb-6" />
 
         {/* Capacity Indicator */}
-        <Box component={"div" as any} sx={{ mb: 3 }}>
-          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-            <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Group sx={{ fontSize: 20, color: 'text.secondary' }} />
-              <Typography variant="body2" color="text.secondary">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1">
+              <Users className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
                 Capacidad
-              </Typography>
-            </Box>
-            <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+              </span>
+            </div>
+            <span className="text-sm font-medium">
               {event.availableSpots} / {event.capacity}
-            </Typography>
-          </Box>
+            </span>
+          </div>
 
-          <LinearProgress
-            variant="determinate"
-            value={capacityPercentage}
-            sx={{
-              height: 8,
-              borderRadius: 4,
-              bgcolor: 'grey.200',
-              '& .MuiLinearProgress-bar': {
-                bgcolor: isSoldOut
-                  ? 'error.main'
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className={cn(
+                'h-2 rounded-full transition-all duration-300',
+                isSoldOut
+                  ? 'bg-red-500'
                   : isLowCapacity
-                  ? 'warning.main'
-                  : 'success.main',
-              },
-            }}
-          />
+                  ? 'bg-yellow-500'
+                  : 'bg-green-500'
+              )}
+              style={{ width: `${capacityPercentage}%` }}
+            />
+          </div>
 
           {isLowCapacity && !isSoldOut && (
-            <Alert severity="warning" sx={{ mt: 1 }}>
-              ¡Solo quedan {event.availableSpots} plazas!
+            <Alert className="mt-2 border-yellow-200 bg-yellow-50">
+              <AlertDescription className="text-yellow-800">
+                ¡Solo quedan {event.availableSpots} plazas!
+              </AlertDescription>
             </Alert>
           )}
 
           {isSoldOut && (
-            <Alert severity="error" sx={{ mt: 1 }}>
-              Evento agotado
+            <Alert className="mt-2 border-red-200 bg-red-50">
+              <AlertDescription className="text-red-800">
+                Evento agotado
+              </AlertDescription>
             </Alert>
           )}
-        </Box>
+        </div>
 
         {/* Participant Type Selector */}
         <FormControl fullWidth sx={{ mb: 2 }}>

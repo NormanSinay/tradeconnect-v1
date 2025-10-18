@@ -1,34 +1,25 @@
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Button,
-  Tabs,
-  Tab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  Alert,
-} from '@mui/material';
-import {
-  CalendarToday,
-  LocationOn,
+  Calendar,
+  MapPin,
   QrCode,
-  Event as EventIcon,
+  Calendar as EventIcon,
   Download,
-  Videocam,
-  Close,
-} from '@mui/icons-material';
+  Video,
+  X,
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '@/services/api';
 import type { EventRegistration, ApiResponse } from '@/types';
 import { toast } from 'react-hot-toast';
+import { cn } from '@/lib/utils';
 
 type EventFilter = 'upcoming' | 'past' | 'cancelled';
 

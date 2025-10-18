@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Grid,
-  Button,
-  CircularProgress,
-  Alert,
-  LinearProgress,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import {
   Save,
   Lock,
   CheckCircle,
-  Error as ErrorIcon,
-} from '@mui/icons-material';
+  AlertTriangle,
+} from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -21,6 +18,7 @@ import { VALIDATION_RULES } from '@/utils/constants';
 import { authService } from '@/services/api';
 import { toast } from 'react-hot-toast';
 import SecureInput from '@/components/common/SecureInput';
+import { cn } from '@/lib/utils';
 
 // Validation schema
 const changePasswordSchema = yup.object({

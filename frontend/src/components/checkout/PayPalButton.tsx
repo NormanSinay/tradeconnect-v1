@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Alert, CircularProgress } from '@mui/material';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 
 interface PayPalButtonProps {
@@ -63,24 +64,24 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
 
   if (loading) {
     return (
-      <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-8">
+        <Skeleton className="h-32 w-full" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
-        {error}
+      <Alert variant="destructive" className="mb-4">
+        <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
   }
 
   if (!clientId) {
     return (
-      <Alert severity="warning" sx={{ mb: 2 }}>
-        PayPal no está disponible en este momento
+      <Alert className="mb-4">
+        <AlertDescription>PayPal no está disponible en este momento</AlertDescription>
       </Alert>
     );
   }
@@ -93,7 +94,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
         intent: 'capture',
       }}
     >
-      <Box component={"div" as any} sx={{ minHeight: 200 }}>
+      <div className="min-h-52">
         <PayPalButtons
           style={{
             layout: 'vertical',
@@ -111,7 +112,7 @@ const PayPalButton: React.FC<PayPalButtonProps> = ({
             if (onCancel) onCancel();
           }}
         />
-      </Box>
+      </div>
     </PayPalScriptProvider>
   );
 };

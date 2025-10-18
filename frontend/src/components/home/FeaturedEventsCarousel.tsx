@@ -1,28 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  IconButton,
-  Card,
-  CardMedia,
-  CardContent,
-  CardActions,
-  Button,
-  Chip,
-  useTheme,
-  useMediaQuery,
-} from '@mui/material';
-import {
-  ChevronLeft,
-  ChevronRight,
-  CalendarToday,
-  LocationOn,
-  People,
-  ArrowForward,
-} from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { FaChevronLeft, FaChevronRight, FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaArrowRight } from 'react-icons/fa';
 import type { Event } from '@/types';
 
 interface FeaturedEventsCarouselProps {
@@ -30,14 +12,11 @@ interface FeaturedEventsCarouselProps {
 }
 
 const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events }) => {
-  const theme = useTheme();
   const navigate = useNavigate();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const itemsPerView = isMobile ? 1 : isTablet ? 2 : 3;
+  const itemsPerView = 3; // Default to 3 items per view for desktop
   const maxIndex = Math.max(0, events.length - itemsPerView);
 
   const handlePrevious = () => {
@@ -73,64 +52,38 @@ const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events 
   }
 
   return (
-    <Box component={"div" as any} sx={{ py: 8, bgcolor: 'background.default' }}>
-      <Container maxWidth="lg">
+    <section className="py-16 bg-gray-50">
+      <div className="container mx-auto px-4">
         {/* Header */}
-        <Box
-          component={"div" as any}
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 4,
-          }}
-        >
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: 'bold',
-              color: 'primary.main',
-            }}
-          >
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="text-3xl md:text-4xl font-bold text-primary">
             Eventos Destacados
-          </Typography>
+          </h3>
 
-          <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
-            <IconButton
+          <div className="flex gap-2">
+            <Button
               onClick={handlePrevious}
               disabled={currentIndex === 0}
-              sx={{
-                bgcolor: 'primary.main',
-                color: 'white',
-                '&:hover': { bgcolor: 'primary.dark' },
-                '&.Mui-disabled': {
-                  bgcolor: 'grey.300',
-                  color: 'grey.500',
-                },
-              }}
+              variant="default"
+              size="sm"
+              className="bg-primary hover:bg-primary/90 disabled:bg-gray-300 disabled:text-gray-500"
             >
-              <ChevronLeft />
-            </IconButton>
-            <IconButton
+              <FaChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
               onClick={handleNext}
               disabled={currentIndex >= maxIndex}
-              sx={{
-                bgcolor: 'primary.main',
-                color: 'white',
-                '&:hover': { bgcolor: 'primary.dark' },
-                '&.Mui-disabled': {
-                  bgcolor: 'grey.300',
-                  color: 'grey.500',
-                },
-              }}
+              variant="default"
+              size="sm"
+              className="bg-primary hover:bg-primary/90 disabled:bg-gray-300 disabled:text-gray-500"
             >
-              <ChevronRight />
-            </IconButton>
-          </Box>
-        </Box>
+              <FaChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
 
         {/* Carousel */}
-        <Box component={"div" as any} sx={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="relative overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -139,164 +92,106 @@ const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events 
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.3 }}
             >
-              <Box
-                component={"div" as any}
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: {
-                    xs: '1fr',
-                    sm: 'repeat(2, 1fr)',
-                    md: 'repeat(3, 1fr)',
-                  },
-                  gap: 3,
-                }}
-              >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {events.slice(currentIndex, currentIndex + itemsPerView).map((event) => (
                   <Card
                     key={event.id}
-                    sx={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        transform: 'translateY(-8px)',
-                        boxShadow: 6,
-                      },
-                    }}
+                    className="h-full flex flex-col transition-all duration-300 cursor-pointer hover:-translate-y-2 hover:shadow-lg"
                     onClick={() => handleEventClick(event.id)}
                   >
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={
-                        event.media?.[0]?.filePath ||
-                        'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400'
-                      }
-                      alt={event.title}
-                      sx={{ objectFit: 'cover' }}
-                    />
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={
+                          event.media?.[0]?.filePath ||
+                          'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400'
+                        }
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-                    <CardContent sx={{ flexGrow: 1 }}>
+                    <CardContent className="flex-grow">
                       {/* Featured Badge */}
                       {event.isFeatured && (
-                        <Chip
-                          label="Destacado"
-                          size="small"
-                          sx={{
-                            bgcolor: 'accent.main',
-                            color: 'white',
-                            fontWeight: 'bold',
-                            mb: 1,
-                          }}
-                        />
+                        <Badge className="bg-accent text-white font-bold mb-2">
+                          Destacado
+                        </Badge>
                       )}
 
                       {/* Title */}
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        sx={{
-                          fontWeight: 'bold',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                        }}
-                      >
+                      <h4 className="text-lg font-bold mb-2 line-clamp-2">
                         {event.title}
-                      </Typography>
+                      </h4>
 
                       {/* Short Description */}
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          mb: 2,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                        }}
-                      >
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                         {event.shortDescription || event.description}
-                      </Typography>
+                      </p>
 
                       {/* Event Info */}
-                      <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                        <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CalendarToday sx={{ fontSize: 16, color: 'text.secondary' }} />
-                          <Typography variant="body2" color="text.secondary">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <FaCalendarAlt className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm text-gray-600">
                             {formatDate(event.startDate)}
-                          </Typography>
-                        </Box>
+                          </span>
+                        </div>
 
                         {event.location && (
-                          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <LocationOn sx={{ fontSize: 16, color: 'text.secondary' }} />
-                            <Typography variant="body2" color="text.secondary">
+                          <div className="flex items-center gap-2">
+                            <FaMapMarkerAlt className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm text-gray-600">
                               {event.location}
-                            </Typography>
-                          </Box>
+                            </span>
+                          </div>
                         )}
 
-                        <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <People sx={{ fontSize: 16, color: 'text.secondary' }} />
-                          <Typography variant="body2" color="text.secondary">
+                        <div className="flex items-center gap-2">
+                          <FaUsers className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm text-gray-600">
                             {event.availableSpots} cupos disponibles
-                          </Typography>
-                        </Box>
-                      </Box>
+                          </span>
+                        </div>
+                      </div>
 
                       {/* Price */}
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          mt: 2,
-                          fontWeight: 'bold',
-                          color: 'primary.main',
-                        }}
-                      >
+                      <p className="text-lg font-bold text-primary mt-4">
                         {formatCurrency(event.price, event.currency)}
-                      </Typography>
+                      </p>
                     </CardContent>
 
-                    <CardActions sx={{ p: 2, pt: 0 }}>
+                    <div className="p-4 pt-0">
                       <Button
-                        variant="contained"
-                        fullWidth
-                        endIcon={<ArrowForward />}
+                        className="w-full"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEventClick(event.id);
                         }}
                       >
                         Ver Detalles
+                        <FaArrowRight className="w-4 h-4 ml-2" />
                       </Button>
-                    </CardActions>
+                    </div>
                   </Card>
                 ))}
-              </Box>
+              </div>
             </motion.div>
           </AnimatePresence>
-        </Box>
+        </div>
 
         {/* View All Button */}
-        <Box component={"div" as any} sx={{ textAlign: 'center', mt: 4 }}>
+        <div className="text-center mt-8">
           <Button
-            variant="outlined"
-            size="large"
-            endIcon={<ArrowForward />}
+            variant="outline"
+            size="lg"
             onClick={() => navigate('/events')}
           >
             Ver Todos los Eventos
+            <FaArrowRight className="w-4 h-4 ml-2" />
           </Button>
-        </Box>
-      </Container>
-    </Box>
+        </div>
+      </div>
+    </section>
   );
 };
 

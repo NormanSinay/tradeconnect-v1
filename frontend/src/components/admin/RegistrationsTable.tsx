@@ -1,45 +1,23 @@
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Chip,
-  TextField,
-  InputAdornment,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Typography,
-  Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Toolbar,
-  Tooltip,
-  useTheme,
-} from '@mui/material';
-import {
-  Visibility as ViewIcon,
-  Close as CloseIcon,
-  GetApp as ExportIcon,
-  Search as SearchIcon,
-  FilterList as FilterIcon,
-  MoneyOff as RefundIcon,
-  Cancel as CancelIcon,
-} from '@mui/icons-material';
+  Eye,
+  X,
+  Download,
+  Search,
+  Filter,
+  DollarSign,
+  XCircle,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 export interface Registration {
   id: string | number;

@@ -1,17 +1,7 @@
 import React from 'react';
-import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  useTheme,
-  Skeleton,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   LineChart,
   Line,
@@ -30,6 +20,7 @@ import {
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 export interface ChartData {
   revenue?: Array<{ date: string; amount: number }>;

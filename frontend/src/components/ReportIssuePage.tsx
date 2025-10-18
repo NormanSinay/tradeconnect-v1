@@ -1,34 +1,22 @@
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import {
-  Box,
-  Container,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Alert,
-  Chip,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormLabel,
-  Divider,
-} from '@mui/material';
-import {
-  BugReport as BugIcon,
-  Security as SecurityIcon,
-  Warning as WarningIcon,
-  Help as HelpIcon,
-  Send as SendIcon,
-  PriorityHigh as PriorityIcon,
-} from '@mui/icons-material';
-import { useTheme } from '@mui/material/styles';
+  Bug,
+  Shield,
+  AlertTriangle,
+  HelpCircle,
+  Send,
+  AlertCircle,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const ReportIssuePage: React.FC = () => {
   const theme = useTheme();

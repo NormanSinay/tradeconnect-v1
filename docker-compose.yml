@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   postgres:
-    image: postgres:14
+    image: postgres:15
     environment:
       POSTGRES_DB: tradeconnect_dev
       POSTGRES_USER: tradeconnect_user
@@ -16,6 +16,8 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --requirepass tradeconnect_redis_password
+    volumes:
+      - redis_data:/data
 
   mailhog:
     image: mailhog/mailhog
@@ -23,5 +25,19 @@ services:
       - "8025:8025"
       - "1025:1025"
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@tradeconnect.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
 volumes:
   postgres_data:
+  redis_data:
+  pgadmin_data:

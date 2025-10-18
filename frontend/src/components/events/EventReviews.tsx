@@ -1,33 +1,25 @@
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
-  Box,
-  Paper,
-  Typography,
-  Rating,
-  Avatar,
-  Button,
-  Divider,
-  LinearProgress,
-  Grid,
-  Pagination,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  TextField,
-  IconButton,
-  Chip,
-} from '@mui/material';
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Star,
-  StarBorder,
-  ThumbUp,
-  ThumbUpOutlined,
-  VerifiedUser,
+  ThumbsUp,
+  ShieldCheck,
   Edit,
-  Close,
-} from '@mui/icons-material';
+  X,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export interface Review {
   id: number;
@@ -109,28 +101,32 @@ const EventReviews: React.FC<EventReviewsProps> = ({
   };
 
   return (
-    <Box component={"div" as any}>
+    <div>
       {/* Overall Rating Summary */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Grid container spacing={3}>
+      <Card className="p-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Average Rating */}
-          <Grid item xs={12} md={4}>
-            <Box component={"div" as any} sx={{ textAlign: 'center' }}>
-              <Typography variant="h2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                {averageRating.toFixed(1)}
-              </Typography>
-              <Rating
-                value={averageRating}
-                precision={0.1}
-                readOnly
-                size="large"
-                sx={{ mb: 1 }}
-              />
-              <Typography variant="body2" color="text.secondary">
-                Basado en {totalReviews || reviews.length} evaluaciones
-              </Typography>
-            </Box>
-          </Grid>
+          <div className="text-center">
+            <h2 className="text-4xl font-bold mb-2">
+              {averageRating.toFixed(1)}
+            </h2>
+            <div className="flex justify-center mb-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={cn(
+                    'h-6 w-6',
+                    star <= Math.round(averageRating)
+                      ? 'text-yellow-400 fill-current'
+                      : 'text-gray-300'
+                  )}
+                />
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Basado en {totalReviews || reviews.length} evaluaciones
+            </p>
+          </div>
 
           {/* Rating Distribution */}
           <Grid item xs={12} md={8}>

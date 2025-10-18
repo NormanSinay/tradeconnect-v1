@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Box,
-  TextField,
-  Typography,
-  FormControl,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  Alert,
-  CircularProgress,
-  InputAdornment,
-  IconButton,
-} from '@mui/material';
-import { CheckCircle, Error as ErrorIcon, Search } from '@mui/icons-material';
+  CheckCircle,
+  AlertTriangle,
+  Search,
+} from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { felService } from '@/services/felService';
 import { VALIDATION_RULES } from '@/utils/constants';
+import { cn } from '@/lib/utils';
 
 // Validation schema
 const nitSchema = yup.object({

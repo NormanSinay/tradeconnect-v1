@@ -1,31 +1,22 @@
 import React, { useState } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import {
-  Box,
-  Dialog,
-  DialogContent,
-  IconButton,
-  Grid,
-  Paper,
-  useTheme,
-  useMediaQuery,
-} from '@mui/material';
-import {
-  Close,
-  NavigateNext,
-  NavigateBefore,
+  X,
+  ChevronRight,
+  ChevronLeft,
   ZoomIn,
-  PlayArrow,
-} from '@mui/icons-material';
+  Play,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { EventMedia } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface EventGalleryProps {
   media: EventMedia[];
 }
 
 const EventGallery: React.FC<EventGalleryProps> = ({ media }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
@@ -61,32 +52,26 @@ const EventGallery: React.FC<EventGalleryProps> = ({ media }) => {
 
   if (!media || media.length === 0) {
     return (
-      <Paper sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Box component={"div" as any} sx={{ textAlign: 'center', color: 'text.secondary' }}>
+      <div className="h-96 flex items-center justify-center bg-muted rounded-lg">
+        <p className="text-center text-muted-foreground">
           No hay medios disponibles
-        </Box>
-      </Paper>
+        </p>
+      </div>
     );
   }
 
   return (
-    <Box component={"div" as any}>
+    <div>
       {/* Primary Display */}
-      <Paper sx={{ mb: 2, overflow: 'hidden', position: 'relative' }}>
+      <div className="mb-4 overflow-hidden relative bg-black rounded-lg">
         <motion.div
           key={selectedIndex}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <Box
-            component={"div" as any}
-            sx={{
-              position: 'relative',
-              height: isMobile ? 300 : 500,
-              bgcolor: 'black',
-              cursor: 'zoom-in',
-            }}
+          <div
+            className="relative h-80 md:h-[500px] bg-black cursor-zoom-in"
             onClick={handleOpenLightbox}
           >
             {selectedMedia?.fileType === 'image' ? (

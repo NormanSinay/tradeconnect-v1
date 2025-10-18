@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Container, Grid, Typography, useTheme } from '@mui/material';
 import { motion, useInView } from 'framer-motion';
-import {
-  Event as EventIcon,
-  People as PeopleIcon,
-  EmojiEvents as TrophyIcon,
-  BusinessCenter as BusinessIcon,
-} from '@mui/icons-material';
+import { FaCalendarAlt, FaUsers, FaTrophy, FaBuilding } from 'react-icons/fa';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Stat {
   icon: React.ReactElement;
@@ -18,28 +13,28 @@ interface Stat {
 
 const stats: Stat[] = [
   {
-    icon: <EventIcon sx={{ fontSize: 48 }} />,
+    icon: <FaCalendarAlt className="w-12 h-12" />,
     value: 500,
     label: 'Eventos Realizados',
     suffix: '+',
     color: '#E63946',
   },
   {
-    icon: <PeopleIcon sx={{ fontSize: 48 }} />,
+    icon: <FaUsers className="w-12 h-12" />,
     value: 50000,
     label: 'Participantes',
     suffix: '+',
     color: '#6B1E22',
   },
   {
-    icon: <TrophyIcon sx={{ fontSize: 48 }} />,
+    icon: <FaTrophy className="w-12 h-12" />,
     value: 45000,
     label: 'Certificados Emitidos',
     suffix: '+',
     color: '#E63946',
   },
   {
-    icon: <BusinessIcon sx={{ fontSize: 48 }} />,
+    icon: <FaBuilding className="w-12 h-12" />,
     value: 200,
     label: 'Empresas Participantes',
     suffix: '+',
@@ -96,106 +91,61 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 };
 
 const StatsSection: React.FC = () => {
-  const theme = useTheme();
-
   return (
-    <Box
-      component={"div" as any}
-      sx={{
-        py: 8,
-        background: `linear-gradient(135deg, ${theme.palette.grey[50]} 0%, ${theme.palette.grey[100]} 100%)`,
-      }}
-    >
-      <Container maxWidth="lg">
+    <section className="py-16 bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <Typography
-            variant="h3"
-            align="center"
-            gutterBottom
-            sx={{
-              fontWeight: 'bold',
-              color: 'primary.main',
-              mb: 6,
-            }}
-          >
+          <h3 className="text-3xl md:text-4xl font-bold text-center text-primary mb-12">
             TradeConnect en Números
-          </Typography>
+          </h3>
         </motion.div>
 
-        <Grid container spacing={4}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Box
-                  component={"div" as any}
-                  sx={{
-                    textAlign: 'center',
-                    p: 3,
-                    borderRadius: 2,
-                    background: 'white',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
-                    },
-                  }}
-                >
-                  <Box
-                    component={"div" as any}
-                    sx={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: 80,
-                      height: 80,
-                      borderRadius: '50%',
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <Card className="text-center p-6 bg-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <CardContent className="p-0">
+                  <div
+                    className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4"
+                    style={{
                       background: `linear-gradient(135deg, ${stat.color}22 0%, ${stat.color}44 100%)`,
                       color: stat.color,
-                      mb: 2,
                     }}
                   >
                     {stat.icon}
-                  </Box>
+                  </div>
 
-                  <Typography
-                    variant="h3"
-                    sx={{
-                      fontWeight: 'bold',
-                      color: stat.color,
-                      mb: 1,
-                    }}
+                  <h4
+                    className="text-2xl md:text-3xl font-bold mb-2"
+                    style={{ color: stat.color }}
                   >
                     <AnimatedCounter
                       target={stat.value}
                       suffix={stat.suffix}
                     />
-                  </Typography>
+                  </h4>
 
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    sx={{ fontWeight: 500 }}
-                  >
+                  <p className="text-gray-600 font-medium">
                     {stat.label}
-                  </Typography>
-                </Box>
-              </motion.div>
-            </Grid>
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </Grid>
-      </Container>
-    </Box>
+        </div>
+      </div>
+    </section>
   );
 };
 

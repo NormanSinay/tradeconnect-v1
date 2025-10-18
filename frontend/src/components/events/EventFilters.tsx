@@ -1,40 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
 import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Slider,
-  Button,
-  Chip,
   Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Checkbox,
-  FormControlLabel,
-  InputAdornment,
-  IconButton,
-  CircularProgress,
-} from '@mui/material';
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import {
-  ExpandMore,
   Search,
-  Clear,
-  FilterList,
-  LocationOn,
-  CalendarToday,
-  AttachMoney,
-} from '@mui/icons-material';
-// Date pickers temporarily disabled - will be implemented later
-// import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-// import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-// import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+  X,
+  Filter,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Loader2,
+} from 'lucide-react';
 import { es } from 'date-fns/locale';
 import type { EventFilters as EventFiltersType, EventCategory, EventType } from '@/types/event.types';
+import { cn } from '@/lib/utils';
 
 interface EventFiltersProps {
   filters: EventFiltersType;
@@ -113,12 +102,12 @@ const EventFilters: React.FC<EventFiltersProps> = ({
     });
   };
 
-  const handlePriceRangeChange = (_event: Event, newValue: number | number[]) => {
+  const handlePriceRangeChange = (newValue: number[]) => {
     const [min, max] = newValue as [number, number];
     setPriceRange([min, max]);
   };
 
-  const handlePriceRangeCommit = (_event: Event | React.SyntheticEvent, newValue: number | number[]) => {
+  const handlePriceRangeCommit = (newValue: number[]) => {
     const [min, max] = newValue as [number, number];
     onFiltersChange({
       ...filters,
@@ -174,274 +163,277 @@ const EventFilters: React.FC<EventFiltersProps> = ({
   const activeFiltersCount = getActiveFiltersCount();
 
   return (
-    <Paper sx={{ p: 2, mb: 3 }}>
+    <Card className="p-4 mb-6">
       {/* Search Bar */}
-      <Box component={"div" as any} sx={{ mb: 3 }}>
-        <TextField
-          fullWidth
-          placeholder="Buscar eventos..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-            endAdornment: searchTerm && (
-              <InputAdornment position="end">
-                <IconButton size="small" onClick={() => setSearchTerm('')}>
-                  <Clear />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          disabled={loading}
-        />
-      </Box>
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Buscar eventos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-10"
+            disabled={loading}
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              disabled={loading}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Active Filters */}
       {activeFiltersCount > 0 && (
-        <Box component={"div" as any} sx={{ mb: 2 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        <div className="mb-4">
+          <h3 className="text-sm font-medium mb-2">
             Filtros activos ({activeFiltersCount}):
-          </Typography>
-          <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          </h3>
+          <div className="flex flex-wrap gap-2">
             {filters.search && (
-              <Chip
-                label={`Búsqueda: ${filters.search}`}
-                onDelete={() => onFiltersChange({ ...filters, search: undefined })}
-                size="small"
-              />
+              <Badge variant="secondary" className="cursor-pointer" onClick={() => onFiltersChange({ ...filters, search: undefined })}>
+                Búsqueda: {filters.search}
+                <X className="ml-1 h-3 w-3" />
+              </Badge>
             )}
             {filters.category && (
-              <Chip
-                label={`Categoría: ${filters.category}`}
-                onDelete={() => onFiltersChange({ ...filters, category: undefined })}
-                size="small"
-              />
+              <Badge variant="secondary" className="cursor-pointer" onClick={() => onFiltersChange({ ...filters, category: undefined })}>
+                Categoría: {filters.category}
+                <X className="ml-1 h-3 w-3" />
+              </Badge>
             )}
             {filters.modality && (
-              <Chip
-                label={`Modalidad: ${filters.modality}`}
-                onDelete={() => onFiltersChange({ ...filters, modality: undefined })}
-                size="small"
-              />
+              <Badge variant="secondary" className="cursor-pointer" onClick={() => onFiltersChange({ ...filters, modality: undefined })}>
+                Modalidad: {filters.modality}
+                <X className="ml-1 h-3 w-3" />
+              </Badge>
             )}
             {(filters.priceMin || filters.priceMax) && (
-              <Chip
-                label={`Precio: Q${filters.priceMin || 0} - Q${filters.priceMax || 1000}`}
-                onDelete={() => onFiltersChange({ ...filters, priceMin: undefined, priceMax: undefined })}
-                size="small"
-              />
+              <Badge variant="secondary" className="cursor-pointer" onClick={() => onFiltersChange({ ...filters, priceMin: undefined, priceMax: undefined })}>
+                Precio: Q{filters.priceMin || 0} - Q{filters.priceMax || 1000}
+                <X className="ml-1 h-3 w-3" />
+              </Badge>
             )}
             {filters.location && (
-              <Chip
-                label={`Ubicación: ${filters.location}`}
-                onDelete={() => onFiltersChange({ ...filters, location: undefined })}
-                size="small"
-              />
+              <Badge variant="secondary" className="cursor-pointer" onClick={() => onFiltersChange({ ...filters, location: undefined })}>
+                Ubicación: {filters.location}
+                <X className="ml-1 h-3 w-3" />
+              </Badge>
             )}
             <Button
-              size="small"
+              variant="outline"
+              size="sm"
               onClick={clearAllFilters}
-              sx={{ ml: 'auto' }}
+              className="ml-auto"
               disabled={loading}
             >
               Limpiar todos
             </Button>
-          </Box>
-        </Box>
+          </div>
+        </div>
       )}
 
       {/* Filters Accordion */}
-      <Box component={"div" as any}>
-        <Accordion defaultExpanded>
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <FilterList />
-              <Typography>Filtros avanzados</Typography>
-              {activeFiltersCount > 0 && (
-                <Chip label={activeFiltersCount} size="small" color="primary" />
-              )}
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Accordion type="single" collapsible defaultValue="filters">
+        <AccordionItem value="filters">
+          <AccordionTrigger className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            <span>Filtros avanzados</span>
+            {activeFiltersCount > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {activeFiltersCount}
+              </Badge>
+            )}
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-col gap-6">
               {/* Categories */}
-              <Box component={"div" as any}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              <div>
+                <Label className="text-sm font-medium mb-3 block">
                   Categorías
-                </Typography>
-                <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                </Label>
+                <div className="flex flex-wrap gap-3">
                   {categories.map((category) => (
-                    <FormControlLabel
-                      key={category.id}
-                      control={
-                        <Checkbox
-                          checked={filters.category?.split(',').includes(category.id) || false}
-                          onChange={(e) => handleCategoryChange(category.id, e.target.checked)}
-                          disabled={loading}
-                        />
-                      }
-                      label={category.name}
-                    />
+                    <div key={category.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-${category.id}`}
+                        checked={filters.category?.split(',').includes(category.id) || false}
+                        onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
+                        disabled={loading}
+                      />
+                      <Label
+                        htmlFor={`category-${category.id}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {category.name}
+                      </Label>
+                    </div>
                   ))}
-                </Box>
-              </Box>
+                </div>
+              </div>
 
               {/* Types */}
-              <Box component={"div" as any}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              <div>
+                <Label className="text-sm font-medium mb-3 block">
                   Tipos de Evento
-                </Typography>
-                <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                </Label>
+                <div className="flex flex-wrap gap-3">
                   {types.map((type) => (
-                    <FormControlLabel
-                      key={type.id}
-                      control={
-                        <Checkbox
-                          checked={filters.type?.split(',').includes(type.slug) || false}
-                          onChange={(e) => handleTypeChange(type.slug, e.target.checked)}
-                          disabled={loading}
-                        />
-                      }
-                      label={type.name}
-                    />
+                    <div key={type.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`type-${type.id}`}
+                        checked={filters.type?.split(',').includes(type.slug) || false}
+                        onCheckedChange={(checked) => handleTypeChange(type.slug, checked as boolean)}
+                        disabled={loading}
+                      />
+                      <Label
+                        htmlFor={`type-${type.id}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {type.name}
+                      </Label>
+                    </div>
                   ))}
-                </Box>
-              </Box>
+                </div>
+              </div>
 
               {/* Modality */}
-              <Box component={"div" as any}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              <div>
+                <Label className="text-sm font-medium mb-3 block">
                   Modalidad
-                </Typography>
-                <Box component={"div" as any} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                </Label>
+                <div className="flex flex-wrap gap-3">
                   {[
                     { value: 'presencial', label: 'Presencial' },
                     { value: 'virtual', label: 'Virtual' },
                     { value: 'hibrido', label: 'Híbrido' },
                   ].map((modality) => (
-                    <FormControlLabel
-                      key={modality.value}
-                      control={
-                        <Checkbox
-                          checked={filters.modality === modality.value}
-                          onChange={() => handleModalityChange(modality.value as any)}
-                          disabled={loading}
-                        />
-                      }
-                      label={modality.label}
-                    />
+                    <div key={modality.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`modality-${modality.value}`}
+                        checked={filters.modality === modality.value}
+                        onCheckedChange={() => handleModalityChange(modality.value as any)}
+                        disabled={loading}
+                      />
+                      <Label
+                        htmlFor={`modality-${modality.value}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {modality.label}
+                      </Label>
+                    </div>
                   ))}
-                </Box>
-              </Box>
+                </div>
+              </div>
 
               {/* Price Range */}
-              <Box component={"div" as any}>
-                <Typography variant="subtitle2" sx={{ mb: 2 }}>
+              <div>
+                <Label className="text-sm font-medium mb-4 block">
                   Rango de Precio (Q)
-                </Typography>
+                </Label>
                 <Slider
                   value={priceRange}
-                  onChange={handlePriceRangeChange}
-                  onChangeCommitted={handlePriceRangeCommit}
-                  valueLabelDisplay="auto"
+                  onValueChange={(value) => {
+                    setPriceRange(value as [number, number]);
+                    handlePriceRangeChange(value);
+                  }}
+                  onValueCommit={(value) => handlePriceRangeCommit(value)}
                   min={0}
                   max={1000}
                   step={50}
                   disabled={loading}
-                  sx={{ mx: 1 }}
+                  className="mb-2"
                 />
-                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Q{priceRange[0]}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Q{priceRange[1]}
-                  </Typography>
-                </Box>
-              </Box>
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Q{priceRange[0]}</span>
+                  <span>Q{priceRange[1]}</span>
+                </div>
+              </div>
 
               {/* Dates - Temporarily disabled */}
-              <Box component={"div" as any} sx={{ display: 'flex', gap: 2 }}>
-                <TextField
-                  fullWidth
-                  label="Fecha desde"
-                  type="date"
-                  value={filters.dateFrom || ''}
-                  onChange={(e) => handleDateFromChange(e.target.value ? new Date(e.target.value) : null)}
-                  disabled={loading}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <CalendarToday />
-                      </InputAdornment>
-                    ),
-                  }}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-                <TextField
-                  fullWidth
-                  label="Fecha hasta"
-                  type="date"
-                  value={filters.dateTo || ''}
-                  onChange={(e) => handleDateToChange(e.target.value ? new Date(e.target.value) : null)}
-                  disabled={loading}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <CalendarToday />
-                      </InputAdornment>
-                    ),
-                  }}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </Box>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="date-from" className="text-sm font-medium mb-2 block">
+                    Fecha desde
+                  </Label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      id="date-from"
+                      type="date"
+                      value={filters.dateFrom || ''}
+                      onChange={(e) => handleDateFromChange(e.target.value ? new Date(e.target.value) : null)}
+                      disabled={loading}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="date-to" className="text-sm font-medium mb-2 block">
+                    Fecha hasta
+                  </Label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      id="date-to"
+                      type="date"
+                      value={filters.dateTo || ''}
+                      onChange={(e) => handleDateToChange(e.target.value ? new Date(e.target.value) : null)}
+                      disabled={loading}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
 
               {/* Location */}
-              <TextField
-                fullWidth
-                label="Ubicación"
-                value={filters.location || ''}
-                onChange={handleLocationChange}
-                disabled={loading}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LocationOn />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              <div>
+                <Label htmlFor="location" className="text-sm font-medium mb-2 block">
+                  Ubicación
+                </Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    id="location"
+                    value={filters.location || ''}
+                    onChange={handleLocationChange}
+                    disabled={loading}
+                    className="pl-10"
+                    placeholder="Buscar por ubicación..."
+                  />
+                </div>
+              </div>
 
               {/* Featured Events */}
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={filters.featured || false}
-                    onChange={(e) => onFiltersChange({ ...filters, featured: e.target.checked || undefined })}
-                    disabled={loading}
-                  />
-                }
-                label="Solo eventos destacados"
-              />
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="featured"
+                  checked={filters.featured || false}
+                  onCheckedChange={(checked) => onFiltersChange({ ...filters, featured: checked || undefined })}
+                  disabled={loading}
+                />
+                <Label
+                  htmlFor="featured"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Solo eventos destacados
+                </Label>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {loading && (
-        <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <CircularProgress size={24} />
-        </Box>
+        <div className="flex justify-center mt-4">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
       )}
-    </Paper>
+    </Card>
   );
 };
 

@@ -1,31 +1,21 @@
 import React from 'react';
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Card,
-  CardContent,
-} from '@mui/material';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   CheckCircle,
-  School,
-  Description,
+  GraduationCap,
+  FileText,
   Coffee,
   Wifi,
-  LocalParking,
-  Restaurant,
-  HeadsetMic,
-  CardGiftcard,
-  Videocam,
-  CloudDownload,
-  EmojiEvents,
-} from '@mui/icons-material';
+  Car,
+  Utensils,
+  Headphones,
+  Gift,
+  Video,
+  Download,
+  Trophy,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface EventIncludesProps {
   includes: string[];
@@ -36,28 +26,28 @@ const EventIncludes: React.FC<EventIncludesProps> = ({ includes, layout = 'grid'
   const getIconForItem = (item: string): React.ReactNode => {
     const lowerItem = item.toLowerCase();
 
-    if (lowerItem.includes('certificado')) return <School color="primary" />;
-    if (lowerItem.includes('material') || lowerItem.includes('documento')) return <Description color="primary" />;
-    if (lowerItem.includes('coffee break') || lowerItem.includes('café')) return <Coffee color="primary" />;
-    if (lowerItem.includes('wifi') || lowerItem.includes('internet')) return <Wifi color="primary" />;
-    if (lowerItem.includes('parking') || lowerItem.includes('estacionamiento')) return <LocalParking color="primary" />;
-    if (lowerItem.includes('almuerzo') || lowerItem.includes('comida')) return <Restaurant color="primary" />;
-    if (lowerItem.includes('soporte') || lowerItem.includes('asistencia')) return <HeadsetMic color="primary" />;
-    if (lowerItem.includes('kit') || lowerItem.includes('regalo')) return <CardGiftcard color="primary" />;
-    if (lowerItem.includes('grabación') || lowerItem.includes('video')) return <Videocam color="primary" />;
-    if (lowerItem.includes('descarga') || lowerItem.includes('recurso')) return <CloudDownload color="primary" />;
-    if (lowerItem.includes('premio') || lowerItem.includes('reconocimiento')) return <EmojiEvents color="primary" />;
+    if (lowerItem.includes('certificado')) return <GraduationCap className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('material') || lowerItem.includes('documento')) return <FileText className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('coffee break') || lowerItem.includes('café')) return <Coffee className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('wifi') || lowerItem.includes('internet')) return <Wifi className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('parking') || lowerItem.includes('estacionamiento')) return <Car className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('almuerzo') || lowerItem.includes('comida')) return <Utensils className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('soporte') || lowerItem.includes('asistencia')) return <Headphones className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('kit') || lowerItem.includes('regalo')) return <Gift className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('grabación') || lowerItem.includes('video')) return <Video className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('descarga') || lowerItem.includes('recurso')) return <Download className="h-5 w-5 text-primary" />;
+    if (lowerItem.includes('premio') || lowerItem.includes('reconocimiento')) return <Trophy className="h-5 w-5 text-primary" />;
 
-    return <CheckCircle color="success" />;
+    return <CheckCircle className="h-5 w-5 text-green-600" />;
   };
 
   if (!includes || includes.length === 0) {
     return (
-      <Paper sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="body1" color="text.secondary">
+      <div className="p-6 text-center bg-muted rounded-lg">
+        <p className="text-muted-foreground">
           Información sobre lo que incluye el evento estará disponible próximamente
-        </Typography>
-      </Paper>
+        </p>
+      </div>
     );
   }
 
