@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import Navigation from '@/components/ui/navigation'
+import CartPage from '@/components/ui/cart-page'
+import Footer from '@/components/ui/footer'
+---
+
+<BaseLayout title="Carrito de Compras - TradeConnect">
+  <Navigation client:load cartItemCount={3} />
+  <CartPage client:load />
+  <Footer client:load />
+</BaseLayout>

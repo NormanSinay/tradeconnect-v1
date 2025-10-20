@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import Navigation from '@/components/ui/navigation'
+import ProfilePage from '@/components/ui/profile-page'
+import Footer from '@/components/ui/footer'
+---
+
+<BaseLayout title="Mi Perfil - TradeConnect">
+  <Navigation client:load cartItemCount={0} />
+  <ProfilePage client:load />
+  <Footer client:load />
+</BaseLayout>

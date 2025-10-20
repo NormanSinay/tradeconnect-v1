@@ -1,243 +1,249 @@
-import React, { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { Eye, EyeOff, Mail, Lock, LogIn } from 'lucide-react';
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Link, useNavigate } from 'react-router-dom'
+import { FaEye, FaEyeSlash, FaGoogle, FaFacebook } from 'react-icons/fa'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { useAuth } from '@/context/AuthContext'
+import { showToast } from '@/utils/toast'
+import type { LoginForm } from '@/types'
 
-const loginSchema = yup.object({
-  email: yup
+// Validation schema
+const loginSchema = z.object({
+  email: z
     .string()
-    .email('Email inválido')
-    .required('El email es requerido'),
-  password: yup
+    .min(1, 'El email es requerido')
+    .email('Ingresa un email válido'),
+  password: z
     .string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .required('La contraseña es requerida'),
-  rememberMe: yup.boolean().optional(),
-});
+    .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  rememberMe: z.boolean().optional(),
+})
 
-type LoginFormData = yup.InferType<typeof loginSchema>;
+type LoginFormData = z.infer<typeof loginSchema>
 
-const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { login, isLoading } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(null);
+interface LoginPageProps {
+  onSwitchToRegister?: () => void
+  onSwitchToForgotPassword?: () => void
+}
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-    watch,
-  } = useForm<LoginFormData>({
-    resolver: yupResolver(loginSchema) as any,
+export const LoginPage: React.FC<LoginPageProps> = ({
+  onSwitchToRegister,
+  onSwitchToForgotPassword,
+}) => {
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth()
+  const navigate = useNavigate()
+
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
       password: '',
       rememberMe: false,
     },
-  });
-
-  const rememberMe = watch('rememberMe');
+  })
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      setLoginError(null);
-      const result = await login({
-        email: data.email,
-        password: data.password,
-        rememberMe: data.rememberMe || false,
-      });
+      setIsLoading(true)
+      const result = await login(data as LoginForm)
 
-      // Redirect based on user role
-      const storedUser = localStorage.getItem('tradeconnect_user');
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
-        const adminRoles = ['super_admin', 'admin', 'manager'];
-
-        // El backend retorna roles como array
-        const hasAdminRole = user.roles?.some((role: string) => adminRoles.includes(role));
-
-        if (hasAdminRole) {
-          navigate('/dashboard');
-        } else {
-          navigate('/');
-        }
+      if (result.success) {
+        showToast.success('¡Bienvenido de vuelta!')
+        navigate('/dashboard')
       } else {
-        navigate('/');
+        showToast.error(result.error || 'Error al iniciar sesión')
       }
     } catch (error) {
-      setLoginError('Credenciales inválidas. Por favor, verifica tu email y contraseña.');
+      console.error('Login error:', error)
+      showToast.error('Error inesperado. Inténtalo de nuevo.')
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
-  const handleGoogleLogin = () => {
-    // TODO: Implement Google OAuth
-    console.log('Google login clicked');
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
+    try {
+      setIsLoading(true)
+      // Implement social login logic here
+      showToast.info(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login coming soon!`)
+    } catch (error) {
+      console.error(`${provider} login error:`, error)
+      showToast.error(`Error al iniciar sesión con ${provider}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">
-            TradeConnect
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            Iniciar Sesión
           </CardTitle>
-          <p className="text-muted-foreground">
-            Inicia sesión en tu cuenta
-          </p>
+          <CardDescription className="text-center">
+            Ingresa tus credenciales para acceder a tu cuenta
+          </CardDescription>
         </CardHeader>
+
         <CardContent>
-          {/* Error Alert */}
-          {loginError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{loginError}</AlertDescription>
-            </Alert>
-          )}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="tu@email.com"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  {...register('email')}
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  autoComplete="email"
-                  autoFocus
-                  className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
-                  disabled={isLoading}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="Tu contraseña"
+                          {...field}
+                          disabled={isLoading}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                          disabled={isLoading}
+                        >
+                          {showPassword ? (
+                            <FaEyeSlash className="h-4 w-4" />
+                          ) : (
+                            <FaEye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  {...register('password')}
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Tu contraseña"
-                  autoComplete="current-password"
-                  className={`pl-10 pr-10 ${errors.password ? 'border-destructive' : ''}`}
-                  disabled={isLoading}
+              <div className="flex items-center justify-between">
+                <FormField
+                  control={form.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="mt-1"
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-sm font-normal">
+                          Recordarme
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
                 />
-                <button
+
+                <Button
                   type="button"
-                  className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
-                  onClick={togglePasswordVisibility}
+                  variant="link"
+                  className="px-0 font-normal"
+                  onClick={onSwitchToForgotPassword}
                   disabled={isLoading}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                  ¿Olvidaste tu contraseña?
+                </Button>
               </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="rememberMe"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setValue('rememberMe', checked as boolean)}
-                  disabled={isLoading}
-                />
-                <Label htmlFor="rememberMe" className="text-sm font-normal">
-                  Recordarme
-                </Label>
-              </div>
-              <RouterLink
-                to="/forgot-password"
-                className="text-sm text-primary hover:underline"
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
               >
-                ¿Olvidaste tu contraseña?
-              </RouterLink>
+                {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              </Button>
+            </form>
+          </Form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  O continúa con
+                </span>
+              </div>
             </div>
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading && <Eye className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-            </Button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <Separator />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="bg-background px-2 text-xs text-muted-foreground">o</span>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                onClick={() => handleSocialLogin('google')}
+                disabled={isLoading}
+              >
+                <FaGoogle className="mr-2 h-4 w-4" />
+                Google
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleSocialLogin('facebook')}
+                disabled={isLoading}
+              >
+                <FaFacebook className="mr-2 h-4 w-4" />
+                Facebook
+              </Button>
             </div>
-          </div>
-
-          {/* Google Login */}
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleLogin}
-            disabled={isLoading}
-          >
-            <LogIn className="mr-2 h-4 w-4" />
-            Continuar con Google
-          </Button>
-
-          {/* Register Link */}
-          <div className="text-center mt-6">
-            <p className="text-sm text-muted-foreground">
-              ¿No tienes una cuenta?{' '}
-              <RouterLink to="/register" className="text-primary hover:underline font-medium">
-                Regístrate aquí
-              </RouterLink>
-            </p>
-          </div>
-
-          {/* Terms and Privacy */}
-          <div className="text-center mt-6">
-            <p className="text-xs text-muted-foreground">
-              Al iniciar sesión, aceptas nuestros{' '}
-              <a href="/terms" target="_blank" className="text-primary hover:underline">
-                Términos de Servicio
-              </a>{' '}
-              y{' '}
-              <a href="/privacy" target="_blank" className="text-primary hover:underline">
-                Política de Privacidad
-              </a>
-            </p>
           </div>
         </CardContent>
+
+        <CardFooter>
+          <p className="text-center text-sm text-gray-600 w-full">
+            ¿No tienes cuenta?{' '}
+            <Button
+              type="button"
+              variant="link"
+              className="p-0 h-auto font-normal"
+              onClick={onSwitchToRegister}
+              disabled={isLoading}
+            >
+              Regístrate aquí
+            </Button>
+          </p>
+        </CardFooter>
       </Card>
     </div>
-  );
-};
-
-export default LoginPage;
+  )
+}

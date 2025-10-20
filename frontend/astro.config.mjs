@@ -31,6 +31,11 @@ export default defineConfig({
             'utils-vendor': ['axios', 'date-fns', 'framer-motion', 'react-hot-toast'],
             'i18n-vendor': ['i18next', 'i18next-browser-languagedetector', 'i18next-http-backend', 'react-i18next'],
             'icons-vendor': ['react-icons/fa', 'react-icons/md', 'lucide-react'],
+            // Performance chunks
+            'websocket-vendor': ['socket.io-client'],
+            'charts-vendor': ['recharts'],
+            'forms-vendor': ['react-hook-form', 'zod'],
+            'security-vendor': ['isomorphic-dompurify'],
           },
         },
       },
@@ -41,8 +46,13 @@ export default defineConfig({
         compress: {
           drop_console: true,
           drop_debugger: true,
+          pure_funcs: ['console.log', 'console.info', 'console.debug'],
         },
       },
+      // Enable source maps for production debugging
+      sourcemap: false,
+      // Optimize CSS
+      cssCodeSplit: true,
     },
     // Optimize dependencies
     optimizeDeps: {
@@ -56,7 +66,16 @@ export default defineConfig({
         'react-router-dom',
         'react-icons',
         'lucide-react',
+        'socket.io-client',
+        'react-hook-form',
+        'zod',
+        'isomorphic-dompurify',
       ],
+    },
+    // Performance optimizations
+    esbuild: {
+      // Remove console logs in production
+      drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
     },
   },
   // Compression

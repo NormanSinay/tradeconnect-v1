@@ -1,414 +1,190 @@
-/**
- * @fileoverview about.astro - Página "Sobre Nosotros" de TradeConnect
- * @description Página informativa que presenta la misión, visión, valores, estadísticas, equipo y certificaciones de TradeConnect.
- *
- * Arquitectura recomendada:
- * React (componentes interactivos)
- *   ↓
- * Astro (routing y SSR)
- *   ↓
- * shadcn/ui (componentes UI)
- *   ↓
- * Tailwind CSS (estilos)
- *   ↓
- * Radix UI (primitivos accesibles)
- *   ↓
- * Lucide Icons (iconos)
- *
- * @author TradeConnect Team
- * @version 1.0.0
- */
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { Button } from '@/components/ui/button'
 ---
 
 <BaseLayout
-  title="Sobre Nosotros - TradeConnect"
-  description="Conoce a TradeConnect, la plataforma líder en eventos empresariales y cursos con facturación FEL Guatemala. Conectamos empresas con profesionales para el desarrollo continuo."
+  title="Sobre TradeConnect - Nuestra Misión y Visión"
+  description="Conoce la historia y el propósito de TradeConnect, la plataforma líder en eventos empresariales en Guatemala."
 >
-  <div class="about-page">
-    <section class="hero-section">
-      <div class="container">
-        <div class="breadcrumb">
-          <a href="/" class="breadcrumb-link">← Volver al Inicio</a>
+  <main class="min-h-screen">
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-br from-primary-50 to-secondary-50 py-20">
+      <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center">
+          <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+            Sobre TradeConnect
+          </h1>
+          <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Conectando empresas, profesionales y oportunidades en Guatemala desde 2024
+          </p>
         </div>
-        <h1>Sobre TradeConnect</h1>
-        <p class="hero-description">
-          La plataforma líder en Guatemala para eventos empresariales y cursos profesionales,
-          conectando empresas con talento calificado para el desarrollo continuo.
+      </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="py-20">
+      <div class="container mx-auto px-4">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Nuestra Misión</h2>
+            <p class="text-lg text-gray-600 mb-6">
+              Facilitar el crecimiento empresarial y profesional en Guatemala mediante una plataforma
+              innovadora que conecta a empresas, emprendedores y profesionales a través de eventos
+              de calidad que impulsan el networking, la capacitación y el desarrollo de negocios.
+            </p>
+            <p class="text-lg text-gray-600">
+              Creemos que el networking estratégico y la formación continua son fundamentales
+              para el desarrollo económico sostenible de nuestro país.
+            </p>
+          </div>
+          <div class="bg-primary-50 p-8 rounded-lg">
+            <div class="grid grid-cols-2 gap-6">
+              <div class="text-center">
+                <div class="text-3xl font-bold text-primary-600 mb-2">500+</div>
+                <div class="text-sm text-gray-600">Eventos Realizados</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-bold text-primary-600 mb-2">10K+</div>
+                <div class="text-sm text-gray-600">Profesionales Conectados</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-bold text-primary-600 mb-2">200+</div>
+                <div class="text-sm text-gray-600">Empresas Participantes</div>
+              </div>
+              <div class="text-center">
+                <div class="text-3xl font-bold text-primary-600 mb-2">95%</div>
+                <div class="text-sm text-gray-600">Satisfacción del Cliente</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section class="py-20 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Nuestra Visión</h2>
+          <p class="text-lg text-gray-600 mb-8 text-center">
+            Ser la plataforma líder en Centroamérica para el desarrollo empresarial y profesional,
+            reconocida por nuestra innovación tecnológica, calidad de servicio y impacto positivo
+            en la economía guatemalteca.
+          </p>
+
+          <div class="grid md:grid-cols-3 gap-8 mt-12">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-3">Innovación</h3>
+              <p class="text-gray-600">
+                Utilizamos las últimas tecnologías para crear experiencias excepcionales
+                y procesos eficientes.
+              </p>
+            </div>
+
+            <div class="text-center">
+              <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-3">Conexión</h3>
+              <p class="text-gray-600">
+                Facilitamos el networking significativo entre profesionales y empresas
+                de diversos sectores.
+              </p>
+            </div>
+
+            <div class="text-center">
+              <div class="w-16 h-16 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-3">Excelencia</h3>
+              <p class="text-gray-600">
+                Mantenemos los más altos estándares de calidad en todos nuestros
+                servicios y eventos.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-20">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Nuestro Equipo</h2>
+          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Profesionales apasionados por el desarrollo empresarial guatemalteco
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div class="text-center">
+            <div class="w-32 h-32 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+              <span class="text-4xl text-white font-bold">A</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Ana García</h3>
+            <p class="text-primary-600 font-medium mb-3">CEO & Fundadora</p>
+            <p class="text-gray-600 text-sm">
+              Experta en desarrollo empresarial con más de 15 años de experiencia
+              en el sector privado guatemalteco.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-32 h-32 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+              <span class="text-4xl text-white font-bold">C</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Carlos Rodríguez</h3>
+            <p class="text-primary-600 font-medium mb-3">CTO</p>
+            <p class="text-gray-600 text-sm">
+              Ingeniero de software especializado en plataformas escalables
+              y experiencias de usuario innovadoras.
+            </p>
+          </div>
+
+          <div class="text-center">
+            <div class="w-32 h-32 bg-gradient-to-br from-success-400 to-success-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+              <span class="text-4xl text-white font-bold">M</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">María López</h3>
+            <p class="text-primary-600 font-medium mb-3">Directora de Eventos</p>
+            <p class="text-gray-600 text-sm">
+              Especialista en organización de eventos corporativos con
+              experiencia internacional.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-primary-600 text-white py-20">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-6">
+          ¿Quieres ser parte de nuestra comunidad?
+        </h2>
+        <p class="text-xl mb-8 text-primary-100 max-w-2xl mx-auto">
+          Únete a miles de profesionales que confían en TradeConnect para su crecimiento empresarial.
         </p>
-      </div>
-    </section>
-
-    <section class="mission-section">
-      <div class="container">
-        <div class="mission-grid">
-          <div class="mission-card">
-            <h2>Nuestra Misión</h2>
-            <p>
-              Democratizar el acceso a la formación profesional y eventos empresariales de calidad
-              en Guatemala, facilitando la conexión entre empresas y profesionales a través de
-              una plataforma tecnológica innovadora con facturación FEL certificada.
-            </p>
-          </div>
-
-          <div class="mission-card">
-            <h2>Nuestra Visión</h2>
-            <p>
-              Ser la plataforma de referencia en Centroamérica para el desarrollo profesional
-              continuo, impulsando el crecimiento económico a través de la formación y
-              networking empresarial de calidad.
-            </p>
-          </div>
-
-          <div class="mission-card">
-            <h2>Valores</h2>
-            <ul>
-              <li><strong>Excelencia:</strong> Compromiso con la calidad en cada servicio</li>
-              <li><strong>Innovación:</strong> Tecnología de vanguardia para soluciones modernas</li>
-              <li><strong>Transparencia:</strong> Operaciones claras y certificadas</li>
-              <li><strong>Confiabilidad:</strong> Plataforma segura con respaldo institucional</li>
-            </ul>
-          </div>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button size="lg" className="bg-white text-primary-600 hover:bg-gray-100 font-semibold px-8 py-4">
+            Registrarse Ahora
+          </Button>
+          <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary-600 px-8 py-4">
+            Contactar Ventas
+          </Button>
         </div>
       </div>
     </section>
-
-    <section class="stats-section">
-      <div class="container">
-        <h2>TradeConnect en Números</h2>
-        <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-number">500+</div>
-            <div class="stat-label">Eventos Realizados</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">10,000+</div>
-            <div class="stat-label">Profesionales Formados</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">200+</div>
-            <div class="stat-label">Empresas Socias</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">98%</div>
-            <div class="stat-label">Satisfacción del Cliente</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="team-section">
-      <div class="container">
-        <h2>Nuestro Equipo</h2>
-        <p class="team-description">
-          Un equipo multidisciplinario comprometido con la excelencia y la innovación
-          en el sector de eventos empresariales.
-        </p>
-        <div class="team-grid">
-          <div class="team-member">
-            <div class="member-avatar">
-              <span>👨‍💼</span>
-            </div>
-            <h3>Carlos Rodríguez</h3>
-            <p class="member-role">Director Ejecutivo</p>
-            <p class="member-bio">
-              Experto en transformación digital con más de 15 años en el sector empresarial guatemalteco.
-            </p>
-          </div>
-
-          <div class="team-member">
-            <div class="member-avatar">
-              <span>👩‍💻</span>
-            </div>
-            <h3>Ana María López</h3>
-            <p class="member-role">Directora de Tecnología</p>
-            <p class="member-bio">
-              Ingeniera de sistemas especializada en plataformas e-commerce y blockchain.
-            </p>
-          </div>
-
-          <div class="team-member">
-            <div class="member-avatar">
-              <span>👨‍🎓</span>
-            </div>
-            <h3>Jorge Martínez</h3>
-            <p class="member-role">Director de Educación</p>
-            <p class="member-bio">
-              Educador y consultor empresarial con experiencia en desarrollo profesional continuo.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="certifications-section">
-      <div class="container">
-        <h2>Certificaciones y Alianzas</h2>
-        <div class="certifications-grid">
-          <div class="certification-item">
-            <h3>SAT/FEL Certificado</h3>
-            <p>Plataforma autorizada para facturación electrónica en Guatemala</p>
-          </div>
-          <div class="certification-item">
-            <h3>ISO 27001</h3>
-            <p>Sistema de gestión de seguridad de la información certificado</p>
-          </div>
-          <div class="certification-item">
-            <h3>Blockchain Verified</h3>
-            <p>Certificados digitales con verificación blockchain</p>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
+  </main>
 </BaseLayout>
-
-<style>
-  .about-page {
-    min-height: 100vh;
-  }
-
-  .hero-section {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white;
-    padding: var(--spacing-2xl) 0;
-    text-align: center;
-  }
-
-  .breadcrumb {
-    text-align: left;
-    margin-bottom: var(--spacing-lg);
-  }
-
-  .breadcrumb-link {
-    color: white;
-    text-decoration: none;
-    font-size: 0.95rem;
-    opacity: 0.9;
-    transition: opacity 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
-
-  .breadcrumb-link:hover {
-    opacity: 1;
-    text-decoration: underline;
-  }
-
-  .hero-section h1 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: var(--spacing-md);
-    font-family: var(--font-secondary);
-  }
-
-  .hero-description {
-    font-size: 1.25rem;
-    max-width: 800px;
-    margin: 0 auto;
-    opacity: 0.9;
-  }
-
-  .mission-section {
-    padding: var(--spacing-2xl) 0;
-    background-color: var(--background);
-  }
-
-  .mission-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--spacing-xl);
-  }
-
-  .mission-card {
-    background: white;
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    border-left: 4px solid var(--primary);
-  }
-
-  .mission-card h2 {
-    color: var(--primary);
-    font-family: var(--font-secondary);
-    margin-bottom: var(--spacing-md);
-  }
-
-  .mission-card ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .mission-card li {
-    margin-bottom: var(--spacing-sm);
-    padding-left: var(--spacing-md);
-    position: relative;
-  }
-
-  .mission-card li::before {
-    content: "✓";
-    color: var(--success);
-    font-weight: bold;
-    position: absolute;
-    left: 0;
-  }
-
-  .stats-section {
-    padding: var(--spacing-2xl) 0;
-    background: linear-gradient(135deg, var(--surface) 0%, white 100%);
-  }
-
-  .stats-section h2 {
-    text-align: center;
-    color: var(--text-primary);
-    font-family: var(--font-secondary);
-    margin-bottom: var(--spacing-xl);
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-lg);
-  }
-
-  .stat-item {
-    text-align: center;
-    padding: var(--spacing-lg);
-    background: white;
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .stat-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary);
-    font-family: var(--font-secondary);
-  }
-
-  .stat-label {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin-top: var(--spacing-sm);
-  }
-
-  .team-section {
-    padding: var(--spacing-2xl) 0;
-    background-color: var(--background);
-  }
-
-  .team-section h2 {
-    text-align: center;
-    color: var(--text-primary);
-    font-family: var(--font-secondary);
-    margin-bottom: var(--spacing-md);
-  }
-
-  .team-description {
-    text-align: center;
-    max-width: 600px;
-    margin: 0 auto var(--spacing-xl);
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-  }
-
-  .team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--spacing-xl);
-  }
-
-  .team-member {
-    background: white;
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    text-align: center;
-  }
-
-  .member-avatar {
-    width: 80px;
-    height: 80px;
-    background: var(--primary-light);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto var(--spacing-md);
-    font-size: 2rem;
-  }
-
-  .member-role {
-    color: var(--primary);
-    font-weight: 600;
-    margin-bottom: var(--spacing-sm);
-  }
-
-  .member-bio {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.6;
-  }
-
-  .certifications-section {
-    padding: var(--spacing-2xl) 0;
-    background: white;
-  }
-
-  .certifications-section h2 {
-    text-align: center;
-    color: var(--text-primary);
-    font-family: var(--font-secondary);
-    margin-bottom: var(--spacing-xl);
-  }
-
-  .certifications-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--spacing-lg);
-  }
-
-  .certification-item {
-    text-align: center;
-    padding: var(--spacing-lg);
-    background: var(--surface);
-    border-radius: var(--border-radius-lg);
-    border: 1px solid var(--primary-light);
-  }
-
-  .certification-item h3 {
-    color: var(--primary);
-    margin-bottom: var(--spacing-sm);
-  }
-
-  .certification-item p {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-  }
-
-  @media (max-width: 768px) {
-    .hero-section h1 {
-      font-size: 2rem;
-    }
-
-    .hero-description {
-      font-size: 1rem;
-    }
-
-    .mission-grid,
-    .stats-grid,
-    .team-grid,
-    .certifications-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .mission-card,
-    .stat-item,
-    .team-member,
-    .certification-item {
-      padding: var(--spacing-md);
-    }
-  }
-</style>

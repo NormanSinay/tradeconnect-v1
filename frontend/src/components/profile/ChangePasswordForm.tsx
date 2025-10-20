@@ -1,369 +1,309 @@
-/**
- * @fileoverview ChangePasswordForm Component - Arquitectura React/Astro + Tailwind CSS + shadcn/ui
- *
- * Arquitectura recomendada para migración:
- * React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui (componentes UI)
- * → Tailwind CSS (estilos) → Radix UI (primitivos accesibles) → Lucide Icons (iconos)
- *
- * @version 2.0.0
- * @author TradeConnect Team
- * @description Formulario de cambio de contraseña con validación avanzada,
- * indicador de fortaleza de contraseña y gestión de estado.
- * Compatible con SSR de Astro y optimizado para performance.
- */
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Progress } from '@/components/ui/progress'
+import { changePasswordSchema, type ChangePasswordFormData } from '@/schemas'
+import { showToast } from '@/utils/toast'
+import { cn } from '@/lib/utils'
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import {
-  Save,
-  Lock,
-  CheckCircle,
-  AlertTriangle,
-} from 'lucide-react';
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { VALIDATION_RULES } from '@/utils/constants';
-import { authService } from '@/services/api';
-import { toast } from 'react-hot-toast';
-import SecureInput from '@/components/common/SecureInput';
-import { cn } from '@/lib/utils';
-
-// Validation schema
-const changePasswordSchema = yup.object({
-  currentPassword: yup
-    .string()
-    .required('Contraseña actual es requerida'),
-  newPassword: yup
-    .string()
-    .required('Nueva contraseña es requerida')
-    .min(
-      VALIDATION_RULES.PASSWORD.MIN_LENGTH,
-      `La contraseña debe tener al menos ${VALIDATION_RULES.PASSWORD.MIN_LENGTH} caracteres`
-    )
-    .matches(
-      /[A-Z]/,
-      'La contraseña debe contener al menos una letra mayúscula'
-    )
-    .matches(
-      /[a-z]/,
-      'La contraseña debe contener al menos una letra minúscula'
-    )
-    .matches(/[0-9]/, 'La contraseña debe contener al menos un número')
-    .matches(
-      /[!@#$%^&*(),.?":{}|<>]/,
-      'La contraseña debe contener al menos un símbolo especial'
-    )
-    .test(
-      'not-same-as-current',
-      'La nueva contraseña debe ser diferente a la actual',
-      function (value) {
-        return value !== this.parent.currentPassword;
-      }
-    ),
-  confirmPassword: yup
-    .string()
-    .required('Confirmar contraseña es requerido')
-    .oneOf([yup.ref('newPassword')], 'Las contraseñas no coinciden'),
-});
-
-export interface ChangePasswordFormData {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
+interface ChangePasswordFormProps {
+  onSubmit: (data: ChangePasswordFormData) => Promise<void>
+  onCancel?: () => void
+  className?: string
 }
 
-const ChangePasswordForm: React.FC = () => {
-  const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState({
-    score: 0,
-    feedback: [] as string[],
-  });
+export const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({
+  onSubmit,
+  onCancel,
+  className,
+}) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    watch,
-    formState: { errors, isValid },
-  } = useForm<ChangePasswordFormData>({
-    resolver: yupResolver(changePasswordSchema),
+  const form = useForm<ChangePasswordFormData>({
+    resolver: zodResolver(changePasswordSchema),
     defaultValues: {
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
     },
-    mode: 'onBlur',
-  });
+  })
 
-  // Watch new password for strength indicator
-  const newPassword = watch('newPassword');
+  const newPassword = form.watch('newPassword')
 
-  // Calculate password strength
-  React.useEffect(() => {
-    if (newPassword) {
-      let score = 0;
-      const feedback: string[] = [];
-
-      // Length check
-      if (newPassword.length >= VALIDATION_RULES.PASSWORD.MIN_LENGTH) {
-        score++;
-      } else {
-        feedback.push(
-          `Al menos ${VALIDATION_RULES.PASSWORD.MIN_LENGTH} caracteres`
-        );
-      }
-
-      // Uppercase check
-      if (/[A-Z]/.test(newPassword)) {
-        score++;
-      } else {
-        feedback.push('Una letra mayúscula');
-      }
-
-      // Lowercase check
-      if (/[a-z]/.test(newPassword)) {
-        score++;
-      } else {
-        feedback.push('Una letra minúscula');
-      }
-
-      // Number check
-      if (/[0-9]/.test(newPassword)) {
-        score++;
-      } else {
-        feedback.push('Un número');
-      }
-
-      // Special character check
-      if (/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
-        score++;
-      } else {
-        feedback.push('Un símbolo especial');
-      }
-
-      setPasswordStrength({ score, feedback });
-    } else {
-      setPasswordStrength({ score: 0, feedback: [] });
+  // Password strength calculation
+  const getPasswordStrength = (password: string) => {
+    let strength = 0
+    const checks = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      special: /[^A-Za-z0-9]/.test(password),
     }
-  }, [newPassword]);
 
-  const onSubmit = async (data: ChangePasswordFormData) => {
-    setIsSaving(true);
-    setShowSuccess(false);
+    strength = Object.values(checks).filter(Boolean).length
 
+    return {
+      score: strength,
+      checks,
+      percentage: (strength / 5) * 100,
+      label: strength <= 2 ? 'Débil' : strength <= 3 ? 'Regular' : strength <= 4 ? 'Buena' : 'Excelente',
+      color: strength <= 2 ? 'bg-red-500' : strength <= 3 ? 'bg-yellow-500' : strength <= 4 ? 'bg-blue-500' : 'bg-green-500',
+    }
+  }
+
+  const passwordStrength = getPasswordStrength(newPassword)
+
+  const handleSubmit = async (data: ChangePasswordFormData) => {
     try {
-      const response = await authService.changePassword({
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
-      });
-
-      if (response.success) {
-        setShowSuccess(true);
-        reset();
-        toast.success('Contraseña actualizada exitosamente');
-      } else {
-        throw new Error(response.message || 'Error al cambiar contraseña');
-      }
+      setIsSubmitting(true)
+      await onSubmit(data)
+      form.reset()
+      showToast.success('Contraseña cambiada exitosamente')
     } catch (error: any) {
-      console.error('Error changing password:', error);
-      toast.error(
-        error.response?.data?.message || 'Error al cambiar la contraseña'
-      );
+      console.error('Password change error:', error)
+      showToast.error(error.response?.data?.error || 'Error al cambiar contraseña')
     } finally {
-      setIsSaving(false);
+      setIsSubmitting(false)
     }
-  };
-
-  const getPasswordStrengthColor = (score: number) => {
-    if (score >= 5) return 'success.main';
-    if (score >= 4) return 'info.main';
-    if (score >= 3) return 'warning.main';
-    return 'error.main';
-  };
-
-  const getPasswordStrengthLabel = (score: number) => {
-    if (score >= 5) return 'Muy Fuerte';
-    if (score >= 4) return 'Fuerte';
-    if (score >= 3) return 'Buena';
-    if (score >= 2) return 'Regular';
-    return 'Débil';
-  };
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold mb-2">Cambiar Contraseña</h2>
-        <p className="text-sm text-gray-600">
-          Asegúrate de usar una contraseña fuerte y única para proteger tu cuenta.
-        </p>
-      </div>
-
-      {/* Success Alert */}
-      {showSuccess && (
-        <Alert className="mb-6">
-          <CheckCircle className="h-4 w-4" />
-          <AlertDescription>
-            Tu contraseña ha sido actualizada exitosamente. La próxima vez que inicies
-            sesión, usa tu nueva contraseña.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Form Fields */}
-      <div className="space-y-4">
-        {/* Current Password */}
-        <div className="space-y-2">
-          <Controller
-            name="currentPassword"
-            control={control}
-            render={({ field }) => (
-              <SecureInput
-                {...field}
-                label="Contraseña Actual"
-                type="password"
-                error={errors.currentPassword?.message}
-                helperText="Ingresa tu contraseña actual para confirmar"
-                autoComplete="current-password"
-              />
-            )}
-          />
+    <Card className={cn('w-full max-w-md', className)}>
+      <CardHeader>
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <FaLock className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <CardTitle>Cambiar Contraseña</CardTitle>
+            <CardDescription>
+              Actualiza tu contraseña para mantener tu cuenta segura
+            </CardDescription>
+          </div>
         </div>
+      </CardHeader>
 
-        {/* New Password */}
-        <div className="space-y-2">
-          <Controller
-            name="newPassword"
-            control={control}
-            render={({ field }) => (
-              <SecureInput
-                {...field}
-                label="Nueva Contraseña"
-                type="password"
-                error={errors.newPassword?.message}
-                autoComplete="new-password"
-                showStrengthIndicator
-              />
-            )}
-          />
-
-          {/* Password Strength Indicator */}
-          {newPassword && (
-            <div className="mt-4 space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-gray-600">Fortaleza de la contraseña:</span>
-                <span className={cn(
-                  "text-xs font-bold",
-                  passwordStrength.score >= 5 ? "text-green-600" :
-                  passwordStrength.score >= 4 ? "text-blue-600" :
-                  passwordStrength.score >= 3 ? "text-yellow-600" : "text-red-600"
-                )}>
-                  {passwordStrength.score >= 5 ? "Muy Fuerte" :
-                   passwordStrength.score >= 4 ? "Fuerte" :
-                   passwordStrength.score >= 3 ? "Buena" :
-                   passwordStrength.score >= 2 ? "Regular" : "Débil"}
-                </span>
-              </div>
-              <Progress
-                value={(passwordStrength.score / 5) * 100}
-                className="h-2"
-              />
-
-              {/* Password Requirements */}
-              {passwordStrength.feedback.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-xs text-gray-600 mb-1">La contraseña debe incluir:</p>
-                  <ul className="m-0 pl-4 space-y-1">
-                    {passwordStrength.feedback.map((item, index) => (
-                      <li key={index} className="flex items-center gap-1 text-xs text-gray-600">
-                        <AlertTriangle className="h-3 w-3 text-red-500" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            {/* Current Password */}
+            <FormField
+              control={form.control}
+              name="currentPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contraseña Actual</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type={showCurrentPassword ? 'text' : 'password'}
+                        placeholder="Ingresa tu contraseña actual"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      >
+                        {showCurrentPassword ? (
+                          <FaEyeSlash className="h-4 w-4" />
+                        ) : (
+                          <FaEye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
+            />
 
-              {passwordStrength.score === 5 && (
-                <Alert className="mt-2">
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertDescription>¡Excelente! Tu contraseña es muy fuerte.</AlertDescription>
-                </Alert>
+            {/* New Password */}
+            <FormField
+              control={form.control}
+              name="newPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nueva Contraseña</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type={showNewPassword ? 'text' : 'password'}
+                        placeholder="Ingresa tu nueva contraseña"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? (
+                          <FaEyeSlash className="h-4 w-4" />
+                        ) : (
+                          <FaEye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </FormControl>
+
+                  {/* Password Strength Indicator */}
+                  {newPassword && (
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Fortaleza:</span>
+                        <span className={cn(
+                          'font-medium',
+                          passwordStrength.score <= 2 ? 'text-red-600' :
+                          passwordStrength.score <= 3 ? 'text-yellow-600' :
+                          passwordStrength.score <= 4 ? 'text-blue-600' : 'text-green-600'
+                        )}>
+                          {passwordStrength.label}
+                        </span>
+                      </div>
+
+                      <Progress
+                        value={passwordStrength.percentage}
+                        className="h-2"
+                      />
+
+                      <div className="grid grid-cols-2 gap-1 text-xs">
+                        <div className={cn(
+                          'flex items-center space-x-1',
+                          passwordStrength.checks.length ? 'text-green-600' : 'text-gray-400'
+                        )}>
+                          <FaCheckCircle className="h-3 w-3" />
+                          <span>8+ caracteres</span>
+                        </div>
+                        <div className={cn(
+                          'flex items-center space-x-1',
+                          passwordStrength.checks.uppercase ? 'text-green-600' : 'text-gray-400'
+                        )}>
+                          <FaCheckCircle className="h-3 w-3" />
+                          <span>Mayúscula</span>
+                        </div>
+                        <div className={cn(
+                          'flex items-center space-x-1',
+                          passwordStrength.checks.lowercase ? 'text-green-600' : 'text-gray-400'
+                        )}>
+                          <FaCheckCircle className="h-3 w-3" />
+                          <span>Minúscula</span>
+                        </div>
+                        <div className={cn(
+                          'flex items-center space-x-1',
+                          passwordStrength.checks.number ? 'text-green-600' : 'text-gray-400'
+                        )}>
+                          <FaCheckCircle className="h-3 w-3" />
+                          <span>Número</span>
+                        </div>
+                        <div className={cn(
+                          'flex items-center space-x-1 col-span-2',
+                          passwordStrength.checks.special ? 'text-green-600' : 'text-gray-400'
+                        )}>
+                          <FaCheckCircle className="h-3 w-3" />
+                          <span>Carácter especial</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Confirm Password */}
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirmar Nueva Contraseña</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Confirma tu nueva contraseña"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? (
+                          <FaEyeSlash className="h-4 w-4" />
+                        ) : (
+                          <FaEye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Security Notice */}
+            <Alert>
+              <FaExclamationTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Recomendaciones de seguridad:</strong>
+                <ul className="mt-2 text-sm list-disc list-inside space-y-1">
+                  <li>Usa una contraseña única para esta cuenta</li>
+                  <li>No compartas tu contraseña con nadie</li>
+                  <li>Cambia tu contraseña regularmente</li>
+                  <li>Evita usar información personal obvia</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Button
+                type="submit"
+                className="flex-1"
+                disabled={isSubmitting || passwordStrength.score < 3}
+              >
+                {isSubmitting ? 'Cambiando...' : 'Cambiar Contraseña'}
+              </Button>
+
+              {onCancel && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onCancel}
+                  disabled={isSubmitting}
+                >
+                  Cancelar
+                </Button>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Confirm Password */}
-        <div className="space-y-2">
-          <Controller
-            name="confirmPassword"
-            control={control}
-            render={({ field }) => (
-              <SecureInput
-                {...field}
-                label="Confirmar Nueva Contraseña"
-                type="password"
-                error={errors.confirmPassword?.message}
-                helperText="Ingresa la nueva contraseña nuevamente"
-                autoComplete="new-password"
-              />
+            {passwordStrength.score < 3 && newPassword && (
+              <p className="text-sm text-red-600 text-center">
+                La contraseña debe tener al menos una fortaleza "Buena" para continuar
+              </p>
             )}
-          />
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-3 pt-4">
-        <Button
-          type="submit"
-          disabled={isSaving || !isValid}
-          className="flex-1"
-        >
-          {isSaving ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Guardando...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 mr-2" />
-              Cambiar Contraseña
-            </>
-          )}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => reset()}
-          disabled={isSaving}
-        >
-          Cancelar
-        </Button>
-      </div>
-
-      {/* Security Tips */}
-      <Alert className="mt-6">
-        <Lock className="h-4 w-4" />
-        <AlertDescription>
-          <strong className="block mb-2">Consejos de Seguridad:</strong>
-          <ul className="m-0 pl-4 space-y-1 text-sm">
-            <li>Usa una contraseña única que no uses en otros sitios</li>
-            <li>Combina letras mayúsculas, minúsculas, números y símbolos</li>
-            <li>Evita información personal como nombres o fechas</li>
-            <li>Considera usar un gestor de contraseñas</li>
-          </ul>
-        </AlertDescription>
-      </Alert>
-    </form>
-  );
-};
-
-export default ChangePasswordForm;
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  )
+}

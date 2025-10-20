@@ -1,263 +1,169 @@
-/**
- * @fileoverview AdminSidebar - Componente de navegación lateral para panel de administración
- *
- * Arquitectura Recomendada:
- * React (componentes interactivos)
- *   ↓
- * Astro (routing y SSR)
- *   ↓
- * shadcn/ui (componentes UI)
- *   ↓
- * Tailwind CSS (estilos)
- *   ↓
- * Radix UI (primitivos accesibles)
- *   ↓
- * Lucide Icons (iconos)
- *
- * @version 1.0.0
- * @author TradeConnect Team
- * @license MIT
- */
-
-import React, { useState } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import React from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import {
-  LayoutDashboard as DashboardIcon,
-  Calendar as EventIcon,
-  Users as PeopleIcon,
-  FileText as RegistrationsIcon,
-  BarChart3 as ReportsIcon,
-  Settings as SettingsIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
-  ChevronDown,
-  ChevronUp,
-  CalendarDays,
-  Tag,
-  Trophy,
-  CreditCard,
-  Gift,
-  QrCode,
-  Award,
-} from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
+  FaTachometerAlt,
+  FaCalendarAlt,
+  FaUsers,
+  FaFileAlt,
+  FaCog,
+  FaSignOutAlt,
+  FaBars,
+  FaTimes
+} from 'react-icons/fa'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
+import type { ComponentProps } from '@/types'
 
-interface MenuItem {
-  title: string;
-  icon: React.ReactElement;
-  path: string;
-  roles?: string[];
-  children?: MenuItem[];
+interface AdminSidebarProps extends ComponentProps {
+  isOpen: boolean
+  onToggle: () => void
+  onLogout: () => void
 }
 
-interface AdminSidebarProps {
-  open: boolean;
-  onClose: () => void;
-  drawerWidth?: number;
-  userRole?: string;
-}
+const menuItems = [
+  {
+    icon: FaTachometerAlt,
+    label: 'Dashboard',
+    path: '/admin',
+    badge: null,
+  },
+  {
+    icon: FaCalendarAlt,
+    label: 'Eventos',
+    path: '/admin/events',
+    badge: '12',
+  },
+  {
+    icon: FaUsers,
+    label: 'Usuarios',
+    path: '/admin/users',
+    badge: null,
+  },
+  {
+    icon: FaFileAlt,
+    label: 'Reportes',
+    path: '/admin/reports',
+    badge: '3',
+  },
+  {
+    icon: FaCog,
+    label: 'Configuración',
+    path: '/admin/settings',
+    badge: null,
+  },
+]
 
-const AdminSidebar: React.FC<AdminSidebarProps> = ({
-  open,
-  onClose,
-  drawerWidth = 280,
-  userRole = 'admin',
+export const AdminSidebar: React.FC<AdminSidebarProps> = ({
+  isOpen,
+  onToggle,
+  onLogout,
+  className,
 }) => {
-  const location = useLocation();
-  const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({});
-  const isMobile = false; // Simplified for now
+  const location = useLocation()
 
-  // Menu items configuration
-  const menuItems: MenuItem[] = [
-    {
-      title: 'Dashboard',
-      icon: <DashboardIcon className="h-4 w-4" />,
-      path: '/admin/dashboard',
-    },
-    {
-      title: 'Eventos y Cursos',
-      icon: <EventIcon className="h-4 w-4" />,
-      path: '/admin/events',
-      children: [
-        { title: 'Todos los Eventos', icon: <CalendarDays className="h-4 w-4" />, path: '/admin/events' },
-        { title: 'Categorías', icon: <Tag className="h-4 w-4" />, path: '/admin/events/categories' },
-        { title: 'Speakers', icon: <Trophy className="h-4 w-4" />, path: '/admin/events/speakers' },
-      ],
-    },
-    {
-      title: 'Usuarios',
-      icon: <PeopleIcon className="h-4 w-4" />,
-      path: '/admin/users',
-      roles: ['admin', 'super_admin'],
-    },
-    {
-      title: 'Inscripciones',
-      icon: <RegistrationsIcon className="h-4 w-4" />,
-      path: '/admin/registrations',
-    },
-    {
-      title: 'Pagos',
-      icon: <CreditCard className="h-4 w-4" />,
-      path: '/admin/payments',
-      roles: ['admin', 'super_admin', 'manager'],
-    },
-    {
-      title: 'Promociones',
-      icon: <Gift className="h-4 w-4" />,
-      path: '/admin/promotions',
-    },
-    {
-      title: 'QR & Acceso',
-      icon: <QrCode className="h-4 w-4" />,
-      path: '/admin/qr-access',
-    },
-    {
-      title: 'Certificados',
-      icon: <Award className="h-4 w-4" />,
-      path: '/admin/certificates',
-    },
-    {
-      title: 'Reportes',
-      icon: <ReportsIcon className="h-4 w-4" />,
-      path: '/admin/reports',
-    },
-    {
-      title: 'Configuración',
-      icon: <SettingsIcon className="h-4 w-4" />,
-      path: '/admin/settings',
-      roles: ['admin', 'super_admin'],
-    },
-  ];
+  return (
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={onToggle}
+        />
+      )}
 
-  // Filter menu items based on user role
-  const filteredMenuItems = menuItems.filter((item) => {
-    if (!item.roles || item.roles.length === 0) return true;
-    return item.roles.includes(userRole);
-  });
+      {/* Sidebar */}
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+          isOpen ? "translate-x-0" : "-translate-x-full",
+          className
+        )}
+      >
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center mr-3">
+              <span className="text-white font-bold text-sm">TC</span>
+            </div>
+            <span className="text-lg font-semibold text-gray-900">TradeConnect</span>
+          </div>
 
-  const handleExpandClick = (title: string) => {
-    setExpandedMenus((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
-  };
-
-  const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
-  };
-
-  const renderMenuItem = (item: MenuItem, depth = 0) => {
-    const hasChildren = item.children && item.children.length > 0;
-    const isExpanded = expandedMenus[item.title];
-    const active = isActive(item.path);
-
-    return (
-      <React.Fragment key={item.title}>
-        <div className="block p-0">
           <Button
-            variant={active ? "secondary" : "ghost"}
-            className={cn(
-              "w-full justify-start h-12 px-2.5",
-              active && "bg-primary/10 border-l-4 border-primary",
-              depth > 0 && "pl-4"
-            )}
-            asChild={!hasChildren}
-            onClick={hasChildren ? () => handleExpandClick(item.title) : undefined}
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="lg:hidden"
           >
-            {hasChildren ? (
-              <div className="flex items-center w-full">
-                <div className="flex items-center justify-center min-w-0 mr-3">
-                  {item.icon}
-                </div>
-                <span className={cn("flex-1 text-left", !open && "hidden")}>
-                  {item.title}
-                </span>
-                {hasChildren && open && (
-                  isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
-                )}
-              </div>
-            ) : (
-              <Link to={item.path} className="flex items-center w-full">
-                <div className="flex items-center justify-center min-w-0 mr-3">
-                  {item.icon}
-                </div>
-                <span className={cn("flex-1 text-left", !open && "hidden")}>
-                  {item.title}
-                </span>
-              </Link>
-            )}
+            <FaTimes />
           </Button>
         </div>
 
-        {hasChildren && isExpanded && open && (
-          <div className="pl-4">
-            {item.children!.map((child) => renderMenuItem(child, depth + 1))}
-          </div>
-        )}
-      </React.Fragment>
-    );
-  };
+        <div className="flex flex-col h-full">
+          {/* Navigation */}
+          <nav className="flex-1 px-4 py-6 space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon
+              const isActive = location.pathname === item.path
 
-  const drawerContent = (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground">
-        <AnimatePresence mode="wait">
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                    isActive
+                      ? "bg-primary-50 text-primary-700 border-r-2 border-primary-700"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  )}
+                  onClick={() => {
+                    // Close sidebar on mobile after navigation
+                    if (window.innerWidth < 1024) {
+                      onToggle()
+                    }
+                  }}
+                >
+                  <Icon className="mr-3 h-5 w-5" />
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge && (
+                    <Badge variant="secondary" className="ml-auto">
+                      {item.badge}
+                    </Badge>
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
+
+          <Separator />
+
+          {/* User Section */}
+          <div className="p-4">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                <span className="text-primary-600 font-semibold">A</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  Admin User
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  admin@tradeconnect.gt
+                </p>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={onLogout}
             >
-              <h2 className="text-lg font-bold whitespace-nowrap">
-                TradeConnect
-              </h2>
-              <p className="text-xs opacity-90">
-                Panel de Administración
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        {!isMobile && (
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-primary-foreground hover:bg-primary-foreground/10">
-            {open ? <ChevronLeftIcon className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
-          </Button>
-        )}
+              <FaSignOutAlt className="mr-2 h-4 w-4" />
+              Cerrar Sesión
+            </Button>
+          </div>
+        </div>
       </div>
-
-      <Separator />
-
-      {/* Menu Items */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden py-2">
-        {filteredMenuItems.map((item) => renderMenuItem(item))}
-      </div>
-
-      <Separator />
-
-      {/* Footer */}
-      <div className={cn("p-2 text-center", !open && "hidden")}>
-        <p className="text-xs text-muted-foreground">
-          TradeConnect v1.0
-        </p>
-        <p className="text-xs text-muted-foreground block">
-          © 2025 Todos los derechos reservados
-        </p>
-      </div>
-    </div>
-  );
-
-  return (
-    <Sheet open={isMobile ? open : true} onOpenChange={onClose}>
-      <SheetContent side="left" className={cn("p-0", open ? "w-70" : "w-16")}>
-        {drawerContent}
-      </SheetContent>
-    </Sheet>
-  );
-};
-
-export default AdminSidebar;
+    </>
+  )
+}

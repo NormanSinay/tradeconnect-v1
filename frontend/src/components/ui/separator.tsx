@@ -1,23 +1,4 @@
-/**
- * @fileoverview Separator Component - Componente de separador accesible
- *
- * Arquitectura Recomendada:
- * React (componentes interactivos)
- *   ↓
- * Astro (routing y SSR)
- *   ↓
- * shadcn/ui (componentes UI)
- *   ↓
- * Tailwind CSS (estilos)
- *   ↓
- * Radix UI (primitivos accesibles)
- *   ↓
- * Lucide Icons (iconos)
- *
- * @version 1.0.0
- * @author TradeConnect Team
- * @license MIT
- */
+"use client"
 
 import * as React from "react"
 import * as SeparatorPrimitive from "@radix-ui/react-separator"

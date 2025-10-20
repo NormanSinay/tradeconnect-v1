@@ -1,532 +1,333 @@
-/**
- * @fileoverview RegisterPage - Página de registro con stepper multi-paso
- * @description Componente React para registro de usuarios con validación completa
- *
- * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
- * - React: Componentes interactivos con hooks y state management
- * - Astro: Server-side rendering (SSR) y routing
- * - shadcn/ui: Componentes UI preconstruidos y accesibles
- * - Tailwind CSS: Framework CSS utilitario para estilos
- * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
- * - Lucide Icons: Iconografía moderna y consistente
- *
- * Características:
- * - Formulario multi-paso con stepper personalizado
- * - Validación completa con Yup y React Hook Form
- * - Indicador de fortaleza de contraseña
- * - Manejo de errores y estados de carga
- * - Compatibilidad SSR con Astro
- * - Diseño responsive con Tailwind CSS
- *
- * @version 1.0.0
- * @since 2024
- */
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Link, useNavigate } from 'react-router-dom'
+import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaCheck } from 'react-icons/fa'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { useAuth } from '@/context/AuthContext'
+import { showToast } from '@/utils/toast'
+import type { RegisterForm } from '@/types'
 
-import React, { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
-import { Eye, EyeOff, Mail, Lock, User, Phone, UserPlus, CheckCircle } from 'lucide-react';
-
-const registerSchema = yup.object({
-  firstName: yup
+// Validation schema
+const registerSchema = z.object({
+  name: z
     .string()
     .min(2, 'El nombre debe tener al menos 2 caracteres')
-    .required('El nombre es requerido'),
-  lastName: yup
+    .max(50, 'El nombre no puede tener más de 50 caracteres'),
+  email: z
     .string()
-    .min(2, 'El apellido debe tener al menos 2 caracteres')
-    .required('El apellido es requerido'),
-  email: yup
-    .string()
-    .email('Email inválido')
-    .required('El email es requerido'),
-  phone: yup
-    .string()
-    .optional()
-    .matches(/^\+502\s\d{4}-\d{4}$/, 'Formato: +502 XXXX-XXXX'),
-  password: yup
+    .min(1, 'El email es requerido')
+    .email('Ingresa un email válido'),
+  password: z
     .string()
     .min(8, 'La contraseña debe tener al menos 8 caracteres')
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial'
-    )
-    .required('La contraseña es requerida'),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('password')], 'Las contraseñas no coinciden')
-    .required('Confirma tu contraseña'),
-  acceptTerms: yup
-    .boolean()
-    .oneOf([true], 'Debes aceptar los términos y condiciones')
-    .required('Debes aceptar los términos y condiciones'),
-  newsletter: yup.boolean(),
-});
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'La contraseña debe contener al menos una letra minúscula, una mayúscula y un número'),
+  confirmPassword: z.string(),
+  acceptTerms: z.boolean().refine(val => val === true, {
+    message: 'Debes aceptar los términos y condiciones',
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
+})
 
-type RegisterFormData = yup.InferType<typeof registerSchema>;
+type RegisterFormData = z.infer<typeof registerSchema>
 
-const steps = ['Información Personal', 'Cuenta', 'Confirmación'];
+interface RegisterPageProps {
+  onSwitchToLogin?: () => void
+}
 
-const RegisterPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { register: registerUser, isLoading } = useAuth();
-  const [activeStep, setActiveStep] = useState(0);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [registerError, setRegisterError] = useState<string | null>(null);
+export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { register } = useAuth()
+  const navigate = useNavigate()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    trigger,
-    watch,
-  } = useForm<RegisterFormData>({
-    resolver: yupResolver(registerSchema) as any,
-    mode: 'onChange',
+  const form = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      name: '',
       email: '',
-      phone: '',
       password: '',
       confirmPassword: '',
       acceptTerms: false,
-      newsletter: false,
     },
-  });
-
-  const watchedValues = watch();
-
-  const handleNext = async () => {
-    let fieldsToValidate: (keyof RegisterFormData)[] = [];
-
-    switch (activeStep) {
-      case 0:
-        fieldsToValidate = ['firstName', 'lastName', 'email', 'phone'];
-        break;
-      case 1:
-        fieldsToValidate = ['password', 'confirmPassword'];
-        break;
-      case 2:
-        fieldsToValidate = ['acceptTerms'];
-        break;
-    }
-
-    const isValid = await trigger(fieldsToValidate);
-    if (isValid) {
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    }
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+  })
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      setRegisterError(null);
-      await registerUser({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
-        phone: data.phone,
-        acceptTerms: data.acceptTerms,
-        marketingAccepted: data.newsletter || false, // Mapear newsletter a marketingAccepted
-      });
-      navigate('/login', {
-        state: {
-          message: 'Registro exitoso. Verifica tu email para activar tu cuenta.',
-        },
-      });
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message
-        || error.message
-        || 'Error al registrarse. Por favor, intenta nuevamente.';
-      setRegisterError(errorMessage);
+      setIsLoading(true)
+      const result = await register(data as RegisterForm)
+
+      if (result.success) {
+        showToast.success('¡Cuenta creada exitosamente! Revisa tu email para verificar tu cuenta.')
+        navigate('/login')
+      } else {
+        showToast.error(result.error || 'Error al crear la cuenta')
+      }
+    } catch (error) {
+      console.error('Register error:', error)
+      showToast.error('Error inesperado. Inténtalo de nuevo.')
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
 
-  const handleGoogleRegister = () => {
-    // TODO: Implement Google OAuth
-    console.log('Google register clicked');
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
-
-  const getPasswordStrength = (password: string) => {
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/\d/.test(password)) strength++;
-    if (/[@$!%*?&]/.test(password)) strength++;
-    return strength;
-  };
-
-  const passwordStrength = getPasswordStrength(watchedValues.password || '');
-
-  const renderStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">Nombre</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    {...register('firstName')}
-                    id="firstName"
-                    placeholder="Tu nombre"
-                    autoComplete="given-name"
-                    className={`pl-10 ${errors.firstName ? 'border-destructive' : ''}`}
-                    disabled={isLoading}
-                  />
-                </div>
-                {errors.firstName && (
-                  <p className="text-sm text-destructive">{errors.firstName.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Apellido</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    {...register('lastName')}
-                    id="lastName"
-                    placeholder="Tu apellido"
-                    autoComplete="family-name"
-                    className={`pl-10 ${errors.lastName ? 'border-destructive' : ''}`}
-                    disabled={isLoading}
-                  />
-                </div>
-                {errors.lastName && (
-                  <p className="text-sm text-destructive">{errors.lastName.message}</p>
-                )}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  {...register('email')}
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  autoComplete="email"
-                  className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
-                  disabled={isLoading}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Teléfono (opcional)</Label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  {...register('phone')}
-                  id="phone"
-                  placeholder="+502 XXXX-XXXX"
-                  autoComplete="tel"
-                  className={`pl-10 ${errors.phone ? 'border-destructive' : ''}`}
-                  disabled={isLoading}
-                />
-              </div>
-              {errors.phone && (
-                <p className="text-sm text-destructive">{errors.phone.message}</p>
-              )}
-            </div>
-          </div>
-        );
-
-      case 1:
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  {...register('password')}
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Tu contraseña"
-                  autoComplete="new-password"
-                  className={`pl-10 pr-10 ${errors.password ? 'border-destructive' : ''}`}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
-                  onClick={togglePasswordVisibility}
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-
-              {/* Password Strength Indicator */}
-              {watchedValues.password && (
-                <div className="mt-2">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Fortaleza de la contraseña:
-                  </p>
-                  <Progress
-                    value={(passwordStrength / 5) * 100}
-                    className="h-2 mb-1"
-                  />
-                  <p className={`text-xs ${
-                    passwordStrength <= 2
-                      ? 'text-destructive'
-                      : passwordStrength <= 3
-                      ? 'text-yellow-600'
-                      : 'text-green-600'
-                  }`}>
-                    {passwordStrength <= 2
-                      ? 'Débil'
-                      : passwordStrength <= 3
-                      ? 'Regular'
-                      : passwordStrength <= 4
-                      ? 'Buena'
-                      : 'Excelente'}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  {...register('confirmPassword')}
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirma tu contraseña"
-                  autoComplete="new-password"
-                  className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
-                  onClick={toggleConfirmPasswordVisibility}
-                  disabled={isLoading}
-                >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-          </div>
-        );
-
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Confirma tu registro</h3>
-              <div className="bg-muted p-4 rounded-md space-y-2">
-                <p className="text-sm">
-                  <strong>Nombre:</strong> {watchedValues.firstName} {watchedValues.lastName}
-                </p>
-                <p className="text-sm">
-                  <strong>Email:</strong> {watchedValues.email}
-                </p>
-                {watchedValues.phone && (
-                  <p className="text-sm">
-                    <strong>Teléfono:</strong> {watchedValues.phone}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-start space-x-2">
-                <Checkbox
-                  id="acceptTerms"
-                  {...register('acceptTerms')}
-                  disabled={isLoading}
-                />
-                <div className="grid gap-1.5 leading-none">
-                  <Label htmlFor="acceptTerms" className="text-sm font-normal">
-                    Acepto los{' '}
-                    <a href="/terms" target="_blank" className="text-primary hover:underline">
-                      Términos de Servicio
-                    </a>{' '}
-                    y la{' '}
-                    <a href="/privacy" target="_blank" className="text-primary hover:underline">
-                      Política de Privacidad
-                    </a>
-                  </Label>
-                  {errors.acceptTerms && (
-                    <p className="text-sm text-destructive">{errors.acceptTerms.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-2">
-                <Checkbox
-                  id="newsletter"
-                  {...register('newsletter')}
-                  disabled={isLoading}
-                />
-                <Label htmlFor="newsletter" className="text-sm font-normal">
-                  Deseo recibir noticias y actualizaciones por email
-                </Label>
-              </div>
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
+  const handleSocialRegister = async (provider: 'google' | 'facebook') => {
+    try {
+      setIsLoading(true)
+      // Implement social register logic here
+      showToast.info(`${provider.charAt(0).toUpperCase() + provider.slice(1)} registration coming soon!`)
+    } catch (error) {
+      console.error(`${provider} register error:`, error)
+      showToast.error(`Error al registrarse con ${provider}`)
+    } finally {
+      setIsLoading(false)
     }
-  };
+  }
+
+  const passwordRequirements = [
+    { text: 'Al menos 8 caracteres', met: form.watch('password')?.length >= 8 },
+    { text: 'Una letra minúscula', met: /[a-z]/.test(form.watch('password') || '') },
+    { text: 'Una letra mayúscula', met: /[A-Z]/.test(form.watch('password') || '') },
+    { text: 'Un número', met: /\d/.test(form.watch('password') || '') },
+  ]
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">
-            TradeConnect
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            Crear Cuenta
           </CardTitle>
-          <p className="text-muted-foreground">
-            Crea tu cuenta
-          </p>
+          <CardDescription className="text-center">
+            Únete a TradeConnect y descubre eventos increíbles
+          </CardDescription>
         </CardHeader>
+
         <CardContent>
-          {/* Stepper */}
-          <div className="mb-8">
-            <div className="flex justify-between">
-              {steps.map((label, index) => (
-                <div key={label} className="flex flex-col items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    index <= activeStep
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground'
-                  }`}>
-                    {index + 1}
-                  </div>
-                  <span className={`text-xs mt-2 ${
-                    index <= activeStep ? 'text-foreground' : 'text-muted-foreground'
-                  }`}>
-                    {label}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 bg-muted rounded-full h-2">
-              <div
-                className="bg-primary h-2 rounded-full transition-all duration-300"
-                style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre Completo</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Tu nombre completo"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-          </div>
 
-          {/* Error Alert */}
-          {registerError && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription>{registerError}</AlertDescription>
-            </Alert>
-          )}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="tu@email.com"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {renderStepContent(activeStep)}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="Tu contraseña"
+                          {...field}
+                          disabled={isLoading}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                          disabled={isLoading}
+                        >
+                          {showPassword ? (
+                            <FaEyeSlash className="h-4 w-4" />
+                          ) : (
+                            <FaEye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={activeStep === 0 || isLoading}
-                onClick={handleBack}
-              >
-                Anterior
-              </Button>
-
-              {activeStep === steps.length - 1 ? (
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading && <UserPlus className="mr-2 h-4 w-4 animate-spin" />}
-                  {isLoading ? 'Registrando...' : 'Crear Cuenta'}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={isLoading}
-                >
-                  Siguiente
-                </Button>
+              {/* Password Requirements */}
+              {form.watch('password') && (
+                <div className="space-y-1">
+                  {passwordRequirements.map((req, index) => (
+                    <div key={index} className="flex items-center text-sm">
+                      <FaCheck
+                        className={`mr-2 h-3 w-3 ${
+                          req.met ? 'text-green-500' : 'text-gray-300'
+                        }`}
+                      />
+                      <span className={req.met ? 'text-green-600' : 'text-gray-500'}>
+                        {req.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
+
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Contraseña</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          placeholder="Confirma tu contraseña"
+                          {...field}
+                          disabled={isLoading}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          disabled={isLoading}
+                        >
+                          {showConfirmPassword ? (
+                            <FaEyeSlash className="h-4 w-4" />
+                          ) : (
+                            <FaEye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="acceptTerms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="mt-1"
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-normal">
+                        Acepto los{' '}
+                        <Link to="/terms" className="text-primary hover:underline">
+                          términos y condiciones
+                        </Link>{' '}
+                        y la{' '}
+                        <Link to="/privacy" className="text-primary hover:underline">
+                          política de privacidad
+                        </Link>
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
+              </Button>
+            </form>
+          </Form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  O regístrate con
+                </span>
+              </div>
             </div>
-          </form>
 
-          {/* Divider */}
-          <div className="relative my-8">
-            <Separator />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="bg-background px-2 text-xs text-muted-foreground">o</span>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                onClick={() => handleSocialRegister('google')}
+                disabled={isLoading}
+              >
+                <FaGoogle className="mr-2 h-4 w-4" />
+                Google
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleSocialRegister('facebook')}
+                disabled={isLoading}
+              >
+                <FaFacebook className="mr-2 h-4 w-4" />
+                Facebook
+              </Button>
             </div>
-          </div>
-
-          {/* Google Register */}
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleRegister}
-            disabled={isLoading}
-          >
-            <UserPlus className="mr-2 h-4 w-4" />
-            Continuar con Google
-          </Button>
-
-          {/* Login Link */}
-          <div className="text-center mt-6">
-            <p className="text-sm text-muted-foreground">
-              ¿Ya tienes una cuenta?{' '}
-              <RouterLink to="/login" className="text-primary hover:underline font-medium">
-                Inicia sesión aquí
-              </RouterLink>
-            </p>
           </div>
         </CardContent>
+
+        <CardFooter>
+          <p className="text-center text-sm text-gray-600 w-full">
+            ¿Ya tienes cuenta?{' '}
+            <Button
+              type="button"
+              variant="link"
+              className="p-0 h-auto font-normal"
+              onClick={onSwitchToLogin}
+              disabled={isLoading}
+            >
+              Inicia sesión aquí
+            </Button>
+          </p>
+        </CardFooter>
       </Card>
     </div>
-  );
-};
-
-export default RegisterPage;
+  )
+}

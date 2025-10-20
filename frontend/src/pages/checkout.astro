@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import Navigation from '@/components/ui/navigation'
+import CheckoutForm from '@/components/ui/checkout-form'
+import Footer from '@/components/ui/footer'
+---
+
+<BaseLayout title="Checkout - TradeConnect">
+  <Navigation client:load cartItemCount={0} />
+  <CheckoutForm client:load />
+  <Footer client:load />
+</BaseLayout>

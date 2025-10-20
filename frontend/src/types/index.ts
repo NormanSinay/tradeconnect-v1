@@ -1,377 +1,143 @@
-// Core types for TradeConnect Frontend
-
-/**
- * @fileoverview Core types for TradeConnect Frontend
- * @description
-
-Arquitectura recomendada si migras:
-  React (componentes interactivos)
-    ↓
-  Astro (routing y SSR)
-    ↓
-  shadcn/ui (componentes UI)
-    ↓
-  Tailwind CSS (estilos)
-    ↓
-  Radix UI (primitivos accesibles)
-    ↓
-  React Icons (iconos)
-
- * @architecture
- * - React: Componentes interactivos con hooks y context
- * - Astro: Routing y Server-Side Rendering (SSR)
- * - shadcn/ui: Componentes UI preconstruidos
- * - Tailwind CSS: Sistema de estilos utilitarios
- * - Radix UI: Primitivos accesibles para componentes
- * - React Icons: Biblioteca de iconos
- *
- * @compatibility SSR: Compatible con Astro SSR
- * @compatibility React: Compatible con React 18+
- * @compatibility TypeScript: Tipos completos incluidos
- * @version 1.0.0
- */
-
+// Base types for the application
 export interface User {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  fullName?: string;
-  phone?: string;
-  avatar?: string;
-  nit?: string;
-  cui?: string;
-  timezone?: string;
-  locale?: string;
-  roles: string[]; // Array de roles del backend
-  isActive: boolean;
-  isEmailVerified?: boolean;
-  is2faEnabled?: boolean;
-  lastLoginAt?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  email: string
+  name: string
+  role: 'admin' | 'organizer' | 'speaker' | 'attendee'
+  avatar?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface Event {
-  id: number;
-  title: string;
-  description: string;
-  shortDescription?: string;
-  startDate: string;
-  endDate: string;
-  location?: string;
-  virtualLocation?: string;
-  isVirtual: boolean;
-  price: number;
-  currency: 'GTQ' | 'USD';
-  capacity: number;
-  availableSpots: number;
-  minAge?: number;
-  maxAge?: number;
-  earlyBirdPrice?: number;
-  earlyBirdDeadline?: string;
-  tags: string[];
-  requirements?: string;
-  isFeatured: boolean;
-  isPublished: boolean;
-  eventTypeId: number;
-  eventCategoryId: number;
-  eventStatusId: number;
-  createdBy: number;
-  createdAt: string;
-  updatedAt: string;
-  // Relations
-  eventType?: EventType;
-  eventCategory?: EventCategory;
-  eventStatus?: EventStatus;
-  creator?: User;
-  media?: EventMedia[];
-  speakers?: Speaker[];
+  id: string
+  title: string
+  description: string
+  startDate: Date
+  endDate: Date
+  location: string
+  capacity: number
+  price: number
+  category: string
+  status: 'draft' | 'published' | 'cancelled' | 'completed'
+  organizerId: string
+  imageUrl?: string
+  createdAt: Date
+  updatedAt: Date
 }
 
-export interface EventType {
-  id: number;
-  name: string;
-  description?: string;
-  isActive: boolean;
-}
-
-export interface EventCategory {
-  id: number;
-  name: string;
-  description?: string;
-  color?: string;
-  icon?: string;
-  isActive: boolean;
-}
-
-export interface EventStatus {
-  id: number;
-  name: string;
-  description?: string;
-  color?: string;
-}
-
-export interface EventMedia {
-  id: number;
-  eventId: number;
-  fileName: string;
-  filePath: string;
-  fileType: 'image' | 'video' | 'document';
-  fileSize: number;
-  mimeType: string;
-  altText?: string;
-  isPrimary: boolean;
-  sortOrder: number;
-  createdAt: string;
-}
-
-export interface Speaker {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email?: string;
-  bio?: string;
-  avatar?: string;
-  linkedinUrl?: string;
-  websiteUrl?: string;
-  specialties: Specialty[];
-  isActive: boolean;
-}
-
-export interface Specialty {
-  id: number;
-  name: string;
-  description?: string;
+export interface Registration {
+  id: string
+  eventId: string
+  userId: string
+  status: 'pending' | 'confirmed' | 'cancelled' | 'attended'
+  registrationDate: Date
+  paymentStatus: 'pending' | 'paid' | 'refunded'
+  paymentAmount: number
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface CartItem {
-  id: number;
-  eventId: number;
-  participantType: 'individual' | 'empresa';
-  quantity: number;
-  basePrice: number;
-  discountAmount: number;
-  finalPrice: number;
-  total: number;
-  isGroupRegistration: boolean;
-  customFields?: Record<string, any>;
-  participantData?: ParticipantData[];
-  addedAt: string;
-  // Relations
-  event?: Event;
-}
-
-export interface ParticipantData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  nit?: string;
-  cui?: string;
-  position?: string;
-  dietaryRestrictions?: string;
+  id: string
+  eventId: string
+  quantity: number
+  price: number
+  event: Event
 }
 
 export interface Cart {
-  id: number;
-  sessionId?: string;
-  userId?: number;
-  totalItems: number;
-  subtotal: number;
-  discountAmount: number;
-  total: number;
-  promoCode?: string;
-  promoDiscount: number;
-  expiresAt?: string;
-  lastActivity: string;
-  isAbandoned: boolean;
-  items: CartItem[];
+  id: string
+  userId: string
+  items: CartItem[]
+  total: number
+  createdAt: Date
+  updatedAt: Date
 }
 
-export interface Payment {
-  id: number;
-  registrationId: number;
-  transactionId: string;
-  gateway: 'paypal' | 'stripe' | 'neonet' | 'bam';
-  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'refunded' | 'partially_refunded' | 'disputed' | 'expired';
-  amount: number;
-  currency: 'GTQ' | 'USD';
-  description?: string;
-  gatewayResponse?: any;
-  createdAt: string;
-  updatedAt: string;
+// API Response types
+export interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+  message?: string
 }
 
-export interface Certificate {
-  id: number;
-  registrationId: number;
-  certificateTemplateId?: number;
-  certificateNumber: string;
-  hash: string;
-  blockchainTxHash?: string;
-  status: 'generated' | 'issued' | 'revoked';
-  issuedAt: string;
-  expiresAt?: string;
-  downloadUrl?: string;
-  qrCodeUrl?: string;
-  // Relations
-  registration?: EventRegistration;
-  template?: CertificateTemplate;
-}
-
-export interface CertificateTemplate {
-  id: number;
-  name: string;
-  description?: string;
-  templateHtml: string;
-  backgroundImageUrl?: string;
-  logoUrl?: string;
-  signatureImageUrl?: string;
-  isActive: boolean;
-}
-
-export interface EventRegistration {
-  id: number;
-  eventId: number;
-  userId: number;
-  participantType: 'individual' | 'empresa';
-  quantity: number;
-  totalAmount: number;
-  paymentStatus: 'pending' | 'paid' | 'refunded' | 'cancelled';
-  registrationStatus: 'confirmed' | 'pending' | 'cancelled';
-  customFields?: Record<string, any>;
-  participantData: ParticipantData[];
-  registeredAt: string;
-  // Relations
-  event?: Event;
-  user?: User;
-  payments?: Payment[];
-  certificate?: Certificate;
-}
-
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T;
-  error?: string;
-  timestamp: string;
-  pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrev: boolean;
-  };
-}
-
-export interface PaginationParams {
-  page?: number;
-  limit?: number;
-}
-
-export interface EventFilters extends PaginationParams {
-  search?: string;
-  eventTypeId?: number;
-  eventCategoryId?: number;
-  isVirtual?: boolean;
-  startDateFrom?: string;
-  startDateTo?: string;
-  priceMin?: number;
-  priceMax?: number;
-  location?: string;
-  tags?: string[];
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
 }
 
 // Form types
 export interface LoginForm {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
+  email: string
+  password: string
+  rememberMe?: boolean
 }
 
 export interface RegisterForm {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  phone?: string;
-  acceptTerms: boolean;
-  marketingAccepted?: boolean;
+  name: string
+  email: string
+  password: string
+  confirmPassword: string
+  acceptTerms: boolean
 }
 
-export interface CheckoutForm {
-  // Personal Info
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
+export interface EventForm {
+  title: string
+  description: string
+  startDate: Date
+  endDate: Date
+  location: string
+  capacity: number
+  price: number
+  category: string
+  imageUrl?: string
+}
 
-  // Billing Info (FEL)
-  nit?: string;
-  cui?: string;
-  billingName?: string;
-  billingAddress?: string;
+// Component props types
+export interface ComponentProps {
+  className?: string
+  children?: React.ReactNode
+}
 
-  // Payment Method
-  paymentMethod: 'card' | 'paypal' | 'bank_transfer';
-  cardNumber?: string;
-  expiryMonth?: number;
-  expiryYear?: number;
-  cvv?: string;
-  holderName?: string;
+// Error types
+export interface ValidationError {
+  field: string
+  message: string
+}
 
-  // Additional
-  acceptTerms: boolean;
-  newsletter?: boolean;
+export interface ApiError {
+  code: string
+  message: string
+  details?: ValidationError[]
+}
+
+// Notification types
+export interface Notification {
+  id: string
+  type: 'success' | 'error' | 'warning' | 'info'
+  title: string
+  message: string
+  duration?: number
+  action?: {
+    label: string
+    onClick: () => void
+  }
 }
 
 // Theme types
-export interface ThemeColors {
-  primary: string;
-  'primary-light': string;
-  'primary-dark': string;
-  accent: string;
-  secondary: string;
-  'text-primary': string;
-  'text-secondary': string;
-  error: string;
-  success: string;
-  warning: string;
-  info: string;
-  background: string;
-  surface: string;
-}
+export type Theme = 'light' | 'dark' | 'system'
 
-// Context types
-export interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (credentials: LoginForm) => Promise<void>;
-  register: (data: RegisterForm) => Promise<void>;
-  logout: () => void;
-  refreshToken: () => Promise<void>;
-}
+// Language types
+export type Language = 'es' | 'en'
 
-export interface CartContextType {
-  cart: Cart | null;
-  isLoading: boolean;
-  addItem: (item: Omit<CartItem, 'id' | 'addedAt'>) => Promise<void>;
-  updateItem: (itemId: number, updates: Partial<CartItem>) => Promise<void>;
-  removeItem: (itemId: number) => Promise<void>;
-  clearCart: () => Promise<void>;
-  applyPromoCode: (code: string) => Promise<void>;
-  refreshCart: () => Promise<void>;
-}
+// Status types
+export type LoadingState = 'idle' | 'loading' | 'success' | 'error'
 
-// Utility types
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
-
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
-  { [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Keys>> }[Keys];
+// Generic utility types
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>

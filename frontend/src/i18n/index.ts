@@ -1,74 +1,46 @@
-/**
- * @fileoverview Internationalization configuration for TradeConnect Frontend
- * @description
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
+import Backend from 'i18next-http-backend'
 
-Arquitectura recomendada si migras:
-  React (componentes interactivos)
-    ↓
-  Astro (routing y SSR)
-    ↓
-  shadcn/ui (componentes UI)
-    ↓
-  Tailwind CSS (estilos)
-    ↓
-  Radix UI (primitivos accesibles)
-    ↓
-  React Icons (iconos)
-
- * @architecture
- * - React: Componentes interactivos con hooks y context
- * - Astro: Routing y Server-Side Rendering (SSR)
- * - shadcn/ui: Componentes UI preconstruidos
- * - Tailwind CSS: Sistema de estilos utilitarios
- * - Radix UI: Primitivos accesibles para componentes
- * - React Icons: Biblioteca de iconos
- *
- * @compatibility SSR: Compatible con Astro SSR
- * @compatibility React: Compatible con React 18+
- * @compatibility TypeScript: Tipos completos incluidos
- * @version 1.0.0
- */
-
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
-
-// Import translation files
-import es from './locales/es.json';
-import en from './locales/en.json';
+import en from './locales/en.json'
+import es from './locales/es.json'
 
 const resources = {
-  es: {
-    translation: es,
-  },
   en: {
     translation: en,
   },
-};
+  es: {
+    translation: es,
+  },
+}
 
 i18n
+  .use(Backend)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
     fallbackLng: 'es',
-    debug: false, // Disable debug logging in production
-
-    // Language detection options
-    detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
-      lookupLocalStorage: 'i18nextLng',
-      caches: ['localStorage'],
-    },
+    debug: import.meta.env.DEV,
 
     interpolation: {
       escapeValue: false, // React already escapes values
     },
 
-    // React options - Compatible with Astro SSR
-    react: {
-      useSuspense: false, // Disable suspense for SSR compatibility
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      lookupLocalStorage: 'language',
+      caches: ['localStorage'],
     },
-  });
 
-export default i18n;
+    backend: {
+      loadPath: '/locales/{{lng}}.json',
+    },
+
+    react: {
+      useSuspense: false,
+    },
+  })
+
+export default i18n

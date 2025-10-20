@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import Navigation from '@/components/ui/navigation'
+import CertificateCard from '@/components/ui/certificate-card'
+import Footer from '@/components/ui/footer'
+---
+
+<BaseLayout title="Certificado - TradeConnect">
+  <Navigation client:load cartItemCount={0} />
+  <CertificateCard client:load />
+  <Footer client:load />
+</BaseLayout>

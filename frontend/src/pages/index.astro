@@ -1,31 +1,8 @@
-/**
- * @fileoverview index.astro - Página principal de TradeConnect
- * @description Página de entrada que carga la aplicación React completa para el dashboard y navegación principal.
- *
- * Arquitectura recomendada:
- * React (componentes interactivos)
- *   ↓
- * Astro (routing y SSR)
- *   ↓
- * shadcn/ui (componentes UI)
- *   ↓
- * Tailwind CSS (estilos)
- *   ↓
- * Radix UI (primitivos accesibles)
- *   ↓
- * Lucide Icons (iconos)
- *
- * @author TradeConnect Team
- * @version 1.0.0
- */
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import ClientApp from '@/components/ClientApp';
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AppRouter from '@/components/ui/app-router'
 ---
 
-<BaseLayout
-  title="TradeConnect - Plataforma E-commerce de Eventos Empresariales"
-  description="Plataforma completa para gestión de eventos empresariales con facturación FEL Guatemala, certificados blockchain y pagos seguros"
->
-  <ClientApp client:only="react" />
+<BaseLayout title="TradeConnect - Conecta con Eventos Empresariales">
+  <AppRouter client:only="react" />
 </BaseLayout>

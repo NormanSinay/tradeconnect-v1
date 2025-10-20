@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npm install -D tailwindcss@latest postcss@latest autoprefixer@latest @astrojs/tailwind@latest)",
       "Bash(npm install -D tailwindcss@^3.4.0 postcss@latest autoprefixer@latest @astrojs/tailwind@^5.1.0)",
-      "Bash(npm install -D tailwindcss@^3.4.0 postcss@latest autoprefixer@latest @astrojs/tailwind@^5.1.0 --legacy-peer-deps)"
+      "Bash(npm install -D tailwindcss@^3.4.0 postcss@latest autoprefixer@latest @astrojs/tailwind@^5.1.0 --legacy-peer-deps)",
+      "Bash(npm install @radix-ui/react-tooltip)",
+      "Bash(npm run type-check)",
+      "Bash(npm install @radix-ui/react-select --legacy-peer-deps)",
+      "Bash(npx tsc --noEmit src/components/common/ToastContainer.tsx src/components/common/ErrorBoundary.tsx src/components/profile/PaymentHistory.tsx src/components/profile/ProfileForm.tsx)",
+      "Bash(dir \"C:\\Users\\NSINAY\\Downloads\\tradeconnect-v1\\frontend\\src\\hooks\")"
     ],
     "deny": [],
     "ask": []

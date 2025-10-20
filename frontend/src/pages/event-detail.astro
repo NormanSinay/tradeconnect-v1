@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import Navigation from '@/components/ui/navigation'
+import EventDetail from '@/components/ui/event-detail'
+import Footer from '@/components/ui/footer'
+---
+
+<BaseLayout title="Detalles del Evento - TradeConnect">
+  <Navigation client:load cartItemCount={3} />
+  <EventDetail client:load />
+  <Footer client:load />
+</BaseLayout>
