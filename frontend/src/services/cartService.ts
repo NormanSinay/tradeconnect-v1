@@ -1,3 +1,23 @@
+/**
+ * @fileoverview cartService.ts - Servicio de carrito de compras para TradeConnect
+ * @description Servicio que maneja operaciones del carrito de compras, incluyendo agregar, actualizar y remover items.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import { apiService } from './api';
 import type { ApiResponse, Cart, CartItem } from '@/types';
 

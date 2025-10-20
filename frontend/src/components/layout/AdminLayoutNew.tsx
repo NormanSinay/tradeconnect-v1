@@ -1,12 +1,23 @@
+/**
+ * @fileoverview AdminLayoutNew - Layout administrativo mejorado para Super Admins
+ * @description Proporciona interfaz dedicada para Super Admins con diseño moderno y navegación mejorada
+ *
+ * Arquitectura:
+ * - React (componentes interactivos) → Estado de autenticación, navegación, dropdowns
+ * - Astro (routing y SSR) → Compatible con SSR, navegación del lado cliente
+ * - shadcn/ui (componentes UI) → Button, Avatar, Badge, DropdownMenu para interfaz consistente
+ * - Tailwind CSS (estilos) → Estilos utilitarios para layout responsivo
+ * - Radix UI (primitivos accesibles) → Primitivos en shadcn/ui
+ * - Lucide Icons (iconos) → Iconos modernos y consistentes
+ *
+ * @version 2.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import {
-  FaSignOutAlt,
-  FaUser,
-  FaHome,
-  FaBriefcase,
-} from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +29,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  LogOut as LogoutIcon,
+  User as PersonIcon,
+  Home as HomeIcon,
+  Building as BusinessIcon,
+} from 'lucide-react';
 
 /**
  * AdminLayout - Layout especial para Super Admins sin navbar público
@@ -48,7 +65,7 @@ const AdminLayoutNew: React.FC = () => {
       manager: 'Manager',
       operator: 'Operator',
     };
-    return roleLabels[user?.role || ''] || user?.role;
+    return roleLabels[user?.roles?.[0] || ''] || user?.roles?.[0];
   };
 
   return (
@@ -59,7 +76,7 @@ const AdminLayoutNew: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             {/* Logo y título */}
             <div className="flex items-center gap-3">
-              <FaBriefcase className="text-3xl text-white" />
+              <BusinessIcon className="text-3xl text-white" />
               <div>
                 <h1 className="text-lg font-bold text-white leading-tight">
                   TradeConnect
@@ -117,22 +134,22 @@ const AdminLayoutNew: React.FC = () => {
                     onClick={handleGoToProfile}
                     className="cursor-pointer"
                   >
-                    <FaUser className="mr-2 h-4 w-4" />
+                    <PersonIcon className="mr-2 h-4 w-4" />
                     Mi Perfil
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleGoToPublicSite}
                     className="cursor-pointer"
                   >
-                    <FaHome className="mr-2 h-4 w-4" />
+                    <HomeIcon className="mr-2 h-4 w-4" />
                     Ir al Sitio Público
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="cursor-pointer text-error"
+                    className="cursor-pointer text-destructive"
                   >
-                    <FaSignOutAlt className="mr-2 h-4 w-4" />
+                    <LogoutIcon className="mr-2 h-4 w-4" />
                     Cerrar Sesión
                   </DropdownMenuItem>
                 </DropdownMenuContent>

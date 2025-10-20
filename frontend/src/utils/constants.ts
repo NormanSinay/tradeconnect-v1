@@ -1,4 +1,19 @@
-// Constants for TradeConnect Frontend
+/**
+ * TradeConnect Frontend Constants
+ *
+ * Constantes centralizadas para la arquitectura:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * React Icons (iconos)
+ */
 
 // API Configuration
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
@@ -8,28 +23,39 @@ export const API_TIMEOUT = 30000; // 30 seconds
 export const IS_PRODUCTION = import.meta.env.PROD;
 export const IS_DEVELOPMENT = import.meta.env.DEV;
 
-// Theme Colors (Corporate Palette)
+// Theme Colors (Corporate Palette) - Compatible with Tailwind/shadcn
 export const THEME_COLORS = {
+  // Primary (Wine/Burgundy)
   primary: '#6B1E22',        // Vino corporativo principal
   primaryLight: '#8B2E32',   // Vino claro para hover
   primaryDark: '#4B1518',    // Vino oscuro para sombras
-  accent: '#E63946',          // Red accent (Rojo acento)
+
+  // Accent (Gold)
+  accent: '#D4AF37',         // Gold accent (Oro acento)
+
+  // Secondary
   secondary: '#F5F5F5',      // Gris claro para fondos secundarios
+
+  // Text
   textPrimary: '#333333',    // Texto principal oscuro
   textSecondary: '#666666',  // Texto secundario
+
+  // Status Colors
   error: '#D32F2F',          // Rojo para errores
   success: '#388E3C',        // Verde para confirmaciones
   warning: '#F57C00',        // Naranja para advertencias
   info: '#1976D2',           // Azul para información
+
+  // Background
   background: '#FFFFFF',     // Fondo blanco
   surface: '#FAFAFA',        // Superficie gris claro
 } as const;
 
-// Typography
+// Typography - Compatible with Tailwind/shadcn
 export const TYPOGRAPHY = {
   fontFamily: {
-    primary: "'Roboto', sans-serif",
-    secondary: "'Montserrat', sans-serif",
+    primary: "'Inter', 'Roboto', system-ui, sans-serif",      // For body text
+    secondary: "'Montserrat', 'Inter', system-ui, sans-serif", // For headings
   },
   fontSize: {
     xs: '0.75rem',    // 12px
@@ -51,44 +77,46 @@ export const TYPOGRAPHY = {
   },
 } as const;
 
-// Breakpoints (Material UI standard)
+// Breakpoints - Compatible with Tailwind CSS
 export const BREAKPOINTS = {
-  xs: 0,      // Extra small devices (phones)
-  sm: 600,    // Small devices (tablets)
-  md: 900,    // Medium devices (small laptops)
-  lg: 1200,   // Large devices (desktops)
-  xl: 1536,   // Extra large devices (large desktops)
+  xs: 0,      // Extra small devices (phones, < 640px)
+  sm: 640,    // Small devices (phones, 640px+)
+  md: 768,    // Medium devices (tablets, 768px+)
+  lg: 1024,   // Large devices (desktops, 1024px+)
+  xl: 1280,   // Extra large devices (large desktops, 1280px+)
+  '2xl': 1536, // 2X large devices (larger desktops, 1536px+)
 } as const;
 
-// Spacing scale
+// Spacing scale - Compatible with Tailwind CSS
 export const SPACING = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  '2xl': 48,
-  '3xl': 64,
+  xs: 4,      // 4px
+  sm: 8,      // 8px
+  md: 16,     // 16px
+  lg: 24,     // 24px
+  xl: 32,     // 32px
+  '2xl': 48,  // 48px
+  '3xl': 64,  // 64px
 } as const;
 
-// Border radius
+// Border radius - Compatible with Tailwind/shadcn
 export const BORDER_RADIUS = {
-  none: 0,
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  full: 9999,
+  none: 0,      // 0px
+  sm: 4,        // 4px
+  md: 8,        // 8px
+  lg: 12,       // 12px
+  xl: 16,       // 16px
+  '2xl': 24,    // 24px
+  full: 9999,   // 9999px (fully rounded)
 } as const;
 
-// Shadows
+// Shadows - Compatible with Tailwind CSS
 export const SHADOWS = {
   none: 'none',
   sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-  md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-  lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-  xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-  '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+  md: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+  lg: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+  xl: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+  '2xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
 } as const;
 
 // Animation durations

@@ -1,3 +1,24 @@
+/**
+ * @fileoverview Componente de Autenticación de Dos Factores (2FA)
+ * @description Gestión completa de autenticación de dos factores con QR codes y códigos de respaldo
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -178,190 +199,169 @@ const TwoFactorAuth: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-8">
+        <Skeleton className="h-8 w-8 rounded-full animate-spin" />
+      </div>
     );
   }
 
   return (
-    <Box component={"div" as any}>
+    <div className="space-y-6">
       {/* Header */}
-      <Box component={"div" as any} sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-          Autenticación de Dos Factores (2FA)
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold">Autenticación de Dos Factores (2FA)</h2>
+        <p className="text-muted-foreground">
           Añade una capa extra de seguridad a tu cuenta requiriendo un código de tu
           aplicación de autenticación además de tu contraseña.
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       {/* Status Card */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box
-            component={"div" as any}
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
               <Shield
-                sx={{
-                  fontSize: 40,
-                  color: twoFactorStatus?.enabled ? 'success.main' : 'text.disabled',
-                }}
+                className={cn(
+                  "h-10 w-10",
+                  twoFactorStatus?.enabled ? "text-green-600" : "text-muted-foreground"
+                )}
               />
-              <Box component={"div" as any}>
-                <Typography variant="h6" gutterBottom>
-                  Estado de 2FA
-                </Typography>
-                <Chip
-                  label={twoFactorStatus?.enabled ? 'Habilitado' : 'Deshabilitado'}
-                  color={twoFactorStatus?.enabled ? 'success' : 'default'}
-                  icon={
-                    twoFactorStatus?.enabled ? <CheckCircle /> : <Lock />
-                  }
-                />
-              </Box>
-            </Box>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={twoFactorStatus?.enabled || false}
-                  onChange={handleToggle2FA}
-                  disabled={enableMutation.isPending}
-                />
-              }
-              label=""
+              <div>
+                <h3 className="text-lg font-semibold">Estado de 2FA</h3>
+                <Badge
+                  variant={twoFactorStatus?.enabled ? "default" : "secondary"}
+                  className={cn(
+                    "mt-1",
+                    twoFactorStatus?.enabled ? "bg-green-100 text-green-800" : ""
+                  )}
+                >
+                  {twoFactorStatus?.enabled ? (
+                    <>
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Habilitado
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-3 h-3 mr-1" />
+                      Deshabilitado
+                    </>
+                  )}
+                </Badge>
+              </div>
+            </div>
+            <Switch
+              checked={twoFactorStatus?.enabled || false}
+              onCheckedChange={handleToggle2FA}
+              disabled={enableMutation.isPending}
             />
-          </Box>
+          </div>
         </CardContent>
       </Card>
 
       {/* Information Alert */}
       {!twoFactorStatus?.enabled && (
-        <Alert severity="info" icon={<Shield />} sx={{ mb: 3 }}>
-          Recomendamos habilitar 2FA para proteger tu cuenta contra accesos no
-          autorizados. Necesitarás una aplicación de autenticación como Google
-          Authenticator o Authy.
+        <Alert className="mb-6">
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            Recomendamos habilitar 2FA para proteger tu cuenta contra accesos no
+            autorizados. Necesitarás una aplicación de autenticación como Google
+            Authenticator o Authy.
+          </AlertDescription>
         </Alert>
       )}
 
       {twoFactorStatus?.enabled && (
-        <Alert severity="success" icon={<CheckCircle />} sx={{ mb: 3 }}>
-          Tu cuenta está protegida con autenticación de dos factores.
+        <Alert className="mb-6">
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            Tu cuenta está protegida con autenticación de dos factores.
+          </AlertDescription>
         </Alert>
       )}
 
       {/* How it Works */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-            ¿Cómo funciona?
-          </Typography>
-          <List>
-            <ListItem>
-              <ListItemIcon>
-                <PhoneIphone color="primary" />
-              </ListItemIcon>
-              <ListItemText
-                primary="1. Instala una aplicación de autenticación"
-                secondary="Google Authenticator, Authy, o similar en tu dispositivo móvil"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <QrCode color="primary" />
-              </ListItemIcon>
-              <ListItemText
-                primary="2. Escanea el código QR"
-                secondary="La aplicación generará un código único de 6 dígitos"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <VpnKey color="primary" />
-              </ListItemIcon>
-              <ListItemText
-                primary="3. Ingresa el código al iniciar sesión"
-                secondary="Se te pedirá el código cada vez que inicies sesión"
-              />
-            </ListItem>
-          </List>
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">¿Cómo funciona?</h3>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Smartphone className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-medium">1. Instala una aplicación de autenticación</p>
+                <p className="text-sm text-muted-foreground">Google Authenticator, Authy, o similar en tu dispositivo móvil</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <QrCode className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-medium">2. Escanea el código QR</p>
+                <p className="text-sm text-muted-foreground">La aplicación generará un código único de 6 dígitos</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Key className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="font-medium">3. Ingresa el código al iniciar sesión</p>
+                <p className="text-sm text-muted-foreground">Se te pedirá el código cada vez que inicies sesión</p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       {/* Backup Codes */}
       {twoFactorStatus?.enabled && twoFactorStatus.backupCodes && (
         <Card>
-          <CardContent>
-            <Box
-              component={"div" as any}
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 2,
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Códigos de Respaldo
-              </Typography>
-              <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Códigos de Respaldo</h3>
+              <div className="flex gap-2">
                 <Button
-                  size="small"
-                  startIcon={<ContentCopy />}
+                  size="sm"
+                  variant="outline"
                   onClick={handleCopyAllBackupCodes}
                 >
+                  <Copy className="w-4 h-4 mr-2" />
                   Copiar
                 </Button>
                 <Button
-                  size="small"
-                  startIcon={<Download />}
+                  size="sm"
+                  variant="outline"
                   onClick={handleDownloadBackupCodes}
                 >
+                  <Download className="w-4 h-4 mr-2" />
                   Descargar
                 </Button>
-              </Box>
-            </Box>
+              </div>
+            </div>
 
-            <Alert severity="warning" icon={<Warning />} sx={{ mb: 2 }}>
-              Guarda estos códigos en un lugar seguro. Puedes usarlos para acceder a tu
-              cuenta si pierdes acceso a tu aplicación de autenticación.
+            <Alert className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Guarda estos códigos en un lugar seguro. Puedes usarlos para acceder a tu
+                cuenta si pierdes acceso a tu aplicación de autenticación.
+              </AlertDescription>
             </Alert>
 
-            <Grid container spacing={1}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {twoFactorStatus.backupCodes.map((code, index) => (
-                <Grid item xs={6} sm={4} key={index}>
-                  <Box
-                    component={"div" as any}
-                    sx={{
-                      p: 1.5,
-                      bgcolor: 'grey.100',
-                      borderRadius: 1,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      fontFamily: 'monospace',
-                      fontSize: '0.9rem',
-                    }}
+                <div
+                  key={index}
+                  className="p-3 bg-muted rounded-md flex justify-between items-center font-mono text-sm"
+                >
+                  {code}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleCopyCode(code)}
+                    className="h-6 w-6 p-0"
                   >
-                    {code}
-                    <Button
-                      size="small"
-                      onClick={() => handleCopyCode(code)}
-                      sx={{ minWidth: 'auto', p: 0.5 }}
-                    >
-                      <ContentCopy sx={{ fontSize: 16 }} />
-                    </Button>
-                  </Box>
-                </Grid>
+                    <Copy className="w-3 h-3" />
+                  </Button>
+                </div>
               ))}
-            </Grid>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -369,219 +369,183 @@ const TwoFactorAuth: React.FC = () => {
       {/* Setup Modal */}
       <Dialog
         open={verifyModalOpen && !showBackupCodes}
-        onClose={() => !verifyMutation.isPending && setVerifyModalOpen(false)}
-        maxWidth="sm"
-        fullWidth
+        onOpenChange={(open) => !verifyMutation.isPending && setVerifyModalOpen(open)}
       >
-        <DialogTitle>Configurar Autenticación de Dos Factores</DialogTitle>
-        <DialogContent>
-          <Box component={"div" as any} sx={{ textAlign: 'center', py: 2 }}>
-            <Typography variant="body1" gutterBottom>
-              1. Escanea este código QR con tu aplicación de autenticación
-            </Typography>
+        <DialogHeader>
+          <DialogTitle>Configurar Autenticación de Dos Factores</DialogTitle>
+        </DialogHeader>
+        <DialogContent className="text-center py-4">
+          <p className="mb-4">
+            1. Escanea este código QR con tu aplicación de autenticación
+          </p>
 
-            {/* QR Code */}
-            {twoFactorStatus?.qrCodeUrl ? (
-              <Box
-                component="img"
-                src={twoFactorStatus.qrCodeUrl}
-                alt="QR Code"
-                sx={{
-                  width: 250,
-                  height: 250,
-                  mx: 'auto',
-                  my: 2,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 2,
-                }}
-              />
-            ) : (
-              <Box
-                component={"div" as any}
-                sx={{
-                  width: 250,
-                  height: 250,
-                  mx: 'auto',
-                  my: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  bgcolor: 'grey.100',
-                  borderRadius: 2,
-                }}
-              >
-                <QrCode sx={{ fontSize: 200, color: 'grey.400' }} />
-              </Box>
-            )}
+          {/* QR Code */}
+          {twoFactorStatus?.qrCodeUrl ? (
+            <img
+              src={twoFactorStatus.qrCodeUrl}
+              alt="QR Code"
+              className="w-64 h-64 mx-auto my-4 border border-border rounded-lg"
+            />
+          ) : (
+            <div className="w-64 h-64 mx-auto my-4 flex items-center justify-center bg-muted rounded-lg">
+              <QrCode className="w-32 h-32 text-muted-foreground" />
+            </div>
+          )}
 
-            {/* Manual Entry */}
-            {twoFactorStatus?.secret && (
-              <Box component={"div" as any} sx={{ mb: 3 }}>
-                <Typography variant="caption" color="text.secondary" gutterBottom>
-                  O ingresa este código manualmente:
-                </Typography>
-                <Box
-                  component={"div" as any}
-                  sx={{
-                    p: 1,
-                    bgcolor: 'grey.100',
-                    borderRadius: 1,
-                    fontFamily: 'monospace',
-                    fontSize: '0.9rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    mt: 1,
-                  }}
+          {/* Manual Entry */}
+          {twoFactorStatus?.secret && (
+            <div className="mb-6">
+              <p className="text-sm text-muted-foreground mb-2">
+                O ingresa este código manualmente:
+              </p>
+              <div className="p-2 bg-muted rounded-md font-mono text-sm flex justify-between items-center">
+                {twoFactorStatus.secret}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleCopyCode(twoFactorStatus.secret!)}
                 >
-                  {twoFactorStatus.secret}
-                  <Button
-                    size="small"
-                    onClick={() => handleCopyCode(twoFactorStatus.secret!)}
-                  >
-                    <ContentCopy />
-                  </Button>
-                </Box>
-              </Box>
-            )}
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
 
-            <Divider sx={{ my: 2 }} />
+          <hr className="my-4" />
 
-            <Typography variant="body1" gutterBottom>
-              2. Ingresa el código de 6 dígitos generado por la aplicación
-            </Typography>
+          <p className="mb-4">
+            2. Ingresa el código de 6 dígitos generado por la aplicación
+          </p>
 
-            <TextField
-              fullWidth
-              label="Código de Verificación"
+          <div className="space-y-2">
+            <Label htmlFor="verification-code">Código de Verificación</Label>
+            <Input
+              id="verification-code"
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="000000"
-              inputProps={{
-                maxLength: 6,
-                style: { textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5rem' },
-              }}
-              sx={{ mt: 2 }}
+              className="text-center text-xl tracking-widest"
+              maxLength={6}
             />
-          </Box>
+          </div>
         </DialogContent>
-        <DialogActions>
+        <DialogFooter>
           <Button
+            variant="outline"
             onClick={() => setVerifyModalOpen(false)}
             disabled={verifyMutation.isPending}
           >
             Cancelar
           </Button>
           <Button
-            variant="contained"
             onClick={handleVerifyCode}
             disabled={verificationCode.length !== 6 || verifyMutation.isPending}
-            startIcon={verifyMutation.isPending ? <CircularProgress size={20} /> : undefined}
           >
+            {verifyMutation.isPending && <Skeleton className="w-4 h-4 mr-2 rounded-full animate-spin" />}
             Verificar
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
 
       {/* Backup Codes Modal */}
       <Dialog
         open={showBackupCodes}
-        onClose={() => setShowBackupCodes(false)}
-        maxWidth="sm"
-        fullWidth
+        onOpenChange={setShowBackupCodes}
       >
-        <DialogTitle>
-          <CheckCircle sx={{ color: 'success.main', mr: 1, verticalAlign: 'middle' }} />
-          2FA Habilitado Exitosamente
-        </DialogTitle>
+        <DialogHeader>
+          <DialogTitle className="flex items-center">
+            <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+            2FA Habilitado Exitosamente
+          </DialogTitle>
+        </DialogHeader>
         <DialogContent>
-          <Alert severity="warning" icon={<Warning />} sx={{ mb: 2 }}>
-            <strong>Importante:</strong> Guarda estos códigos de respaldo en un lugar
-            seguro. Los necesitarás si pierdes acceso a tu aplicación de autenticación.
+          <Alert className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Importante:</strong> Guarda estos códigos de respaldo en un lugar
+              seguro. Los necesitarás si pierdes acceso a tu aplicación de autenticación.
+            </AlertDescription>
           </Alert>
 
-          <Typography variant="body2" color="text.secondary" gutterBottom>
+          <p className="text-sm text-muted-foreground mb-4">
             Códigos de Respaldo:
-          </Typography>
+          </p>
 
-          <Grid container spacing={1} sx={{ my: 2 }}>
+          <div className="grid grid-cols-2 gap-2 mb-4">
             {twoFactorStatus?.backupCodes?.map((code, index) => (
-              <Grid item xs={6} key={index}>
-                <Box
-                  component={"div" as any}
-                  sx={{
-                    p: 1.5,
-                    bgcolor: 'grey.100',
-                    borderRadius: 1,
-                    fontFamily: 'monospace',
-                    fontSize: '0.9rem',
-                    textAlign: 'center',
-                  }}
-                >
-                  {code}
-                </Box>
-              </Grid>
+              <div
+                key={index}
+                className="p-3 bg-muted rounded-md font-mono text-sm text-center"
+              >
+                {code}
+              </div>
             ))}
-          </Grid>
+          </div>
         </DialogContent>
-        <DialogActions>
-          <Button startIcon={<ContentCopy />} onClick={handleCopyAllBackupCodes}>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleCopyAllBackupCodes}>
+            <Copy className="w-4 h-4 mr-2" />
             Copiar Todos
           </Button>
-          <Button startIcon={<Download />} onClick={handleDownloadBackupCodes}>
+          <Button variant="outline" onClick={handleDownloadBackupCodes}>
+            <Download className="w-4 h-4 mr-2" />
             Descargar
           </Button>
-          <Button variant="contained" onClick={() => setShowBackupCodes(false)}>
+          <Button onClick={() => setShowBackupCodes(false)}>
             Entendido
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
 
       {/* Disable 2FA Modal */}
       <Dialog
         open={disableModalOpen}
-        onClose={() => !disableMutation.isPending && setDisableModalOpen(false)}
-        maxWidth="xs"
-        fullWidth
+        onOpenChange={(open) => !disableMutation.isPending && setDisableModalOpen(open)}
       >
-        <DialogTitle>Deshabilitar 2FA</DialogTitle>
+        <DialogHeader>
+          <DialogTitle>Deshabilitar 2FA</DialogTitle>
+        </DialogHeader>
         <DialogContent>
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            Deshabilitar 2FA hará tu cuenta menos segura.
+          <Alert className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Deshabilitar 2FA hará tu cuenta menos segura.
+            </AlertDescription>
           </Alert>
-          <Typography variant="body2" gutterBottom>
+          <p className="text-sm mb-4">
             Ingresa el código de tu aplicación de autenticación para confirmar:
-          </Typography>
-          <TextField
-            fullWidth
-            label="Código de Verificación"
-            value={disableCode}
-            onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="000000"
-            inputProps={{
-              maxLength: 6,
-              style: { textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5rem' },
-            }}
-            sx={{ mt: 2 }}
-          />
+          </p>
+          <div className="space-y-2">
+            <Label htmlFor="disable-code">Código de Verificación</Label>
+            <Input
+              id="disable-code"
+              value={disableCode}
+              onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="000000"
+              className="text-center text-xl tracking-widest"
+              maxLength={6}
+            />
+          </div>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDisableModalOpen(false)} disabled={disableMutation.isPending}>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setDisableModalOpen(false)}
+            disabled={disableMutation.isPending}
+          >
             Cancelar
           </Button>
           <Button
-            variant="contained"
-            color="error"
+            variant="destructive"
             onClick={handleDisable2FA}
             disabled={disableCode.length !== 6 || disableMutation.isPending}
-            startIcon={disableMutation.isPending ? <CircularProgress size={20} /> : undefined}
           >
+            {disableMutation.isPending && <Skeleton className="w-4 h-4 mr-2 rounded-full animate-spin" />}
             Deshabilitar
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
-    </Box>
+    </div>
   );
 };
 

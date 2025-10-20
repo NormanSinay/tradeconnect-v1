@@ -5,6 +5,9 @@ import { authService } from '@/services/api';
 import { STORAGE_KEYS } from '@/utils/constants';
 import toast from 'react-hot-toast';
 
+// AuthContext for React/Astro architecture
+// Compatible with: React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
@@ -15,8 +18,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if user is authenticated on mount
+  // Check if user is authenticated on mount (SSR-safe)
   useEffect(() => {
+    // Only run on client-side to avoid SSR hydration issues
+    if (typeof window === 'undefined') {
+      setIsLoading(false);
+      return;
+    }
+
     const initializeAuth = async () => {
       try {
         const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
@@ -108,10 +117,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = (): void => {
-    // Clear all auth data
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    // Clear all auth data (SSR-safe)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
+    }
 
     setUser(null);
     toast.success('Sesión cerrada exitosamente', {

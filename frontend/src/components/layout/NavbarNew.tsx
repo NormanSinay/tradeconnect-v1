@@ -1,22 +1,36 @@
+/**
+ * @fileoverview NavbarNew Component - Arquitectura React/Astro + Tailwind CSS + shadcn/ui
+ *
+ * Arquitectura recomendada para migración:
+ * React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui (componentes UI)
+ * → Tailwind CSS (estilos) → Radix UI (primitivos accesibles) → Lucide Icons (iconos)
+ *
+ * @version 2.0.0
+ * @author TradeConnect Team
+ * @description Componente de navegación mejorado con navegación responsiva,
+ * autenticación integrada, carrito de compras y búsqueda de eventos.
+ * Compatible con SSR de Astro y optimizado para performance.
+ */
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  FaBars,
-  FaSearch,
-  FaShoppingCart,
-  FaUser,
-  FaSignOutAlt,
-  FaTachometerAlt,
-  FaCalendarAlt,
-  FaGraduationCap,
-  FaBriefcase,
-  FaUserCog,
-  FaChartBar,
-  FaHome,
-  FaEnvelope,
-  FaCalendar,
-  FaQrcode,
-} from 'react-icons/fa';
+  Menu as MenuIcon,
+  Search as SearchIcon,
+  ShoppingCart as CartIcon,
+  User as PersonIcon,
+  LogOut as LogoutIcon,
+  LayoutDashboard as DashboardIcon,
+  Calendar as EventIcon,
+  GraduationCap as SchoolIcon,
+  Building as BusinessIcon,
+  Users as ManageAccountsIcon,
+  BarChart3 as AssessmentIcon,
+  Home as HomeIcon,
+  Mail as ContactIcon,
+  CalendarDays as CalendarIcon,
+  QrCode as QrCodeIcon,
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
@@ -43,7 +57,7 @@ import MiniCart from '@/components/cart/MiniCart';
 
 const NavbarNew: React.FC = () => {
   const { user, logout } = useAuth();
-  const { items } = useCart();
+  const { cart } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -54,7 +68,7 @@ const NavbarNew: React.FC = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const cartItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const cartItemsCount = cart?.totalItems || 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,36 +88,36 @@ const NavbarNew: React.FC = () => {
   const getNavLinks = () => {
     if (!user) {
       return [
-        { label: 'Inicio', href: '/', icon: FaHome },
-        { label: 'Eventos', href: '/events', icon: FaCalendarAlt },
-        { label: 'Contacto', href: '/contact', icon: FaEnvelope },
+        { label: 'Inicio', href: '/', icon: HomeIcon },
+        { label: 'Eventos', href: '/events', icon: EventIcon },
+        { label: 'Contacto', href: '/contact', icon: ContactIcon },
       ];
     }
 
     const commonLinks = [
-      { label: 'Inicio', href: '/', icon: FaHome },
-      { label: 'Eventos', href: '/events', icon: FaCalendarAlt },
+      { label: 'Inicio', href: '/', icon: HomeIcon },
+      { label: 'Eventos', href: '/events', icon: EventIcon },
     ];
 
-    if (user.role === 'super_admin' || user.role === 'admin' || user.role === 'manager') {
+    if (user.roles?.some(role => ['super_admin', 'admin', 'manager'].includes(role))) {
       return [
         ...commonLinks,
-        { label: 'Dashboard', href: '/admin/dashboard', icon: FaTachometerAlt },
+        { label: 'Dashboard', href: '/admin/dashboard', icon: DashboardIcon },
       ];
     }
 
-    if (user.role === 'speaker') {
+    if (user.roles?.includes('speaker')) {
       return [
         ...commonLinks,
-        { label: 'Mis Eventos', href: '/speaker/events', icon: FaCalendarAlt },
-        { label: 'Mi Perfil', href: '/speaker/profile', icon: FaUser },
+        { label: 'Mis Eventos', href: '/speaker/events', icon: EventIcon },
+        { label: 'Mi Perfil', href: '/speaker/profile', icon: PersonIcon },
       ];
     }
 
-    if (user.role === 'operator') {
+    if (user.roles?.includes('operator')) {
       return [
         ...commonLinks,
-        { label: 'Check-in', href: '/operator/checkin', icon: FaQrcode },
+        { label: 'Check-in', href: '/operator/checkin', icon: QrCodeIcon },
       ];
     }
 
@@ -123,7 +137,7 @@ const NavbarNew: React.FC = () => {
               to="/"
               className="flex items-center gap-2 text-primary-600 font-bold text-xl hover:text-primary-700 transition-colors no-underline"
             >
-              <FaBriefcase className="text-2xl" />
+              <BusinessIcon className="text-2xl" />
               <span className="hidden sm:inline">TradeConnect</span>
             </Link>
 
@@ -156,7 +170,7 @@ const NavbarNew: React.FC = () => {
                 onClick={() => setSearchOpen(true)}
                 aria-label="Buscar"
               >
-                <FaSearch className="h-5 w-5" />
+                <SearchIcon className="h-5 w-5" />
               </Button>
 
               {/* Language Selector */}
@@ -171,7 +185,7 @@ const NavbarNew: React.FC = () => {
                   className="relative"
                   aria-label="Carrito"
                 >
-                  <FaShoppingCart className="h-5 w-5" />
+                  <CartIcon className="h-5 w-5" />
                   {cartItemsCount > 0 && (
                     <Badge
                       variant="destructive"
@@ -189,9 +203,8 @@ const NavbarNew: React.FC = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatar} alt={user.name} />
                         <AvatarFallback className="bg-primary-100 text-primary-700">
-                          {user.name?.charAt(0).toUpperCase() || 'U'}
+                          {user.firstName?.[0] || user.email?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -199,35 +212,35 @@ const NavbarNew: React.FC = () => {
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium">{user.name}</p>
+                        <p className="text-sm font-medium">{user.firstName} {user.lastName}</p>
                         <p className="text-xs text-gray-500">{user.email}</p>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link to="/profile" className="cursor-pointer flex items-center">
-                        <FaUser className="mr-2 h-4 w-4" />
+                        <PersonIcon className="mr-2 h-4 w-4" />
                         Mi Perfil
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/profile/events" className="cursor-pointer flex items-center">
-                        <FaCalendar className="mr-2 h-4 w-4" />
+                        <EventIcon className="mr-2 h-4 w-4" />
                         Mis Eventos
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/profile/certificates" className="cursor-pointer flex items-center">
-                        <FaGraduationCap className="mr-2 h-4 w-4" />
+                        <SchoolIcon className="mr-2 h-4 w-4" />
                         Mis Certificados
                       </Link>
                     </DropdownMenuItem>
-                    {(user.role === 'super_admin' || user.role === 'admin') && (
+                    {user.roles?.some(role => ['super_admin', 'admin'].includes(role)) && (
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
                           <Link to="/admin/dashboard" className="cursor-pointer flex items-center">
-                            <FaTachometerAlt className="mr-2 h-4 w-4" />
+                            <DashboardIcon className="mr-2 h-4 w-4" />
                             Dashboard
                           </Link>
                         </DropdownMenuItem>
@@ -235,7 +248,7 @@ const NavbarNew: React.FC = () => {
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-error">
-                      <FaSignOutAlt className="mr-2 h-4 w-4" />
+                      <LogoutIcon className="mr-2 h-4 w-4" />
                       Cerrar Sesión
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -268,7 +281,7 @@ const NavbarNew: React.FC = () => {
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   aria-label="Menú"
                 >
-                  <FaBars className="h-5 w-5" />
+                  <MenuIcon className="h-5 w-5" />
                 </Button>
               )}
             </div>
@@ -301,7 +314,7 @@ const NavbarNew: React.FC = () => {
                       onClick={() => setMobileMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 no-underline"
                     >
-                      <FaUser className="text-lg" />
+                      <PersonIcon className="text-lg" />
                       Iniciar Sesión
                     </Link>
                   </>
@@ -329,7 +342,7 @@ const NavbarNew: React.FC = () => {
                 autoFocus
               />
               <Button type="submit">
-                <FaSearch className="mr-2" />
+                <SearchIcon className="mr-2" />
                 Buscar
               </Button>
             </div>
@@ -340,7 +353,7 @@ const NavbarNew: React.FC = () => {
       {/* Cart Dialog */}
       <Dialog open={cartOpen} onOpenChange={setCartOpen}>
         <DialogContent className="sm:max-w-[600px]">
-          <MiniCart onClose={() => setCartOpen(false)} />
+          <MiniCart anchorEl={null} onClose={() => setCartOpen(false)} onOpen={() => {}} />
         </DialogContent>
       </Dialog>
     </>

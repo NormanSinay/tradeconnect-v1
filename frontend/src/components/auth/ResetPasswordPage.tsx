@@ -1,31 +1,40 @@
+/**
+ * @fileoverview ResetPasswordPage - Página de restablecimiento de contraseña
+ * @description Componente React para restablecer contraseña con validación completa
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Validación completa con Yup y React Hook Form
+ * - Indicador de fortaleza de contraseña
+ * - Manejo de tokens de recuperación
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link as RouterLink } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Box,
-  Grid,
-  Alert,
-  InputAdornment,
-  IconButton,
-  Link,
-  CircularProgress,
-} from '@mui/material';
-import {
-  Lock,
-  Visibility,
-  VisibilityOff,
-  CheckCircle,
-  ArrowBack,
-} from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { authService } from '@/services/api';
 import toast from 'react-hot-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
 
 const resetPasswordSchema = yup.object({
   password: yup
@@ -142,128 +151,81 @@ const ResetPasswordPage: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="sm" sx={{ py: 8 }}>
-      <Paper
-        elevation={8}
-        sx={{
-          p: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          borderRadius: 2,
-        }}
-      >
-        {/* Logo/Brand */}
-        <Box component={"div" as any} sx={{ mb: 3, textAlign: 'center' }}>
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{
-              fontWeight: 'bold',
-              color: 'primary.main',
-              mb: 1,
-            }}
-          >
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-primary">
             TradeConnect
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
+          </CardTitle>
+          <p className="text-muted-foreground">
             Restablecer contraseña
-          </Typography>
-        </Box>
+          </p>
+        </CardHeader>
+        <CardContent>
+          {!resetSuccess ? (
+            <>
+              {/* Instructions */}
+              <div className="text-center mb-6">
+                <p className="text-sm text-muted-foreground">
+                  Ingresa tu nueva contraseña. Asegúrate de que sea segura y fácil de recordar.
+                </p>
+              </div>
 
-        {!resetSuccess ? (
-          <>
-            {/* Instructions */}
-            <Box component={"div" as any} sx={{ mb: 3, textAlign: 'center', width: '100%' }}>
-              <Typography variant="body2" color="text.secondary">
-                Ingresa tu nueva contraseña. Asegúrate de que sea segura y fácil de recordar.
-              </Typography>
-            </Box>
+              {/* Error Alert */}
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-            {/* Error Alert */}
-            {error && (
-              <Alert severity="error" sx={{ width: '100%', mb: 3 }}>
-                {error}
-              </Alert>
-            )}
-
-            {/* Form */}
-            {token && (
-              <Box
-                component="form"
-                onSubmit={handleSubmit(onSubmit)}
-                sx={{ width: '100%' }}
-              >
-                <Grid container spacing={3}>
+              {/* Form */}
+              {token && (
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   {/* Password Field */}
-                  <Grid item xs={12}>
-                    <TextField
-                      {...register('password')}
-                      fullWidth
-                      label="Nueva Contraseña"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="new-password"
-                      autoFocus
-                      error={!!errors.password}
-                      helperText={errors.password?.message}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Lock color="action" />
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              aria-label="toggle password visibility"
-                              onClick={togglePasswordVisibility}
-                              edge="end"
-                            >
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                      disabled={isSubmitting}
-                    />
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Nueva Contraseña</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        {...register('password')}
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Tu nueva contraseña"
+                        autoComplete="new-password"
+                        autoFocus
+                        className={`pl-10 pr-10 ${errors.password ? 'border-destructive' : ''}`}
+                        disabled={isSubmitting}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
+                        onClick={togglePasswordVisibility}
+                        disabled={isSubmitting}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-sm text-destructive">{errors.password.message}</p>
+                    )}
 
                     {/* Password Strength Indicator */}
                     {watchedPassword && (
-                      <Box component={"div" as any} sx={{ mt: 1 }}>
-                        <Typography variant="caption" color="text.secondary">
+                      <div className="mt-2">
+                        <p className="text-xs text-muted-foreground mb-1">
                           Fortaleza de la contraseña:
-                        </Typography>
-                        <Box component={"div" as any} sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
-                          {[1, 2, 3, 4, 5].map((level) => (
-                            <Box
-                              component={"div" as any}
-                              key={level}
-                              sx={{
-                                height: 4,
-                                flex: 1,
-                                borderRadius: 1,
-                                backgroundColor:
-                                  level <= passwordStrength
-                                    ? passwordStrength <= 2
-                                      ? 'error.main'
-                                      : passwordStrength <= 3
-                                      ? 'warning.main'
-                                      : 'success.main'
-                                    : 'grey.300',
-                              }}
-                            />
-                          ))}
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          color={
-                            passwordStrength <= 2
-                              ? 'error.main'
-                              : passwordStrength <= 3
-                              ? 'warning.main'
-                              : 'success.main'
-                          }
-                        >
+                        </p>
+                        <Progress
+                          value={(passwordStrength / 5) * 100}
+                          className="h-2 mb-1"
+                        />
+                        <p className={`text-xs ${
+                          passwordStrength <= 2
+                            ? 'text-destructive'
+                            : passwordStrength <= 3
+                            ? 'text-yellow-600'
+                            : 'text-green-600'
+                        }`}>
                           {passwordStrength <= 2
                             ? 'Débil'
                             : passwordStrength <= 3
@@ -271,115 +233,96 @@ const ResetPasswordPage: React.FC = () => {
                             : passwordStrength <= 4
                             ? 'Buena'
                             : 'Excelente'}
-                        </Typography>
-                      </Box>
+                        </p>
+                      </div>
                     )}
-                  </Grid>
+                  </div>
 
                   {/* Confirm Password Field */}
-                  <Grid item xs={12}>
-                    <TextField
-                      {...register('confirmPassword')}
-                      fullWidth
-                      label="Confirmar Nueva Contraseña"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      autoComplete="new-password"
-                      error={!!errors.confirmPassword}
-                      helperText={errors.confirmPassword?.message}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Lock color="action" />
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              aria-label="toggle confirm password visibility"
-                              onClick={toggleConfirmPasswordVisibility}
-                              edge="end"
-                            >
-                              {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                      disabled={isSubmitting}
-                    />
-                  </Grid>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirmar Nueva Contraseña</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        {...register('confirmPassword')}
+                        id="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        placeholder="Confirma tu contraseña"
+                        autoComplete="new-password"
+                        className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                        disabled={isSubmitting}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
+                        onClick={toggleConfirmPasswordVisibility}
+                        disabled={isSubmitting}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                    )}
+                  </div>
 
                   {/* Submit Button */}
-                  <Grid item xs={12}>
-                    <Button
-                      type="submit"
-                      fullWidth
-                      variant="contained"
-                      size="large"
-                      disabled={isSubmitting || !token}
-                      startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <CheckCircle />}
-                      sx={{ py: 1.5, fontSize: '1.1rem' }}
-                    >
-                      {isSubmitting ? 'Restableciendo...' : 'Restablecer Contraseña'}
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Box>
-            )}
-          </>
-        ) : (
-          <>
-            {/* Success Message */}
-            <Alert severity="success" sx={{ width: '100%', mb: 3 }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>¡Contraseña restablecida exitosamente!</strong>
-              </Typography>
-              <Typography variant="body2">
-                Tu contraseña ha sido actualizada. Serás redirigido al inicio de sesión.
-              </Typography>
-            </Alert>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isSubmitting || !token}
+                  >
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isSubmitting ? 'Restableciendo...' : 'Restablecer Contraseña'}
+                  </Button>
+                </form>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Success Message */}
+              <Alert className="mb-4">
+                <AlertDescription>
+                  <strong>¡Contraseña restablecida exitosamente!</strong>
+                  <br />
+                  Tu contraseña ha sido actualizada. Serás redirigido al inicio de sesión.
+                </AlertDescription>
+              </Alert>
 
-            <Box component={"div" as any} sx={{ width: '100%', textAlign: 'center', mb: 3 }}>
-              <CircularProgress size={40} />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                Redirigiendo...
-              </Typography>
-            </Box>
-          </>
-        )}
+              <div className="text-center mb-4">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mt-2">
+                  Redirigiendo...
+                </p>
+              </div>
+            </>
+          )}
 
-        {/* Back to Login Link */}
-        {!resetSuccess && (
-          <Box component={"div" as any} sx={{ mt: 3, textAlign: 'center', width: '100%' }}>
-            <Link
-              component={RouterLink}
-              to="/login"
-              sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                textDecoration: 'none',
-                color: 'primary.main',
-                '&:hover': {
-                  textDecoration: 'underline',
-                },
-              }}
-            >
-              <ArrowBack sx={{ fontSize: 18, mr: 0.5 }} />
-              Volver al inicio de sesión
-            </Link>
-          </Box>
-        )}
+          {/* Back to Login Link */}
+          {!resetSuccess && (
+            <div className="text-center mt-6">
+              <RouterLink
+                to="/login"
+                className="inline-flex items-center text-primary hover:underline"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver al inicio de sesión
+              </RouterLink>
+            </div>
+          )}
 
-        {/* Help Text */}
-        <Box component={"div" as any} sx={{ mt: 3, textAlign: 'center' }}>
-          <Typography variant="caption" color="text.secondary">
-            ¿Necesitas ayuda? {' '}
-            <Link href="/contact" sx={{ textDecoration: 'none' }}>
-              Contáctanos
-            </Link>
-          </Typography>
-        </Box>
-      </Paper>
-    </Container>
+          {/* Help Text */}
+          <div className="text-center mt-6">
+            <p className="text-xs text-muted-foreground">
+              ¿Necesitas ayuda?{' '}
+              <a href="/contact" className="text-primary hover:underline">
+                Contáctanos
+              </a>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

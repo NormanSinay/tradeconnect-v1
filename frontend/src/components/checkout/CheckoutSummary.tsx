@@ -1,7 +1,31 @@
+/**
+ * @fileoverview CheckoutSummary - Componente de resumen del carrito en checkout
+ * @description Componente React para mostrar resumen de orden en proceso de pago
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Resumen completo de items del carrito
+ * - Cálculos automáticos de subtotal y descuentos
+ * - Información de seguridad de pago
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 import { Shield, CheckCircle } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
@@ -10,6 +34,11 @@ interface CheckoutSummaryProps {
   showSecurityBadge?: boolean;
 }
 
+/**
+ * CheckoutSummary - Componente de resumen del carrito en checkout
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
   showSecurityBadge = true,
 }) => {
@@ -28,163 +57,108 @@ const CheckoutSummary: React.FC<CheckoutSummaryProps> = ({
       </h3>
 
       {/* Cart Items */}
-      <Box component={"div" as any} sx={{ mb: 3 }}>
+      <div className="mb-3">
         {cart.items.map((item) => (
-          <Box
-            component={"div" as any}
+          <div
             key={item.id}
-            sx={{
-              display: 'flex',
-              mb: 2,
-              pb: 2,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-            }}
+            className="flex mb-2 pb-2 border-b border-border"
           >
-            <CardMedia
-              component="img"
-              sx={{
-                width: 70,
-                height: 70,
-                borderRadius: 2,
-                mr: 2,
-                objectFit: 'cover',
-              }}
-              image={
+            <img
+              className="w-[70px] h-[70px] rounded-lg mr-2 object-cover"
+              src={
                 item.event?.media?.find((m) => m.isPrimary)?.filePath ||
                 '/placeholder-event.jpg'
               }
               alt={item.event?.title}
             />
-            <Box component={"div" as any} sx={{ flex: 1 }}>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 'bold', mb: 0.5, lineHeight: 1.3 }}
-              >
+            <div className="flex-1">
+              <p className="text-sm font-bold mb-0.5 leading-tight">
                 {item.event?.title}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                display="block"
-                sx={{ mb: 0.5 }}
-              >
+              </p>
+              <p className="text-xs text-muted-foreground block mb-0.5">
                 Cantidad: {item.quantity} × {formatPrice(item.finalPrice)}
-              </Typography>
+              </p>
               {item.participantType && (
-                <Chip
-                  label={item.participantType === 'individual' ? 'Individual' : 'Empresa'}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                  sx={{ fontSize: '0.65rem', height: 20 }}
-                />
+                <Badge variant="outline" className="text-xs h-5">
+                  {item.participantType === 'individual' ? 'Individual' : 'Empresa'}
+                </Badge>
               )}
-            </Box>
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: 'bold', alignSelf: 'flex-start' }}
-            >
+            </div>
+            <p className="text-sm font-bold self-start">
               {formatPrice(item.total)}
-            </Typography>
-          </Box>
+            </p>
+          </div>
         ))}
-      </Box>
+      </div>
 
-      <Divider sx={{ my: 2 }} />
+      <Separator className="my-2" />
 
       {/* Price Breakdown */}
-      <Box component={"div" as any} sx={{ mb: 2 }}>
-        <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+      <div className="mb-2">
+        <div className="flex justify-between mb-1">
+          <p className="text-sm text-muted-foreground">
             Subtotal ({cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'}):
-          </Typography>
-          <Typography variant="body2">{formatPrice(cart.subtotal)}</Typography>
-        </Box>
+          </p>
+          <p className="text-sm">{formatPrice(cart.subtotal)}</p>
+        </div>
 
         {cart.discountAmount > 0 && (
-          <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="body2" color="success.main">
-              <CheckCircle sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+          <div className="flex justify-between mb-1">
+            <p className="text-sm text-green-600">
+              <CheckCircle className="inline h-4 w-4 mr-0.5 align-middle" />
               Descuento aplicado:
-            </Typography>
-            <Typography variant="body2" color="success.main" fontWeight="bold">
+            </p>
+            <p className="text-sm text-green-600 font-bold">
               -{formatPrice(cart.discountAmount)}
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
 
         {cart.promoCode && (
-          <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="caption" color="success.main">
+          <div className="flex justify-between mb-1">
+            <p className="text-xs text-green-600">
               Código: {cart.promoCode}
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Divider sx={{ my: 2 }} />
+      <Separator className="my-2" />
 
       {/* Total */}
-      <Box
-        component={"div" as any}
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          mb: 3,
-          p: 2,
-          borderRadius: 2,
-          bgcolor: (theme) =>
-            theme.palette.mode === 'light'
-              ? 'primary.50'
-              : 'primary.dark',
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+      <div className="flex justify-between mb-3 p-2 rounded-lg bg-primary/10">
+        <p className="text-lg font-bold">
           Total a Pagar:
-        </Typography>
-        <Typography
-          variant="h6"
-          color="primary.main"
-          sx={{ fontWeight: 'bold' }}
-        >
+        </p>
+        <p className="text-lg text-primary font-bold">
           {formatPrice(cart.total)}
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       {/* Security Badge */}
       {showSecurityBadge && (
-        <Alert
-          severity="success"
-          icon={<Security />}
-          sx={{
-            '& .MuiAlert-message': {
-              width: '100%',
-            },
-          }}
-        >
-          <Typography variant="caption" display="block">
-            <strong>🔒 Pago 100% Seguro</strong>
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Encriptación SSL • PCI DSS Compliant
-          </Typography>
+        <Alert className="border-green-200 bg-green-50">
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            <strong className="block">🔒 Pago 100% Seguro</strong>
+            <span className="text-muted-foreground">Encriptación SSL • PCI DSS Compliant</span>
+          </AlertDescription>
         </Alert>
       )}
 
       {/* Additional Info */}
-      <Box component={"div" as any} sx={{ mt: 2 }}>
-        <Typography variant="caption" color="text.secondary" display="block">
+      <div className="mt-2">
+        <p className="text-xs text-muted-foreground block">
           • Factura FEL incluida
-        </Typography>
-        <Typography variant="caption" color="text.secondary" display="block">
+        </p>
+        <p className="text-xs text-muted-foreground block">
           • Certificados digitales
-        </Typography>
-        <Typography variant="caption" color="text.secondary" display="block">
+        </p>
+        <p className="text-xs text-muted-foreground block">
           • Código QR de acceso
-        </Typography>
-      </Box>
-    </Paper>
+        </p>
+      </div>
+    </Card>
   );
 };
 

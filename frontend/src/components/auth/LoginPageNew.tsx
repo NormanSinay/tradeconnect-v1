@@ -1,3 +1,34 @@
+/**
+ * @fileoverview LoginPageNew component for TradeConnect Frontend
+ * @description
+
+Arquitectura recomendada si migras:
+  React (componentes interactivos)
+    ↓
+  Astro (routing y SSR)
+    ↓
+  shadcn/ui (componentes UI)
+    ↓
+  Tailwind CSS (estilos)
+    ↓
+  Radix UI (primitivos accesibles)
+    ↓
+  React Icons (iconos)
+
+ * @architecture
+ * - React: Componentes interactivos con hooks y context
+ * - Astro: Routing y Server-Side Rendering (SSR)
+ * - shadcn/ui: Componentes UI preconstruidos
+ * - Tailwind CSS: Sistema de estilos utilitarios
+ * - Radix UI: Primitivos accesibles para componentes
+ * - React Icons: Biblioteca de iconos
+ *
+ * @compatibility SSR: Compatible con Astro SSR
+ * @compatibility React: Compatible con React 18+
+ * @compatibility TypeScript: Tipos completos incluidos
+ * @version 1.0.0
+ */
+
 import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -5,14 +36,13 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import {
-  FaEye,
-  FaEyeSlash,
-  FaEnvelope,
-  FaLock,
-  FaSignInAlt,
-  FaBriefcase,
-} from 'react-icons/fa';
-import { FcGoogle } from 'react-icons/fc';
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  LogIn,
+  Briefcase,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -112,7 +142,7 @@ const LoginPageNew: React.FC = () => {
           {/* Logo/Brand */}
           <div className="flex flex-col items-center mb-4">
             <div className="flex items-center gap-2 text-primary-600 mb-2">
-              <FaBriefcase className="text-4xl" />
+              <Briefcase className="text-4xl" />
               <h1 className="text-3xl font-bold">TradeConnect</h1>
             </div>
             <p className="text-gray-600 text-base">Inicia sesión en tu cuenta</p>
@@ -134,7 +164,7 @@ const LoginPageNew: React.FC = () => {
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaEnvelope className="h-5 w-5 text-gray-400" />
+                  <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <Input
                   {...register('email')}
@@ -157,7 +187,7 @@ const LoginPageNew: React.FC = () => {
               <Label htmlFor="password">Contraseña</Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <Input
                   {...register('password')}
@@ -175,9 +205,9 @@ const LoginPageNew: React.FC = () => {
                   aria-label="Toggle password visibility"
                 >
                   {showPassword ? (
-                    <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                   ) : (
-                    <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
                   )}
                 </button>
               </div>
@@ -194,8 +224,8 @@ const LoginPageNew: React.FC = () => {
                 <Checkbox
                   id="rememberMe"
                   checked={rememberMe}
-                  onCheckedChange={(checked) =>
-                    setValue('rememberMe', checked as boolean)
+                  onCheckedChange={(checked: boolean) =>
+                    setValue('rememberMe', checked)
                   }
                   disabled={isLoading}
                 />
@@ -227,7 +257,7 @@ const LoginPageNew: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <FaSignInAlt className="h-5 w-5" />
+                  <LogIn className="h-5 w-5" />
                   Iniciar Sesión
                 </>
               )}

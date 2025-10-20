@@ -1,7 +1,33 @@
+/**
+ * @fileoverview FooterNew - Componente de footer mejorado para páginas públicas
+ * @description Footer completo mejorado con enlaces, información de contacto y redes sociales
+ *
+ * Arquitectura:
+ * - React (componentes interactivos) → Enlaces de navegación, formularios
+ * - Astro (routing y SSR) → Compatible con SSR, navegación del lado cliente
+ * - shadcn/ui (componentes UI) → Button, Input para interfaz consistente
+ * - Tailwind CSS (estilos) → Estilos utilitarios para layout responsivo
+ * - Radix UI (primitivos accesibles) → Primitivos en shadcn/ui
+ * - Lucide Icons (iconos) → Iconos modernos y consistentes
+ *
+ * @version 2.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt, FaBriefcase } from 'react-icons/fa';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Facebook as FacebookIcon,
+  Twitter as TwitterIcon,
+  Instagram as InstagramIcon,
+  Linkedin as LinkedInIcon,
+  Mail as EmailIcon,
+  Phone as PhoneIcon,
+  MapPin as LocationIcon,
+  Building as BusinessIcon,
+} from 'lucide-react';
 
 const FooterNew: React.FC = () => {
   const footerSections = [
@@ -44,10 +70,10 @@ const FooterNew: React.FC = () => {
   ];
 
   const socialLinks = [
-    { icon: FaFacebook, href: 'https://facebook.com/tradeconnect', label: 'Facebook' },
-    { icon: FaTwitter, href: 'https://twitter.com/tradeconnect', label: 'Twitter' },
-    { icon: FaInstagram, href: 'https://instagram.com/tradeconnect', label: 'Instagram' },
-    { icon: FaLinkedin, href: 'https://linkedin.com/company/tradeconnect', label: 'LinkedIn' },
+    { icon: FacebookIcon, href: 'https://facebook.com/tradeconnect', label: 'Facebook' },
+    { icon: TwitterIcon, href: 'https://twitter.com/tradeconnect', label: 'Twitter' },
+    { icon: InstagramIcon, href: 'https://instagram.com/tradeconnect', label: 'Instagram' },
+    { icon: LinkedInIcon, href: 'https://linkedin.com/company/tradeconnect', label: 'LinkedIn' },
   ];
 
   return (
@@ -62,7 +88,7 @@ const FooterNew: React.FC = () => {
                 href="/"
                 className="flex items-center gap-2 text-primary-400 font-bold text-xl mb-4 hover:text-primary-300 transition-colors no-underline"
               >
-                <FaBriefcase className="text-2xl" />
+                <BusinessIcon className="text-2xl" />
                 TradeConnect
               </a>
               <p className="text-sm text-gray-300 mb-4">
@@ -74,7 +100,7 @@ const FooterNew: React.FC = () => {
             {/* Contact Info */}
             <div className="mb-6 space-y-2">
               <div className="flex items-center">
-                <FaEnvelope className="mr-2 text-sm text-primary-400" />
+                <EmailIcon className="mr-2 text-sm text-primary-400" />
                 <a
                   href="mailto:info@tradeconnect.gt"
                   className="text-sm text-gray-300 hover:text-primary-400 transition-colors no-underline"
@@ -83,7 +109,7 @@ const FooterNew: React.FC = () => {
                 </a>
               </div>
               <div className="flex items-center">
-                <FaPhone className="mr-2 text-sm text-primary-400" />
+                <PhoneIcon className="mr-2 text-sm text-primary-400" />
                 <a
                   href="tel:+50212345678"
                   className="text-sm text-gray-300 hover:text-primary-400 transition-colors no-underline"
@@ -92,7 +118,7 @@ const FooterNew: React.FC = () => {
                 </a>
               </div>
               <div className="flex items-start">
-                <FaMapMarkerAlt className="mr-2 mt-1 text-sm text-primary-400 flex-shrink-0" />
+                <LocationIcon className="mr-2 mt-1 text-sm text-primary-400 flex-shrink-0" />
                 <span className="text-sm text-gray-300">
                   Ciudad de Guatemala, Guatemala
                 </span>

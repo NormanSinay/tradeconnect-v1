@@ -1,13 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import { securityUtils } from '@/utils/security';
 
+// Security hooks for React/Astro architecture
+// Compatible with: React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons
+
 export const useSecurity = () => {
   const [csrfToken, setCsrfToken] = useState<string>('');
   const [sessionExpired, setSessionExpired] = useState(false);
 
-  // Generate CSRF token on mount
+  // Generate CSRF token on mount (SSR-safe)
   useEffect(() => {
-    setCsrfToken(securityUtils.generateCSRFToken());
+    // Only generate token on client-side
+    if (typeof window !== 'undefined') {
+      setCsrfToken(securityUtils.generateCSRFToken());
+    }
   }, []);
 
   // Rate limiting hook
@@ -48,11 +54,14 @@ export const useSecurity = () => {
     return { setItem, getItem, removeItem, clearAll };
   };
 
-  // Session management hook
+  // Session management hook (SSR-safe)
   const useSessionManager = () => {
     const [isActive, setIsActive] = useState(true);
 
     useEffect(() => {
+      // Only start timer on client-side
+      if (typeof window === 'undefined') return;
+
       const cleanup = securityUtils.sessionManager.startInactivityTimer(
         15 * 60 * 1000, // 15 minutes
         () => {

@@ -1,20 +1,32 @@
+/**
+ * @fileoverview EventCardNew - Tarjeta de evento con diseño avanzado
+ * @description Componente React para mostrar información de eventos con diseño moderno
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Tarjeta de evento con diseño avanzado
+ * - Efectos hover y animaciones
+ * - Funcionalidad completa de favoritos
+ * - Integración con carrito de compras
+ * - Estados de carga con skeletons
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
-import {
-  FaHeart,
-  FaRegHeart,
-  FaMapMarkerAlt,
-  FaClock,
-  FaUser,
-  FaShoppingCart,
-  FaEye,
-  FaBuilding,
-  FaLaptop,
-  FaSyncAlt,
-  FaCalendar,
-  FaStar,
-} from 'react-icons/fa';
+import { Heart, MapPin, Clock, Users, ShoppingCart, Eye, Building, Monitor, RefreshCw, Calendar, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tantml:function_calls';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import { eventsService } from '@/services/eventsService';
 import { useCart } from '@/context/CartContext';
@@ -25,8 +37,9 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * EventCardNew - Tarjeta de evento con imagen, detalles y acciones
- * Migrado de MUI a Tailwind CSS + shadcn/ui
+ * EventCardNew - Tarjeta de evento con diseño avanzado
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
  */
 const EventCardNew: React.FC<EventCardProps> = ({
   event,
@@ -126,13 +139,13 @@ const EventCardNew: React.FC<EventCardProps> = ({
   const getModalityIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case 'presencial':
-        return <FaBuilding className="h-3 w-3" />;
+        return <Building className="h-3 w-3" />;
       case 'virtual':
-        return <FaLaptop className="h-3 w-3" />;
+        return <Monitor className="h-3 w-3" />;
       case 'hibrido':
-        return <FaSyncAlt className="h-3 w-3" />;
+        return <RefreshCw className="h-3 w-3" />;
       default:
-        return <FaCalendar className="h-3 w-3" />;
+        return <Calendar className="h-3 w-3" />;
     }
   };
 
@@ -170,7 +183,7 @@ const EventCardNew: React.FC<EventCardProps> = ({
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {event.isFeatured && (
             <Badge className="bg-warning text-white font-bold gap-1">
-              <FaStar className="h-3 w-3" />
+              <Star className="h-3 w-3" />
               Destacado
             </Badge>
           )}
@@ -193,9 +206,9 @@ const EventCardNew: React.FC<EventCardProps> = ({
           }
         >
           {isFavorite ? (
-            <FaHeart className="h-5 w-5 text-error" />
+            <Heart className="h-5 w-5 text-red-500 fill-current" />
           ) : (
-            <FaRegHeart className="h-5 w-5 text-gray-700" />
+            <Heart className="h-5 w-5 text-gray-700" />
           )}
         </button>
 
@@ -228,7 +241,7 @@ const EventCardNew: React.FC<EventCardProps> = ({
         <div className="space-y-2 mb-3">
           {/* Date */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <FaClock className="h-4 w-4 flex-shrink-0" />
+            <Clock className="h-4 w-4 flex-shrink-0" />
             <span>
               {formatDate(event.startDate)} • {formatTime(event.startDate)}
             </span>
@@ -236,7 +249,7 @@ const EventCardNew: React.FC<EventCardProps> = ({
 
           {/* Location */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <FaMapMarkerAlt className="h-4 w-4 flex-shrink-0" />
+            <MapPin className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">
               {event.location ||
                 event.virtualLink ||
@@ -247,7 +260,7 @@ const EventCardNew: React.FC<EventCardProps> = ({
 
         {/* Capacity */}
         <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-          <FaUser className="h-4 w-4 flex-shrink-0" />
+          <Users className="h-4 w-4 flex-shrink-0" />
           <span>{event.availableSpots} plazas disponibles</span>
         </div>
 
@@ -270,7 +283,7 @@ const EventCardNew: React.FC<EventCardProps> = ({
             handleViewDetails();
           }}
         >
-          <FaEye className="h-4 w-4" />
+          <Eye className="h-4 w-4" />
           Ver detalles
         </Button>
 
@@ -285,7 +298,7 @@ const EventCardNew: React.FC<EventCardProps> = ({
           }}
           disabled={event.availableSpots === 0}
         >
-          <FaShoppingCart className="h-4 w-4" />
+          <ShoppingCart className="h-4 w-4" />
           {event.availableSpots === 0 ? 'Agotado' : 'Agregar'}
         </Button>
       </CardFooter>

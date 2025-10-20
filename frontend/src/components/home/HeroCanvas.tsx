@@ -1,3 +1,20 @@
+/**
+ * @fileoverview HeroCanvas - Componente de canvas 3D para la sección hero
+ * @description Renderiza un fondo animado con partículas 3D usando Three.js y React Three Fiber
+ *
+ * Arquitectura:
+ * - React (componentes interactivos) → Componentes con estado y efectos
+ * - Astro (routing y SSR) → Compatible con SSR, renderizado del lado cliente
+ * - shadcn/ui (componentes UI) → No aplica (componente 3D puro)
+ * - Tailwind CSS (estilos) → Estilos utilitarios para posicionamiento
+ * - Radix UI (primitivos accesibles) → No aplica (componente 3D puro)
+ * - Lucide Icons (iconos) → No aplica (componente 3D puro)
+ *
+ * @version 2.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';

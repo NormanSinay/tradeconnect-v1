@@ -1,3 +1,23 @@
+/**
+ * @fileoverview notificationService.ts - Servicio de notificaciones para TradeConnect
+ * @description Servicio que maneja notificaciones, preferencias y entrega de mensajes a través de múltiples canales.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import { apiService } from './api';
 import type { ApiResponse } from '@/types';
 

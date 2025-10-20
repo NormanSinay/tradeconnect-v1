@@ -5,6 +5,9 @@ import { cartService } from '@/services/cartService';
 import toast from 'react-hot-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+// CartContext for React/Astro architecture
+// Compatible with: React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 interface CartProviderProps {
@@ -14,27 +17,35 @@ interface CartProviderProps {
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
    const queryClient = useQueryClient();
 
-   // Fetch cart from backend
+   // Fetch cart from backend (SSR-safe with React Query)
    const { data: cartData, isLoading: cartLoading, error: cartError } = useQuery({
      queryKey: ['cart'],
      queryFn: () => cartService.getCart(),
      staleTime: 30000, // 30 seconds
      retry: 2,
+     // Disable query on server-side to prevent hydration mismatches
+     enabled: typeof window !== 'undefined',
    });
 
    const cart = cartData?.data || null;
    const isLoading = cartLoading;
 
-   // Mutations for cart operations
+   // Mutations for cart operations (SSR-safe)
    const addItemMutation = useMutation({
      mutationFn: cartService.addItem,
      onSuccess: () => {
        queryClient.invalidateQueries({ queryKey: ['cart'] });
-       toast.success('Producto agregado al carrito');
+       // Only show toast on client-side
+       if (typeof window !== 'undefined') {
+         toast.success('Producto agregado al carrito');
+       }
      },
      onError: (error: any) => {
        console.error('Error adding item to cart:', error);
-       toast.error(error.response?.data?.message || 'Error al agregar producto al carrito');
+       // Only show toast on client-side
+       if (typeof window !== 'undefined') {
+         toast.error(error.response?.data?.message || 'Error al agregar producto al carrito');
+       }
      },
    });
 
@@ -43,11 +54,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
        cartService.updateItem(itemId, updates),
      onSuccess: () => {
        queryClient.invalidateQueries({ queryKey: ['cart'] });
-       toast.success('Producto actualizado');
+       if (typeof window !== 'undefined') {
+         toast.success('Producto actualizado');
+       }
      },
      onError: (error: any) => {
        console.error('Error updating cart item:', error);
-       toast.error(error.response?.data?.message || 'Error al actualizar producto');
+       if (typeof window !== 'undefined') {
+         toast.error(error.response?.data?.message || 'Error al actualizar producto');
+       }
      },
    });
 
@@ -55,11 +70,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
      mutationFn: cartService.removeItem,
      onSuccess: () => {
        queryClient.invalidateQueries({ queryKey: ['cart'] });
-       toast.success('Producto removido del carrito');
+       if (typeof window !== 'undefined') {
+         toast.success('Producto removido del carrito');
+       }
      },
      onError: (error: any) => {
        console.error('Error removing cart item:', error);
-       toast.error(error.response?.data?.message || 'Error al remover producto');
+       if (typeof window !== 'undefined') {
+         toast.error(error.response?.data?.message || 'Error al remover producto');
+       }
      },
    });
 
@@ -67,11 +86,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
      mutationFn: cartService.clearCart,
      onSuccess: () => {
        queryClient.invalidateQueries({ queryKey: ['cart'] });
-       toast.success('Carrito vaciado');
+       if (typeof window !== 'undefined') {
+         toast.success('Carrito vaciado');
+       }
      },
      onError: (error: any) => {
        console.error('Error clearing cart:', error);
-       toast.error(error.response?.data?.message || 'Error al vaciar carrito');
+       if (typeof window !== 'undefined') {
+         toast.error(error.response?.data?.message || 'Error al vaciar carrito');
+       }
      },
    });
 
@@ -79,11 +102,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
      mutationFn: cartService.applyPromoCode,
      onSuccess: () => {
        queryClient.invalidateQueries({ queryKey: ['cart'] });
-       toast.success('Código promocional aplicado');
+       if (typeof window !== 'undefined') {
+         toast.success('Código promocional aplicado');
+       }
      },
      onError: (error: any) => {
        console.error('Error applying promo code:', error);
-       toast.error(error.response?.data?.message || 'Error al aplicar código promocional');
+       if (typeof window !== 'undefined') {
+         toast.error(error.response?.data?.message || 'Error al aplicar código promocional');
+       }
      },
    });
 

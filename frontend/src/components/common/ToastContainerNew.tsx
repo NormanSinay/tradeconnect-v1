@@ -1,11 +1,33 @@
+/**
+ * @fileoverview ToastContainerNew - Contenedor moderno de notificaciones toast
+ * @description Componente React para mostrar notificaciones toast con Tailwind CSS
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Notificaciones toast con estilos Tailwind
+ * - Configuración completa de apariencia
+ * - Compatibilidad SSR con Astro
+ * - Posicionamiento inteligente
+ * - Animaciones suaves
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React from 'react';
 import { Toaster } from 'react-hot-toast';
 
 /**
- * ToastContainerNew - Contenedor de notificaciones toast
- * Migrado de MUI theme a Tailwind CSS con CSS variables
- *
- * Usa react-hot-toast con estilos personalizados usando colores de Tailwind
+ * ToastContainerNew - Contenedor moderno de notificaciones toast
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
  */
 const ToastContainerNew: React.FC = () => {
   return (

@@ -1,3 +1,24 @@
+/**
+ * @fileoverview Alert Component - Componente de alerta accesible
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';

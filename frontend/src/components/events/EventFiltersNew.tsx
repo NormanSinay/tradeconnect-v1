@@ -1,12 +1,41 @@
+/**
+ * @fileoverview EventFiltersNew - Panel de filtros avanzados para eventos (versión mejorada)
+ * @description Componente React que proporciona filtros interactivos mejorados para búsqueda y filtrado de eventos.
+ * Implementa filtros por categoría, tipo, modalidad, precio y ubicación con interfaz moderna y sticky.
+ *
+ * Arquitectura:
+ * - React: Componentes interactivos con hooks de estado y efectos
+ *   ↓
+ * - Astro: Routing y SSR - Compatible con hidratación del lado cliente
+ *   ↓
+ * - shadcn/ui: Componentes UI preconstruidos (Card, Button, Input, Checkbox, Slider, Accordion, Badge)
+ *   ↓
+ * - Tailwind CSS: Estilos utilitarios para diseño responsivo y moderno
+ *   ↓
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ *   ↓
+ * - Lucide Icons: Iconografía moderna y consistente (Search, X, Filter, MapPin, DollarSign)
+ *
+ * Mejoras sobre EventFilters:
+ * - Diseño sticky para mejor UX
+ * - Iconos Lucide React modernos
+ * - Estados de carga mejorados
+ * - Interfaz más intuitiva con botones para modalidad
+ * - Mejor organización de filtros con colores de categoría
+ *
+ * @version 1.1.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
-  FaSearch,
-  FaTimes,
-  FaFilter,
-  FaMapMarkerAlt,
-  FaCalendar,
-  FaDollarSign,
-} from 'react-icons/fa';
+  Search,
+  X,
+  Filter,
+  MapPin,
+  DollarSign,
+} from 'lucide-react';
 import type {
   EventFilters as EventFiltersType,
   EventCategory,
@@ -25,19 +54,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-
-interface EventFiltersProps {
-  filters: EventFiltersType;
-  onFiltersChange: (filters: EventFiltersType) => void;
-  categories: EventCategory[];
-  types: EventType[];
-  loading?: boolean;
-}
-
-/**
- * EventFiltersNew - Panel de filtros para eventos
- * Migrado de MUI a Tailwind CSS + shadcn/ui
- */
 const EventFiltersNew: React.FC<EventFiltersProps> = ({
   filters,
   onFiltersChange,
@@ -114,8 +130,8 @@ const EventFiltersNew: React.FC<EventFiltersProps> = ({
     const [min, max] = newValue;
     onFiltersChange({
       ...filters,
-      priceMin: min > 0 ? min : undefined,
-      priceMax: max < 1000 ? max : undefined,
+      priceMin: min > 0 ? min : 0,
+      priceMax: max < 1000 ? max : 1000,
     });
   };
 
@@ -152,7 +168,7 @@ const EventFiltersNew: React.FC<EventFiltersProps> = ({
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FaFilter className="h-5 w-5 text-primary-600" />
+            <Filter className="h-5 w-5 text-primary-600" />
             <CardTitle className="text-lg">Filtros</CardTitle>
             {activeFiltersCount > 0 && (
               <Badge variant="default" className="ml-2">
@@ -167,7 +183,7 @@ const EventFiltersNew: React.FC<EventFiltersProps> = ({
               onClick={handleClearFilters}
               className="gap-2 text-sm"
             >
-              <FaTimes className="h-4 w-4" />
+              <X className="h-4 w-4" />
               Limpiar
             </Button>
           )}
@@ -180,7 +196,7 @@ const EventFiltersNew: React.FC<EventFiltersProps> = ({
           <Label htmlFor="search">Buscar</Label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaSearch className="h-4 w-4 text-gray-400" />
+              <Search className="h-4 w-4 text-gray-400" />
             </div>
             <Input
               id="search"
@@ -214,7 +230,7 @@ const EventFiltersNew: React.FC<EventFiltersProps> = ({
                     >
                       <Checkbox
                         id={`category-${category.id}`}
-                        checked={isChecked}
+                        checked={isChecked || false}
                         onCheckedChange={(checked) =>
                           handleCategoryChange(category.id, checked as boolean)
                         }
@@ -254,7 +270,7 @@ const EventFiltersNew: React.FC<EventFiltersProps> = ({
                       >
                         <Checkbox
                           id={`type-${type.id}`}
-                          checked={isChecked}
+                          checked={isChecked || false}
                           onCheckedChange={(checked) =>
                             handleTypeChange(type.slug, checked as boolean)
                           }
@@ -318,7 +334,7 @@ const EventFiltersNew: React.FC<EventFiltersProps> = ({
             <AccordionContent>
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <FaDollarSign className="h-4 w-4 text-gray-500" />
+                  <DollarSign className="h-4 w-4 text-gray-500" />
                   <span className="text-sm font-medium">
                     Q{priceRange[0]} - Q{priceRange[1]}
                     {priceRange[1] === 1000 && '+'}
@@ -350,7 +366,7 @@ const EventFiltersNew: React.FC<EventFiltersProps> = ({
             <AccordionContent>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaMapMarkerAlt className="h-4 w-4 text-gray-400" />
+                  <MapPin className="h-4 w-4 text-gray-400" />
                 </div>
                 <Input
                   type="text"

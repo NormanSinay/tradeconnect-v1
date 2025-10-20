@@ -1,3 +1,22 @@
+/**
+ * @fileoverview Client App component for TradeConnect Frontend
+ * @description
+
+
+ * @architecture
+ * - React: Componentes interactivos con hooks y context
+ * - Astro: Routing y Server-Side Rendering (SSR)
+ * - shadcn/ui: Componentes UI preconstruidos
+ * - Tailwind CSS: Sistema de estilos utilitarios
+ * - Radix UI: Primitivos accesibles para componentes
+ * - React Icons: Biblioteca de iconos
+ *
+ * @compatibility SSR: Compatible con Astro SSR
+ * @compatibility React: Compatible con React 18+
+ * @compatibility TypeScript: Tipos completos incluidos
+ * @version 1.0.0
+ */
+
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

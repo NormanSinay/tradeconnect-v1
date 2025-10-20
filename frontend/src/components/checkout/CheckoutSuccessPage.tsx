@@ -1,3 +1,27 @@
+/**
+ * @fileoverview CheckoutSuccessPage - Página de confirmación de pago exitoso
+ * @description Componente React para mostrar confirmación de compra y acciones post-pago
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Confirmación visual de pago exitoso
+ * - Detalles completos de la orden
+ * - Acciones post-compra (descargas, compartir)
+ * - Información de próximos pasos
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,6 +41,11 @@ import {
 import { useCart } from '@/context/CartContext';
 import { cn } from '@/lib/utils';
 
+/**
+ * CheckoutSuccessPage - Página de confirmación de pago exitoso
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const CheckoutSuccessPage: React.FC = () => {
   const navigate = useNavigate();
   const { cart } = useCart();

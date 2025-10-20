@@ -1,3 +1,24 @@
+/**
+ * @fileoverview Slider Component - Componente de control deslizante accesible
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import * as React from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { cn } from '@/lib/utils';

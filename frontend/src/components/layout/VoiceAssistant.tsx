@@ -1,3 +1,16 @@
+/**
+ * @fileoverview VoiceAssistant Component - Arquitectura React/Astro + Tailwind CSS + shadcn/ui
+ *
+ * Arquitectura recomendada para migración:
+ * React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui (componentes UI)
+ * → Tailwind CSS (estilos) → Radix UI (primitivos accesibles) → Lucide Icons (iconos)
+ *
+ * @version 2.0.0
+ * @author TradeConnect Team
+ * @description Componente de asistente de voz con reconocimiento de voz y síntesis de voz.
+ * Compatible con SSR de Astro y optimizado para performance.
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,81 +23,38 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Animations
-const pulse = keyframes`
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-`;
+// Componente de botón de voz usando Tailwind CSS y shadcn/ui
+const VoiceButton = ({ isListening, onClick, className }: {
+  isListening: boolean;
+  onClick: () => void;
+  className?: string;
+}) => (
+  <Button
+    onClick={onClick}
+    className={cn(
+      "fixed bottom-6 right-6 w-[70px] h-[70px] rounded-full bg-gradient-to-br from-primary to-yellow-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 z-[1000] animate-pulse hover:scale-105",
+      isListening && "animate-ping",
+      className
+    )}
+    aria-label={isListening ? 'Detener escucha' : 'Iniciar asistente de voz'}
+  >
+    {isListening ? <MicOff className="w-7 h-7" /> : <Mic className="w-7 h-7" />}
+  </Button>
+);
 
-const voiceActive = keyframes`
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(107, 30, 34, 0.7);
-  }
-  50% {
-    transform: scale(1.15);
-    box-shadow: 0 0 0 10px rgba(107, 30, 34, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(107, 30, 34, 0);
-  }
-`;
-
-// Styled Components
-const VoiceButton = styled(Fab)(({ theme }) => ({
-  position: 'fixed',
-  bottom: 24,
-  right: 24,
-  width: 70,
-  height: 70,
-  background: `linear-gradient(135deg, ${theme.palette.primary.main}, #D4AF37)`,
-  color: 'white',
-  boxShadow: '0 4px 20px rgba(107, 30, 34, 0.3)',
-  zIndex: 1000,
-  transition: 'all 0.3s ease-in-out',
-  animation: `${pulse} 2s infinite`,
-
-  '&:hover': {
-    background: `linear-gradient(135deg, ${theme.palette.primary.dark}, #D4AF37)`,
-    transform: 'scale(1.05)',
-  },
-
-  '&.voice-active': {
-    animation: `${voiceActive} 1.5s infinite`,
-  },
-}));
-
-const ChatBubble = styled(Paper)(({ theme }) => ({
-  position: 'fixed',
-  bottom: 110,
-  right: 24,
-  maxWidth: 300,
-  minWidth: 250,
-  padding: theme.spacing(2),
-  background: 'rgba(255, 255, 255, 0.95)',
-  backdropFilter: 'blur(10px)',
-  borderRadius: theme.spacing(2),
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  zIndex: 999,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing(1),
-}));
+// Componente de burbuja de chat usando Tailwind CSS y shadcn/ui
+const ChatBubble = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <Card className={cn(
+    "fixed bottom-28 right-6 max-w-[300px] min-w-[250px] p-4 bg-white/95 backdrop-blur-md rounded-lg shadow-lg border border-white/20 z-[999]",
+    className
+  )}>
+    <CardContent className="p-0 flex flex-col gap-2">
+      {children}
+    </CardContent>
+  </Card>
+);
 
 const VoiceAssistant: React.FC = () => {
-  const theme = useTheme();
   const [isListening, setIsListening] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -220,51 +190,50 @@ const VoiceAssistant: React.FC = () => {
     <>
       {/* Voice Assistant Button */}
       <VoiceButton
+        isListening={isListening}
         onClick={toggleListening}
         className={isListening ? 'voice-active' : ''}
-        aria-label={isListening ? 'Detener escucha' : 'Iniciar asistente de voz'}
-      >
-        {isListening ? (
-          <MicOffIcon sx={{ fontSize: 28 }} />
-        ) : (
-          <MicIcon sx={{ fontSize: 28 }} />
-        )}
-      </VoiceButton>
+      />
 
       {/* Chat Bubble */}
       {isOpen && (
-        <ChatBubble elevation={0}>
-          <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+        <ChatBubble>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-bold text-primary">
               Asistente TradeConnect
-            </Typography>
-            <IconButton size="small" onClick={closeChat} sx={{ p: 0.5 }}>
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </Box>
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={closeChat}
+              className="p-1 h-auto"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
 
           {transcript && (
-            <Box component={"div" as any} sx={{ mb: 1 }}>
-              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+            <div className="mb-2">
+              <p className="text-sm italic text-gray-600">
                 " {transcript} "
-              </Typography>
-            </Box>
+              </p>
+            </div>
           )}
 
-          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <div className="flex items-center gap-2">
             {isProcessing ? (
-              <CircularProgress size={16} />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <VolumeUpIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+              <Volume2 className="w-4 h-4 text-primary" />
             )}
-            <Typography variant="body2" sx={{ flex: 1 }}>
+            <p className="text-sm flex-1">
               {response || 'Di algo para comenzar...'}
-            </Typography>
-          </Box>
+            </p>
+          </div>
 
-          <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1 }}>
+          <p className="text-xs text-gray-500 mt-2">
             {isListening ? 'Escuchando...' : 'Toca el botón para hablar'}
-          </Typography>
+          </p>
         </ChatBubble>
       )}
     </>

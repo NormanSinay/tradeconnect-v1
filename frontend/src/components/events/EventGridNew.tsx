@@ -1,13 +1,38 @@
+/**
+ * @fileoverview EventGridNew - Grid responsivo avanzado para mostrar eventos
+ * @description Componente React que renderiza una cuadrícula responsiva mejorada de tarjetas de eventos.
+ * Incluye estados de carga mejorados, paginación infinita y animaciones de carga.
+ *
+ * Arquitectura:
+ * - React: Componentes funcionales con props tipadas
+ *   ↓
+ * - Astro: Routing y SSR - Compatible con hidratación del lado cliente
+ *   ↓
+ * - shadcn/ui: Componentes UI preconstruidos (Button, Skeleton)
+ *   ↓
+ * - Tailwind CSS: Estilos utilitarios para diseño responsivo y moderno
+ *   ↓
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ *   ↓
+ * - Lucide Icons: No aplica (componente no usa iconos)
+ *
+ * Mejoras sobre EventGrid:
+ * - Estados de carga con spinner animado
+ * - Diseño más moderno con mejores skeletons
+ * - Mejor manejo de estados vacíos
+ * - Paginación con indicador de carga
+ * - Compatibilidad completa con SSR de Astro
+ *
+ * @version 1.1.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
 import EventCardNew from './EventCardNew';
 import type { EventGridViewProps } from '@/types/event.types';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-
-/**
- * EventGridNew - Grid responsivo para mostrar eventos
- * Migrado de MUI a Tailwind CSS + shadcn/ui
- */
 const EventGridNew: React.FC<EventGridViewProps> = ({
   events,
   loading = false,

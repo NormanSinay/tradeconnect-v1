@@ -1,8 +1,39 @@
+/**
+ * @fileoverview HomePageNew component for TradeConnect Frontend
+ * @description
+
+Arquitectura recomendada si migras:
+  React (componentes interactivos)
+    ↓
+  Astro (routing y SSR)
+    ↓
+  shadcn/ui (componentes UI)
+    ↓
+  Tailwind CSS (estilos)
+    ↓
+  Radix UI (primitivos accesibles)
+    ↓
+  React Icons (iconos)
+
+ * @architecture
+ * - React: Componentes interactivos con hooks y context
+ * - Astro: Routing y Server-Side Rendering (SSR)
+ * - shadcn/ui: Componentes UI preconstruidos
+ * - Tailwind CSS: Sistema de estilos utilitarios
+ * - Radix UI: Primitivos accesibles para componentes
+ * - React Icons: Biblioteca de iconos
+ *
+ * @compatibility SSR: Compatible con Astro SSR
+ * @compatibility React: Compatible con React 18+
+ * @compatibility TypeScript: Tipos completos incluidos
+ * @version 1.0.0
+ */
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { FaCalendarAlt, FaUsers, FaGraduationCap, FaChartLine } from 'react-icons/fa';
+import { Calendar, Users, GraduationCap, TrendingUp } from 'lucide-react';
 import { publicEventsService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -170,10 +201,10 @@ const HomePageNew: React.FC = () => {
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
-                { icon: FaCalendarAlt, label: 'Eventos Activos', value: stats.totalEvents, color: 'text-primary-500' },
-                { icon: FaUsers, label: 'Usuarios Registrados', value: stats.totalUsers, color: 'text-success' },
-                { icon: FaGraduationCap, label: 'Certificados Emitidos', value: stats.totalCertificates, color: 'text-info' },
-                { icon: FaChartLine, label: 'Ingresos Generados', value: `Q${stats.totalRevenue.toLocaleString()}`, color: 'text-secondary-600' },
+                { icon: Calendar, label: 'Eventos Activos', value: stats.totalEvents, color: 'text-primary' },
+                { icon: Users, label: 'Usuarios Registrados', value: stats.totalUsers, color: 'text-green-600' },
+                { icon: GraduationCap, label: 'Certificados Emitidos', value: stats.totalCertificates, color: 'text-blue-600' },
+                { icon: TrendingUp, label: 'Ingresos Generados', value: `Q${stats.totalRevenue.toLocaleString()}`, color: 'text-orange-600' },
               ].map((stat, index) => (
                 <motion.div
                   key={index}

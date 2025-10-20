@@ -1,6 +1,28 @@
+/**
+ * @fileoverview DashboardCharts - Componente de gráficos para dashboard administrativo
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   LineChart,
@@ -34,8 +56,7 @@ interface DashboardChartsProps {
 }
 
 const DashboardCharts: React.FC<DashboardChartsProps> = ({ data, loading = false }) => {
-  const theme = useTheme();
-  const [revenuePeriod, setRevenuePeriod] = React.useState('month');
+   const [revenuePeriod, setRevenuePeriod] = React.useState('month');
 
   // Default data for demonstration
   const defaultData: ChartData = {
@@ -73,84 +94,66 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ data, loading = false
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <Box
-          component={"div" as any}
-          sx={{
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: 1,
-            p: 1.5,
-            boxShadow: theme.shadows[3],
-          }}
-        >
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-            {label}
-          </Typography>
-          {payload.map((entry: any, index: number) => (
-            <Typography
-              key={index}
-              variant="body2"
-              sx={{ color: entry.color, fontSize: '0.875rem' }}
-            >
-              {entry.name}: {entry.value.toLocaleString('es-GT')}
-            </Typography>
-          ))}
-        </Box>
-      );
-    }
-    return null;
-  };
+     if (active && payload && payload.length) {
+       return (
+         <div className="bg-white/95 border border-border rounded-md p-3 shadow-lg">
+           <p className="font-semibold text-sm mb-1">{label}</p>
+           {payload.map((entry: any, index: number) => (
+             <p
+               key={index}
+               className="text-sm"
+               style={{ color: entry.color }}
+             >
+               {entry.name}: {entry.value.toLocaleString('es-GT')}
+             </p>
+           ))}
+         </div>
+       );
+     }
+     return null;
+   };
 
   return (
-    <Grid container spacing={3}>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/* Revenue Chart */}
-      <Grid item xs={12} lg={8}>
+      <div className="lg:col-span-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Card sx={{ height: '100%', boxShadow: theme.shadows[3] }}>
-            <CardContent>
-              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <Box component={"div" as any}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                    Ingresos
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Tendencia de ingresos por período
-                  </Typography>
-                </Box>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel>Período</InputLabel>
-                  <Select
-                    value={revenuePeriod}
-                    label="Período"
-                    onChange={(e) => setRevenuePeriod(e.target.value)}
-                  >
-                    <MenuItem value="week">Semana</MenuItem>
-                    <MenuItem value="month">Mes</MenuItem>
-                    <MenuItem value="year">Año</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+          <Card className="h-full shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="text-lg font-bold mb-1">Ingresos</h3>
+                  <p className="text-sm text-muted-foreground">Tendencia de ingresos por período</p>
+                </div>
+                <select
+                  value={revenuePeriod}
+                  onChange={(e) => setRevenuePeriod(e.target.value)}
+                  className="w-32 px-3 py-2 border border-input bg-background rounded-md text-sm"
+                >
+                  <option value="week">Semana</option>
+                  <option value="month">Mes</option>
+                  <option value="year">Año</option>
+                </select>
+              </div>
 
               {loading ? (
-                <Skeleton variant="rectangular" height={300} />
+                <Skeleton className="h-[300px] w-full" />
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={chartData.revenue}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(value) => format(new Date(value), 'dd MMM', { locale: es })}
-                      stroke={theme.palette.text.secondary}
+                      stroke="#6b7280"
                     />
                     <YAxis
                       tickFormatter={(value) => `Q${value.toLocaleString()}`}
-                      stroke={theme.palette.text.secondary}
+                      stroke="#6b7280"
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
@@ -158,9 +161,9 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ data, loading = false
                       type="monotone"
                       dataKey="amount"
                       name="Ingresos"
-                      stroke={theme.palette.primary.main}
+                      stroke="#1976d2"
                       strokeWidth={3}
-                      dot={{ fill: theme.palette.primary.main, r: 5 }}
+                      dot={{ fill: '#1976d2', r: 5 }}
                       activeDot={{ r: 7 }}
                     />
                   </LineChart>
@@ -169,26 +172,22 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ data, loading = false
             </CardContent>
           </Card>
         </motion.div>
-      </Grid>
+      </div>
 
       {/* Events by Category Pie Chart */}
-      <Grid item xs={12} lg={4}>
+      <div className="lg:col-span-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Card sx={{ height: '100%', boxShadow: theme.shadows[3] }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                Eventos por Categoría
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Distribución de eventos
-              </Typography>
+          <Card className="h-full shadow-lg">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-bold mb-1">Eventos por Categoría</h3>
+              <p className="text-sm text-muted-foreground mb-4">Distribución de eventos</p>
 
               {loading ? (
-                <Skeleton variant="circular" width={250} height={250} sx={{ mx: 'auto' }} />
+                <Skeleton className="h-[250px] w-[250px] rounded-full mx-auto" />
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
@@ -213,44 +212,40 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ data, loading = false
             </CardContent>
           </Card>
         </motion.div>
-      </Grid>
+      </div>
 
       {/* Registrations Timeline */}
-      <Grid item xs={12}>
+      <div className="lg:col-span-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card sx={{ boxShadow: theme.shadows[3] }}>
-            <CardContent>
-              <Box component={"div" as any} sx={{ mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                  Inscripciones
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Evolución de inscripciones por día
-                </Typography>
-              </Box>
+          <Card className="shadow-lg">
+            <CardContent className="p-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-bold mb-1">Inscripciones</h3>
+                <p className="text-sm text-muted-foreground">Evolución de inscripciones por día</p>
+              </div>
 
               {loading ? (
-                <Skeleton variant="rectangular" height={300} />
+                <Skeleton className="h-[300px] w-full" />
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={chartData.registrations}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(value) => format(new Date(value), 'dd MMM', { locale: es })}
-                      stroke={theme.palette.text.secondary}
+                      stroke="#6b7280"
                     />
-                    <YAxis stroke={theme.palette.text.secondary} />
+                    <YAxis stroke="#6b7280" />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
                     <Bar
                       dataKey="count"
                       name="Inscripciones"
-                      fill={theme.palette.success.main}
+                      fill="#388e3c"
                       radius={[8, 8, 0, 0]}
                     />
                   </BarChart>
@@ -259,8 +254,8 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ data, loading = false
             </CardContent>
           </Card>
         </motion.div>
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   );
 };
 

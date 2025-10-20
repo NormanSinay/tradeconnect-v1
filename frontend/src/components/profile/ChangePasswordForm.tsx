@@ -1,3 +1,17 @@
+/**
+ * @fileoverview ChangePasswordForm Component - Arquitectura React/Astro + Tailwind CSS + shadcn/ui
+ *
+ * Arquitectura recomendada para migración:
+ * React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui (componentes UI)
+ * → Tailwind CSS (estilos) → Radix UI (primitivos accesibles) → Lucide Icons (iconos)
+ *
+ * @version 2.0.0
+ * @author TradeConnect Team
+ * @description Formulario de cambio de contraseña con validación avanzada,
+ * indicador de fortaleza de contraseña y gestión de estado.
+ * Compatible con SSR de Astro y optimizado para performance.
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -183,29 +197,30 @@ const ChangePasswordForm: React.FC = () => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Header */}
-      <Box component={"div" as any} sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-          Cambiar Contraseña
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
+      <div className="mb-6">
+        <h2 className="text-xl font-bold mb-2">Cambiar Contraseña</h2>
+        <p className="text-sm text-gray-600">
           Asegúrate de usar una contraseña fuerte y única para proteger tu cuenta.
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       {/* Success Alert */}
       {showSuccess && (
-        <Alert severity="success" icon={<CheckCircle />} sx={{ mb: 3 }}>
-          Tu contraseña ha sido actualizada exitosamente. La próxima vez que inicies
-          sesión, usa tu nueva contraseña.
+        <Alert className="mb-6">
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            Tu contraseña ha sido actualizada exitosamente. La próxima vez que inicies
+            sesión, usa tu nueva contraseña.
+          </AlertDescription>
         </Alert>
       )}
 
       {/* Form Fields */}
-      <Grid container spacing={3}>
+      <div className="space-y-4">
         {/* Current Password */}
-        <Grid item xs={12}>
+        <div className="space-y-2">
           <Controller
             name="currentPassword"
             control={control}
@@ -220,10 +235,10 @@ const ChangePasswordForm: React.FC = () => {
               />
             )}
           />
-        </Grid>
+        </div>
 
         {/* New Password */}
-        <Grid item xs={12}>
+        <div className="space-y-2">
           <Controller
             name="newPassword"
             control={control}
@@ -241,82 +256,53 @@ const ChangePasswordForm: React.FC = () => {
 
           {/* Password Strength Indicator */}
           {newPassword && (
-            <Box component={"div" as any} sx={{ mt: 2 }}>
-              <Box
-                component={"div" as any}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 1,
-                }}
-              >
-                <Typography variant="caption" color="text.secondary">
-                  Fortaleza de la contraseña:
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: getPasswordStrengthColor(passwordStrength.score),
-                  }}
-                >
-                  {getPasswordStrengthLabel(passwordStrength.score)}
-                </Typography>
-              </Box>
-              <LinearProgress
-                variant="determinate"
+            <div className="mt-4 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-600">Fortaleza de la contraseña:</span>
+                <span className={cn(
+                  "text-xs font-bold",
+                  passwordStrength.score >= 5 ? "text-green-600" :
+                  passwordStrength.score >= 4 ? "text-blue-600" :
+                  passwordStrength.score >= 3 ? "text-yellow-600" : "text-red-600"
+                )}>
+                  {passwordStrength.score >= 5 ? "Muy Fuerte" :
+                   passwordStrength.score >= 4 ? "Fuerte" :
+                   passwordStrength.score >= 3 ? "Buena" :
+                   passwordStrength.score >= 2 ? "Regular" : "Débil"}
+                </span>
+              </div>
+              <Progress
                 value={(passwordStrength.score / 5) * 100}
-                sx={{
-                  height: 8,
-                  borderRadius: 4,
-                  bgcolor: 'grey.200',
-                  '& .MuiLinearProgress-bar': {
-                    bgcolor: getPasswordStrengthColor(passwordStrength.score),
-                    borderRadius: 4,
-                  },
-                }}
+                className="h-2"
               />
 
               {/* Password Requirements */}
               {passwordStrength.feedback.length > 0 && (
-                <Box component={"div" as any} sx={{ mt: 2 }}>
-                  <Typography variant="caption" color="text.secondary" gutterBottom>
-                    La contraseña debe incluir:
-                  </Typography>
-                  <Box component="ul" sx={{ m: 0, pl: 2 }}>
+                <div className="mt-2">
+                  <p className="text-xs text-gray-600 mb-1">La contraseña debe incluir:</p>
+                  <ul className="m-0 pl-4 space-y-1">
                     {passwordStrength.feedback.map((item, index) => (
-                      <Box
-                        key={index}
-                        component="li"
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          fontSize: '0.75rem',
-                          color: 'text.secondary',
-                          mb: 0.5,
-                        }}
-                      >
-                        <ErrorIcon sx={{ fontSize: 14, color: 'error.main' }} />
+                      <li key={index} className="flex items-center gap-1 text-xs text-gray-600">
+                        <AlertTriangle className="h-3 w-3 text-red-500" />
                         {item}
-                      </Box>
+                      </li>
                     ))}
-                  </Box>
-                </Box>
+                  </ul>
+                </div>
               )}
 
               {passwordStrength.score === 5 && (
-                <Alert severity="success" icon={<CheckCircle />} sx={{ mt: 2 }}>
-                  ¡Excelente! Tu contraseña es muy fuerte.
+                <Alert className="mt-2">
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertDescription>¡Excelente! Tu contraseña es muy fuerte.</AlertDescription>
                 </Alert>
               )}
-            </Box>
+            </div>
           )}
-        </Grid>
+        </div>
 
         {/* Confirm Password */}
-        <Grid item xs={12}>
+        <div className="space-y-2">
           <Controller
             name="confirmPassword"
             control={control}
@@ -331,59 +317,52 @@ const ChangePasswordForm: React.FC = () => {
               />
             )}
           />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
 
       {/* Action Buttons */}
-      <Box component={"div" as any} sx={{ mt: 4, display: 'flex', gap: 2 }}>
+      <div className="flex gap-3 pt-4">
         <Button
           type="submit"
-          variant="contained"
-          startIcon={isSaving ? <CircularProgress size={20} /> : <Save />}
           disabled={isSaving || !isValid}
-          size="large"
+          className="flex-1"
         >
-          {isSaving ? 'Guardando...' : 'Cambiar Contraseña'}
+          {isSaving ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Guardando...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Cambiar Contraseña
+            </>
+          )}
         </Button>
         <Button
-          variant="outlined"
+          type="button"
+          variant="outline"
           onClick={() => reset()}
           disabled={isSaving}
-          size="large"
         >
           Cancelar
         </Button>
-      </Box>
+      </div>
 
       {/* Security Tips */}
-      <Alert severity="info" icon={<Lock />} sx={{ mt: 3 }}>
-        <Typography variant="body2" sx={{ fontWeight: 'bold' }} gutterBottom>
-          Consejos de Seguridad:
-        </Typography>
-        <Box component="ul" sx={{ m: 0, pl: 2 }}>
-          <li>
-            <Typography variant="body2">
-              Usa una contraseña única que no uses en otros sitios
-            </Typography>
-          </li>
-          <li>
-            <Typography variant="body2">
-              Combina letras mayúsculas, minúsculas, números y símbolos
-            </Typography>
-          </li>
-          <li>
-            <Typography variant="body2">
-              Evita información personal como nombres o fechas
-            </Typography>
-          </li>
-          <li>
-            <Typography variant="body2">
-              Considera usar un gestor de contraseñas
-            </Typography>
-          </li>
-        </Box>
+      <Alert className="mt-6">
+        <Lock className="h-4 w-4" />
+        <AlertDescription>
+          <strong className="block mb-2">Consejos de Seguridad:</strong>
+          <ul className="m-0 pl-4 space-y-1 text-sm">
+            <li>Usa una contraseña única que no uses en otros sitios</li>
+            <li>Combina letras mayúsculas, minúsculas, números y símbolos</li>
+            <li>Evita información personal como nombres o fechas</li>
+            <li>Considera usar un gestor de contraseñas</li>
+          </ul>
+        </AlertDescription>
       </Alert>
-    </Box>
+    </form>
   );
 };
 

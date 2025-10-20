@@ -1,3 +1,23 @@
+/**
+ * @fileoverview websocketService.ts - Servicio de WebSocket para TradeConnect
+ * @description Servicio que maneja conexiones WebSocket para actualizaciones en tiempo real de eventos, notificaciones y pagos.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import { io, Socket } from 'socket.io-client';
 import { API_BASE_URL } from '@/utils/constants';
 

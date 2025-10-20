@@ -1,3 +1,27 @@
+/**
+ * @fileoverview SecureFileUpload - Componente seguro de subida de archivos
+ * @description Componente React para subida segura de archivos con validación completa
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Validación segura de archivos
+ * - Drag & drop interface
+ * - Preview de imágenes
+ * - Indicador de progreso
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +52,11 @@ interface SecureFileUploadProps {
   multiple?: boolean;
 }
 
+/**
+ * SecureFileUpload - Componente seguro de subida de archivos
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
   onFileSelect,
   onFileRemove,

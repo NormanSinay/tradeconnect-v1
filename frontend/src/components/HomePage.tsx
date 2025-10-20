@@ -1,6 +1,22 @@
+/**
+ * @fileoverview Home Page component for TradeConnect Frontend
+ * @description
+
+ * @architecture
+ * - React: Componentes interactivos con hooks y context
+ * - Astro: Routing y Server-Side Rendering (SSR)
+ * - shadcn/ui: Componentes UI preconstruidos
+ * - Tailwind CSS: Sistema de estilos utilitarios
+ * - Radix UI: Primitivos accesibles para componentes
+ * - React Icons: Biblioteca de iconos
+ *
+ * @compatibility SSR: Compatible con Astro SSR
+ * @compatibility React: Compatible con React 18+
+ * @compatibility TypeScript: Tipos completos incluidos
+ * @version 1.0.0
+ */
+
 import React, { Suspense } from 'react';
-import { Box, Container, Typography, Grid, useTheme, useMediaQuery, Button, Card, CardContent, CardMedia, Chip } from '@mui/material';
-import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { publicEventsService } from '@/services/api';
 import { Link } from 'react-router-dom';

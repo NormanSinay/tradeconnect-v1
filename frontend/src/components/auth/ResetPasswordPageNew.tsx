@@ -1,3 +1,27 @@
+/**
+ * @fileoverview ResetPasswordPageNew - Página de restablecimiento de contraseña con diseño moderno
+ * @description Componente React para restablecer contraseña con validación completa y UI moderna
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Validación completa con Yup y React Hook Form
+ * - Indicador visual de fortaleza de contraseña
+ * - Manejo de tokens de recuperación
+ * - Compatibilidad SSR con Astro
+ * - Diseño moderno con gradientes y animaciones
+ * - Estados de carga y éxito mejorados
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   useNavigate,
@@ -8,14 +32,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import toast from 'react-hot-toast';
-import {
-  FaLock,
-  FaEye,
-  FaEyeSlash,
-  FaCheckCircle,
-  FaArrowLeft,
-  FaBriefcase,
-} from 'react-icons/fa';
+import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft, Briefcase } from 'lucide-react';
 import { authService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,8 +58,9 @@ const resetPasswordSchema = yup.object({
 type ResetPasswordFormData = yup.InferType<typeof resetPasswordSchema>;
 
 /**
- * ResetPasswordPageNew - Página de restablecimiento de contraseña
- * Migrado de MUI a Tailwind CSS + shadcn/ui
+ * ResetPasswordPageNew - Página de restablecimiento de contraseña con diseño moderno
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
  */
 const ResetPasswordPageNew: React.FC = () => {
   const navigate = useNavigate();
@@ -157,7 +175,7 @@ const ResetPasswordPageNew: React.FC = () => {
           {/* Logo/Brand */}
           <div className="flex flex-col items-center mb-4">
             <div className="flex items-center gap-2 text-primary-600 mb-2">
-              <FaBriefcase className="text-4xl" />
+              <Briefcase className="text-4xl" />
               <h1 className="text-3xl font-bold">TradeConnect</h1>
             </div>
             <p className="text-gray-600 text-base">Restablecer contraseña</p>
@@ -190,7 +208,7 @@ const ResetPasswordPageNew: React.FC = () => {
                     <Label htmlFor="password">Nueva Contraseña</Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaLock className="h-5 w-5 text-gray-400" />
+                        <Lock className="h-5 w-5 text-gray-400" />
                       </div>
                       <Input
                         {...register('password')}
@@ -210,9 +228,9 @@ const ResetPasswordPageNew: React.FC = () => {
                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       >
                         {showPassword ? (
-                          <FaEyeSlash className="h-5 w-5 text-gray-400" />
+                          <EyeOff className="h-5 w-5 text-gray-400" />
                         ) : (
-                          <FaEye className="h-5 w-5 text-gray-400" />
+                          <Eye className="h-5 w-5 text-gray-400" />
                         )}
                       </button>
                     </div>
@@ -268,7 +286,7 @@ const ResetPasswordPageNew: React.FC = () => {
                     </Label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <FaLock className="h-5 w-5 text-gray-400" />
+                        <Lock className="h-5 w-5 text-gray-400" />
                       </div>
                       <Input
                         {...register('confirmPassword')}
@@ -287,9 +305,9 @@ const ResetPasswordPageNew: React.FC = () => {
                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       >
                         {showConfirmPassword ? (
-                          <FaEyeSlash className="h-5 w-5 text-gray-400" />
+                          <EyeOff className="h-5 w-5 text-gray-400" />
                         ) : (
-                          <FaEye className="h-5 w-5 text-gray-400" />
+                          <Eye className="h-5 w-5 text-gray-400" />
                         )}
                       </button>
                     </div>
@@ -313,7 +331,7 @@ const ResetPasswordPageNew: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <FaCheckCircle className="h-5 w-5" />
+                        <CheckCircle className="h-5 w-5" />
                         Restablecer Contraseña
                       </>
                     )}
@@ -325,7 +343,7 @@ const ResetPasswordPageNew: React.FC = () => {
             <>
               {/* Success Message */}
               <Alert className="bg-success/10 border-success text-success-foreground">
-                <FaCheckCircle className="h-5 w-5 text-success" />
+                <CheckCircle className="h-5 w-5 text-success" />
                 <AlertTitle className="ml-2 font-semibold">
                   ¡Contraseña restablecida exitosamente!
                 </AlertTitle>
@@ -351,7 +369,7 @@ const ResetPasswordPageNew: React.FC = () => {
                 to="/login"
                 className="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 hover:underline"
               >
-                <FaArrowLeft className="h-3 w-3" />
+                <ArrowLeft className="h-3 w-3" />
                 Volver al inicio de sesión
               </RouterLink>
             </div>

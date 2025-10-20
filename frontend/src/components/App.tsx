@@ -1,3 +1,34 @@
+/**
+ * @fileoverview Main App component for TradeConnect Frontend
+ * @description
+
+Arquitectura recomendada si migras:
+  React (componentes interactivos)
+    ↓
+  Astro (routing y SSR)
+    ↓
+  shadcn/ui (componentes UI)
+    ↓
+  Tailwind CSS (estilos)
+    ↓
+  Radix UI (primitivos accesibles)
+    ↓
+  React Icons (iconos)
+
+ * @architecture
+ * - React: Componentes interactivos con hooks y context
+ * - Astro: Routing y Server-Side Rendering (SSR)
+ * - shadcn/ui: Componentes UI preconstruidos
+ * - Tailwind CSS: Sistema de estilos utilitarios
+ * - Radix UI: Primitivos accesibles para componentes
+ * - React Icons: Biblioteca de iconos
+ *
+ * @compatibility SSR: Compatible con Astro SSR
+ * @compatibility React: Compatible con React 18+
+ * @compatibility TypeScript: Tipos completos incluidos
+ * @version 1.0.0
+ */
+
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -69,17 +100,14 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Router>
-            <AuthProvider>
-              <CartProvider>
-                <AppRoutes />
-                <ToastContainer />
-              </CartProvider>
-            </AuthProvider>
-          </Router>
-        </ThemeProvider>
+        <Router>
+          <AuthProvider>
+            <CartProvider>
+              <AppRoutes />
+              <ToastContainer />
+            </CartProvider>
+          </AuthProvider>
+        </Router>
       </QueryClientProvider>
     </ErrorBoundary>
   );

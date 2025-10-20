@@ -1,3 +1,27 @@
+/**
+ * @fileoverview CheckoutPage - Página de checkout con stepper multi-paso
+ * @description Componente React para proceso completo de checkout
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Formulario multi-paso con validación completa
+ * - Múltiples métodos de pago (tarjeta, PayPal, transferencia)
+ * - Integración FEL (Guatemala) para facturación
+ * - Validación en tiempo real con Yup
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,6 +53,11 @@ import { cn } from '@/lib/utils';
 
 const steps = ['Información Personal', 'Método de Pago', 'Confirmación'];
 
+/**
+ * CheckoutPage - Página de checkout con stepper multi-paso
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { cart, clearCart } = useCart();

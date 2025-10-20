@@ -1,3 +1,38 @@
+---
+title: TradeConnect Frontend Services
+description: Documentación completa de servicios API para TradeConnect
+---
+
+# TradeConnect Frontend Services
+
+Esta documentación describe todos los módulos de servicios API para la aplicación frontend de TradeConnect. Cada servicio proporciona una interfaz limpia para interactuar con los endpoints del backend.
+
+## Arquitectura Recomendada
+
+```
+React (componentes interactivos)
+  ↓
+Astro (routing y SSR)
+  ↓
+shadcn/ui (componentes UI)
+  ↓
+Tailwind CSS (estilos)
+  ↓
+Radix UI (primitivos accesibles)
+  ↓
+Lucide Icons (iconos)
+```
+
+## Arquitectura de Servicios
+
+Todos los servicios siguen un patrón consistente:
+- Uso del `apiService` central desde `api.ts`
+- Retorno de formato `ApiResponse<T>` con seguridad de tipos
+- Comentarios JSDoc completos
+- Manejo de errores consistente
+- Soporte para inferencia de tipos TypeScript
+
+## Servicios Disponibles
 # TradeConnect Frontend Services
 
 This directory contains all API service modules for the TradeConnect frontend application. Each service provides a clean interface to interact with backend endpoints.

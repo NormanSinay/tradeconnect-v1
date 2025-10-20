@@ -1,3 +1,26 @@
+/**
+ * @fileoverview CertificateDetailPage - Página de detalle de certificados
+ * @description Componente React para mostrar certificados digitales con validación
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Visualización completa de certificados
+ * - Validación QR y blockchain
+ * - Acciones de descarga, impresión y compartir
+ * - Diseño responsive con Tailwind CSS
+ * - Compatibilidad SSR con Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -43,6 +66,11 @@ interface Certificate {
   skills?: string[];
 }
 
+/**
+ * CertificateDetailPage - Página de detalle de certificados
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const CertificateDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

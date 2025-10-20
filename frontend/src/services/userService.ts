@@ -1,3 +1,23 @@
+/**
+ * @fileoverview userService.ts - Servicio de usuarios para TradeConnect
+ * @description Servicio que maneja perfiles de usuario, configuración de seguridad, preferencias y gestión de cuenta.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import { apiService } from './api';
 import type { ApiResponse, User } from '@/types';
 

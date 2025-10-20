@@ -1,39 +1,42 @@
+/**
+ * @fileoverview RegisterPage - Página de registro con stepper multi-paso
+ * @description Componente React para registro de usuarios con validación completa
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Formulario multi-paso con stepper personalizado
+ * - Validación completa con Yup y React Hook Form
+ * - Indicador de fortaleza de contraseña
+ * - Manejo de errores y estados de carga
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Box,
-  Grid,
-  Divider,
-  FormControlLabel,
-  Checkbox,
-  Alert,
-  IconButton,
-  InputAdornment,
-  Link,
-  Stepper,
-  Step,
-  StepLabel,
-} from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  Email,
-  Lock,
-  Person,
-  Phone,
-  Google,
-  PersonAdd as RegisterIcon,
-  CheckCircle,
-} from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
+import { Eye, EyeOff, Mail, Lock, User, Phone, UserPlus, CheckCircle } from 'lucide-react';
 
 const registerSchema = yup.object({
   firstName: yup
@@ -185,154 +188,127 @@ const RegisterPage: React.FC = () => {
     switch (step) {
       case 0:
         return (
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                {...register('firstName')}
-                fullWidth
-                label="Nombre"
-                autoComplete="given-name"
-                error={!!errors.firstName}
-                helperText={errors.firstName?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Person color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                disabled={isLoading}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                {...register('lastName')}
-                fullWidth
-                label="Apellido"
-                autoComplete="family-name"
-                error={!!errors.lastName}
-                helperText={errors.lastName?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Person color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                disabled={isLoading}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                {...register('email')}
-                fullWidth
-                label="Email"
-                type="email"
-                autoComplete="email"
-                error={!!errors.email}
-                helperText={errors.email?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                disabled={isLoading}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                {...register('phone')}
-                fullWidth
-                label="Teléfono (opcional)"
-                placeholder="+502 XXXX-XXXX"
-                autoComplete="tel"
-                error={!!errors.phone}
-                helperText={errors.phone?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Phone color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                disabled={isLoading}
-              />
-            </Grid>
-          </Grid>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">Nombre</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    {...register('firstName')}
+                    id="firstName"
+                    placeholder="Tu nombre"
+                    autoComplete="given-name"
+                    className={`pl-10 ${errors.firstName ? 'border-destructive' : ''}`}
+                    disabled={isLoading}
+                  />
+                </div>
+                {errors.firstName && (
+                  <p className="text-sm text-destructive">{errors.firstName.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Apellido</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    {...register('lastName')}
+                    id="lastName"
+                    placeholder="Tu apellido"
+                    autoComplete="family-name"
+                    className={`pl-10 ${errors.lastName ? 'border-destructive' : ''}`}
+                    disabled={isLoading}
+                  />
+                </div>
+                {errors.lastName && (
+                  <p className="text-sm text-destructive">{errors.lastName.message}</p>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  {...register('email')}
+                  id="email"
+                  type="email"
+                  placeholder="tu@email.com"
+                  autoComplete="email"
+                  className={`pl-10 ${errors.email ? 'border-destructive' : ''}`}
+                  disabled={isLoading}
+                />
+              </div>
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Teléfono (opcional)</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  {...register('phone')}
+                  id="phone"
+                  placeholder="+502 XXXX-XXXX"
+                  autoComplete="tel"
+                  className={`pl-10 ${errors.phone ? 'border-destructive' : ''}`}
+                  disabled={isLoading}
+                />
+              </div>
+              {errors.phone && (
+                <p className="text-sm text-destructive">{errors.phone.message}</p>
+              )}
+            </div>
+          </div>
         );
 
       case 1:
         return (
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <TextField
-                {...register('password')}
-                fullWidth
-                label="Contraseña"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                error={!!errors.password}
-                helperText={errors.password?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={togglePasswordVisibility}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                disabled={isLoading}
-              />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  {...register('password')}
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Tu contraseña"
+                  autoComplete="new-password"
+                  className={`pl-10 pr-10 ${errors.password ? 'border-destructive' : ''}`}
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
+                  onClick={togglePasswordVisibility}
+                  disabled={isLoading}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
 
               {/* Password Strength Indicator */}
               {watchedValues.password && (
-                <Box component={"div" as any} sx={{ mt: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">
                     Fortaleza de la contraseña:
-                  </Typography>
-                  <Box component={"div" as any} sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
-                    {[1, 2, 3, 4, 5].map((level) => (
-                      <Box
-                        component={"div" as any}
-                        key={level}
-                        sx={{
-                          height: 4,
-                          flex: 1,
-                          borderRadius: 1,
-                          backgroundColor:
-                            level <= passwordStrength
-                              ? passwordStrength <= 2
-                                ? 'error.main'
-                                : passwordStrength <= 3
-                                ? 'warning.main'
-                                : 'success.main'
-                              : 'grey.300',
-                        }}
-                      />
-                    ))}
-                  </Box>
-                  <Typography
-                    variant="caption"
-                    color={
-                      passwordStrength <= 2
-                        ? 'error.main'
-                        : passwordStrength <= 3
-                        ? 'warning.main'
-                        : 'success.main'
-                    }
-                  >
+                  </p>
+                  <Progress
+                    value={(passwordStrength / 5) * 100}
+                    className="h-2 mb-1"
+                  />
+                  <p className={`text-xs ${
+                    passwordStrength <= 2
+                      ? 'text-destructive'
+                      : passwordStrength <= 3
+                      ? 'text-yellow-600'
+                      : 'text-green-600'
+                  }`}>
                     {passwordStrength <= 2
                       ? 'Débil'
                       : passwordStrength <= 3
@@ -340,104 +316,96 @@ const RegisterPage: React.FC = () => {
                       : passwordStrength <= 4
                       ? 'Buena'
                       : 'Excelente'}
-                  </Typography>
-                </Box>
+                  </p>
+                </div>
               )}
-            </Grid>
+            </div>
 
-            <Grid item xs={12}>
-              <TextField
-                {...register('confirmPassword')}
-                fullWidth
-                label="Confirmar Contraseña"
-                type={showConfirmPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                error={!!errors.confirmPassword}
-                helperText={errors.confirmPassword?.message}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Lock color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle confirm password visibility"
-                        onClick={toggleConfirmPasswordVisibility}
-                        edge="end"
-                      >
-                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                disabled={isLoading}
-              />
-            </Grid>
-          </Grid>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  {...register('confirmPassword')}
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirma tu contraseña"
+                  autoComplete="new-password"
+                  className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
+                  onClick={toggleConfirmPasswordVisibility}
+                  disabled={isLoading}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+          </div>
         );
 
       case 2:
         return (
-          <Box component={"div" as any}>
-            <Typography variant="h6" gutterBottom>
-              Confirma tu registro
-            </Typography>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Confirma tu registro</h3>
+              <div className="bg-muted p-4 rounded-md space-y-2">
+                <p className="text-sm">
+                  <strong>Nombre:</strong> {watchedValues.firstName} {watchedValues.lastName}
+                </p>
+                <p className="text-sm">
+                  <strong>Email:</strong> {watchedValues.email}
+                </p>
+                {watchedValues.phone && (
+                  <p className="text-sm">
+                    <strong>Teléfono:</strong> {watchedValues.phone}
+                  </p>
+                )}
+              </div>
+            </div>
 
-            <Box component={"div" as any} sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>Nombre:</strong> {watchedValues.firstName} {watchedValues.lastName}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>Email:</strong> {watchedValues.email}
-              </Typography>
-              {watchedValues.phone && (
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Teléfono:</strong> {watchedValues.phone}
-                </Typography>
-              )}
-            </Box>
-
-            <FormControlLabel
-              control={
+            <div className="space-y-4">
+              <div className="flex items-start space-x-2">
                 <Checkbox
+                  id="acceptTerms"
                   {...register('acceptTerms')}
-                  color="primary"
                   disabled={isLoading}
                 />
-              }
-              label={
-                <Typography variant="body2">
-                  Acepto los{' '}
-                  <Link href="/terms" target="_blank" sx={{ textDecoration: 'none' }}>
-                    Términos de Servicio
-                  </Link>{' '}
-                  y la{' '}
-                  <Link href="/privacy" target="_blank" sx={{ textDecoration: 'none' }}>
-                    Política de Privacidad
-                  </Link>
-                </Typography>
-              }
-            />
-            {errors.acceptTerms && (
-              <Typography variant="caption" color="error" sx={{ display: 'block', ml: 4 }}>
-                {errors.acceptTerms.message}
-              </Typography>
-            )}
+                <div className="grid gap-1.5 leading-none">
+                  <Label htmlFor="acceptTerms" className="text-sm font-normal">
+                    Acepto los{' '}
+                    <a href="/terms" target="_blank" className="text-primary hover:underline">
+                      Términos de Servicio
+                    </a>{' '}
+                    y la{' '}
+                    <a href="/privacy" target="_blank" className="text-primary hover:underline">
+                      Política de Privacidad
+                    </a>
+                  </Label>
+                  {errors.acceptTerms && (
+                    <p className="text-sm text-destructive">{errors.acceptTerms.message}</p>
+                  )}
+                </div>
+              </div>
 
-            <FormControlLabel
-              control={
+              <div className="flex items-start space-x-2">
                 <Checkbox
+                  id="newsletter"
                   {...register('newsletter')}
-                  color="primary"
                   disabled={isLoading}
                 />
-              }
-              label="Deseo recibir noticias y actualizaciones por email"
-              sx={{ mt: 1 }}
-            />
-          </Box>
+                <Label htmlFor="newsletter" className="text-sm font-normal">
+                  Deseo recibir noticias y actualizaciones por email
+                </Label>
+              </div>
+            </div>
+          </div>
         );
 
       default:
@@ -446,147 +414,118 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="md" sx={{ py: 8 }}>
-      <Paper
-        elevation={8}
-        sx={{
-          p: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          borderRadius: 2,
-        }}
-      >
-        {/* Logo/Brand */}
-        <Box component={"div" as any} sx={{ mb: 3, textAlign: 'center' }}>
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{
-              fontWeight: 'bold',
-              color: 'primary.main',
-              mb: 1,
-            }}
-          >
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-2xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-primary">
             TradeConnect
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
+          </CardTitle>
+          <p className="text-muted-foreground">
             Crea tu cuenta
-          </Typography>
-        </Box>
+          </p>
+        </CardHeader>
+        <CardContent>
+          {/* Stepper */}
+          <div className="mb-8">
+            <div className="flex justify-between">
+              {steps.map((label, index) => (
+                <div key={label} className="flex flex-col items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    index <= activeStep
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {index + 1}
+                  </div>
+                  <span className={`text-xs mt-2 ${
+                    index <= activeStep ? 'text-foreground' : 'text-muted-foreground'
+                  }`}>
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 bg-muted rounded-full h-2">
+              <div
+                className="bg-primary h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
+              />
+            </div>
+          </div>
 
-        {/* Stepper */}
-        <Box component={"div" as any} sx={{ width: '100%', mb: 4 }}>
-          <Stepper activeStep={activeStep} alternativeLabel>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </Box>
+          {/* Error Alert */}
+          {registerError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{registerError}</AlertDescription>
+            </Alert>
+          )}
 
-        {/* Error Alert */}
-        {registerError && (
-          <Alert severity="error" sx={{ width: '100%', mb: 3 }}>
-            {registerError}
-          </Alert>
-        )}
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {renderStepContent(activeStep)}
 
-        {/* Form */}
-        <Box
-          component="form"
-          onSubmit={handleSubmit(onSubmit)}
-          sx={{ width: '100%', mt: 1 }}
-        >
-          {renderStepContent(activeStep)}
+            {/* Navigation Buttons */}
+            <div className="flex justify-between pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={activeStep === 0 || isLoading}
+                onClick={handleBack}
+              >
+                Anterior
+              </Button>
 
-          {/* Navigation Buttons */}
-          <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-            <Button
-              disabled={activeStep === 0 || isLoading}
-              onClick={handleBack}
-              variant="outlined"
-            >
-              Anterior
-            </Button>
-
-            <Box component={"div" as any}>
               {activeStep === steps.length - 1 ? (
                 <Button
                   type="submit"
-                  variant="contained"
                   disabled={isLoading}
-                  startIcon={<RegisterIcon />}
-                  sx={{ px: 4 }}
                 >
+                  {isLoading && <UserPlus className="mr-2 h-4 w-4 animate-spin" />}
                   {isLoading ? 'Registrando...' : 'Crear Cuenta'}
                 </Button>
               ) : (
                 <Button
-                  variant="contained"
+                  type="button"
                   onClick={handleNext}
                   disabled={isLoading}
                 >
                   Siguiente
                 </Button>
               )}
-            </Box>
-          </Box>
-        </Box>
+            </div>
+          </form>
 
-        {/* Divider */}
-        <Box component={"div" as any} sx={{ width: '100%', my: 3 }}>
-          <Divider>
-            <Typography variant="body2" color="text.secondary" sx={{ px: 2 }}>
-              o
-            </Typography>
-          </Divider>
-        </Box>
+          {/* Divider */}
+          <div className="relative my-8">
+            <Separator />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="bg-background px-2 text-xs text-muted-foreground">o</span>
+            </div>
+          </div>
 
-        {/* Google Register */}
-        <Button
-          fullWidth
-          variant="outlined"
-          size="large"
-          onClick={handleGoogleRegister}
-          disabled={isLoading}
-          startIcon={<Google />}
-          sx={{
-            py: 1.5,
-            borderColor: '#dadce0',
-            color: '#3c4043',
-            '&:hover': {
-              borderColor: '#dadce0',
-              backgroundColor: '#f8f9fa',
-            },
-          }}
-        >
-          Continuar con Google
-        </Button>
+          {/* Google Register */}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleGoogleRegister}
+            disabled={isLoading}
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
+            Continuar con Google
+          </Button>
 
-        {/* Login Link */}
-        <Box component={"div" as any} sx={{ mt: 3, textAlign: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
-            ¿Ya tienes una cuenta?{' '}
-            <Link
-              component={RouterLink}
-              to="/login"
-              sx={{
-                textDecoration: 'none',
-                fontWeight: 'bold',
-                color: 'primary.main',
-                '&:hover': {
-                  textDecoration: 'underline',
-                },
-              }}
-            >
-              Inicia sesión aquí
-            </Link>
-          </Typography>
-        </Box>
-      </Paper>
-    </Container>
+          {/* Login Link */}
+          <div className="text-center mt-6">
+            <p className="text-sm text-muted-foreground">
+              ¿Ya tienes una cuenta?{' '}
+              <RouterLink to="/login" className="text-primary hover:underline font-medium">
+                Inicia sesión aquí
+              </RouterLink>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

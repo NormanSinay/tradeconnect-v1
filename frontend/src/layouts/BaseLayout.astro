@@ -1,3 +1,23 @@
+/**
+ * @fileoverview BaseLayout.astro - Layout base para la aplicación TradeConnect
+ * @description Layout principal que proporciona la estructura HTML base, estilos globales y configuración de metadatos para todas las páginas de la aplicación.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 ---
 export interface Props {
   title: string;

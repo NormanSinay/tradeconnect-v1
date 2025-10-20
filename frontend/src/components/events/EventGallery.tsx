@@ -1,3 +1,36 @@
+/**
+ * @fileoverview EventGallery - Galería de medios para eventos
+ * @description Componente React que muestra una galería interactiva de imágenes y videos de eventos.
+ * Incluye lightbox modal, navegación por teclado, miniaturas y soporte para múltiples formatos.
+ *
+ * Arquitectura:
+ * - React: Componentes interactivos con hooks de estado
+ *   ↓
+ * - Astro: Routing y SSR - Compatible con hidratación del lado cliente
+ *   ↓
+ * - shadcn/ui: Componentes UI preconstruidos (Dialog, Button)
+ *   ↓
+ * - Tailwind CSS: Estilos utilitarios para diseño responsivo y moderno
+ *   ↓
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ *   ↓
+ * - Lucide Icons: Iconografía moderna y consistente (X, ChevronRight, ChevronLeft, ZoomIn, Play)
+ * - Framer Motion: Animaciones suaves y transiciones fluidas
+ *
+ * Características:
+ * - Galería responsiva con miniaturas
+ * - Lightbox modal con navegación
+ * - Soporte para imágenes y videos
+ * - Animaciones con Framer Motion
+ * - Navegación por teclado
+ * - Estados de carga optimizados
+ * - Compatibilidad completa con SSR de Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -75,294 +108,166 @@ const EventGallery: React.FC<EventGalleryProps> = ({ media }) => {
             onClick={handleOpenLightbox}
           >
             {selectedMedia?.fileType === 'image' ? (
-              <Box
-                component="img"
+              <img
                 src={selectedMedia.filePath}
                 alt={selectedMedia.altText || 'Event image'}
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                }}
+                className="w-full h-full object-contain"
               />
             ) : selectedMedia?.fileType === 'video' ? (
               <video
                 src={selectedMedia.filePath}
                 controls
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                }}
+                className="w-full h-full object-contain"
               />
             ) : null}
 
             {/* Zoom icon overlay */}
             {selectedMedia?.fileType === 'image' && (
-              <Box
-                component={"div" as any}
-                sx={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  bgcolor: 'rgba(0, 0, 0, 0.6)',
-                  borderRadius: '50%',
-                  p: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <ZoomIn sx={{ color: 'white' }} />
-              </Box>
+              <div className="absolute top-4 right-4 bg-black/60 rounded-full p-2 flex items-center justify-center">
+                <ZoomIn className="w-5 h-5 text-white" />
+              </div>
             )}
 
             {/* Navigation Arrows */}
             {thumbnails.length > 1 && (
               <>
-                <IconButton
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handlePrev();
                   }}
-                  sx={{
-                    position: 'absolute',
-                    left: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    bgcolor: 'rgba(255, 255, 255, 0.9)',
-                    '&:hover': { bgcolor: 'white' },
-                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 transition-colors"
                 >
-                  <NavigateBefore />
-                </IconButton>
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
 
-                <IconButton
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNext();
                   }}
-                  sx={{
-                    position: 'absolute',
-                    right: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    bgcolor: 'rgba(255, 255, 255, 0.9)',
-                    '&:hover': { bgcolor: 'white' },
-                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 transition-colors"
                 >
-                  <NavigateNext />
-                </IconButton>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </>
             )}
-          </Box>
+          </div>
         </motion.div>
-      </Paper>
+      </div>
 
       {/* Thumbnail Grid */}
       {thumbnails.length > 1 && (
-        <Grid container spacing={1}>
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
           {thumbnails.map((item, index) => (
-            <Grid item xs={3} sm={2} md={1.5} key={item.id}>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Box
-                  component={"div" as any}
-                  sx={{
-                    position: 'relative',
-                    paddingTop: '75%',
-                    cursor: 'pointer',
-                    borderRadius: 1,
-                    overflow: 'hidden',
-                    border: 3,
-                    borderColor: selectedIndex === index ? 'primary.main' : 'transparent',
-                    transition: 'all 0.2s',
-                    '&:hover': {
-                      borderColor: selectedIndex === index ? 'primary.main' : 'grey.400',
-                    },
-                  }}
-                  onClick={() => handleThumbnailClick(index)}
-                >
-                  {item.fileType === 'image' ? (
-                    <Box
-                      component="img"
-                      src={item.filePath}
-                      alt={item.altText || `Thumbnail ${index + 1}`}
-                      sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        opacity: selectedIndex === index ? 1 : 0.7,
-                      }}
-                    />
-                  ) : (
-                    <>
-                      <Box
-                        component="video"
-                        src={item.filePath}
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          opacity: selectedIndex === index ? 1 : 0.7,
-                        }}
-                      />
-                      <Box
-                        component={"div" as any}
-                        sx={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          bgcolor: 'rgba(0, 0, 0, 0.6)',
-                          borderRadius: '50%',
-                          p: 0.5,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <PlayArrow sx={{ color: 'white', fontSize: 20 }} />
-                      </Box>
-                    </>
+            <motion.div
+              key={item.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={cn(
+                "relative aspect-square cursor-pointer rounded-lg overflow-hidden border-2 transition-all",
+                selectedIndex === index ? "border-primary" : "border-transparent hover:border-gray-400"
+              )}
+              onClick={() => handleThumbnailClick(index)}
+            >
+              {item.fileType === 'image' ? (
+                <img
+                  src={item.filePath}
+                  alt={item.altText || `Thumbnail ${index + 1}`}
+                  className={cn(
+                    "w-full h-full object-cover transition-opacity",
+                    selectedIndex === index ? "opacity-100" : "opacity-70"
                   )}
-                </Box>
-              </motion.div>
-            </Grid>
+                />
+              ) : (
+                <>
+                  <video
+                    src={item.filePath}
+                    className={cn(
+                      "w-full h-full object-cover transition-opacity",
+                      selectedIndex === index ? "opacity-100" : "opacity-70"
+                    )}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-black/60 rounded-full p-1">
+                      <Play className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                </>
+              )}
+            </motion.div>
           ))}
-        </Grid>
+        </div>
       )}
 
       {/* Lightbox Modal */}
       <Dialog
         open={lightboxOpen}
         onClose={handleCloseLightbox}
-        maxWidth={false}
-        fullWidth
-        PaperProps={{
-          sx: {
-            bgcolor: 'rgba(0, 0, 0, 0.95)',
-            boxShadow: 'none',
-            maxWidth: '95vw',
-            maxHeight: '95vh',
-            m: 0,
-          },
-        }}
+        className="max-w-[95vw] max-h-[95vh]"
       >
-        <IconButton
-          onClick={handleCloseLightbox}
-          sx={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            color: 'white',
-            bgcolor: 'rgba(255, 255, 255, 0.1)',
-            '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' },
-            zIndex: 1,
-          }}
-        >
-          <Close />
-        </IconButton>
+        <DialogContent className="p-0 bg-black/95 border-none">
+          <button
+            onClick={handleCloseLightbox}
+            className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 rounded-full p-2 text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
 
-        <DialogContent sx={{ p: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={selectedIndex}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
-              style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              {selectedMedia?.fileType === 'image' ? (
-                <Box
-                  component="img"
-                  src={selectedMedia.filePath}
-                  alt={selectedMedia.altText || 'Event image'}
-                  sx={{
-                    maxWidth: '100%',
-                    maxHeight: '85vh',
-                    objectFit: 'contain',
-                  }}
-                />
-              ) : selectedMedia?.fileType === 'video' ? (
-                <video
-                  src={selectedMedia.filePath}
-                  controls
-                  autoPlay
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '85vh',
-                    objectFit: 'contain',
-                  }}
-                />
-              ) : null}
-            </motion.div>
-          </AnimatePresence>
+          <div className="flex items-center justify-center min-h-[85vh]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedIndex}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center justify-center w-full h-full"
+              >
+                {selectedMedia?.fileType === 'image' ? (
+                  <img
+                    src={selectedMedia.filePath}
+                    alt={selectedMedia.altText || 'Event image'}
+                    className="max-w-full max-h-[85vh] object-contain"
+                  />
+                ) : selectedMedia?.fileType === 'video' ? (
+                  <video
+                    src={selectedMedia.filePath}
+                    controls
+                    autoPlay
+                    className="max-w-full max-h-[85vh] object-contain"
+                  />
+                ) : null}
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
           {/* Lightbox Navigation */}
           {thumbnails.length > 1 && (
             <>
-              <IconButton
+              <button
                 onClick={handlePrev}
-                sx={{
-                  position: 'absolute',
-                  left: 16,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'white',
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' },
-                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 rounded-full p-3 text-white transition-colors"
               >
-                <NavigateBefore fontSize="large" />
-              </IconButton>
+                <ChevronLeft className="w-6 h-6" />
+              </button>
 
-              <IconButton
+              <button
                 onClick={handleNext}
-                sx={{
-                  position: 'absolute',
-                  right: 16,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'white',
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' },
-                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 rounded-full p-3 text-white transition-colors"
               >
-                <NavigateNext fontSize="large" />
-              </IconButton>
+                <ChevronRight className="w-6 h-6" />
+              </button>
             </>
           )}
 
           {/* Counter */}
-          <Box
-            component={"div" as any}
-            sx={{
-              position: 'absolute',
-              bottom: 16,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: 'white',
-              bgcolor: 'rgba(0, 0, 0, 0.6)',
-              px: 2,
-              py: 1,
-              borderRadius: 2,
-            }}
-          >
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-lg">
             {selectedIndex + 1} / {thumbnails.length}
-          </Box>
+          </div>
         </DialogContent>
       </Dialog>
-    </Box>
+    </div>
   );
 };
 

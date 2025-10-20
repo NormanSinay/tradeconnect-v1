@@ -1,17 +1,40 @@
+/**
+ * @fileoverview Events Page component for TradeConnect Frontend
+ * @description
+
+Arquitectura recomendada si migras:
+  React (componentes interactivos)
+    ↓
+  Astro (routing y SSR)
+    ↓
+  shadcn/ui (componentes UI)
+    ↓
+  Tailwind CSS (estilos)
+    ↓
+  Radix UI (primitivos accesibles)
+    ↓
+  React Icons (iconos)
+
+ * @architecture
+ * - React: Componentes interactivos con hooks y context
+ * - Astro: Routing y Server-Side Rendering (SSR)
+ * - shadcn/ui: Componentes UI preconstruidos
+ * - Tailwind CSS: Sistema de estilos utilitarios
+ * - Radix UI: Primitivos accesibles para componentes
+ * - React Icons: Biblioteca de iconos
+ *
+ * @compatibility SSR: Compatible con Astro SSR
+ * @compatibility React: Compatible con React 18+
+ * @compatibility TypeScript: Tipos completos incluidos
+ * @version 1.0.0
+ */
+
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Breadcrumbs,
-  Link as MuiLink,
-  CircularProgress,
-  Alert,
-  Pagination,
-} from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { NavigateNext } from '@mui/icons-material';
+import { ChevronRight, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Components
 import EventFilters from '@/components/events/EventFilters';
@@ -110,78 +133,47 @@ const EventsPage: React.FC = () => {
   }, [eventsData]);
 
   return (
-    <Box component={"div" as any} sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <div className="min-h-screen bg-background">
       {/* Breadcrumbs */}
-      <Container maxWidth="lg" sx={{ py: 2 }}>
-        <Breadcrumbs
-          separator={<NavigateNext fontSize="small" />}
-          aria-label="breadcrumb"
-          sx={{ mb: 2 }}
-        >
-          <MuiLink component={Link} to="/" color="inherit">
-            Inicio
-          </MuiLink>
-          <Typography color="text.primary">Eventos</Typography>
-        </Breadcrumbs>
-      </Container>
+      <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <nav className="flex mb-4" aria-label="Breadcrumb">
+          <ol className="inline-flex items-center space-x-1 md:space-x-3">
+            <li className="inline-flex items-center">
+              <Link to="/" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground">
+                Inicio
+              </Link>
+            </li>
+            <li>
+              <div className="flex items-center">
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <span className="ml-1 text-sm font-medium text-foreground md:ml-2">Eventos</span>
+              </div>
+            </li>
+          </ol>
+        </nav>
+      </div>
 
       {/* Header */}
-      <Box
-        component={"div" as any}
-        sx={{
-          bgcolor: 'background.paper',
-          borderBottom: 1,
-          borderColor: 'divider',
-          py: { xs: 2, md: 4 },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Typography
-            variant="h3"
-            component="h1"
-            sx={{
-              mb: 2,
-              fontWeight: 'bold',
-              color: 'text.primary',
-              fontSize: { xs: '1.8rem', md: '2.125rem' },
-            }}
-          >
+      <div className="bg-card border-b">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
             Catálogo de Eventos
-          </Typography>
-          <Typography
-            variant="h6"
-            color="text.secondary"
-            sx={{
-              mb: 1,
-              fontSize: { xs: '1rem', md: '1.25rem' }
-            }}
-          >
+          </h1>
+          <p className="text-base md:text-lg text-muted-foreground mb-2">
             Descubre eventos empresariales y cursos de formación
-          </Typography>
+          </p>
           {eventsData && (
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{ display: { xs: 'none', sm: 'block' } }}
-            >
+            <p className="text-sm text-muted-foreground hidden sm:block">
               {eventsData.total} eventos encontrados
-            </Typography>
+            </p>
           )}
-        </Container>
-      </Box>
+        </div>
+      </div>
 
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box component={"div" as any} sx={{
-          display: 'flex',
-          gap: { xs: 2, md: 4 },
-          flexDirection: { xs: 'column', md: 'row' }
-        }}>
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Filters Sidebar */}
-          <Box component={"div" as any} sx={{
-            width: { xs: '100%', md: 300 },
-            flexShrink: 0,
-            order: { xs: 2, md: 1 }
-          }}>
+          <div className="w-full md:w-80 flex-shrink-0 order-2 md:order-1">
             <EventFilters
               filters={filters}
               onFiltersChange={handleFiltersChange}
@@ -189,13 +181,10 @@ const EventsPage: React.FC = () => {
               types={types}
               loading={eventsLoading}
             />
-          </Box>
+          </div>
 
           {/* Main Content */}
-          <Box component={"div" as any} sx={{
-            flex: 1,
-            order: { xs: 1, md: 2 }
-          }}>
+          <div className="flex-1 order-1 md:order-2">
             {/* Sort Options */}
             <EventSortOptions
               sortBy={sortBy}
@@ -205,8 +194,10 @@ const EventsPage: React.FC = () => {
 
             {/* Error State */}
             {eventsError && (
-              <Alert severity="error" sx={{ mb: 3 }}>
-                Error al cargar los eventos. Por favor, intenta de nuevo.
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>
+                  Error al cargar los eventos. Por favor, intenta de nuevo.
+                </AlertDescription>
               </Alert>
             )}
 
@@ -221,60 +212,69 @@ const EventsPage: React.FC = () => {
 
             {/* Pagination */}
             {paginationInfo && paginationInfo.totalPages > 1 && (
-              <Box component={"div" as any} sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                mt: 4,
-                px: { xs: 2, sm: 0 }
-              }}>
-                <Pagination
-                  count={paginationInfo.totalPages}
-                  page={paginationInfo.currentPage}
-                  onChange={handlePageChange}
-                  color="primary"
-                  size="large"
-                  showFirstButton
-                  showLastButton
-                  siblingCount={1}
-                  boundaryCount={1}
-                  sx={{
-                    '& .MuiPaginationItem-root': {
-                      fontSize: { xs: '0.875rem', sm: '1rem' },
-                    },
-                  }}
-                />
-              </Box>
+              <div className="flex justify-center mt-8 px-4 sm:px-0">
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(null as any, 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Primera
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(null as any, currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Anterior
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    Página {paginationInfo.currentPage} de {paginationInfo.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(null as any, currentPage + 1)}
+                    disabled={currentPage === paginationInfo.totalPages}
+                  >
+                    Siguiente
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(null as any, paginationInfo.totalPages)}
+                    disabled={currentPage === paginationInfo.totalPages}
+                  >
+                    Última
+                  </Button>
+                </div>
+              </div>
             )}
 
             {/* Loading State */}
             {eventsLoading && events.length === 0 && (
-              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                <CircularProgress size={40} />
-              </Box>
+              <div className="flex justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
             )}
 
             {/* Empty State */}
             {!eventsLoading && events.length === 0 && !eventsError && (
-              <Box
-                component={"div" as any}
-                sx={{
-                  textAlign: 'center',
-                  py: 8,
-                  px: 2,
-                }}
-              >
-                <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+              <div className="text-center py-16 px-4">
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">
                   No se encontraron eventos
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
+                </h3>
+                <p className="text-sm text-muted-foreground">
                   Intenta ajustar los filtros de búsqueda o verifica que los criterios sean correctos.
-                </Typography>
-              </Box>
+                </p>
+              </div>
             )}
-          </Box>
-        </Box>
-      </Container>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

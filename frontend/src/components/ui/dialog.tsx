@@ -1,7 +1,28 @@
+/**
+ * @fileoverview Dialog Component - Componente de diálogo modal accesible
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { cn } from '@/lib/utils';
-import { FaTimes } from 'react-icons/fa';
+import { X } from 'lucide-react';
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -39,7 +60,7 @@ const DialogContent = React.forwardRef<
     >
       {children}
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100 data-[state=open]:text-gray-500">
-        <FaTimes className="h-4 w-4" />
+        <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>

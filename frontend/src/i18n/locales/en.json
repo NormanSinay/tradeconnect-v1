@@ -1,4 +1,7 @@
 {
+  "_architecture": "React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons",
+  "_description": "English translations for TradeConnect platform - SSR compatible with Astro",
+  "_version": "1.0.0",
   "common": {
     "loading": "Loading...",
     "error": "Error",
@@ -343,5 +346,15 @@
     "last": "Last",
     "next": "Next",
     "previous": "Previous"
+  },
+  "architecture": {
+    "title": "Architecture Information",
+    "description": "This application uses React + Astro + Tailwind CSS + shadcn/ui architecture",
+    "components": "Interactive Components",
+    "routing": "SSR Routing",
+    "ui": "UI Components",
+    "styling": "CSS Framework",
+    "primitives": "Accessible Primitives",
+    "icons": "Icon Library"
   }
 }

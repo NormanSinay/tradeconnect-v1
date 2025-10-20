@@ -1,3 +1,23 @@
+/**
+ * @fileoverview certificateService.ts - Servicio de certificados para TradeConnect
+ * @description Servicio que maneja la generación, descarga y verificación de certificados blockchain.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import { apiService } from './api';
 import type { ApiResponse, Certificate, CertificateTemplate } from '@/types';
 

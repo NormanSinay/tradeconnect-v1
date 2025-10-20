@@ -1,3 +1,34 @@
+/**
+ * @fileoverview EventIncludes - Componente para mostrar beneficios incluidos en eventos
+ * @description Componente React que muestra una lista de beneficios incluidos en eventos con iconos contextuales.
+ * Soporta layouts de lista y grid con animaciones suaves y diseño responsivo.
+ *
+ * Arquitectura:
+ * - React: Componentes funcionales con props tipadas
+ *   ↓
+ * - Astro: Routing y SSR - Compatible con hidratación del lado cliente
+ *   ↓
+ * - shadcn/ui: Componentes UI preconstruidos (Card)
+ *   ↓
+ * - Tailwind CSS: Estilos utilitarios para diseño responsivo y moderno
+ *   ↓
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ *   ↓
+ * - Lucide Icons: Iconografía moderna y consistente (CheckCircle, GraduationCap, FileText, Coffee, Wifi, Car, Utensils, Headphones, Gift, Video, Download, Trophy)
+ * - Framer Motion: Animaciones suaves y transiciones fluidas
+ *
+ * Características:
+ * - Mapeo inteligente de iconos basado en contenido
+ * - Layouts flexibles (grid/list)
+ * - Animaciones de entrada escalonadas
+ * - Estados vacíos informativos
+ * - Compatibilidad completa con SSR de Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -72,131 +103,65 @@ const EventIncludes: React.FC<EventIncludesProps> = ({ includes, layout = 'grid'
 
   if (layout === 'list') {
     return (
-      <Paper sx={{ p: 3 }}>
-        <List>
+      <Card className="p-6">
+        <div className="space-y-3">
           {includes.map((item, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
+              className="flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 hover:bg-muted hover:translate-x-2"
             >
-              <ListItem
-                sx={{
-                  borderRadius: 1,
-                  mb: 1,
-                  transition: 'all 0.2s',
-                  '&:hover': {
-                    bgcolor: 'action.hover',
-                    transform: 'translateX(8px)',
-                  },
-                }}
-              >
-                <ListItemIcon>{getIconForItem(item)}</ListItemIcon>
-                <ListItemText
-                  primary={item}
-                  primaryTypographyProps={{
-                    variant: 'body1',
-                  }}
-                />
-              </ListItem>
+              <div className="flex-shrink-0">
+                {getIconForItem(item)}
+              </div>
+              <span className="text-base font-medium">{item}</span>
             </motion.div>
           ))}
-        </List>
-      </Paper>
+        </div>
+      </Card>
     );
   }
 
   return (
-    <Box component={"div" as any}>
+    <div>
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <Grid container spacing={2}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {includes.map((item, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <motion.div
-                variants={itemVariants}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    transition: 'all 0.3s',
-                    cursor: 'default',
-                    '&:hover': {
-                      boxShadow: 4,
-                      bgcolor: 'primary.light',
-                      '& .MuiTypography-root': {
-                        color: 'primary.contrastText',
-                      },
-                      '& .MuiSvgIcon-root': {
-                        color: 'white',
-                      },
-                    },
-                  }}
-                >
-                  <CardContent
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 2,
-                      width: '100%',
-                      p: 2,
-                      '&:last-child': { pb: 2 },
-                    }}
-                  >
-                    <Box
-                      component={"div" as any}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minWidth: 40,
-                      }}
-                    >
-                      {getIconForItem(item)}
-                    </Box>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        flex: 1,
-                        transition: 'color 0.3s',
-                      }}
-                    >
-                      {item}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Grid>
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Card className="h-full flex transition-all duration-300 cursor-default hover:shadow-lg hover:bg-primary/5">
+                <CardContent className="flex items-center gap-3 w-full p-4">
+                  <div className="flex items-center justify-center min-w-10">
+                    {getIconForItem(item)}
+                  </div>
+                  <span className="flex-1 text-base transition-colors duration-300">
+                    {item}
+                  </span>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </Grid>
+        </div>
       </motion.div>
 
       {/* Summary Footer */}
-      <Box
-        component={"div" as any}
-        sx={{
-          mt: 3,
-          p: 2,
-          bgcolor: 'success.light',
-          borderRadius: 2,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-        }}
-      >
-        <CheckCircle sx={{ color: 'success.dark' }} />
-        <Typography variant="body2" sx={{ color: 'success.dark', fontWeight: 'medium' }}>
+      <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+        <CheckCircle className="h-5 w-5 text-green-700" />
+        <span className="text-sm text-green-700 font-medium">
           Este evento incluye {includes.length} beneficio{includes.length !== 1 ? 's' : ''} para tu experiencia completa
-        </Typography>
-      </Box>
-    </Box>
+        </span>
+      </div>
+    </div>
   );
 };
 

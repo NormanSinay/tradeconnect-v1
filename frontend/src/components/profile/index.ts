@@ -1,3 +1,16 @@
+/**
+ * @fileoverview Profile Components Index - Arquitectura React/Astro + Tailwind CSS + shadcn/ui
+ *
+ * Arquitectura recomendada para migración:
+ * React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui (componentes UI)
+ * → Tailwind CSS (estilos) → Radix UI (primitivos accesibles) → Lucide Icons (iconos)
+ *
+ * @version 2.0.0
+ * @author TradeConnect Team
+ * @description Índice centralizado de componentes de perfil.
+ * Compatible con SSR de Astro y optimizado para performance.
+ */
+
 // Profile Components Index
 // Centralized exports for all profile-related components
 

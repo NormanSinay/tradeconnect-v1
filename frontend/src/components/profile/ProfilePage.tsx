@@ -1,56 +1,34 @@
 import React, { useState } from 'react';
-import {
-  Container,
-  Typography,
-  Box,
-  Grid,
-  Paper,
-  Tabs,
-  Tab,
-  Avatar,
-  Button,
-  TextField,
-  Divider,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Skeleton,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-} from '@mui/material';
-import {
-  Person,
-  Email,
-  Phone,
-  Edit,
-  Save,
-  Close as Cancel,
-  Event,
-  School,
-  Receipt,
-  Settings,
-  Download,
-  QrCode,
-  CalendarToday,
-  LocationOn,
-  AccessTime,
-  CheckCircle,
-  Refresh,
-} from '@mui/icons-material';
 import { useAuth } from '@/context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import type { EventRegistration } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  User,
+  Mail,
+  Phone,
+  Edit,
+  Save,
+  X,
+  Calendar,
+  MapPin,
+  Clock,
+  CheckCircle,
+  Download,
+  QrCode,
+  Receipt,
+  GraduationCap,
+  Settings
+} from 'lucide-react';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -60,7 +38,7 @@ interface TabPanelProps {
 
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index}>
-    {value === index && <Box component={"div" as any} sx={{ py: 3 }}>{children}</Box>}
+    {value === index && <div className="py-6">{children}</div>}
   </div>
 );
 
@@ -208,383 +186,350 @@ const ProfilePage: React.FC = () => {
 
   if (!user) {
     return (
-      <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
-        <Typography variant="h4" gutterBottom>
+      <div className="max-w-2xl mx-auto py-16 text-center">
+        <h1 className="text-2xl font-bold mb-4">
           Acceso requerido
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+        </h1>
+        <p className="text-muted-foreground">
           Debes iniciar sesión para acceder a tu perfil.
-        </Typography>
-      </Container>
+        </p>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <Box component={"div" as any} sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">
           Mi Perfil
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+        </h1>
+        <p className="text-muted-foreground">
           Gestiona tu información personal y accede a tus eventos y certificados
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       {/* Profile Header */}
-      <Paper sx={{ p: 4, mb: 4 }}>
-        <Grid container spacing={4} alignItems="center">
-          <Grid item>
-            <Avatar
-              sx={{ width: 120, height: 120, bgcolor: 'primary.main', fontSize: '3rem' }}
-            >
+      <Card className="p-6 mb-8">
+        <div className="flex flex-col md:flex-row gap-6 items-center">
+          <Avatar className="w-32 h-32">
+            <AvatarFallback className="text-3xl">
               {user.firstName?.[0]}{user.lastName?.[0]}
-            </Avatar>
-          </Grid>
-          <Grid item xs>
-            <Typography variant="h4" gutterBottom>
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 text-center md:text-left">
+            <h2 className="text-2xl font-bold mb-1">
               {user.firstName} {user.lastName}
-            </Typography>
-            <Typography variant="body1" color="text.secondary" gutterBottom>
+            </h2>
+            <p className="text-muted-foreground mb-3">
               {user.email}
-            </Typography>
-            <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mb: 2 }}>
-              <Chip
-                label={user.roles?.includes('admin') ? 'Administrador' : user.roles?.includes('organizer') ? 'Organizador' : 'Usuario'}
-                color="primary"
-                variant="outlined"
-              />
-              <Chip
-                label={user.isActive ? 'Activo' : 'Inactivo'}
-                color={user.isActive ? 'success' : 'error'}
-                variant="outlined"
-              />
-            </Box>
-            <Typography variant="body2" color="text.secondary">
+            </p>
+            <div className="flex flex-wrap gap-2 mb-3 justify-center md:justify-start">
+              <Badge variant="outline">
+                {user.roles?.includes('admin') ? 'Administrador' : user.roles?.includes('organizer') ? 'Organizador' : 'Usuario'}
+              </Badge>
+              <Badge variant={user.isActive ? 'default' : 'destructive'}>
+                {user.isActive ? 'Activo' : 'Inactivo'}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
               Miembro desde {formatDate(user.createdAt)}
-            </Typography>
-          </Grid>
-        </Grid>
-      </Paper>
+            </p>
+          </div>
+        </div>
+      </Card>
 
       {/* Tabs */}
-      <Paper sx={{ width: '100%' }}>
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          indicatorColor="primary"
-          textColor="primary"
-          variant="fullWidth"
-        >
-          <Tab icon={<Person />} label="Mi Perfil" />
-          <Tab icon={<Event />} label="Mis Eventos" />
-          <Tab icon={<School />} label="Mis Certificados" />
-          <Tab icon={<Receipt />} label="Historial de Pagos" />
-        </Tabs>
+      <Tabs value={activeTab.toString()} onValueChange={(value) => setActiveTab(parseInt(value))} className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="0" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Mi Perfil
+          </TabsTrigger>
+          <TabsTrigger value="1" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Mis Eventos
+          </TabsTrigger>
+          <TabsTrigger value="2" className="flex items-center gap-2">
+            <GraduationCap className="h-4 w-4" />
+            Mis Certificados
+          </TabsTrigger>
+          <TabsTrigger value="3" className="flex items-center gap-2">
+            <Receipt className="h-4 w-4" />
+            Historial de Pagos
+          </TabsTrigger>
+        </TabsList>
 
-        {/* Profile Tab */}
-        <TabPanel value={activeTab} index={0}>
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={8}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+        <TabsContent value="0">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <h3 className="text-xl font-semibold mb-4">
                 Información Personal
-              </Typography>
+              </h3>
 
-              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <Typography variant="body1">
+              <div className="flex justify-between items-center mb-6">
+                <p className="text-muted-foreground">
                   Actualiza tu información personal y preferencias
-                </Typography>
+                </p>
                 <Button
-                  variant={isEditing ? 'outlined' : 'contained'}
-                  startIcon={isEditing ? <Cancel /> : <Edit />}
+                  variant={isEditing ? 'outline' : 'default'}
                   onClick={handleEditToggle}
                 >
-                  {isEditing ? 'Cancelar' : 'Editar'}
+                  {isEditing ? (
+                    <>
+                      <X className="mr-2 h-4 w-4" />
+                      Cancelar
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Editar
+                    </>
+                  )}
                 </Button>
-              </Box>
+              </div>
 
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Nombre"
-                    value={isEditing ? editForm.firstName : user.firstName}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
-                    disabled={!isEditing}
-                    InputProps={{
-                      startAdornment: <Person sx={{ mr: 1, color: 'action.active' }} />,
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Apellido"
-                    value={isEditing ? editForm.lastName : user.lastName}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
-                    disabled={!isEditing}
-                    InputProps={{
-                      startAdornment: <Person sx={{ mr: 1, color: 'action.active' }} />,
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    type="email"
-                    value={isEditing ? editForm.email : user.email}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
-                    disabled={!isEditing}
-                    InputProps={{
-                      startAdornment: <Email sx={{ mr: 1, color: 'action.active' }} />,
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Teléfono"
-                    value={isEditing ? editForm.phone : user.phone || ''}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
-                    disabled={!isEditing}
-                    InputProps={{
-                      startAdornment: <Phone sx={{ mr: 1, color: 'action.active' }} />,
-                    }}
-                  />
-                </Grid>
-              </Grid>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Nombre</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="firstName"
+                      value={isEditing ? editForm.firstName : user.firstName}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
+                      disabled={!isEditing}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Apellido</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="lastName"
+                      value={isEditing ? editForm.lastName : user.lastName}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
+                      disabled={!isEditing}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      value={isEditing ? editForm.email : user.email}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                      disabled={!isEditing}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Teléfono</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="phone"
+                      value={isEditing ? editForm.phone : user.phone || ''}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                      disabled={!isEditing}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
 
               {isEditing && (
-                <Box component={"div" as any} sx={{ mt: 3, display: 'flex', gap: 2 }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<Save />}
-                    onClick={handleSaveProfile}
-                  >
+                <div className="flex gap-3 mt-6">
+                  <Button onClick={handleSaveProfile}>
+                    <Save className="mr-2 h-4 w-4" />
                     Guardar Cambios
                   </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<Cancel />}
-                    onClick={handleEditToggle}
-                  >
+                  <Button variant="outline" onClick={handleEditToggle}>
+                    <X className="mr-2 h-4 w-4" />
                     Cancelar
                   </Button>
-                </Box>
+                </div>
               )}
-            </Grid>
+            </div>
 
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+            <div>
+              <h3 className="text-xl font-semibold mb-4">
                 Estadísticas
-              </Typography>
+              </h3>
 
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Card sx={{ textAlign: 'center', p: 2 }}>
-                    <Typography variant="h4" color="primary" sx={{ fontWeight: 'bold' }}>
-                      {mockRegistrations.length}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Eventos
-                    </Typography>
-                  </Card>
-                </Grid>
-                <Grid item xs={6}>
-                  <Card sx={{ textAlign: 'center', p: 2 }}>
-                    <Typography variant="h4" color="success.main" sx={{ fontWeight: 'bold' }}>
-                      {mockCertificates.length}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Certificados
-                    </Typography>
-                  </Card>
-                </Grid>
-              </Grid>
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-4 text-center">
+                  <div className="text-2xl font-bold text-primary mb-1">
+                    {mockRegistrations.length}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Eventos
+                  </p>
+                </Card>
+                <Card className="p-4 text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-1">
+                    {mockCertificates.length}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Certificados
+                  </p>
+                </Card>
+              </div>
 
-              <Alert severity="info" sx={{ mt: 3 }}>
-                <Typography variant="body2">
+              <Alert className="mt-6">
+                <AlertDescription>
                   <strong>💡 Tip:</strong> Mantén tu información actualizada para recibir
                   confirmaciones y recordatorios de eventos.
-                </Typography>
+                </AlertDescription>
               </Alert>
-            </Grid>
-          </Grid>
-        </TabPanel>
+            </div>
+          </div>
+        </TabsContent>
 
-        {/* Events Tab */}
-        <TabPanel value={activeTab} index={1}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+        <TabsContent value="1">
+          <h3 className="text-xl font-semibold mb-4">
             Mis Eventos
-          </Typography>
+          </h3>
 
-          <Tabs value={0} sx={{ mb: 3 }}>
-            <Tab label="Próximos" />
-            <Tab label="Pasados" />
+          <Tabs value="upcoming" className="mb-6">
+            <TabsList>
+              <TabsTrigger value="upcoming">Próximos</TabsTrigger>
+              <TabsTrigger value="past">Pasados</TabsTrigger>
+            </TabsList>
           </Tabs>
 
-          <Grid container spacing={3}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {mockRegistrations.map((registration) => (
-              <Grid item xs={12} md={6} key={registration.id}>
-                <Card>
-                  <CardContent>
-                    <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                      <Typography variant="h6" component="h3">
-                        {registration.event?.title}
-                      </Typography>
-                      <Chip
-                        label={getStatusText(registration.registrationStatus)}
-                        color={getStatusColor(registration.registrationStatus) as any}
-                        size="small"
-                      />
-                    </Box>
+              <Card key={registration.id}>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <h4 className="text-lg font-semibold">
+                      {registration.event?.title}
+                    </h4>
+                    <Badge variant={registration.registrationStatus === 'confirmed' ? 'default' : 'secondary'}>
+                      {getStatusText(registration.registrationStatus)}
+                    </Badge>
+                  </div>
 
-                    <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <CalendarToday sx={{ fontSize: 16, color: 'text.secondary' }} />
-                        <Typography variant="body2" color="text.secondary">
-                          {formatDate(registration.event?.startDate || '')}
-                        </Typography>
-                      </Box>
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      <span>{formatDate(registration.event?.startDate || '')}</span>
+                    </div>
 
-                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <LocationOn sx={{ fontSize: 16, color: 'text.secondary' }} />
-                        <Typography variant="body2" color="text.secondary">
-                          {registration.event?.location || registration.event?.virtualLocation || 'Ubicación por confirmar'}
-                        </Typography>
-                      </Box>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4" />
+                      <span>{registration.event?.location || registration.event?.virtualLocation || 'Ubicación por confirmar'}</span>
+                    </div>
 
-                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Receipt sx={{ fontSize: 16, color: 'text.secondary' }} />
-                        <Typography variant="body2" color="text.secondary">
-                          Q{registration.totalAmount} • {registration.participantType === 'individual' ? 'Individual' : 'Empresa'}
-                        </Typography>
-                      </Box>
-                    </Box>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Receipt className="h-4 w-4" />
+                      <span>Q{registration.totalAmount} • {registration.participantType === 'individual' ? 'Individual' : 'Empresa'}</span>
+                    </div>
+                  </div>
 
-                    <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
-                      <Button
-                        size="small"
-                        startIcon={<QrCode />}
-                        onClick={() => handleDownloadQR(registration.id)}
-                      >
-                        QR
-                      </Button>
-                      <Button
-                        size="small"
-                        startIcon={<Event />}
-                        variant="outlined"
-                      >
-                        Detalles
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDownloadQR(registration.id)}
+                    >
+                      <QrCode className="mr-2 h-4 w-4" />
+                      QR
+                    </Button>
+                    <Button size="sm" variant="outline">
+                      Detalles
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-          </Grid>
-        </TabPanel>
+          </div>
+        </TabsContent>
 
-        {/* Certificates Tab */}
-        <TabPanel value={activeTab} index={2}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+        <TabsContent value="2">
+          <h3 className="text-xl font-semibold mb-4">
             Mis Certificados
-          </Typography>
+          </h3>
 
-          <Grid container spacing={3}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {mockCertificates.map((certificate) => (
-              <Grid item xs={12} md={6} key={certificate.id}>
-                <Card>
-                  <CardContent>
-                    <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                      <Box component={"div" as any}>
-                        <Typography variant="h6" component="h3" gutterBottom>
-                          {certificate.eventTitle}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Certificado #{certificate.certificateNumber}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Emitido: {formatDate(certificate.issuedAt)}
-                        </Typography>
-                      </Box>
-                      <CheckCircle sx={{ fontSize: 40, color: 'success.main' }} />
-                    </Box>
+              <Card key={certificate.id}>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h4 className="text-lg font-semibold mb-1">
+                        {certificate.eventTitle}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        Certificado #{certificate.certificateNumber}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Emitido: {formatDate(certificate.issuedAt)}
+                      </p>
+                    </div>
+                    <CheckCircle className="h-10 w-10 text-green-600" />
+                  </div>
 
-                    <Box component={"div" as any} sx={{ display: 'flex', gap: 1 }}>
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        startIcon={<Download />}
-                        onClick={() => handleDownloadCertificate(certificate.id)}
-                      >
-                        Descargar PDF
-                      </Button>
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        startIcon={<QrCode />}
-                      >
-                        Ver QR
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+                  <div className="flex gap-3">
+                    <Button
+                      className="flex-1"
+                      onClick={() => handleDownloadCertificate(certificate.id)}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Descargar PDF
+                    </Button>
+                    <Button variant="outline" className="flex-1">
+                      <QrCode className="mr-2 h-4 w-4" />
+                      Ver QR
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-          </Grid>
+          </div>
 
-          <Box component={"div" as any} sx={{ mt: 3 }}>
-            <Button
-              variant="outlined"
-              startIcon={<Download />}
-              size="large"
-            >
+          <div className="mt-6">
+            <Button variant="outline" size="lg">
+              <Download className="mr-2 h-4 w-4" />
               Descargar Todos (ZIP)
             </Button>
-          </Box>
-        </TabPanel>
+          </div>
+        </TabsContent>
 
-        {/* Payments Tab */}
-        <TabPanel value={activeTab} index={3}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+        <TabsContent value="3">
+          <h3 className="text-xl font-semibold mb-4">
             Historial de Pagos
-          </Typography>
+          </h3>
 
-          <List>
+          <div className="space-y-4">
             {mockRegistrations.map((registration) => (
-              <ListItem key={registration.id} divider>
-                <ListItemIcon>
-                  <Receipt color="primary" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={registration.event?.title}
-                  secondary={
-                    <Box component={"div" as any}>
-                      <Typography variant="body2" component="span">
-                        Fecha: {formatDate(registration.registeredAt)} •
-                      </Typography>
-                      <Typography variant="body2" component="span" sx={{ ml: 1 }}>
-                        Monto: Q{registration.totalAmount}
-                      </Typography>
-                      <Typography variant="body2" component="span" sx={{ ml: 1 }}>
-                        Estado: {getStatusText(registration.paymentStatus)}
-                      </Typography>
-                    </Box>
-                  }
-                />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end">
-                    <Download />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
+              <div key={registration.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Receipt className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="font-medium">{registration.event?.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Fecha: {formatDate(registration.registeredAt)} • Monto: Q{registration.totalAmount} • Estado: {getStatusText(registration.paymentStatus)}
+                    </p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm">
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
             ))}
-          </List>
-        </TabPanel>
-      </Paper>
-    </Container>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

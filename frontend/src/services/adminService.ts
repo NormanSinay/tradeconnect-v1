@@ -1,3 +1,23 @@
+/**
+ * @fileoverview adminService.ts - Servicio de administración para TradeConnect
+ * @description Servicio que maneja operaciones administrativas como gestión de eventos, usuarios, reportes y configuración del sistema.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import { apiService } from './api';
 import type { ApiResponse, Event, User } from '@/types';
 

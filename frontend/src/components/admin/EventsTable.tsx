@@ -1,3 +1,24 @@
+/**
+ * @fileoverview EventsTable - Tabla de gestión de eventos administrativos
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,7 +79,6 @@ const EventsTable: React.FC<EventsTableProps> = ({
   onDuplicate,
   onCreate,
 }) => {
-  const theme = useTheme();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
@@ -191,289 +211,297 @@ const EventsTable: React.FC<EventsTableProps> = ({
   };
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden', boxShadow: theme.shadows[3] }}>
+    <div className="w-full overflow-hidden shadow-lg bg-card rounded-lg">
       {/* Toolbar */}
-      <Toolbar
-        sx={{
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-          ...(selectedEvents.length > 0 && {
-            bgcolor: (theme) => `${theme.palette.primary.main}15`,
-          }),
-        }}
-      >
+      <div className={cn(
+        "flex items-center justify-between p-4 border-b",
+        selectedEvents.length > 0 && "bg-primary/10"
+      )}>
         {selectedEvents.length > 0 ? (
-          <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle1">
+          <div className="flex-1 text-sm font-medium">
             {selectedEvents.length} seleccionado(s)
-          </Typography>
+          </div>
         ) : (
-          <Box component={"div" as any} sx={{ flex: '1 1 100%', display: 'flex', gap: 2, alignItems: 'center' }}>
-            <TextField
-              size="small"
-              placeholder="Buscar eventos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ minWidth: 300 }}
-            />
-            <Tooltip title="Filtros">
-              <IconButton>
-                <FilterIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          <div className="flex-1 flex gap-2 items-center">
+            <div className="relative min-w-[300px]">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar eventos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              Filtros
+            </Button>
+          </div>
         )}
 
         {selectedEvents.length > 0 ? (
-          <Tooltip title="Eliminar seleccionados">
-            <IconButton>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
+          <Button variant="outline" size="sm">
+            <Trash2 className="h-4 w-4 mr-2" />
+            Eliminar seleccionados
+          </Button>
         ) : (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={onCreate}
-            sx={{ whiteSpace: 'nowrap' }}
-          >
+          <Button onClick={onCreate} className="whitespace-nowrap">
+            <Plus className="h-4 w-4 mr-2" />
             Nuevo Evento
           </Button>
         )}
-      </Toolbar>
+      </div>
 
       {/* Table */}
-      <TableContainer>
-        <Table stickyHeader>
-          <TableHead>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell padding="checkbox">
+              <TableHead className="w-12">
                 <Checkbox
-                  indeterminate={
-                    selectedEvents.length > 0 && selectedEvents.length < paginatedEvents.length
-                  }
                   checked={
                     paginatedEvents.length > 0 && selectedEvents.length === paginatedEvents.length
                   }
-                  onChange={handleSelectAll}
+                  onCheckedChange={handleSelectAll}
+                  aria-label="Seleccionar todos"
                 />
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'title'}
-                  direction={orderBy === 'title' ? order : 'asc'}
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
                   onClick={() => handleRequestSort('title')}
+                  className="h-auto p-0 font-medium hover:bg-transparent"
                 >
                   Título
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'date'}
-                  direction={orderBy === 'date' ? order : 'asc'}
+                  {orderBy === 'title' && (
+                    <span className="ml-1">{order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
                   onClick={() => handleRequestSort('date')}
+                  className="h-auto p-0 font-medium hover:bg-transparent"
                 >
                   Fecha
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={orderBy === 'status'}
-                  direction={orderBy === 'status' ? order : 'asc'}
+                  {orderBy === 'date' && (
+                    <span className="ml-1">{order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
                   onClick={() => handleRequestSort('status')}
+                  className="h-auto p-0 font-medium hover:bg-transparent"
                 >
                   Estado
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="center">
-                <TableSortLabel
-                  active={orderBy === 'registrations'}
-                  direction={orderBy === 'registrations' ? order : 'asc'}
+                  {orderBy === 'status' && (
+                    <span className="ml-1">{order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
+              </TableHead>
+              <TableHead className="text-center">
+                <Button
+                  variant="ghost"
                   onClick={() => handleRequestSort('registrations')}
+                  className="h-auto p-0 font-medium hover:bg-transparent"
                 >
                   Inscripciones
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="center">
-                <TableSortLabel
-                  active={orderBy === 'capacity'}
-                  direction={orderBy === 'capacity' ? order : 'asc'}
+                  {orderBy === 'registrations' && (
+                    <span className="ml-1">{order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
+              </TableHead>
+              <TableHead className="text-center">
+                <Button
+                  variant="ghost"
                   onClick={() => handleRequestSort('capacity')}
+                  className="h-auto p-0 font-medium hover:bg-transparent"
                 >
                   Capacidad
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="right">
-                <TableSortLabel
-                  active={orderBy === 'price'}
-                  direction={orderBy === 'price' ? order : 'asc'}
+                  {orderBy === 'capacity' && (
+                    <span className="ml-1">{order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
+              </TableHead>
+              <TableHead className="text-right">
+                <Button
+                  variant="ghost"
                   onClick={() => handleRequestSort('price')}
+                  className="h-auto p-0 font-medium hover:bg-transparent"
                 >
                   Precio
-                </TableSortLabel>
-              </TableCell>
-              <TableCell align="center">Acciones</TableCell>
+                  {orderBy === 'price' && (
+                    <span className="ml-1">{order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
+              </TableHead>
+              <TableHead className="text-center">Acciones</TableHead>
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             {paginatedEvents.map((event) => {
               const isSelected = selectedEvents.includes(event.id);
               const capacityPercent = (event.registrations / event.capacity) * 100;
 
               return (
-                <TableRow
-                  key={event.id}
-                  hover
-                  selected={isSelected}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell padding="checkbox">
+                <TableRow key={event.id} className={cn(isSelected && "bg-muted/50")}>
+                  <TableCell>
                     <Checkbox
                       checked={isSelected}
-                      onChange={() => handleSelectOne(event.id)}
+                      onCheckedChange={() => handleSelectOne(event.id)}
+                      aria-label={`Seleccionar ${event.title}`}
                     />
                   </TableCell>
                   <TableCell>
-                    <Box component={"div" as any}>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {event.title}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {event.category}
-                      </Typography>
-                    </Box>
+                    <div>
+                      <div className="font-medium">{event.title}</div>
+                      <div className="text-sm text-muted-foreground">{event.category}</div>
+                    </div>
                   </TableCell>
                   <TableCell>
                     {format(new Date(event.date), 'dd MMM yyyy', { locale: es })}
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={getStatusLabel(event.status)}
-                      color={getStatusColor(event.status)}
-                      size="small"
-                    />
+                    <Badge variant={getStatusColor(event.status) as any}>
+                      {getStatusLabel(event.status)}
+                    </Badge>
                   </TableCell>
-                  <TableCell align="center">
-                    <Box component={"div" as any}>
-                      <Typography variant="body2">
+                  <TableCell className="text-center">
+                    <div>
+                      <div className="text-sm">
                         {event.registrations} / {event.capacity}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color:
-                            capacityPercent >= 90
-                              ? theme.palette.error.main
-                              : capacityPercent >= 70
-                              ? theme.palette.warning.main
-                              : theme.palette.success.main,
-                        }}
-                      >
+                      </div>
+                      <div className={cn(
+                        "text-xs",
+                        capacityPercent >= 90 ? "text-destructive" :
+                        capacityPercent >= 70 ? "text-yellow-600" : "text-green-600"
+                      )}>
                         {capacityPercent.toFixed(0)}%
-                      </Typography>
-                    </Box>
+                      </div>
+                    </div>
                   </TableCell>
-                  <TableCell align="center">{event.capacity}</TableCell>
-                  <TableCell align="right">
+                  <TableCell className="text-center">{event.capacity}</TableCell>
+                  <TableCell className="text-right">
                     {event.price === 0 ? (
-                      <Chip label="Gratis" size="small" color="success" />
+                      <Badge variant="secondary">Gratis</Badge>
                     ) : (
                       `Q${event.price.toLocaleString('es-GT')}`
                     )}
                   </TableCell>
-                  <TableCell align="center">
-                    <Box component={"div" as any} sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
-                      <Tooltip title="Ver">
-                        <IconButton size="small" onClick={() => onView(event)}>
-                          <ViewIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Editar">
-                        <IconButton size="small" onClick={() => onEdit(event)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => handleMenuOpen(e, event)}
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onView(event)}
+                        title="Ver"
                       >
-                        <MoreVertIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEdit(event)}
+                        title="Editar"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" title="Más acciones">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onPublish(event.id)}>
+                            {event.status === 'published' ? 'Despublicar' : 'Publicar'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onDuplicate(event.id)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteClick(event)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
-      </TableContainer>
+      </div>
 
       {/* Pagination */}
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25, 50]}
-        component="div"
-        count={filteredEvents.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        labelRowsPerPage="Filas por página:"
-      />
-
-      {/* Context Menu */}
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem
-          onClick={() => {
-            if (selectedEvent) onPublish(selectedEvent.id);
-            handleMenuClose();
-          }}
-        >
-          <PublishIcon fontSize="small" sx={{ mr: 1 }} />
-          {selectedEvent?.status === 'published' ? 'Despublicar' : 'Publicar'}
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (selectedEvent) onDuplicate(selectedEvent.id);
-            handleMenuClose();
-          }}
-        >
-          <DuplicateIcon fontSize="small" sx={{ mr: 1 }} />
-          Duplicar
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (selectedEvent) handleDeleteClick(selectedEvent);
-          }}
-          sx={{ color: theme.palette.error.main }}
-        >
-          <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-          Eliminar
-        </MenuItem>
-      </Menu>
+      <div className="flex items-center justify-between px-4 py-4 border-t">
+        <div className="text-sm text-muted-foreground">
+          Mostrando {page * rowsPerPage + 1} a {Math.min((page + 1) * rowsPerPage, filteredEvents.length)} de {filteredEvents.length} eventos
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm">Filas por página:</span>
+          <select
+            value={rowsPerPage}
+            onChange={(e) => handleChangeRowsPerPage({ target: { value: e.target.value } } as any)}
+            className="px-2 py-1 border rounded text-sm"
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleChangePage(null, page - 1)}
+              disabled={page === 0}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleChangePage(null, page + 1)}
+              disabled={page >= Math.ceil(filteredEvents.length / rowsPerPage) - 1}
+            >
+              Siguiente
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Confirmar eliminación</DialogTitle>
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
-          <DialogContentText>
-            ¿Estás seguro de que deseas eliminar el evento "{selectedEvent?.title}"? Esta acción no
-            se puede deshacer.
-          </DialogContentText>
+          <DialogHeader>
+            <DialogTitle>Confirmar eliminación</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              ¿Estás seguro de que deseas eliminar el evento "{selectedEvent?.title}"? Esta acción no
+              se puede deshacer.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              Eliminar
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            Eliminar
-          </Button>
-        </DialogActions>
       </Dialog>
-    </Paper>
+    </div>
   );
 };
 

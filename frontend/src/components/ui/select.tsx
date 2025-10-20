@@ -1,6 +1,27 @@
+/**
+ * @fileoverview Select Component - Componente de selector accesible
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { FaChevronDown } from 'react-icons/fa';
+import { ChevronDown } from 'lucide-react';
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {}
 
@@ -18,7 +39,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         >
           {children}
         </select>
-        <FaChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
       </div>
     );
   }

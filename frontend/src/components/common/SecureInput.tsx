@@ -1,3 +1,26 @@
+/**
+ * @fileoverview SecureInput - Componente de entrada segura
+ * @description Componente React para inputs seguros con validación y sanitización
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Sanitización automática de inputs
+ * - Validación en tiempo real
+ * - Indicador de fortaleza de contraseña
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -29,6 +52,11 @@ interface SecureInputProps {
   sanitize?: boolean;
 }
 
+/**
+ * SecureInput - Componente de entrada segura
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const SecureInput: React.FC<SecureInputProps> = ({
   label,
   value,

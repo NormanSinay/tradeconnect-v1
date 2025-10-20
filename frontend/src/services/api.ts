@@ -1,3 +1,23 @@
+/**
+ * @fileoverview api.ts - Servicio de API base para TradeConnect
+ * @description Servicio central que maneja todas las comunicaciones HTTP con el backend, incluyendo autenticación, interceptores y servicios específicos.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import axios from 'axios';
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { API_BASE_URL, API_TIMEOUT, STORAGE_KEYS } from '@/utils/constants';

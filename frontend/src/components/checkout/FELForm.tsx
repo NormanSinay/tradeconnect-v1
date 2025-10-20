@@ -1,3 +1,26 @@
+/**
+ * @fileoverview FELForm - Formulario de información fiscal FEL Guatemala
+ * @description Componente React para captura de datos fiscales FEL (Factura Electrónica)
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Validación NIT/CUI Guatemala
+ * - Auto-formateo de documentos
+ * - Integración con servicios FEL
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -55,6 +78,11 @@ interface FELFormProps {
   initialData?: Partial<FELFormData>;
 }
 
+/**
+ * FELForm - Formulario de información fiscal FEL Guatemala
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const FELForm: React.FC<FELFormProps> = ({ onDataChange, initialData }) => {
   const [validating, setValidating] = useState(false);
   const [validationStatus, setValidationStatus] = useState<{

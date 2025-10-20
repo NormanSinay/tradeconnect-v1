@@ -1,9 +1,29 @@
+/**
+ * TradeConnect Theme Configuration
+ *
+ * This file provides theme configuration for both MUI (legacy) and Tailwind/shadcn (new) architectures.
+ * The theme is designed to support the migration from MUI to Tailwind CSS + shadcn/ui.
+ *
+ * Architecture:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * React Icons (iconografía)
+ */
+
 import { createTheme } from '@mui/material/styles';
 import type { ThemeOptions } from '@mui/material/styles';
 import { THEME_COLORS, TYPOGRAPHY, BREAKPOINTS, SPACING, BORDER_RADIUS, SHADOWS } from '@/utils/constants';
 
-// Corporate theme configuration for TradeConnect
-const themeOptions: ThemeOptions = {
+// Legacy MUI Theme (for components not yet migrated)
+const muiThemeOptions: ThemeOptions = {
   palette: {
     primary: {
       main: THEME_COLORS.primary,
@@ -494,34 +514,160 @@ const themeOptions: ThemeOptions = {
   },
 };
 
-export const theme = createTheme(themeOptions);
+// Legacy MUI theme export (for backward compatibility)
+export const theme = createTheme(muiThemeOptions);
 
-// Custom CSS variables for additional styling
+// Tailwind/shadcn Theme Configuration
+export const tailwindTheme = {
+  colors: {
+    // Corporate brand colors (matching Tailwind config)
+    primary: {
+      50: '#E8EAF6',
+      100: '#C5CAE9',
+      200: '#9FA8DA',
+      300: '#7986CB',
+      400: '#5C6BC0',
+      500: '#3949AB', // Main primary color
+      600: '#3242A3',
+      700: '#2A3899',
+      800: '#232F8F',
+      900: '#161D7D',
+      DEFAULT: '#3949AB',
+    },
+    secondary: {
+      50: '#FFF9E6',
+      100: '#FFF0C2',
+      200: '#FFE699',
+      300: '#FFDC70',
+      400: '#FFD54F',
+      500: '#D4AF37', // Gold/Accent color
+      600: '#C6A033',
+      700: '#B8912F',
+      800: '#AA812B',
+      900: '#906323',
+      DEFAULT: '#D4AF37',
+    },
+    accent: '#D4AF37',
+    success: {
+      DEFAULT: '#388E3C',
+      light: '#4CAF50',
+      dark: '#2E7D32',
+    },
+    error: {
+      DEFAULT: '#D32F2F',
+      light: '#EF5350',
+      dark: '#C62828',
+    },
+    warning: {
+      DEFAULT: '#F57C00',
+      light: '#FF9800',
+      dark: '#E65100',
+    },
+    info: {
+      DEFAULT: '#1976D2',
+      light: '#42A5F5',
+      dark: '#1565C0',
+    },
+  },
+  typography: {
+    fontFamily: {
+      sans: ['Inter', 'Roboto', 'system-ui', '-apple-system', 'sans-serif'],
+      heading: ['Montserrat', 'Inter', 'system-ui', 'sans-serif'],
+    },
+    fontSize: {
+      xs: ['0.75rem', { lineHeight: '1rem' }],
+      sm: ['0.875rem', { lineHeight: '1.25rem' }],
+      base: ['1rem', { lineHeight: '1.5rem' }],
+      lg: ['1.125rem', { lineHeight: '1.75rem' }],
+      xl: ['1.25rem', { lineHeight: '1.75rem' }],
+      '2xl': ['1.5rem', { lineHeight: '2rem' }],
+      '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+      '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+      '5xl': ['3rem', { lineHeight: '1.2' }],
+    },
+  },
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+    '2xl': '48px',
+    '3xl': '64px',
+  },
+  borderRadius: {
+    sm: '4px',
+    md: '8px',
+    lg: '12px',
+    xl: '16px',
+    '2xl': '24px',
+    full: '9999px',
+  },
+  shadows: {
+    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+  },
+};
+
+// CSS Variables for global styling (compatible with both architectures)
 export const cssVariables = {
+  // Primary colors
   '--primary': THEME_COLORS.primary,
   '--primary-light': THEME_COLORS.primaryLight,
   '--primary-dark': THEME_COLORS.primaryDark,
   '--accent': THEME_COLORS.accent,
   '--secondary': THEME_COLORS.secondary,
+
+  // Text colors
   '--text-primary': THEME_COLORS.textPrimary,
   '--text-secondary': THEME_COLORS.textSecondary,
+
+  // Status colors
   '--error': THEME_COLORS.error,
   '--success': THEME_COLORS.success,
   '--warning': THEME_COLORS.warning,
   '--info': THEME_COLORS.info,
+
+  // Background colors
   '--background': THEME_COLORS.background,
   '--surface': THEME_COLORS.surface,
+
+  // Border radius
   '--border-radius-sm': `${BORDER_RADIUS.sm}px`,
   '--border-radius-md': `${BORDER_RADIUS.md}px`,
   '--border-radius-lg': `${BORDER_RADIUS.lg}px`,
   '--border-radius-xl': `${BORDER_RADIUS.xl}px`,
+
+  // Shadows
   '--shadow-sm': SHADOWS.sm,
   '--shadow-md': SHADOWS.md,
   '--shadow-lg': SHADOWS.lg,
   '--shadow-xl': SHADOWS.xl,
+
+  // Spacing
   '--spacing-xs': `${SPACING.xs}px`,
   '--spacing-sm': `${SPACING.sm}px`,
   '--spacing-md': `${SPACING.md}px`,
   '--spacing-lg': `${SPACING.lg}px`,
   '--spacing-xl': `${SPACING.xl}px`,
 } as const;
+
+// Theme validation function
+export const validateThemeStructure = () => {
+  const requiredColors = ['primary', 'secondary', 'accent', 'success', 'error', 'warning', 'info'];
+  const missingColors = requiredColors.filter(color => !THEME_COLORS[color as keyof typeof THEME_COLORS]);
+
+  if (missingColors.length > 0) {
+    console.warn(`Missing theme colors: ${missingColors.join(', ')}`);
+    return false;
+  }
+
+  console.log('✅ Theme structure is valid');
+  return true;
+};
+
+// Export validation on module load
+validateThemeStructure();

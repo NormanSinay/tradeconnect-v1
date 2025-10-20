@@ -3,11 +3,17 @@ import { useAuth } from '@/context/AuthContext';
 import websocketService from '@/services/websocketService';
 import { STORAGE_KEYS } from '@/utils/constants';
 
+// WebSocket hooks for React/Astro architecture
+// Compatible with: React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons
+
 export const useWebSocket = () => {
   const { user } = useAuth();
   const isConnectedRef = useRef(false);
 
   useEffect(() => {
+    // SSR-safe: only connect on client-side
+    if (typeof window === 'undefined') return;
+
     if (user && !isConnectedRef.current) {
       // Get token from localStorage
       const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);

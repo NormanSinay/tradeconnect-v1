@@ -1,3 +1,20 @@
+/**
+ * @fileoverview AdminLayout - Layout dedicado para panel de administración
+ * @description Proporciona interfaz dedicada para Super Admins sin distracciones del sitio público
+ *
+ * Arquitectura:
+ * - React (componentes interactivos) → Estado de autenticación, navegación
+ * - Astro (routing y SSR) → Compatible con SSR, navegación del lado cliente
+ * - shadcn/ui (componentes UI) → Button, Avatar, Badge, DropdownMenu para interfaz consistente
+ * - Tailwind CSS (estilos) → Estilos utilitarios para layout responsivo
+ * - Radix UI (primitivos accesibles) → Primitivos en shadcn/ui
+ * - Lucide Icons (iconos) → Iconos modernos y consistentes
+ *
+ * @version 2.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';

@@ -1,6 +1,27 @@
+/**
+ * @fileoverview Checkbox Component - Componente de casilla de verificación accesible
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { FaCheck } from 'react-icons/fa';
+import { Check } from 'lucide-react';
 
 export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -20,7 +41,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             ref={ref}
             {...props}
           />
-          <FaCheck className="absolute left-0.5 top-0.5 h-3 w-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100" />
+          <Check className="absolute left-0.5 top-0.5 h-3 w-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100" />
         </div>
         {label && (
           <label

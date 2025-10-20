@@ -1,6 +1,23 @@
+/**
+ * @fileoverview StatsSection - Componente de estadísticas animadas para la página principal
+ * @description Muestra estadísticas de TradeConnect con contadores animados y diseño moderno
+ *
+ * Arquitectura:
+ * - React (componentes interactivos) → Estado, efectos, animaciones
+ * - Astro (routing y SSR) → Compatible con SSR, animaciones del lado cliente
+ * - shadcn/ui (componentes UI) → Card para layout consistente
+ * - Tailwind CSS (estilos) → Estilos utilitarios para diseño responsivo
+ * - Radix UI (primitivos accesibles) → Primitivos en shadcn/ui
+ * - Lucide Icons (iconos) → Iconos modernos y consistentes
+ *
+ * @version 2.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { FaCalendarAlt, FaUsers, FaTrophy, FaBuilding } from 'react-icons/fa';
+import { Calendar, Users, Trophy, Building } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface Stat {
@@ -13,34 +30,34 @@ interface Stat {
 
 const stats: Stat[] = [
   {
-    icon: <FaCalendarAlt className="w-12 h-12" />,
+    icon: <Calendar className="w-12 h-12" />,
     value: 500,
     label: 'Eventos Realizados',
     suffix: '+',
     color: '#E63946',
   },
   {
-    icon: <FaUsers className="w-12 h-12" />,
+    icon: <Users className="w-12 h-12" />,
     value: 50000,
     label: 'Participantes',
     suffix: '+',
     color: '#6B1E22',
   },
   {
-    icon: <FaTrophy className="w-12 h-12" />,
+    icon: <Trophy className="w-12 h-12" />,
     value: 45000,
     label: 'Certificados Emitidos',
     suffix: '+',
     color: '#E63946',
   },
   {
-    icon: <FaBuilding className="w-12 h-12" />,
+    icon: <Building className="w-12 h-12" />,
     value: 200,
     label: 'Empresas Participantes',
     suffix: '+',
     color: '#6B1E22',
   },
-];
+ ];
 
 interface AnimatedCounterProps {
   target: number;

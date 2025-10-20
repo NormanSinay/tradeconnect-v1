@@ -1,3 +1,24 @@
+/**
+ * @fileoverview Página de Eventos del Speaker
+ * @description Gestión de eventos donde el usuario participa como ponente
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,117 +93,107 @@ const SpeakerEventsPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <div className="max-w-7xl mx-auto py-8">
       {/* Header */}
-      <Box component={"div" as any} sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Mis Eventos como Speaker
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Mis Eventos como Speaker</h1>
+        <p className="text-muted-foreground">
           Gestiona tus participaciones como ponente en eventos
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>
-            <CardContent>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                {upcomingEvents.length}
-              </Typography>
-              <Typography variant="body2">Eventos Próximos</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: 'success.main', color: 'success.contrastText' }}>
-            <CardContent>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                {pastEvents.length}
-              </Typography>
-              <Typography variant="body2">Eventos Completados</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: 'info.main', color: 'info.contrastText' }}>
-            <CardContent>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                4.7
-              </Typography>
-              <Typography variant="body2">Rating Promedio</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: 'warning.main', color: 'warning.contrastText' }}>
-            <CardContent>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                430
-              </Typography>
-              <Typography variant="body2">Total Asistentes</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card className="bg-primary text-primary-foreground">
+          <CardContent className="pt-6">
+            <div className="text-3xl font-bold mb-2">
+              {upcomingEvents.length}
+            </div>
+            <p className="text-sm">Eventos Próximos</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-green-600 text-white">
+          <CardContent className="pt-6">
+            <div className="text-3xl font-bold mb-2">
+              {pastEvents.length}
+            </div>
+            <p className="text-sm">Eventos Completados</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-blue-600 text-white">
+          <CardContent className="pt-6">
+            <div className="text-3xl font-bold mb-2">
+              4.7
+            </div>
+            <p className="text-sm">Rating Promedio</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-orange-600 text-white">
+          <CardContent className="pt-6">
+            <div className="text-3xl font-bold mb-2">
+              430
+            </div>
+            <p className="text-sm">Total Asistentes</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Upcoming Events */}
-      <Paper sx={{ mb: 4 }}>
-        <Box component={"div" as any} sx={{ p: 3, borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Eventos Próximos
-          </Typography>
-        </Box>
-        <TableContainer>
+      <Card className="mb-8">
+        <div className="p-6 border-b">
+          <h2 className="text-xl font-semibold">Eventos Próximos</h2>
+        </div>
+        <div className="overflow-x-auto">
           <Table>
-            <TableHead>
+            <TableHeader>
               <TableRow>
-                <TableCell>Evento</TableCell>
-                <TableCell>Mi Participación</TableCell>
-                <TableCell>Fecha y Hora</TableCell>
-                <TableCell>Ubicación</TableCell>
-                <TableCell>Asistentes</TableCell>
-                <TableCell>Estado</TableCell>
-                <TableCell>Acciones</TableCell>
+                <TableHead>Evento</TableHead>
+                <TableHead>Mi Participación</TableHead>
+                <TableHead>Fecha y Hora</TableHead>
+                <TableHead>Ubicación</TableHead>
+                <TableHead>Asistentes</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Acciones</TableHead>
               </TableRow>
-            </TableHead>
+            </TableHeader>
             <TableBody>
               {upcomingEvents.map((event) => (
                 <TableRow key={event.id}>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                      {event.title}
-                    </Typography>
+                    <span className="font-medium">{event.title}</span>
                   </TableCell>
                   <TableCell>{event.mySession}</TableCell>
                   <TableCell>
-                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <CalendarToday sx={{ fontSize: 16 }} />
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
                       {new Date(event.date).toLocaleDateString('es-GT')} - {event.time}
-                    </Box>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LocationOn sx={{ fontSize: 16 }} />
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
                       {event.location}
-                    </Box>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <People sx={{ fontSize: 16 }} />
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4" />
                       {event.attendees}
-                    </Box>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={getStatusText(event.status)}
-                      color={getStatusColor(event.status)}
-                      size="small"
-                    />
+                    <Badge
+                      variant={event.status === 'confirmed' ? 'default' : 'secondary'}
+                      className={cn(
+                        event.status === 'confirmed' ? 'bg-green-100 text-green-800' : ''
+                      )}
+                    >
+                      {getStatusText(event.status)}
+                    </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button size="small" startIcon={<Info />}>
+                    <Button size="sm" variant="outline">
+                      <Info className="w-4 h-4 mr-2" />
                       Ver Detalles
                     </Button>
                   </TableCell>
@@ -190,48 +201,49 @@ const SpeakerEventsPage: React.FC = () => {
               ))}
             </TableBody>
           </Table>
-        </TableContainer>
-      </Paper>
+        </div>
+      </Card>
 
       {/* Past Events */}
-      <Paper>
-        <Box component={"div" as any} sx={{ p: 3, borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Eventos Pasados
-          </Typography>
-        </Box>
-        <TableContainer>
+      <Card>
+        <div className="p-6 border-b">
+          <h2 className="text-xl font-semibold">Eventos Pasados</h2>
+        </div>
+        <div className="overflow-x-auto">
           <Table>
-            <TableHead>
+            <TableHeader>
               <TableRow>
-                <TableCell>Evento</TableCell>
-                <TableCell>Fecha</TableCell>
-                <TableCell>Ubicación</TableCell>
-                <TableCell>Asistentes</TableCell>
-                <TableCell>Rating</TableCell>
-                <TableCell>Feedback</TableCell>
-                <TableCell>Acciones</TableCell>
+                <TableHead>Evento</TableHead>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Ubicación</TableHead>
+                <TableHead>Asistentes</TableHead>
+                <TableHead>Rating</TableHead>
+                <TableHead>Feedback</TableHead>
+                <TableHead>Acciones</TableHead>
               </TableRow>
-            </TableHead>
+            </TableHeader>
             <TableBody>
               {pastEvents.map((event) => (
                 <TableRow key={event.id}>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                      {event.title}
-                    </Typography>
+                    <span className="font-medium">{event.title}</span>
                   </TableCell>
                   <TableCell>{new Date(event.date).toLocaleDateString('es-GT')}</TableCell>
                   <TableCell>{event.location}</TableCell>
                   <TableCell>{event.attendees}</TableCell>
                   <TableCell>
-                    <Chip label={`⭐ ${event.rating}`} color="success" size="small" />
+                    <Badge variant="outline" className="bg-green-50">
+                      ⭐ {event.rating}
+                    </Badge>
                   </TableCell>
                   <TableCell>
-                    <Chip label={`${event.feedback} comentarios`} size="small" />
+                    <Badge variant="outline">
+                      {event.feedback} comentarios
+                    </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button size="small" startIcon={<Info />}>
+                    <Button size="sm" variant="outline">
+                      <Info className="w-4 h-4 mr-2" />
                       Ver Evaluaciones
                     </Button>
                   </TableCell>
@@ -239,9 +251,9 @@ const SpeakerEventsPage: React.FC = () => {
               ))}
             </TableBody>
           </Table>
-        </TableContainer>
-      </Paper>
-    </Container>
+        </div>
+      </Card>
+    </div>
   );
 };
 

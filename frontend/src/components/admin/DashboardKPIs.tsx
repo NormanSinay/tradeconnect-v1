@@ -1,3 +1,24 @@
+/**
+ * @fileoverview DashboardKPIs - Componente de indicadores clave de rendimiento para dashboard administrativo
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,42 +48,41 @@ interface DashboardKPIsProps {
 }
 
 const defaultKPIs: KPIData[] = [
-  {
-    label: 'Total Eventos',
-    value: 0,
-    icon: <EventIcon />,
-    trend: 0,
-    format: 'number',
-    color: '#1976D2',
-  },
-  {
-    label: 'Ingresos Totales',
-    value: 0,
-    icon: <AttachMoney />,
-    trend: 0,
-    format: 'currency',
-    color: '#388E3C',
-  },
-  {
-    label: 'Usuarios Activos',
-    value: 0,
-    icon: <People />,
-    trend: 0,
-    format: 'number',
-    color: '#F57C00',
-  },
-  {
-    label: 'Certificados Emitidos',
-    value: 0,
-    icon: <CardMembership />,
-    trend: 0,
-    format: 'number',
-    color: '#7B1FA2',
-  },
-];
+   {
+     label: 'Total Eventos',
+     value: 0,
+     icon: <Calendar className="h-6 w-6" />,
+     trend: 0,
+     format: 'number',
+     color: '#1976D2',
+   },
+   {
+     label: 'Ingresos Totales',
+     value: 0,
+     icon: <DollarSign className="h-6 w-6" />,
+     trend: 0,
+     format: 'currency',
+     color: '#388E3C',
+   },
+   {
+     label: 'Usuarios Activos',
+     value: 0,
+     icon: <Users className="h-6 w-6" />,
+     trend: 0,
+     format: 'number',
+     color: '#F57C00',
+   },
+   {
+     label: 'Certificados Emitidos',
+     value: 0,
+     icon: <Award className="h-6 w-6" />,
+     trend: 0,
+     format: 'number',
+     color: '#7B1FA2',
+   },
+ ];
 
 const DashboardKPIs: React.FC<DashboardKPIsProps> = ({ kpis = defaultKPIs, loading = false }) => {
-  const theme = useTheme();
 
   // Animated counter hook
   const useCountUp = (end: number, duration: number = 2000) => {
@@ -107,151 +127,91 @@ const DashboardKPIs: React.FC<DashboardKPIsProps> = ({ kpis = defaultKPIs, loadi
   };
 
   const KPICard: React.FC<{ kpi: KPIData; index: number }> = ({ kpi, index }) => {
-    const numericValue = typeof kpi.value === 'number' ? kpi.value : 0;
-    const animatedValue = useCountUp(numericValue);
-    const displayValue = typeof kpi.value === 'number' ? animatedValue : kpi.value;
+     const numericValue = typeof kpi.value === 'number' ? kpi.value : 0;
+     const animatedValue = useCountUp(numericValue);
+     const displayValue = typeof kpi.value === 'number' ? animatedValue : kpi.value;
 
-    return (
-      <Grid item xs={12} sm={6} md={3}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: index * 0.1 }}
-        >
-          <Card
-            sx={{
-              height: '100%',
-              position: 'relative',
-              overflow: 'hidden',
-              borderRadius: 2,
-              boxShadow: theme.shadows[3],
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                boxShadow: theme.shadows[8],
-                transform: 'translateY(-4px)',
-              },
-            }}
-          >
-            <CardContent>
-              {loading ? (
-                <Box component={"div" as any}>
-                  <Skeleton variant="circular" width={56} height={56} sx={{ mb: 2 }} />
-                  <Skeleton variant="text" width="60%" height={32} />
-                  <Skeleton variant="text" width="40%" height={24} />
-                </Box>
-              ) : (
-                <>
-                  {/* Icon */}
-                  <Box
-                    component={"div" as any}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      mb: 2,
-                    }}
-                  >
-                    <Box
-                      component={"div" as any}
-                      sx={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 2,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: `${kpi.color || theme.palette.primary.main}15`,
-                        color: kpi.color || theme.palette.primary.main,
-                      }}
-                    >
-                      {React.cloneElement(kpi.icon, { sx: { fontSize: 32 } })}
-                    </Box>
+     return (
+       <div className="col-span-12 sm:col-span-6 md:col-span-3">
+         <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.5, delay: index * 0.1 }}
+         >
+           <Card className="h-full relative overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+             <CardContent className="p-6">
+               {loading ? (
+                 <div>
+                   <Skeleton className="w-14 h-14 rounded-full mb-4" />
+                   <Skeleton className="h-8 w-3/5 mb-2" />
+                   <Skeleton className="h-6 w-2/5" />
+                 </div>
+               ) : (
+                 <>
+                   {/* Icon */}
+                   <div className="flex items-center justify-between mb-4">
+                     <div
+                       className="w-14 h-14 rounded-lg flex items-center justify-center"
+                       style={{
+                         backgroundColor: `${kpi.color || '#1976d2'}15`,
+                         color: kpi.color || '#1976d2',
+                       }}
+                     >
+                       {kpi.icon}
+                     </div>
 
-                    {/* Trend indicator */}
-                    {kpi.trend !== undefined && kpi.trend !== 0 && (
-                      <Tooltip
-                        title={`${kpi.trend > 0 ? '+' : ''}${kpi.trend.toFixed(1)}% vs mes anterior`}
-                      >
-                        <Box
-                          component={"div" as any}
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.5,
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: 1,
-                            backgroundColor:
-                              kpi.trend > 0
-                                ? `${theme.palette.success.main}15`
-                                : `${theme.palette.error.main}15`,
-                            color:
-                              kpi.trend > 0 ? theme.palette.success.main : theme.palette.error.main,
-                          }}
-                        >
-                          {kpi.trend > 0 ? (
-                            <TrendingUp sx={{ fontSize: 20 }} />
-                          ) : (
-                            <TrendingDown sx={{ fontSize: 20 }} />
-                          )}
-                          <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                            {Math.abs(kpi.trend).toFixed(1)}%
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-                    )}
-                  </Box>
+                     {/* Trend indicator */}
+                     {kpi.trend !== undefined && kpi.trend !== 0 && (
+                       <div
+                         className="flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold"
+                         style={{
+                           backgroundColor: kpi.trend > 0 ? '#388e3c15' : '#d32f2f15',
+                           color: kpi.trend > 0 ? '#388e3c' : '#d32f2f',
+                         }}
+                         title={`${kpi.trend > 0 ? '+' : ''}${kpi.trend.toFixed(1)}% vs mes anterior`}
+                       >
+                         {kpi.trend > 0 ? (
+                           <TrendingUp className="h-4 w-4" />
+                         ) : (
+                           <TrendingDown className="h-4 w-4" />
+                         )}
+                         {Math.abs(kpi.trend).toFixed(1)}%
+                       </div>
+                     )}
+                   </div>
 
-                  {/* Value */}
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 'bold',
-                      mb: 0.5,
-                      color: theme.palette.text.primary,
-                    }}
-                  >
-                    {formatValue(displayValue, kpi.format)}
-                  </Typography>
+                   {/* Value */}
+                   <div className="text-2xl font-bold mb-1 text-foreground">
+                     {formatValue(displayValue, kpi.format)}
+                   </div>
 
-                  {/* Label */}
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {kpi.label}
-                  </Typography>
+                   {/* Label */}
+                   <div className="text-sm text-muted-foreground font-medium">
+                     {kpi.label}
+                   </div>
 
-                  {/* Decorative gradient */}
-                  <Box
-                    component={"div" as any}
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: 4,
-                      background: `linear-gradient(90deg, ${kpi.color || theme.palette.primary.main}, ${kpi.color || theme.palette.primary.main}80)`,
-                    }}
-                  />
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </Grid>
-    );
-  };
+                   {/* Decorative gradient */}
+                   <div
+                     className="absolute bottom-0 left-0 right-0 h-1"
+                     style={{
+                       background: `linear-gradient(90deg, ${kpi.color || '#1976d2'}, ${kpi.color || '#1976d2'}80)`,
+                     }}
+                   />
+                 </>
+               )}
+             </CardContent>
+           </Card>
+         </motion.div>
+       </div>
+     );
+   };
 
   return (
-    <Grid container spacing={3}>
+    <div className="grid grid-cols-12 gap-6">
       {kpis.map((kpi, index) => (
         <KPICard key={kpi.label} kpi={kpi} index={index} />
       ))}
-    </Grid>
+    </div>
   );
 };
 

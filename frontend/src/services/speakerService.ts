@@ -1,3 +1,23 @@
+/**
+ * @fileoverview speakerService.ts - Servicio de speakers para TradeConnect
+ * @description Servicio que maneja la gestión de speakers, contratos, disponibilidad y asignaciones a eventos.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import { apiService } from './api';
 import type { ApiResponse, Speaker, Specialty } from '@/types';
 

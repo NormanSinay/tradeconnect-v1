@@ -1,3 +1,23 @@
+/**
+ * @fileoverview paymentService.ts - Servicio de pagos para TradeConnect
+ * @description Servicio que maneja procesamiento de pagos a través de múltiples gateways incluyendo Stripe, PayPal y gateways locales de Guatemala.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import { apiService } from './api';
 import type { ApiResponse, Payment } from '@/types';
 

@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 
+// Custom hook to handle media queries in React/Astro architecture
+// Compatible with: React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons
+
 /**
  * Custom hook to handle media queries in React
  * Replacement for MUI's useMediaQuery hook
+ * SSR-safe for Astro integration
  *
  * @param query - CSS media query string (e.g., '(min-width: 768px)')
  * @returns boolean indicating if the media query matches
@@ -12,17 +16,22 @@ import { useState, useEffect } from 'react';
  * const isTablet = useMediaQuery('(min-width: 768px) and (max-width: 1024px)');
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState<boolean>(false);
+  // SSR-safe: return false on server, true on client initially
+  const [matches, setMatches] = useState<boolean>(() => {
+    // Return false during SSR to prevent hydration mismatches
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia(query).matches;
+  });
 
   useEffect(() => {
-    // Check if window is defined (client-side)
+    // Only run on client-side
     if (typeof window === 'undefined') {
       return;
     }
 
     const mediaQuery = window.matchMedia(query);
 
-    // Set initial value
+    // Update state with current value (handles initial SSR mismatch)
     setMatches(mediaQuery.matches);
 
     // Create event listener function

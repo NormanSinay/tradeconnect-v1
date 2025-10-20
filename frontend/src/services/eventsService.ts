@@ -1,3 +1,23 @@
+/**
+ * @fileoverview eventsService.ts - Servicio de eventos para TradeConnect
+ * @description Servicio que maneja la búsqueda, obtención y gestión de eventos, incluyendo filtros, categorías y favoritos.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import api from './api';
 import type {
   Event,

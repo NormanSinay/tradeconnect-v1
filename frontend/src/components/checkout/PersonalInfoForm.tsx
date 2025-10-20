@@ -1,3 +1,25 @@
+/**
+ * @fileoverview PersonalInfoForm - Formulario de información personal para checkout
+ * @description Componente React para captura de datos personales en proceso de pago
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Validación completa con Yup y React Hook Form
+ * - Notificación automática de cambios a componentes padre
+ * - Diseño responsive con Tailwind CSS
+ * - Compatibilidad SSR con Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +56,11 @@ interface PersonalInfoFormProps {
   initialData?: Partial<PersonalInfoFormData>;
 }
 
+/**
+ * PersonalInfoForm - Formulario de información personal para checkout
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
   onDataChange,
   onValidChange,

@@ -1,26 +1,35 @@
+/**
+ * @fileoverview CategoriesGrid - Componente de grid de categorías para la página principal
+ * @description Muestra un grid interactivo de categorías de eventos con animaciones y navegación
+ *
+ * Arquitectura:
+ * - React (componentes interactivos) → Componentes con estado y navegación
+ * - Astro (routing y SSR) → Compatible con SSR, navegación del lado cliente
+ * - shadcn/ui (componentes UI) → Card, Button para interfaz consistente
+ * - Tailwind CSS (estilos) → Estilos utilitarios para layout responsivo
+ * - Radix UI (primitivos accesibles) → Primitivos en shadcn/ui
+ * - Lucide Icons (iconos) → Iconos modernos y consistentes
+ *
+ * @version 2.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardActionArea,
-  useTheme,
-} from '@mui/material';
-import {
-  Business as BusinessIcon,
-  Computer as TechIcon,
-  School as EducationIcon,
-  LocalHospital as HealthIcon,
-  TrendingUp as MarketingIcon,
-  AccountBalance as FinanceIcon,
-  Gavel as LegalIcon,
-  People as HRIcon,
-} from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Building as BusinessIcon,
+  Monitor as TechIcon,
+  GraduationCap as EducationIcon,
+  Heart as HealthIcon,
+  TrendingUp as MarketingIcon,
+  Landmark as FinanceIcon,
+  Scale as LegalIcon,
+  Users as HRIcon,
+} from 'lucide-react';
 import type { EventCategory } from '@/types';
 
 // Extended category type for local use only
@@ -29,85 +38,84 @@ interface CategoryWithIcon extends Omit<EventCategory, 'icon'> {
 }
 
 const defaultCategories: CategoryWithIcon[] = [
-  {
-    id: 1,
-    name: 'Negocios',
-    description: 'Eventos empresariales y desarrollo de negocios',
-    color: '#6B1E22',
-    icon: <BusinessIcon sx={{ fontSize: 48 }} />,
-    isActive: true,
-  },
-  {
-    id: 2,
-    name: 'Tecnología',
-    description: 'Innovación, software y transformación digital',
-    color: '#1976D2',
-    icon: <TechIcon sx={{ fontSize: 48 }} />,
-    isActive: true,
-  },
-  {
-    id: 3,
-    name: 'Salud',
-    description: 'Medicina, bienestar y salud ocupacional',
-    color: '#388E3C',
-    icon: <HealthIcon sx={{ fontSize: 48 }} />,
-    isActive: true,
-  },
-  {
-    id: 4,
-    name: 'Educación',
-    description: 'Formación profesional y capacitación',
-    color: '#F57C00',
-    icon: <EducationIcon sx={{ fontSize: 48 }} />,
-    isActive: true,
-  },
-  {
-    id: 5,
-    name: 'Marketing',
-    description: 'Estrategias de marketing y ventas',
-    color: '#E63946',
-    icon: <MarketingIcon sx={{ fontSize: 48 }} />,
-    isActive: true,
-  },
-  {
-    id: 6,
-    name: 'Finanzas',
-    description: 'Gestión financiera y contabilidad',
-    color: '#7B1FA2',
-    icon: <FinanceIcon sx={{ fontSize: 48 }} />,
-    isActive: true,
-  },
-  {
-    id: 7,
-    name: 'Legal',
-    description: 'Derecho empresarial y cumplimiento',
-    color: '#455A64',
-    icon: <LegalIcon sx={{ fontSize: 48 }} />,
-    isActive: true,
-  },
-  {
-    id: 8,
-    name: 'Recursos Humanos',
-    description: 'Gestión de talento y desarrollo organizacional',
-    color: '#00897B',
-    icon: <HRIcon sx={{ fontSize: 48 }} />,
-    isActive: true,
-  },
-];
+   {
+     id: 1,
+     name: 'Negocios',
+     description: 'Eventos empresariales y desarrollo de negocios',
+     color: '#6B1E22',
+     icon: <BusinessIcon className="w-12 h-12" />,
+     isActive: true,
+   },
+   {
+     id: 2,
+     name: 'Tecnología',
+     description: 'Innovación, software y transformación digital',
+     color: '#1976D2',
+     icon: <TechIcon className="w-12 h-12" />,
+     isActive: true,
+   },
+   {
+     id: 3,
+     name: 'Salud',
+     description: 'Medicina, bienestar y salud ocupacional',
+     color: '#388E3C',
+     icon: <HealthIcon className="w-12 h-12" />,
+     isActive: true,
+   },
+   {
+     id: 4,
+     name: 'Educación',
+     description: 'Formación profesional y capacitación',
+     color: '#F57C00',
+     icon: <EducationIcon className="w-12 h-12" />,
+     isActive: true,
+   },
+   {
+     id: 5,
+     name: 'Marketing',
+     description: 'Estrategias de marketing y ventas',
+     color: '#E63946',
+     icon: <MarketingIcon className="w-12 h-12" />,
+     isActive: true,
+   },
+   {
+     id: 6,
+     name: 'Finanzas',
+     description: 'Gestión financiera y contabilidad',
+     color: '#7B1FA2',
+     icon: <FinanceIcon className="w-12 h-12" />,
+     isActive: true,
+   },
+   {
+     id: 7,
+     name: 'Legal',
+     description: 'Derecho empresarial y cumplimiento',
+     color: '#455A64',
+     icon: <LegalIcon className="w-12 h-12" />,
+     isActive: true,
+   },
+   {
+     id: 8,
+     name: 'Recursos Humanos',
+     description: 'Gestión de talento y desarrollo organizacional',
+     color: '#00897B',
+     icon: <HRIcon className="w-12 h-12" />,
+     isActive: true,
+   },
+ ];
 
 interface CategoriesGridProps {
   categories?: EventCategory[];
 }
 
 const CategoriesGrid: React.FC<CategoriesGridProps> = ({ categories }) => {
-  const theme = useTheme();
   const navigate = useNavigate();
 
   // Map API categories to include icons, or use defaults
   const displayCategories: CategoryWithIcon[] = categories
     ? categories.map((cat) => ({
         ...cat,
-        icon: <BusinessIcon sx={{ fontSize: 48 }} />, // Default icon for API categories
+        icon: <BusinessIcon className="w-12 h-12" />, // Default icon for API categories
       }))
     : defaultCategories;
 
@@ -116,15 +124,8 @@ const CategoriesGrid: React.FC<CategoriesGridProps> = ({ categories }) => {
   };
 
   return (
-    <Box
-      component={"div" as any}
-      sx={{
-        py: 8,
-        background: `linear-gradient(135deg, ${theme.palette.grey[900]} 0%, ${theme.palette.grey[800]} 100%)`,
-        color: 'white',
-      }}
-    >
-      <Container maxWidth="lg">
+    <section className="py-16 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+      <div className="container mx-auto px-4">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -132,122 +133,56 @@ const CategoriesGrid: React.FC<CategoriesGridProps> = ({ categories }) => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <Typography
-            variant="h3"
-            align="center"
-            gutterBottom
-            sx={{
-              fontWeight: 'bold',
-              mb: 2,
-            }}
-          >
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             Explora por Categoría
-          </Typography>
-          <Typography
-            variant="h6"
-            align="center"
-            sx={{
-              mb: 6,
-              color: 'grey.400',
-            }}
-          >
+          </h2>
+          <p className="text-lg text-center text-gray-300 mb-12">
             Encuentra eventos especializados para tu área de interés
-          </Typography>
+          </p>
         </motion.div>
 
         {/* Categories Grid */}
-        <Grid container spacing={3}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {displayCategories.map((category, index) => (
-            <Grid item xs={12} sm={6} md={3} key={category.id}>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-              >
-                <Card
-                  sx={{
-                    height: '100%',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      boxShadow: `0 8px 32px ${category.color}44`,
-                      borderColor: category.color,
-                    },
-                  }}
+            <motion.div
+              key={category.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+            >
+              <Card className="h-full bg-white/5 backdrop-blur-md border border-white/10 transition-all duration-300 hover:-translate-y-2 hover:bg-white/10 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/50 cursor-pointer">
+                <CardContent
+                  className="flex flex-col items-center text-center p-6 h-full"
+                  onClick={() => handleCategoryClick(category.id)}
                 >
-                  <CardActionArea
-                    onClick={() => handleCategoryClick(category.id)}
-                    sx={{ height: '100%' }}
+                  {/* Icon */}
+                  <div
+                    className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-4 transition-all duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${category.color}22 0%, ${category.color}44 100%)`,
+                      color: category.color,
+                    }}
                   >
-                    <CardContent
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        textAlign: 'center',
-                        p: 3,
-                        height: '100%',
-                      }}
-                    >
-                      {/* Icon */}
-                      <Box
-                        component={"div" as any}
-                        sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: 100,
-                          height: 100,
-                          borderRadius: '50%',
-                          background: `linear-gradient(135deg, ${category.color}22 0%, ${category.color}44 100%)`,
-                          color: category.color,
-                          mb: 2,
-                          transition: 'all 0.3s ease',
-                        }}
-                      >
-                        {category.icon || <BusinessIcon sx={{ fontSize: 48 }} />}
-                      </Box>
+                    {category.icon || <BusinessIcon className="w-12 h-12" />}
+                  </div>
 
-                      {/* Category Name */}
-                      <Typography
-                        variant="h6"
-                        gutterBottom
-                        sx={{
-                          fontWeight: 'bold',
-                          color: 'white',
-                        }}
-                      >
-                        {category.name}
-                      </Typography>
+                  {/* Category Name */}
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    {category.name}
+                  </h3>
 
-                      {/* Description */}
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: 'grey.400',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                        }}
-                      >
-                        {category.description}
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </motion.div>
-            </Grid>
+                  {/* Description */}
+                  <p className="text-gray-300 text-sm line-clamp-2">
+                    {category.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </Grid>
-      </Container>
-    </Box>
+        </div>
+      </div>
+    </section>
   );
 };
 

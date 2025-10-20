@@ -1,3 +1,27 @@
+/**
+ * @fileoverview CreditCardForm - Componente de formulario de tarjeta de crédito
+ * @description Componente React para captura de información de pago con tarjeta
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Formateo automático de número de tarjeta
+ * - Detección automática de tipo de tarjeta
+ * - Validación en tiempo real
+ * - Campos seguros con encriptación
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +31,11 @@ import { CreditCard, Lock } from 'lucide-react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 
+/**
+ * CreditCardForm - Componente de formulario de tarjeta de crédito
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const CreditCardForm: React.FC = () => {
   const {
     control,

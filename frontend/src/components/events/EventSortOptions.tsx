@@ -1,3 +1,33 @@
+/**
+ * @fileoverview EventSortOptions - Opciones de ordenamiento para eventos
+ * @description Componente React que proporciona controles para ordenar eventos por diferentes criterios.
+ * Incluye selección de campo de ordenamiento y dirección (ascendente/descendente).
+ *
+ * Arquitectura:
+ * - React: Componentes funcionales con props tipadas
+ *   ↓
+ * - Astro: Routing y SSR - Compatible con hidratación del lado cliente
+ *   ↓
+ * - shadcn/ui: Componentes UI preconstruidos (Select, Button)
+ *   ↓
+ * - Tailwind CSS: Estilos utilitarios para diseño responsivo y moderno
+ *   ↓
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ *   ↓
+ * - Lucide Icons: Iconografía moderna y consistente (ArrowUpDown, ArrowUp, ArrowDown, List, Grid3X3)
+ *
+ * Características:
+ * - Selección de campo de ordenamiento
+ * - Controles de dirección ascendente/descendente
+ * - Vista previa de opciones de vista (deshabilitadas)
+ * - Diseño responsivo con flexbox
+ * - Compatibilidad completa con SSR de Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';

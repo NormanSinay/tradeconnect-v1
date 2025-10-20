@@ -1,5 +1,8 @@
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 
+// Translation hooks for React/Astro architecture
+// Compatible with: React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons
+
 export const useTranslation = () => {
   const { t, i18n } = useI18nTranslation();
 

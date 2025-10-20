@@ -1,3 +1,26 @@
+/**
+ * @fileoverview PayPalButton - Componente de integración PayPal
+ * @description Componente React para procesamiento de pagos con PayPal
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Integración completa con PayPal
+ * - Manejo de órdenes y aprobaciones
+ * - Estados de carga y error
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,6 +34,11 @@ interface PayPalButtonProps {
   onCancel?: () => void;
 }
 
+/**
+ * PayPalButton - Componente de integración PayPal
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const PayPalButton: React.FC<PayPalButtonProps> = ({
   amount,
   currency = 'USD',

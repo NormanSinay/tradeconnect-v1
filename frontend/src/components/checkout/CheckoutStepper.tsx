@@ -1,3 +1,25 @@
+/**
+ * @fileoverview CheckoutStepper - Componente de stepper para checkout
+ * @description Componente React para navegación visual en proceso de checkout
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Indicador visual de progreso
+ * - Estados de completado y activo
+ * - Diseño responsive con Tailwind CSS
+ * - Compatibilidad SSR con Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React from 'react';
 import { CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';

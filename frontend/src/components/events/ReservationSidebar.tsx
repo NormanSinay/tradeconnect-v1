@@ -1,3 +1,35 @@
+/**
+ * @fileoverview ReservationSidebar - Barra lateral de reservas para eventos
+ * @description Componente React que proporciona una interfaz completa para reservar plazas en eventos.
+ * Incluye selección de cantidad, tipo de participante, códigos promocionales y resumen de precios.
+ *
+ * Arquitectura:
+ * - React: Componentes interactivos con hooks de estado y efectos
+ *   ↓
+ * - Astro: Routing y SSR - Compatible con hidratación del lado cliente
+ *   ↓
+ * - shadcn/ui: Componentes UI preconstruidos (Card, Button, Input, Select, Badge, Alert)
+ *   ↓
+ * - Tailwind CSS: Estilos utilitarios para diseño responsivo y moderno
+ *   ↓
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ *   ↓
+ * - Lucide Icons: Iconografía moderna y consistente (ShoppingCart, Plus, Minus, User, Building, Tag, Info, CheckCircle, Calendar, Users)
+ * - Framer Motion: Animaciones suaves y transiciones fluidas
+ *
+ * Características:
+ * - Sidebar sticky con comportamiento inteligente
+ * - Indicadores de capacidad en tiempo real
+ * - Sistema de códigos promocionales
+ * - Resumen de precios con descuentos
+ * - Estados de carga y validaciones
+ * - Compatibilidad completa con SSR de Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -193,57 +225,53 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
         </div>
 
         {/* Participant Type Selector */}
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel>Tipo de participante</InputLabel>
+        <div className="mb-4">
+          <Label htmlFor="participant-type" className="text-sm font-medium mb-2 block">
+            Tipo de participante
+          </Label>
           <Select
             value={participantType}
             onChange={(e) => setParticipantType(e.target.value as 'individual' | 'empresa')}
-            label="Tipo de participante"
             disabled={isSoldOut}
           >
-            <MenuItem value="individual">
-              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Person />
-                <Box component={"div" as any}>
-                  <Typography variant="body2">Individual</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Para una sola persona
-                  </Typography>
-                </Box>
-              </Box>
-            </MenuItem>
-            <MenuItem value="empresa">
-              <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Business />
-                <Box component={"div" as any}>
-                  <Typography variant="body2">Empresa</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Facturación con NIT
-                  </Typography>
-                </Box>
-              </Box>
-            </MenuItem>
+            <option value="individual">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <div>
+                  <span className="text-sm font-medium">Individual</span>
+                  <span className="text-xs text-muted-foreground block">Para una sola persona</span>
+                </div>
+              </div>
+            </option>
+            <option value="empresa">
+              <div className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                <div>
+                  <span className="text-sm font-medium">Empresa</span>
+                  <span className="text-xs text-muted-foreground block">Facturación con NIT</span>
+                </div>
+              </div>
+            </option>
           </Select>
-        </FormControl>
+        </div>
 
         {/* Quantity Selector */}
-        <Box component={"div" as any} sx={{ mb: 3 }}>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 'medium' }}>
+        <div className="mb-4">
+          <Label className="text-sm font-medium mb-2 block">
             Cantidad de personas
-          </Typography>
-          <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton
+          </Label>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => handleQuantityChange(-1)}
               disabled={quantity <= 1 || isSoldOut}
-              sx={{
-                border: 1,
-                borderColor: 'divider',
-              }}
+              className="h-10 w-10 p-0"
             >
-              <Remove />
-            </IconButton>
+              <Minus className="h-4 w-4" />
+            </Button>
 
-            <TextField
+            <Input
               value={quantity}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
@@ -252,158 +280,161 @@ const ReservationSidebar: React.FC<ReservationSidebarProps> = ({
                 }
               }}
               type="number"
-              inputProps={{ min: 1, max: Math.min(10, event.availableSpots) }}
-              sx={{
-                flex: 1,
-                '& input': { textAlign: 'center', fontWeight: 'bold' },
-              }}
+              min={1}
+              max={Math.min(10, event.availableSpots)}
+              className="w-20 text-center font-bold"
               disabled={isSoldOut}
             />
 
-            <IconButton
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => handleQuantityChange(1)}
               disabled={quantity >= event.availableSpots || quantity >= 10 || isSoldOut}
-              sx={{
-                border: 1,
-                borderColor: 'divider',
-              }}
+              className="h-10 w-10 p-0"
             >
-              <Add />
-            </IconButton>
-          </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
             Máximo 10 personas por reserva
-          </Typography>
-        </Box>
+          </p>
+        </div>
 
         {/* Promo Code */}
         {!isSoldOut && onApplyPromoCode && (
-          <Box component={"div" as any} sx={{ mb: 3 }}>
-            <Typography variant="body2" sx={{ mb: 1, fontWeight: 'medium' }}>
+          <div className="mb-4">
+            <Label className="text-sm font-medium mb-2 block">
               Código promocional
-            </Typography>
-            <Stack direction="row" spacing={1}>
-              <TextField
-                size="small"
-                fullWidth
+            </Label>
+            <div className="flex gap-2">
+              <Input
                 placeholder="Ingresa tu código"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                 disabled={promoApplied || !!appliedPromoCode}
+                className="flex-1"
               />
               <Button
-                variant="outlined"
+                variant="outline"
                 onClick={handleApplyPromoCode}
                 disabled={!promoCode.trim() || promoApplied || !!appliedPromoCode}
               >
                 Aplicar
               </Button>
-            </Stack>
+            </div>
             {(promoApplied || appliedPromoCode) && discount > 0 && (
-              <Alert severity="success" icon={<CheckCircle />} sx={{ mt: 1 }}>
-                ¡{discount}% de descuento aplicado!
+              <Alert className="mt-2 border-green-200 bg-green-50">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  ¡{discount}% de descuento aplicado!
+                </AlertDescription>
               </Alert>
             )}
-          </Box>
+          </div>
         )}
 
         {/* Price Summary */}
-        <Box component={"div" as any} sx={{ mb: 3, bgcolor: 'grey.50', p: 2, borderRadius: 1 }}>
-          <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="body2">Subtotal ({quantity} x Q{basePrice})</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+        <div className="mb-4 bg-muted p-4 rounded-lg">
+          <div className="flex justify-between mb-2">
+            <span className="text-sm">Subtotal ({quantity} x Q{basePrice})</span>
+            <span className="text-sm font-medium">
               Q{subtotal.toLocaleString()}
-            </Typography>
-          </Box>
+            </span>
+          </div>
 
           {discountAmount > 0 && (
-            <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" color="success.main">
+            <div className="flex justify-between mb-2">
+              <span className="text-sm text-green-600">
                 Descuento ({discount}%)
-              </Typography>
-              <Typography variant="body2" color="success.main" sx={{ fontWeight: 'medium' }}>
+              </span>
+              <span className="text-sm text-green-600 font-medium">
                 -Q{discountAmount.toLocaleString()}
-              </Typography>
-            </Box>
+              </span>
+            </div>
           )}
 
-          <Divider sx={{ my: 1 }} />
+          <hr className="my-2" />
 
-          <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          <div className="flex justify-between">
+            <span className="text-lg font-bold">
               Total
-            </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+            </span>
+            <span className="text-lg font-bold text-primary">
               Q{total.toLocaleString()}
-            </Typography>
-          </Box>
-        </Box>
+            </span>
+          </div>
+        </div>
 
         {/* Add to Cart Button */}
         <Button
-          variant="contained"
-          size="large"
-          fullWidth
-          startIcon={<ShoppingCart />}
+          variant="default"
+          size="lg"
+          className="w-full py-6 text-lg font-bold"
           onClick={handleAddToCart}
           disabled={isSoldOut || loading}
-          sx={{
-            py: 1.5,
-            fontSize: '1.1rem',
-            fontWeight: 'bold',
-          }}
         >
+          <ShoppingCart className="h-5 w-5 mr-2" />
           {isSoldOut ? 'Evento agotado' : loading ? 'Agregando...' : 'Agregar al carrito'}
         </Button>
 
-        <Divider sx={{ my: 3 }} />
+        <hr className="my-6" />
 
         {/* Event Details Quick Info */}
-        <Box component={"div" as any}>
-          <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
+        <div>
+          <h4 className="text-lg font-bold mb-4">
             Detalles del evento
-          </Typography>
+          </h4>
 
-          <Stack spacing={1.5}>
-            <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Schedule sx={{ fontSize: 20, color: 'text.secondary' }} />
-              <Box component={"div" as any}>
-                <Typography variant="caption" color="text.secondary" display="block">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">
                   Fecha y hora
-                </Typography>
-                <Typography variant="body2">
+                </p>
+                <p className="text-sm">
                   {formatDate(event.startDate)}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
+                </p>
+                <p className="text-xs text-muted-foreground">
                   {formatTime(event.startDate)} - {formatTime(event.endDate)}
-                </Typography>
-              </Box>
-            </Box>
+                </p>
+              </div>
+            </div>
 
-            <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Info sx={{ fontSize: 20, color: 'text.secondary' }} />
-              <Box component={"div" as any}>
-                <Typography variant="caption" color="text.secondary" display="block">
+            <div className="flex items-center gap-3">
+              <Info className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-xs text-muted-foreground">
                   Modalidad
-                </Typography>
-                <Typography variant="body2">
+                </p>
+                <p className="text-sm">
                   {event.isVirtual ? 'Virtual' : 'Presencial'}
-                </Typography>
-              </Box>
-            </Box>
-          </Stack>
-        </Box>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Trust Badges */}
-        <Box component={"div" as any} sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: 'divider' }}>
-          <Stack direction="row" spacing={1} flexWrap="wrap">
-            <Chip icon={<CheckCircle />} label="Pago seguro" size="small" variant="outlined" />
-            <Chip icon={<CheckCircle />} label="Factura FEL" size="small" variant="outlined" />
-            <Chip icon={<CheckCircle />} label="Certificado" size="small" variant="outlined" />
-          </Stack>
-        </Box>
-      </Paper>
-    </Box>
+        <div className="mt-3 pt-3 border-t border-border">
+          <div className="flex flex-wrap gap-1">
+            <Badge variant="outline" className="text-xs">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Pago seguro
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Factura FEL
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Certificado
+            </Badge>
+          </div>
+        </div>
+      </Card>
+    </motion.div>
   );
 };
 

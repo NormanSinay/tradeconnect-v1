@@ -1,3 +1,24 @@
+/**
+ * @fileoverview Página de Check-in de Operador
+ * @description Gestión de asistencia y validación de QR codes para eventos
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -109,11 +130,11 @@ const OperatorCheckinPage: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success':
-        return <CheckCircle color="success" />;
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
       case 'duplicate':
-        return <Cancel color="error" />;
+        return <X className="w-5 h-5 text-red-600" />;
       default:
-        return <Person />;
+        return <User className="w-5 h-5" />;
     }
   };
 
@@ -129,228 +150,186 @@ const OperatorCheckinPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <div className="max-w-7xl mx-auto py-8">
       {/* Header */}
-      <Box component={"div" as any} sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Check-in de Asistentes
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Check-in de Asistentes</h1>
+        <p className="text-muted-foreground">
           Validación de QR y registro de asistencia
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <Grid container spacing={3}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Column - Scanner & Manual Entry */}
-        <Grid item xs={12} md={6}>
+        <div className="space-y-6">
           {/* Event Info */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Evento Actual
-            </Typography>
-            <Typography variant="h5" sx={{ mb: 1 }}>
-              {currentEvent.title}
-            </Typography>
-            <Box component={"div" as any} sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              <Chip icon={<AccessTime />} label={currentEvent.time} />
-              <Chip label={currentEvent.location} />
-            </Box>
-            <Divider sx={{ my: 2 }} />
-            <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2">Progreso de Check-in:</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Evento Actual</h2>
+            <h3 className="text-2xl font-bold mb-3">{currentEvent.title}</h3>
+            <div className="flex gap-2 mb-4">
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {currentEvent.time}
+              </Badge>
+              <Badge variant="outline">{currentEvent.location}</Badge>
+            </div>
+            <hr className="my-4" />
+            <div className="flex justify-between">
+              <span className="text-sm">Progreso de Check-in:</span>
+              <span className="text-sm font-bold">
                 {currentEvent.checkedIn} / {currentEvent.totalRegistrations} (
                 {Math.round((currentEvent.checkedIn / currentEvent.totalRegistrations) * 100)}%)
-              </Typography>
-            </Box>
-          </Paper>
+              </span>
+            </div>
+          </Card>
 
           {/* QR Scanner */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Escanear Código QR
-            </Typography>
-            <Box
-              component={"div" as any}
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 2,
-                py: 4,
-                bgcolor: 'grey.100',
-                borderRadius: 2,
-                mb: 2,
-              }}
-            >
-              <QrCodeScanner sx={{ fontSize: 100, color: 'primary.main' }} />
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Escanear Código QR</h2>
+            <div className="flex flex-col items-center gap-4 py-8 bg-muted rounded-lg mb-4">
+              <QrCode className="w-24 h-24 text-primary" />
               <Button
-                variant="contained"
-                size="large"
-                startIcon={<QrCodeScanner />}
+                size="lg"
                 onClick={handleScanQR}
               >
+                <QrCode className="w-5 h-5 mr-2" />
                 Iniciar Escaneo
               </Button>
-            </Box>
-          </Paper>
+            </div>
+          </Card>
 
           {/* Manual Entry */}
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Entrada Manual
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-2">Entrada Manual</h2>
+            <p className="text-muted-foreground mb-4">
               Ingresa el código del ticket manualmente si el QR no funciona
-            </Typography>
-            <Box component={"div" as any} sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                fullWidth
+            </p>
+            <div className="flex gap-2">
+              <Input
                 placeholder="Ej: TC-2024-001"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleManualEntry()}
+                onKeyDown={(e) => e.key === 'Enter' && handleManualEntry()}
+                className="flex-1"
               />
-              <Button
-                variant="contained"
-                startIcon={<Search />}
-                onClick={handleManualEntry}
-              >
+              <Button onClick={handleManualEntry}>
+                <Search className="w-4 h-4 mr-2" />
                 Buscar
               </Button>
-            </Box>
-          </Paper>
-        </Grid>
+            </div>
+          </Card>
+        </div>
 
         {/* Right Column - Scan Result & Recent Check-ins */}
-        <Grid item xs={12} md={6}>
+        <div className="space-y-6">
           {/* Scan Result */}
           {scanResult && (
-            <Paper sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                Resultado del Escaneo
-              </Typography>
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Resultado del Escaneo</h2>
 
               {scanStatus === 'success' && (
                 <>
-                  <Alert severity="success" sx={{ mb: 2 }}>
-                    Código QR válido - Listo para check-in
+                  <Alert className="mb-4">
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Código QR válido - Listo para check-in
+                    </AlertDescription>
                   </Alert>
 
-                  <Card sx={{ mb: 3, bgcolor: 'success.light', color: 'success.contrastText' }}>
-                    <CardContent>
-                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                        <Avatar sx={{ width: 60, height: 60, bgcolor: 'success.dark' }}>
-                          <Person sx={{ fontSize: 40 }} />
+                  <Card className="mb-6 bg-green-50 border-green-200">
+                    <CardContent className="pt-6">
+                      <div className="flex items-center gap-4 mb-4">
+                        <Avatar className="w-16 h-16 bg-green-600">
+                          <User className="w-8 h-8" />
                         </Avatar>
-                        <Box component={"div" as any}>
-                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                            {scanResult.name}
-                          </Typography>
-                          <Typography variant="body2">{scanResult.email}</Typography>
-                        </Box>
-                      </Box>
-                      <Divider sx={{ my: 2, bgcolor: 'success.dark' }} />
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <Typography variant="caption">Número de Ticket</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                            {scanResult.ticketNumber}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="caption">Tipo de Registro</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                            {scanResult.registrationType}
-                          </Typography>
-                        </Grid>
-                      </Grid>
+                        <div>
+                          <h3 className="text-lg font-semibold">{scanResult.name}</h3>
+                          <p className="text-muted-foreground">{scanResult.email}</p>
+                        </div>
+                      </div>
+                      <hr className="my-4" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Número de Ticket</p>
+                          <p className="font-medium">{scanResult.ticketNumber}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Tipo de Registro</p>
+                          <p className="font-medium">{scanResult.registrationType}</p>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
 
-                  <Box component={"div" as any} sx={{ display: 'flex', gap: 2 }}>
+                  <div className="flex gap-2">
                     <Button
-                      variant="contained"
-                      color="success"
-                      fullWidth
-                      startIcon={<CheckCircle />}
+                      className="flex-1"
+                      size="lg"
                       onClick={handleConfirmCheckIn}
-                      size="large"
                     >
+                      <CheckCircle className="w-5 h-5 mr-2" />
                       Confirmar Check-in
                     </Button>
                     <Button
-                      variant="outlined"
-                      color="error"
+                      variant="outline"
                       onClick={handleCancelCheckIn}
                     >
                       Cancelar
                     </Button>
-                  </Box>
+                  </div>
                 </>
               )}
 
               {scanStatus === 'error' && (
-                <Alert severity="error">
-                  Código inválido o ya utilizado. Verifica los datos.
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    Código inválido o ya utilizado. Verifica los datos.
+                  </AlertDescription>
                 </Alert>
               )}
-            </Paper>
+            </Card>
           )}
 
           {/* Recent Check-ins */}
-          <Paper sx={{ p: 3 }}>
-            <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Check-ins Recientes
-              </Typography>
-              <IconButton size="small">
-                <Refresh />
-              </IconButton>
-            </Box>
+          <Card className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Check-ins Recientes</h2>
+              <Button size="sm" variant="ghost">
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </div>
 
-            <List>
+            <div className="space-y-4">
               {recentCheckIns.map((checkin, index) => (
-                <React.Fragment key={checkin.id}>
-                  <ListItem alignItems="flex-start">
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'primary.main' }}>
-                        {getStatusIcon(checkin.status)}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                            {checkin.name}
-                          </Typography>
-                          <Chip
-                            label={checkin.status === 'success' ? 'Confirmado' : 'Duplicado'}
-                            color={getStatusColor(checkin.status)}
-                            size="small"
-                          />
-                        </Box>
-                      }
-                      secondary={
-                        <>
-                          <Typography variant="body2" color="text.secondary">
-                            {checkin.email}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {checkin.ticketNumber} • {checkin.time}
-                          </Typography>
-                        </>
-                      }
-                    />
-                  </ListItem>
-                  {index < recentCheckIns.length - 1 && <Divider variant="inset" component="li" />}
-                </React.Fragment>
+                <div key={checkin.id} className="flex items-start gap-3">
+                  <Avatar className="w-10 h-10 bg-primary flex-shrink-0">
+                    {getStatusIcon(checkin.status)}
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="font-medium truncate">{checkin.name}</h3>
+                      <Badge
+                        variant={checkin.status === 'success' ? 'default' : 'destructive'}
+                        className={cn(
+                          checkin.status === 'success' ? 'bg-green-100 text-green-800' : ''
+                        )}
+                      >
+                        {checkin.status === 'success' ? 'Confirmado' : 'Duplicado'}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{checkin.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {checkin.ticketNumber} • {checkin.time}
+                    </p>
+                  </div>
+                </div>
               ))}
-            </List>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 };
 

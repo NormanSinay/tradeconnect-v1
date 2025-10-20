@@ -1,3 +1,20 @@
+/**
+ * @fileoverview BaseLayoutNew - Layout base mejorado para páginas públicas
+ * @description Proporciona estructura básica mejorada con navbar, footer y componentes comunes
+ *
+ * Arquitectura:
+ * - React (componentes interactivos) → Estado de navegación, outlet para rutas
+ * - Astro (routing y SSR) → Compatible con SSR, navegación del lado cliente
+ * - shadcn/ui (componentes UI) → No aplica directamente (usa componentes personalizados)
+ * - Tailwind CSS (estilos) → Estilos utilitarios para layout
+ * - Radix UI (primitivos accesibles) → No aplica directamente
+ * - Lucide Icons (iconos) → No aplica directamente
+ *
+ * @version 2.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import NavbarNew from './NavbarNew';

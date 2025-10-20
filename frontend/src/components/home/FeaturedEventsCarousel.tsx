@@ -1,10 +1,27 @@
+/**
+ * @fileoverview FeaturedEventsCarousel - Carrusel de eventos destacados para la página principal
+ * @description Muestra un carrusel interactivo de eventos destacados con navegación y animaciones
+ *
+ * Arquitectura:
+ * - React (componentes interactivos) → Estado complejo, navegación, manejo de eventos
+ * - Astro (routing y SSR) → Compatible con SSR, navegación del lado cliente
+ * - shadcn/ui (componentes UI) → Card, Button, Badge para interfaz consistente
+ * - Tailwind CSS (estilos) → Estilos utilitarios para layout responsivo
+ * - Radix UI (primitivos accesibles) → Primitivos en shadcn/ui
+ * - Lucide Icons (iconos) → Iconos modernos y consistentes
+ *
+ * @version 2.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FaChevronLeft, FaChevronRight, FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaArrowRight } from 'react-icons/fa';
+import { ChevronLeft, ChevronRight, Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
 import type { Event } from '@/types';
 
 interface FeaturedEventsCarouselProps {
@@ -68,7 +85,7 @@ const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events 
               size="sm"
               className="bg-primary hover:bg-primary/90 disabled:bg-gray-300 disabled:text-gray-500"
             >
-              <FaChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" />
             </Button>
             <Button
               onClick={handleNext}
@@ -77,7 +94,7 @@ const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events 
               size="sm"
               className="bg-primary hover:bg-primary/90 disabled:bg-gray-300 disabled:text-gray-500"
             >
-              <FaChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
@@ -131,7 +148,7 @@ const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events 
                       {/* Event Info */}
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <FaCalendarAlt className="w-4 h-4 text-gray-500" />
+                          <Calendar className="w-4 h-4 text-gray-500" />
                           <span className="text-sm text-gray-600">
                             {formatDate(event.startDate)}
                           </span>
@@ -139,7 +156,7 @@ const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events 
 
                         {event.location && (
                           <div className="flex items-center gap-2">
-                            <FaMapMarkerAlt className="w-4 h-4 text-gray-500" />
+                            <MapPin className="w-4 h-4 text-gray-500" />
                             <span className="text-sm text-gray-600">
                               {event.location}
                             </span>
@@ -147,7 +164,7 @@ const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events 
                         )}
 
                         <div className="flex items-center gap-2">
-                          <FaUsers className="w-4 h-4 text-gray-500" />
+                          <Users className="w-4 h-4 text-gray-500" />
                           <span className="text-sm text-gray-600">
                             {event.availableSpots} cupos disponibles
                           </span>
@@ -169,7 +186,7 @@ const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events 
                         }}
                       >
                         Ver Detalles
-                        <FaArrowRight className="w-4 h-4 ml-2" />
+                        <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </div>
                   </Card>
@@ -187,7 +204,7 @@ const FeaturedEventsCarousel: React.FC<FeaturedEventsCarouselProps> = ({ events 
             onClick={() => navigate('/events')}
           >
             Ver Todos los Eventos
-            <FaArrowRight className="w-4 h-4 ml-2" />
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
       </div>

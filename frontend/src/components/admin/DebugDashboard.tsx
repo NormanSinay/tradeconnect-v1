@@ -1,37 +1,67 @@
+/**
+ * @fileoverview DebugDashboard - Componente de diagnóstico para dashboard administrativo
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import React from 'react';
-import { Container, Paper, Typography, Box } from '@mui/material';
 import { useAuth } from '@/context/AuthContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const DebugDashboard: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Paper sx={{ p: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          🔍 Dashboard de Diagnóstico
-        </Typography>
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            🔍 Dashboard de Diagnóstico
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Estado de Autenticación:</h3>
+              <p>isAuthenticated: {isAuthenticated ? '✅ Sí' : '❌ No'}</p>
+            </div>
 
-        <Box component={"div" as any} sx={{ mt: 3 }}>
-          <Typography variant="h6">Estado de Autenticación:</Typography>
-          <Typography>isAuthenticated: {isAuthenticated ? '✅ Sí' : '❌ No'}</Typography>
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Datos del Usuario:</h3>
+              <pre className="bg-muted p-4 rounded-md overflow-auto text-sm">
+                {JSON.stringify(user, null, 2)}
+              </pre>
+            </div>
 
-          <Typography variant="h6" sx={{ mt: 2 }}>Datos del Usuario:</Typography>
-          <pre style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
-            {JSON.stringify(user, null, 2)}
-          </pre>
-
-          <Typography variant="h6" sx={{ mt: 2 }}>LocalStorage:</Typography>
-          <pre style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
-            {JSON.stringify({
-              user: localStorage.getItem('tradeconnect_user'),
-              token: localStorage.getItem('tradeconnect_auth_token') ? 'Existe' : 'No existe',
-              refreshToken: localStorage.getItem('tradeconnect_refresh_token') ? 'Existe' : 'No existe'
-            }, null, 2)}
-          </pre>
-        </Box>
-      </Paper>
-    </Container>
+            <div>
+              <h3 className="text-lg font-semibold mb-2">LocalStorage:</h3>
+              <pre className="bg-muted p-4 rounded-md overflow-auto text-sm">
+                {JSON.stringify({
+                  user: localStorage.getItem('tradeconnect_user'),
+                  token: localStorage.getItem('tradeconnect_auth_token') ? 'Existe' : 'No existe',
+                  refreshToken: localStorage.getItem('tradeconnect_refresh_token') ? 'Existe' : 'No existe'
+                }, null, 2)}
+              </pre>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

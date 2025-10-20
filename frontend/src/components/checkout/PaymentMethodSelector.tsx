@@ -1,3 +1,26 @@
+/**
+ * @fileoverview PaymentMethodSelector - Selector de métodos de pago
+ * @description Componente React para selección de métodos de pago disponibles
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Selección visual de métodos de pago
+ * - Integración con múltiples pasarelas
+ * - Información de seguridad
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -60,6 +83,11 @@ interface PaymentMethodSelectorProps {
   onMethodChange?: (method: PaymentMethod) => void;
 }
 
+/**
+ * PaymentMethodSelector - Selector de métodos de pago
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   selectedMethod,
   onMethodChange,

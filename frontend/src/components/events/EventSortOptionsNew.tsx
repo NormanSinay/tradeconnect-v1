@@ -1,26 +1,45 @@
-import React from 'react';
-import { FaSort, FaArrowUp, FaArrowDown, FaThLarge, FaList } from 'react-icons/fa';
-import type { EventSortOptionsProps } from '@/types/event.types';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-
 /**
- * EventSortOptionsNew - Opciones de ordenamiento de eventos
- * Migrado de MUI a Tailwind CSS + shadcn/ui
+ * @fileoverview EventSortOptionsNew - Opciones de ordenamiento mejoradas para eventos
+ * @description Componente React que proporciona controles mejorados para ordenar eventos.
+ * Incluye selector moderno y toggle de dirección con mejor UX.
+ *
+ * Arquitectura:
+ * - React: Componentes funcionales con props tipadas
+ *   ↓
+ * - Astro: Routing y SSR - Compatible con hidratación del lado cliente
+ *   ↓
+ * - shadcn/ui: Componentes UI preconstruidos (Select, Button)
+ *   ↓
+ * - Tailwind CSS: Estilos utilitarios para diseño responsivo y moderno
+ *   ↓
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ *   ↓
+ * - Lucide Icons: Iconografía moderna y consistente (ArrowUp, ArrowDown, List, Grid3X3)
+ *
+ * Mejoras sobre EventSortOptions:
+ * - Selector shadcn/ui moderno
+ * - Toggle de dirección más intuitivo
+ * - Mejor organización visual
+ * - Estados deshabilitados para futuras vistas
+ * - Compatibilidad completa con SSR de Astro
+ *
+ * @version 1.1.0
+ * @since 2024
+ * @author TradeConnect Team
  */
+
+import React from 'react';
+import { ArrowUp, ArrowDown, List, Grid3X3 } from 'lucide-react';
+import type { EventSortOptionsProps } from '@/types/event.types';
+import { Select } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 const EventSortOptionsNew: React.FC<EventSortOptionsProps> = ({
   sortBy,
   sortOrder,
   onSortChange,
 }) => {
   const handleSortByChange = (value: string) => {
-    onSortChange(value, sortOrder);
+    onSortChange(value as 'relevance' | 'date' | 'price' | 'popularity', sortOrder);
   };
 
   const handleSortOrderToggle = () => {
@@ -31,17 +50,12 @@ const EventSortOptionsNew: React.FC<EventSortOptionsProps> = ({
     <div className="flex items-center gap-3 flex-wrap mb-6">
       {/* Sort By Select */}
       <div className="flex items-center gap-2">
-        <FaSort className="h-4 w-4 text-gray-500" />
-        <Select value={sortBy} onValueChange={handleSortByChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Ordenar por" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="relevance">Relevancia</SelectItem>
-            <SelectItem value="date">Fecha</SelectItem>
-            <SelectItem value="price">Precio</SelectItem>
-            <SelectItem value="popularity">Popularidad</SelectItem>
-          </SelectContent>
+        <ArrowUp className="h-4 w-4 text-gray-500" />
+        <Select value={sortBy} onChange={(e) => handleSortByChange(e.target.value)}>
+          <option value="relevance">Relevancia</option>
+          <option value="date">Fecha</option>
+          <option value="price">Precio</option>
+          <option value="popularity">Popularidad</option>
         </Select>
       </div>
 
@@ -54,12 +68,12 @@ const EventSortOptionsNew: React.FC<EventSortOptionsProps> = ({
       >
         {sortOrder === 'asc' ? (
           <>
-            <FaArrowUp className="h-4 w-4" />
+            <ArrowUp className="h-4 w-4" />
             Ascendente
           </>
         ) : (
           <>
-            <FaArrowDown className="h-4 w-4" />
+            <ArrowDown className="h-4 w-4" />
             Descendente
           </>
         )}
@@ -75,7 +89,7 @@ const EventSortOptionsNew: React.FC<EventSortOptionsProps> = ({
             className="rounded-r-none"
             disabled
           >
-            <FaList className="h-4 w-4" />
+            <List className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
@@ -83,7 +97,7 @@ const EventSortOptionsNew: React.FC<EventSortOptionsProps> = ({
             className="rounded-l-none bg-gray-100"
             disabled
           >
-            <FaThLarge className="h-4 w-4" />
+            <Grid3X3 className="h-4 w-4" />
           </Button>
         </div>
       </div>

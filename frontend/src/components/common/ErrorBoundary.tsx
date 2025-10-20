@@ -1,3 +1,19 @@
+/**
+ * @fileoverview ErrorBoundary - Componente de límite de error (legacy)
+ * @description Componente React class-based para captura de errores (versión legacy con MUI)
+ *
+ * NOTA: Este archivo usa Material-UI y debe ser migrado a la nueva arquitectura.
+ * Para nueva implementación, usar ErrorBoundaryNew.tsx
+ *
+ * Arquitectura Legacy: React + Material-UI
+ * - React: Componentes interactivos con class components
+ * - Material-UI: Framework de componentes UI
+ *
+ * @deprecated Use ErrorBoundaryNew.tsx instead
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { Box, Typography, Button, Paper, Alert } from '@mui/material';
@@ -15,6 +31,10 @@ interface State {
   errorInfo?: ErrorInfo;
 }
 
+/**
+ * ErrorBoundary - Componente legacy con Material-UI
+ * @deprecated Use ErrorBoundaryNew.tsx instead
+ */
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);

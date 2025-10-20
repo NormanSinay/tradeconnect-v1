@@ -1,3 +1,34 @@
+/**
+ * @fileoverview Report Issue Page component for TradeConnect Frontend
+ * @description
+
+Arquitectura recomendada si migras:
+  React (componentes interactivos)
+    ↓
+  Astro (routing y SSR)
+    ↓
+  shadcn/ui (componentes UI)
+    ↓
+  Tailwind CSS (estilos)
+    ↓
+  Radix UI (primitivos accesibles)
+    ↓
+  React Icons (iconos)
+
+ * @architecture
+ * - React: Componentes interactivos con hooks y context
+ * - Astro: Routing y Server-Side Rendering (SSR)
+ * - shadcn/ui: Componentes UI preconstruidos
+ * - Tailwind CSS: Sistema de estilos utilitarios
+ * - Radix UI: Primitivos accesibles para componentes
+ * - React Icons: Biblioteca de iconos
+ *
+ * @compatibility SSR: Compatible con Astro SSR
+ * @compatibility React: Compatible con React 18+
+ * @compatibility TypeScript: Tipos completos incluidos
+ * @version 1.0.0
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

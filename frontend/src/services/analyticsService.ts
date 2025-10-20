@@ -1,3 +1,23 @@
+/**
+ * @fileoverview analyticsService.ts - Servicio de analytics para TradeConnect
+ * @description Servicio que maneja el seguimiento de eventos, páginas vistas, conversiones y análisis de datos de usuario.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import { apiService } from './api';
 import type { ApiResponse } from '@/types';
 

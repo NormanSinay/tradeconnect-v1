@@ -1,37 +1,41 @@
+/**
+ * @fileoverview EventFormWizard - Asistente de formulario para creación/edición de eventos
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @license MIT
+ */
+
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Stepper,
-  Step,
-  StepLabel,
-  Box,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  Grid,
-  Chip,
-  Alert,
-  FormControlLabel,
-  Switch,
-  InputAdornment,
-} from '@mui/material';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { es } from 'date-fns/locale';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import toast from 'react-hot-toast';
 import { EVENT_TYPES, EVENT_CATEGORIES, CURRENCIES } from '@/utils/constants';
 import { securityUtils } from '@/utils/security';
+import { Calendar, Clock, MapPin, Users, DollarSign, Settings } from 'lucide-react';
 
 // Validation schema
 const eventSchema = yup.object().shape({

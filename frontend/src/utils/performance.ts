@@ -1,4 +1,6 @@
-// Performance monitoring utilities
+// Performance monitoring utilities for React/Astro architecture
+// Compatible with: React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons
+
 export const performanceUtils = {
   // Measure Core Web Vitals
   measureCoreWebVitals: () => {
@@ -89,46 +91,84 @@ export const performanceUtils = {
   },
 };
 
-// Service Worker registration for PWA
+// Service Worker registration for PWA (Astro-compatible)
 export const registerServiceWorker = () => {
-  if ('serviceWorker' in navigator) {
-    // Simple service worker registration for basic caching
-    navigator.serviceWorker.register('/sw.js').then((registration) => {
-      console.log('Service Worker registered:', registration);
-    }).catch((error) => {
-      console.log('Service Worker registration failed:', error);
+  // Check if running in browser environment (Astro SSR compatibility)
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+
+  // Register service worker for caching and offline support
+  navigator.serviceWorker.register('/sw.js')
+    .then((registration) => {
+      console.log('Service Worker registered for PWA:', registration.scope);
+
+      // Handle updates
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New content available, notify user
+              console.log('New content available, please refresh.');
+            }
+          });
+        }
+      });
+    })
+    .catch((error) => {
+      console.error('Service Worker registration failed:', error);
     });
-  }
 };
 
-// Preload critical resources
+// Preload critical resources (optimized for Astro SSR)
 export const preloadCriticalResources = () => {
-  // Preload critical fonts
-  const fontLink = document.createElement('link');
-  fontLink.rel = 'preload';
-  fontLink.href = '/fonts/roboto-regular.woff2';
-  fontLink.as = 'font';
-  fontLink.type = 'font/woff2';
-  fontLink.crossOrigin = 'anonymous';
-  document.head.appendChild(fontLink);
+  // Check if running in browser environment (Astro SSR compatibility)
+  if (typeof document === 'undefined') return;
 
-  // Preload critical images
-  const heroImage = document.createElement('link');
-  heroImage.rel = 'preload';
-  heroImage.href = '/images/hero-bg.webp';
-  heroImage.as = 'image';
-  document.head.appendChild(heroImage);
+  // Preload critical fonts (Inter & Montserrat for Tailwind/shadcn)
+  const fontLinks = [
+    { href: '/fonts/inter-regular.woff2', family: 'Inter' },
+    { href: '/fonts/montserrat-regular.woff2', family: 'Montserrat' },
+  ];
+
+  fontLinks.forEach(({ href, family }) => {
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'preload';
+    fontLink.href = href;
+    fontLink.as = 'font';
+    fontLink.type = 'font/woff2';
+    fontLink.crossOrigin = 'anonymous';
+    document.head.appendChild(fontLink);
+  });
+
+  // Preload critical images (optimized for TradeConnect)
+  const criticalImages = [
+    '/images/hero-bg.webp',
+    '/images/logo-tradeconnect.webp',
+  ];
+
+  criticalImages.forEach(href => {
+    const imageLink = document.createElement('link');
+    imageLink.rel = 'preload';
+    imageLink.href = href;
+    imageLink.as = 'image';
+    document.head.appendChild(imageLink);
+  });
 };
 
-// Intersection Observer for lazy loading
+// Intersection Observer for lazy loading (React/Astro optimized)
 export const createIntersectionObserver = (
   callback: IntersectionObserverCallback,
   options: IntersectionObserverInit = {}
 ) => {
+  // Check if running in browser environment (Astro SSR compatibility)
+  if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+    return null; // Return null for SSR
+  }
+
   const defaultOptions: IntersectionObserverInit = {
     root: null,
-    rootMargin: '50px',
-    threshold: 0.1,
+    rootMargin: '50px', // Pre-load before entering viewport
+    threshold: 0.1, // Trigger when 10% visible
     ...options,
   };
 
@@ -194,14 +234,28 @@ export const cacheUtils = {
   },
 };
 
-// Error boundary performance monitoring
+// Error boundary performance monitoring (React/Astro compatible)
 export const logError = (error: Error, errorInfo?: any) => {
-  console.error('Application Error:', error, errorInfo);
+  // Enhanced error logging for React/Astro architecture
+  const errorContext = {
+    error: {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    },
+    errorInfo,
+    timestamp: new Date().toISOString(),
+    url: typeof window !== 'undefined' ? window.location.href : 'SSR',
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'SSR',
+    environment: import.meta.env.MODE,
+  };
+
+  console.error('Application Error:', errorContext);
 
   // In production, send to error reporting service
   if (import.meta.env.PROD) {
     // Example: send to Sentry, LogRocket, etc.
-    // errorReportingService.captureException(error, { extra: errorInfo });
+    // errorReportingService.captureException(error, { extra: errorContext });
   }
 };
 

@@ -1,3 +1,24 @@
+/**
+ * @fileoverview Página de Agenda del Speaker
+ * @description Calendario y gestión de participaciones programadas como ponente
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -95,224 +116,200 @@ const SpeakerSchedulePage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <div className="max-w-7xl mx-auto py-8">
       {/* Header */}
-      <Box component={"div" as any} sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Mi Agenda de Speaker
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Mi Agenda de Speaker</h1>
+        <p className="text-muted-foreground">
           Calendario de participaciones y sesiones programadas
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <Grid container spacing={3}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Calendar/Date Selector */}
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Próximas Fechas
-            </Typography>
-            <List>
+        <div className="lg:col-span-1">
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Próximas Fechas</h2>
+            <div className="space-y-2">
               {upcomingDates.map((date) => (
-                <ListItem
+                <button
                   key={date}
-                  button
-                  selected={selectedDate === date}
                   onClick={() => setSelectedDate(date)}
-                  sx={{
-                    borderRadius: 1,
-                    mb: 1,
-                    '&.Mui-selected': {
-                      bgcolor: 'primary.main',
-                      color: 'white',
-                      '&:hover': {
-                        bgcolor: 'primary.dark',
-                      },
-                    },
-                  }}
+                  className={cn(
+                    "w-full p-3 text-left rounded-lg transition-colors",
+                    selectedDate === date
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted"
+                  )}
                 >
-                  <CalendarToday sx={{ mr: 2 }} />
-                  <ListItemText
-                    primary={new Date(date).toLocaleDateString('es-GT', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                    secondary={
-                      schedule.find((s) => s.date === date)?.events.length + ' eventos'
-                    }
-                  />
-                </ListItem>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium">
+                        {new Date(date).toLocaleDateString('es-GT', {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {schedule.find((s) => s.date === date)?.events.length} eventos
+                      </p>
+                    </div>
+                  </div>
+                </button>
               ))}
-            </List>
+            </div>
 
-            <Divider sx={{ my: 2 }} />
+            <hr className="my-6" />
 
-            <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Resumen del Mes
-            </Typography>
-            <Box component={"div" as any} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">Total Eventos:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+            <h3 className="font-semibold mb-4">Resumen del Mes</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Total Eventos:</span>
+                <span className="text-sm font-bold">
                   {schedule.reduce((acc, s) => acc + s.events.length, 0)}
-                </Typography>
-              </Box>
-              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">Keynotes:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Keynotes:</span>
+                <span className="text-sm font-bold">
                   {schedule.reduce(
                     (acc, s) => acc + s.events.filter((e) => e.type === 'keynote').length,
                     0
                   )}
-                </Typography>
-              </Box>
-              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">Paneles:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Paneles:</span>
+                <span className="text-sm font-bold">
                   {schedule.reduce(
                     (acc, s) => acc + s.events.filter((e) => e.type === 'panel').length,
                     0
                   )}
-                </Typography>
-              </Box>
-              <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2">Talleres:</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Talleres:</span>
+                <span className="text-sm font-bold">
                   {schedule.reduce(
                     (acc, s) => acc + s.events.filter((e) => e.type === 'workshop').length,
                     0
                   )}
-                </Typography>
-              </Box>
-            </Box>
-          </Paper>
-        </Grid>
+                </span>
+              </div>
+            </div>
+          </Card>
+        </div>
 
         {/* Schedule Details */}
-        <Grid item xs={12} md={8}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+        <div className="lg:col-span-2">
+          <h2 className="text-xl font-semibold mb-6">
             {new Date(selectedDate).toLocaleDateString('es-GT', {
               weekday: 'long',
               year: 'numeric',
               month: 'long',
               day: 'numeric',
             })}
-          </Typography>
+          </h2>
 
           {currentSchedule?.events.map((event, index) => (
-            <Card key={event.id} sx={{ mb: 3 }}>
-              <CardContent>
-                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                  <Box component={"div" as any}>
-                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                      {event.title}
-                    </Typography>
-                    <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                      <Chip
-                        label={getTypeLabel(event.type)}
-                        color={getTypeColor(event.type)}
-                        size="small"
-                      />
+            <Card key={event.id} className="mb-6">
+              <CardContent className="pt-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">{event.title}</h3>
+                    <div className="flex gap-2 mt-2">
+                      <Badge
+                        variant={event.type === 'keynote' ? 'default' : 'secondary'}
+                        className={cn(
+                          event.type === 'keynote' ? 'bg-red-100 text-red-800' :
+                          event.type === 'panel' ? 'bg-orange-100 text-orange-800' :
+                          'bg-blue-100 text-blue-800'
+                        )}
+                      >
+                        {getTypeLabel(event.type)}
+                      </Badge>
                       {event.isVirtual && (
-                        <Chip
-                          icon={<Videocam />}
-                          label="Virtual"
-                          color="info"
-                          size="small"
-                        />
+                        <Badge variant="outline" className="flex items-center gap-1">
+                          <Video className="w-3 h-3" />
+                          Virtual
+                        </Badge>
                       )}
-                    </Box>
-                  </Box>
-                  <Avatar
-                    sx={{
-                      bgcolor: 'primary.main',
-                      width: 56,
-                      height: 56,
-                      fontSize: '1.5rem',
-                    }}
-                  >
-                    {index + 1}
+                    </div>
+                  </div>
+                  <Avatar className="w-14 h-14 bg-primary text-primary-foreground text-lg">
+                    <AvatarFallback>{index + 1}</AvatarFallback>
                   </Avatar>
-                </Box>
+                </div>
 
-                <Divider sx={{ my: 2 }} />
+                <hr className="my-4" />
 
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <AccessTime color="action" />
-                      <Typography variant="body2">{event.time}</Typography>
-                    </Box>
-                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <LocationOn color="action" />
-                      <Typography variant="body2">{event.location}</Typography>
-                    </Box>
-                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <People color="action" />
-                      <Typography variant="body2">
-                        {event.attendees} asistentes esperados
-                      </Typography>
-                    </Box>
-                  </Grid>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{event.time}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{event.location}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{event.attendees} asistentes esperados</span>
+                    </div>
+                  </div>
 
-                  <Grid item xs={12} sm={6}>
-                    <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
-                      <Description color="action" />
-                      <Box component={"div" as any}>
-                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                          Preparación:
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {event.preparation}
-                        </Typography>
-                      </Box>
-                    </Box>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2">
+                      <FileText className="w-4 h-4 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium">Preparación:</p>
+                        <p className="text-sm text-muted-foreground">{event.preparation}</p>
+                      </div>
+                    </div>
                     {event.notes && (
-                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                        <Description color="action" />
-                        <Box component={"div" as any}>
-                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                            Notas:
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {event.notes}
-                          </Typography>
-                        </Box>
-                      </Box>
+                      <div className="flex items-start gap-2">
+                        <FileText className="w-4 h-4 text-muted-foreground mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium">Notas:</p>
+                          <p className="text-sm text-muted-foreground">{event.notes}</p>
+                        </div>
+                      </div>
                     )}
-                  </Grid>
-                </Grid>
+                  </div>
+                </div>
 
-                <Box component={"div" as any} sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                  <Button variant="contained" size="small">
+                <div className="flex gap-2 mt-6">
+                  <Button size="sm">
                     Ver Detalles del Evento
                   </Button>
-                  <Button variant="outlined" size="small">
+                  <Button size="sm" variant="outline">
                     Agregar Nota
                   </Button>
                   {event.isVirtual && (
-                    <Button variant="outlined" color="info" size="small">
+                    <Button size="sm" variant="outline">
+                      <Video className="w-4 h-4 mr-2" />
                       Link de Reunión
                     </Button>
                   )}
-                </Box>
+                </div>
               </CardContent>
             </Card>
           ))}
 
           {!currentSchedule?.events.length && (
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="h6" color="text.secondary">
+            <Card className="p-8 text-center">
+              <p className="text-muted-foreground">
                 No hay eventos programados para esta fecha
-              </Typography>
-            </Paper>
+              </p>
+            </Card>
           )}
-        </Grid>
-      </Grid>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 };
 

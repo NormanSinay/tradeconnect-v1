@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Footer - Componente de footer para páginas públicas
+ * @description Footer completo con enlaces, información de contacto y redes sociales
+ *
+ * Arquitectura:
+ * - React (componentes interactivos) → Enlaces de navegación, formularios
+ * - Astro (routing y SSR) → Compatible con SSR, navegación del lado cliente
+ * - shadcn/ui (componentes UI) → Button, Input, Separator para interfaz consistente
+ * - Tailwind CSS (estilos) → Estilos utilitarios para layout responsivo
+ * - Radix UI (primitivos accesibles) → Primitivos en shadcn/ui
+ * - Lucide Icons (iconos) → Iconos modernos y consistentes
+ *
+ * @version 2.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';

@@ -2,57 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import {
-  Container,
-  Typography,
-  Box,
-  Grid,
-  Paper,
-  Card,
-  CardContent,
-  Tabs,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Button,
-  Avatar,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Alert,
-  CircularProgress,
-  Menu,
-} from '@mui/material';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 import { adminService } from '@/services/api';
 import toast from 'react-hot-toast';
 import {
-  Dashboard,
-  Event,
-  People,
-  Payment,
+  LayoutDashboard,
+  Calendar,
+  Users,
+  CreditCard,
   TrendingUp,
   Edit,
-  Delete,
-  Add,
-  MoreVert,
+  Trash2,
+  Plus,
+  MoreVertical,
   CheckCircle,
   Settings,
-  Security,
+  Shield,
   Code,
-  Api,
-} from '@mui/icons-material';
+  Zap,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -62,7 +43,7 @@ interface TabPanelProps {
 
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index}>
-    {value === index && <Box component={"div" as any} sx={{ py: 3 }}>{children}</Box>}
+    {value === index && <div className="py-3">{children}</div>}
   </div>
 );
 

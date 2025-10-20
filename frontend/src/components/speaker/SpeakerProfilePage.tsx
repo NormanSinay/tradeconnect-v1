@@ -1,3 +1,24 @@
+/**
+ * @fileoverview Página de Perfil del Speaker
+ * @description Gestión completa del perfil de speaker con contratos, pagos y evaluaciones
+ *
+ * Arquitectura Recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,7 +45,7 @@ interface TabPanelProps {
 
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index}>
-    {value === index && <Box component={"div" as any} sx={{ py: 3 }}>{children}</Box>}
+    {value === index && <div className="py-6">{children}</div>}
   </div>
 );
 
@@ -129,103 +150,109 @@ const SpeakerProfilePage: React.FC = () => {
   const formatCurrency = (amount: number) => `Q${amount.toLocaleString()}`;
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <div className="max-w-7xl mx-auto py-8">
       {/* Header with Profile Info */}
-      <Paper sx={{ p: 3, mb: 4 }}>
-        <Grid container spacing={3}>
-          <Grid item>
-            <Avatar
-              sx={{
-                width: 120,
-                height: 120,
-                bgcolor: 'primary.main',
-                fontSize: '3rem',
-              }}
-            >
+      <Card className="p-6 mb-8">
+        <div className="flex gap-6">
+          <Avatar className="w-32 h-32 bg-primary text-primary-foreground text-4xl">
+            <AvatarFallback>
               {speakerProfile.firstName[0]}
               {speakerProfile.lastName[0]}
-            </Avatar>
-          </Grid>
-          <Grid item xs>
-            <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-              <Box component={"div" as any}>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {speakerProfile.firstName} {speakerProfile.lastName}
-                </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                  {speakerProfile.email} • {speakerProfile.phone}
-                </Typography>
-                <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <Rating value={speakerProfile.rating} readOnly precision={0.1} />
-                  <Typography variant="body2">
-                    {speakerProfile.rating} ({speakerProfile.totalEvaluations} evaluaciones)
-                  </Typography>
-                </Box>
-                <Box component={"div" as any} sx={{ display: 'flex', gap: 1, mb: 2 }}>
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <div className="flex justify-between items-start">
+              <div className="space-y-4">
+                <div>
+                  <h1 className="text-3xl font-bold">
+                    {speakerProfile.firstName} {speakerProfile.lastName}
+                  </h1>
+                  <p className="text-muted-foreground">
+                    {speakerProfile.email} • {speakerProfile.phone}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="font-medium">{speakerProfile.rating}</span>
+                  </div>
+                  <span className="text-muted-foreground">
+                    ({speakerProfile.totalEvaluations} evaluaciones)
+                  </span>
+                </div>
+                <div className="flex gap-2">
                   {speakerProfile.specialties.map((specialty) => (
-                    <Chip key={specialty} label={specialty} color="primary" size="small" />
+                    <Badge key={specialty} variant="secondary">
+                      {specialty}
+                    </Badge>
                   ))}
-                </Box>
-                <Box component={"div" as any} sx={{ display: 'flex', gap: 2 }}>
+                </div>
+                <div className="flex gap-2">
                   {speakerProfile.linkedinUrl && (
-                    <Button
-                      size="small"
-                      startIcon={<LinkedIn />}
-                      href={speakerProfile.linkedinUrl}
-                      target="_blank"
-                    >
-                      LinkedIn
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={speakerProfile.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                        <Linkedin className="w-4 h-4 mr-2" />
+                        LinkedIn
+                      </a>
                     </Button>
                   )}
                   {speakerProfile.websiteUrl && (
-                    <Button
-                      size="small"
-                      startIcon={<Language />}
-                      href={speakerProfile.websiteUrl}
-                      target="_blank"
-                    >
-                      Sitio Web
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={speakerProfile.websiteUrl} target="_blank" rel="noopener noreferrer">
+                        <Globe className="w-4 h-4 mr-2" />
+                        Sitio Web
+                      </a>
                     </Button>
                   )}
-                </Box>
-              </Box>
-              <Button variant="outlined" startIcon={<Edit />}>
+                </div>
+              </div>
+              <Button variant="outline">
+                <Edit className="w-4 h-4 mr-2" />
                 Editar Perfil
               </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Tabs */}
-      <Paper>
-        <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} variant="fullWidth">
-          <Tab icon={<Description />} label="Contratos" />
-          <Tab icon={<AttachMoney />} label="Pagos" />
-          <Tab icon={<Star />} label="Evaluaciones" />
-        </Tabs>
+      <Card>
+        <Tabs value={activeTab.toString()} onValueChange={(value) => setActiveTab(parseInt(value))} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="0" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Contratos
+            </TabsTrigger>
+            <TabsTrigger value="1" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Pagos
+            </TabsTrigger>
+            <TabsTrigger value="2" className="flex items-center gap-2">
+              <Star className="w-4 h-4" />
+              Evaluaciones
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Contracts Tab */}
-        <TabPanel value={activeTab} index={0}>
-          <TableContainer>
+        <TabsContent value="0" className="mt-6">
+          <div className="overflow-x-auto">
             <Table>
-              <TableHead>
+              <TableHeader>
                 <TableRow>
-                  <TableCell>Evento</TableCell>
-                  <TableCell>Tipo</TableCell>
-                  <TableCell>Honorarios</TableCell>
-                  <TableCell>Fecha del Evento</TableCell>
-                  <TableCell>Firmado</TableCell>
-                  <TableCell>Estado</TableCell>
-                  <TableCell>Acciones</TableCell>
+                  <TableHead>Evento</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Honorarios</TableHead>
+                  <TableHead>Fecha del Evento</TableHead>
+                  <TableHead>Firmado</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
-              </TableHead>
+              </TableHeader>
               <TableBody>
                 {contracts.map((contract) => (
                   <TableRow key={contract.id}>
                     <TableCell>{contract.eventTitle}</TableCell>
                     <TableCell>{contract.type}</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>
+                    <TableCell className="font-bold">
                       {formatCurrency(contract.fee)}
                     </TableCell>
                     <TableCell>
@@ -235,76 +262,72 @@ const SpeakerProfilePage: React.FC = () => {
                       {new Date(contract.signedDate).toLocaleDateString('es-GT')}
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        label={contract.status === 'active' ? 'Activo' : 'Pendiente'}
-                        color={getStatusColor(contract.status)}
-                        size="small"
-                      />
+                      <Badge
+                        variant={contract.status === 'active' ? 'default' : 'secondary'}
+                        className={cn(
+                          contract.status === 'active' ? 'bg-green-100 text-green-800' : ''
+                        )}
+                      >
+                        {contract.status === 'active' ? 'Activo' : 'Pendiente'}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button size="small">Ver Contrato</Button>
+                      <Button size="sm" variant="outline">Ver Contrato</Button>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </TableContainer>
-        </TabPanel>
+          </div>
+        </TabsContent>
 
-        {/* Payments Tab */}
-        <TabPanel value={activeTab} index={1}>
-          <Box component={"div" as any} sx={{ mb: 3 }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
-                <Card sx={{ bgcolor: 'success.main', color: 'white' }}>
-                  <CardContent>
-                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                      {formatCurrency(5000)}
-                    </Typography>
-                    <Typography variant="body2">Total Pagado (este mes)</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Card sx={{ bgcolor: 'warning.main', color: 'white' }}>
-                  <CardContent>
-                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                      {formatCurrency(4000)}
-                    </Typography>
-                    <Typography variant="body2">Pendiente de Pago</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Card sx={{ bgcolor: 'primary.main', color: 'white' }}>
-                  <CardContent>
-                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                      {formatCurrency(18000)}
-                    </Typography>
-                    <Typography variant="body2">Total Año 2024</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </Box>
+        <TabsContent value="1" className="mt-6">
+          <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-green-600 text-white">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold mb-2">
+                    {formatCurrency(5000)}
+                  </div>
+                  <p className="text-sm">Total Pagado (este mes)</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-orange-600 text-white">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold mb-2">
+                    {formatCurrency(4000)}
+                  </div>
+                  <p className="text-sm">Pendiente de Pago</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-primary text-primary-foreground">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold mb-2">
+                    {formatCurrency(18000)}
+                  </div>
+                  <p className="text-sm">Total Año 2024</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
 
-          <TableContainer>
+          <div className="overflow-x-auto">
             <Table>
-              <TableHead>
+              <TableHeader>
                 <TableRow>
-                  <TableCell>Evento</TableCell>
-                  <TableCell>Monto</TableCell>
-                  <TableCell>Método</TableCell>
-                  <TableCell>Fecha</TableCell>
-                  <TableCell>Estado</TableCell>
-                  <TableCell>Acciones</TableCell>
+                  <TableHead>Evento</TableHead>
+                  <TableHead>Monto</TableHead>
+                  <TableHead>Método</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
-              </TableHead>
+              </TableHeader>
               <TableBody>
                 {payments.map((payment) => (
                   <TableRow key={payment.id}>
                     <TableCell>{payment.eventTitle}</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>
+                    <TableCell className="font-bold">
                       {formatCurrency(payment.amount)}
                     </TableCell>
                     <TableCell>{payment.method}</TableCell>
@@ -314,79 +337,75 @@ const SpeakerProfilePage: React.FC = () => {
                         : `Vence: ${new Date(payment.dueDate!).toLocaleDateString('es-GT')}`}
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        label={payment.status === 'paid' ? 'Pagado' : 'Pendiente'}
-                        color={getStatusColor(payment.status)}
-                        size="small"
-                      />
+                      <Badge
+                        variant={payment.status === 'paid' ? 'default' : 'secondary'}
+                        className={cn(
+                          payment.status === 'paid' ? 'bg-green-100 text-green-800' : ''
+                        )}
+                      >
+                        {payment.status === 'paid' ? 'Pagado' : 'Pendiente'}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button size="small">Ver Recibo</Button>
+                      <Button size="sm" variant="outline">Ver Recibo</Button>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </TableContainer>
-        </TabPanel>
+          </div>
+        </TabsContent>
 
-        {/* Evaluations Tab */}
-        <TabPanel value={activeTab} index={2}>
+        <TabsContent value="2" className="mt-6">
           {evaluations.map((evaluation) => (
-            <Card key={evaluation.id} sx={{ mb: 3 }}>
-              <CardContent>
-                <Box component={"div" as any} sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                  <Box component={"div" as any}>
-                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                      {evaluation.eventTitle}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(evaluation.date).toLocaleDateString('es-GT')} • {evaluation.attendees}{' '}
-                      asistentes
-                    </Typography>
-                  </Box>
-                  <Box component={"div" as any} sx={{ textAlign: 'right' }}>
-                    <Rating value={evaluation.rating} readOnly precision={0.1} />
-                    <Typography variant="body2">{evaluation.comments} comentarios</Typography>
-                  </Box>
-                </Box>
+            <Card key={evaluation.id} className="mb-6">
+              <CardContent className="pt-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">{evaluation.eventTitle}</h3>
+                    <p className="text-muted-foreground">
+                      {new Date(evaluation.date).toLocaleDateString('es-GT')} • {evaluation.attendees} asistentes
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-center gap-1 mb-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-medium">{evaluation.rating}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{evaluation.comments} comentarios</p>
+                  </div>
+                </div>
 
-                <Divider sx={{ my: 2 }} />
+                <hr className="my-4" />
 
-                <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  Desglose por Categoría
-                </Typography>
-                <Grid container spacing={2}>
+                <h4 className="font-semibold mb-4">Desglose por Categoría</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {evaluation.highlights.map((highlight) => (
-                    <Grid item xs={12} sm={4} key={highlight.category}>
-                      <Typography variant="body2" gutterBottom>
-                        {highlight.category}
-                      </Typography>
-                      <Box component={"div" as any} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <LinearProgress
-                          variant="determinate"
+                    <div key={highlight.category}>
+                      <p className="text-sm mb-2">{highlight.category}</p>
+                      <div className="flex items-center gap-2">
+                        <Progress
                           value={(highlight.score / 5) * 100}
-                          sx={{ flex: 1, height: 8, borderRadius: 4 }}
+                          className="flex-1 h-2"
                         />
-                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                          {highlight.score}
-                        </Typography>
-                      </Box>
-                    </Grid>
+                        <span className="text-sm font-bold">{highlight.score}</span>
+                      </div>
+                    </div>
                   ))}
-                </Grid>
+                </div>
 
-                <Box component={"div" as any} sx={{ mt: 2 }}>
-                  <Button size="small" variant="outlined">
+                <div className="mt-4">
+                  <Button size="sm" variant="outline">
                     Ver Todos los Comentarios
                   </Button>
-                </Box>
+                </div>
               </CardContent>
             </Card>
           ))}
-        </TabPanel>
-      </Paper>
-    </Container>
+        </TabsContent>
+        </Tabs>
+      </Card>
+    </div>
   );
 };
 

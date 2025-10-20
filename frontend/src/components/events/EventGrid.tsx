@@ -1,3 +1,33 @@
+/**
+ * @fileoverview EventGrid - Grid responsivo para mostrar eventos
+ * @description Componente React que renderiza una cuadrícula responsiva de tarjetas de eventos.
+ * Incluye estados de carga, paginación infinita y manejo de estados vacíos.
+ *
+ * Arquitectura:
+ * - React: Componentes funcionales con props tipadas
+ *   ↓
+ * - Astro: Routing y SSR - Compatible con hidratación del lado cliente
+ *   ↓
+ * - shadcn/ui: Componentes UI preconstruidos (Button, Skeleton)
+ *   ↓
+ * - Tailwind CSS: Estilos utilitarios para diseño responsivo y moderno
+ *   ↓
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ *   ↓
+ * - Lucide Icons: No aplica (componente no usa iconos)
+ *
+ * Características:
+ * - Grid responsivo con columnas configurables
+ * - Estados de carga con skeletons
+ * - Paginación infinita con botón "Cargar más"
+ * - Estados vacíos informativos
+ * - Compatibilidad completa con SSR de Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';

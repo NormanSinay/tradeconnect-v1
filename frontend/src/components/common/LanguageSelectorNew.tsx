@@ -1,5 +1,28 @@
+/**
+ * @fileoverview LanguageSelectorNew - Selector de idioma avanzado
+ * @description Componente React para cambio de idioma con diseño moderno
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Selector de idioma con diseño moderno
+ * - Indicador visual de idioma seleccionado
+ * - Integración completa con sistema de traducción
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React from 'react';
-import { FaLanguage, FaCheck } from 'react-icons/fa';
+import { Languages, Check } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,8 +38,9 @@ const languages = [
 ];
 
 /**
- * LanguageSelectorNew - Selector de idioma con dropdown
- * Migrado de MUI Menu a shadcn/ui DropdownMenu
+ * LanguageSelectorNew - Selector de idioma avanzado
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
  */
 const LanguageSelectorNew: React.FC = () => {
   const { changeLanguage, getCurrentLanguage } = useTranslation();
@@ -39,7 +63,7 @@ const LanguageSelectorNew: React.FC = () => {
           aria-label="Cambiar idioma / Change language"
           title="Cambiar idioma / Change language"
         >
-          <FaLanguage className="h-5 w-5" />
+          <Languages className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
@@ -58,7 +82,7 @@ const LanguageSelectorNew: React.FC = () => {
                 <span className="font-medium">{language.name}</span>
               </div>
               {isSelected && (
-                <FaCheck className="h-4 w-4 text-primary-600" />
+                <Check className="h-4 w-4 text-primary-600" />
               )}
             </DropdownMenuItem>
           );

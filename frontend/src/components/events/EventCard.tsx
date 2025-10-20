@@ -1,3 +1,27 @@
+/**
+ * @fileoverview EventCard - Tarjeta de evento moderna
+ * @description Componente React para mostrar información de eventos en tarjetas
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Tarjeta de evento con imagen y detalles
+ * - Funcionalidad de favoritos
+ * - Integración con carrito de compras
+ * - Estados de carga con skeletons
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +44,11 @@ import { useCart } from '@/context/CartContext';
 import type { EventCardProps } from '@/types/event.types';
 import { cn } from '@/lib/utils';
 
+/**
+ * EventCard - Tarjeta de evento moderna
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const EventCard: React.FC<EventCardProps> = ({
   event,
   onViewDetails,

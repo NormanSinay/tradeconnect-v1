@@ -1,8 +1,29 @@
+/**
+ * @fileoverview ToastContainer - Contenedor de notificaciones toast
+ * @description Componente React para mostrar notificaciones toast con Material-UI
+ *
+ * NOTA: Este archivo usa Material-UI y debe ser migrado a la nueva arquitectura.
+ * Para nueva implementación, crear un componente con shadcn/ui y react-hot-toast.
+ *
+ * Arquitectura Legacy: React + Material-UI + react-hot-toast
+ * - React: Componentes interactivos con hooks
+ * - Material-UI: Framework de componentes UI
+ * - react-hot-toast: Biblioteca de notificaciones
+ *
+ * @deprecated Use toast implementation with shadcn/ui instead
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useEffect } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@mui/material';
 
+/**
+ * ToastContainer - Contenedor legacy de notificaciones
+ * @deprecated Use toast implementation with shadcn/ui instead
+ */
 const ToastContainer: React.FC = () => {
   const theme = useTheme();
 

@@ -2,9 +2,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
+// Optimized React Query hooks for React/Astro architecture
+// Compatible with: React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons
+
 /**
  * Hook personalizado para queries optimizadas con React Query
  * Incluye configuración predeterminada para mejor rendimiento y UX
+ * SSR-safe para integración con Astro
  */
 export const useOptimizedQuery = <TData = unknown, TError = unknown>(
   key: string[],
@@ -29,6 +33,8 @@ export const useOptimizedQuery = <TData = unknown, TError = unknown>(
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+    // SSR-safe: disable for server-side rendering
+    enabled: typeof window !== 'undefined' && (options.enabled ?? true),
     ...options,
   });
 };
@@ -49,13 +55,16 @@ export const useOptimizedMutation = <TData = unknown, TError = unknown, TVariabl
 };
 
 /**
- * Hook para prefetching inteligente de datos
+ * Hook para prefetching inteligente de datos (SSR-safe)
  */
 export const usePrefetch = () => {
   const queryClient = useQueryClient();
 
   const prefetchQuery = useCallback(
     <TData = unknown>(key: string[], queryFn: () => Promise<TData>) => {
+      // Only prefetch on client-side
+      if (typeof window === 'undefined') return;
+
       queryClient.prefetchQuery({
         queryKey: key,
         queryFn,
@@ -67,6 +76,9 @@ export const usePrefetch = () => {
 
   const prefetchInfiniteQuery = useCallback(
     <TData = unknown>(key: string[], queryFn: (pageParam: any) => Promise<TData>) => {
+      // Only prefetch on client-side
+      if (typeof window === 'undefined') return;
+
       queryClient.prefetchInfiniteQuery({
         queryKey: key,
         queryFn: ({ pageParam = 1 }) => queryFn(pageParam),

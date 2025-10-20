@@ -1,6 +1,8 @@
 import DOMPurify from 'isomorphic-dompurify';
 
-// Security utilities for frontend protection
+// Security utilities for React/Astro architecture
+// Compatible with: React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui → Tailwind CSS → Radix UI → React Icons
+
 export const securityUtils = {
   // Input sanitization
   sanitizeInput: (input: string): string => {
@@ -224,8 +226,21 @@ export const securityUtils = {
     },
   },
 
-  // XSS prevention for dynamic content
+  // XSS prevention for dynamic content (Astro SSR compatible)
   escapeHtml: (text: string): string => {
+    // Check if running in browser environment (Astro SSR compatibility)
+    if (typeof document === 'undefined') {
+      // Server-side: use a simple HTML entity encoding
+      return text
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"')
+        .replace(/'/g, '&#x27;')
+        .replace(/\//g, '&#x2F;');
+    }
+
+    // Client-side: use DOM-based escaping
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
@@ -284,10 +299,15 @@ export const securityUtils = {
     return { isValid: true };
   },
 
-  // Session management
+  // Session management (React/Astro compatible)
   sessionManager: {
     // Auto-logout after inactivity
     startInactivityTimer: (timeoutMs: number = 30 * 60 * 1000, callback: () => void): (() => void) => {
+      // Check if running in browser environment (Astro SSR compatibility)
+      if (typeof document === 'undefined' || typeof window === 'undefined') {
+        return () => {}; // Return empty cleanup function for SSR
+      }
+
       let timeoutId: NodeJS.Timeout;
 
       const resetTimer = () => {
@@ -357,24 +377,27 @@ export const securityUtils = {
     },
   },
 
-  // Error reporting (client-side)
+  // Error reporting (React/Astro compatible)
   errorReporter: {
     reportError: (error: Error, context?: any): void => {
-      console.error('Application Error:', error, context);
+      // Enhanced error context for React/Astro architecture
+      const errorData = {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        context,
+        timestamp: new Date().toISOString(),
+        url: typeof window !== 'undefined' ? window.location.href : 'SSR',
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'SSR',
+        environment: import.meta.env.MODE,
+        framework: 'React/Astro',
+      };
+
+      console.error('Application Error:', errorData);
 
       // In production, send to error reporting service
       if (import.meta.env.PROD) {
-        // Example: send to error reporting service
-        const errorData = {
-          message: error.message,
-          stack: error.stack,
-          context,
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent,
-          url: window.location.href,
-        };
-
-        // Send to error reporting service (implement based on your service)
+        // Example: send to Sentry, LogRocket, etc.
         // errorReportingService.captureError(errorData);
       }
     },

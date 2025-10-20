@@ -1,3 +1,33 @@
+/**
+ * @fileoverview EventFilters - Panel de filtros avanzados para eventos
+ * @description Componente React que proporciona filtros interactivos para búsqueda y filtrado de eventos.
+ * Implementa filtros por categoría, tipo, modalidad, precio, fechas y ubicación con interfaz responsiva.
+ *
+ * Arquitectura:
+ * - React: Componentes interactivos con hooks de estado y efectos
+ *   ↓
+ * - Astro: Routing y SSR - Compatible con hidratación del lado cliente
+ *   ↓
+ * - shadcn/ui: Componentes UI preconstruidos (Card, Button, Input, Checkbox, Slider, Accordion, Badge)
+ *   ↓
+ * - Tailwind CSS: Estilos utilitarios para diseño responsivo y moderno
+ *   ↓
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ *   ↓
+ * - Lucide Icons: Iconografía moderna y consistente (Search, X, Filter, MapPin, Calendar, DollarSign, Loader2)
+ *
+ * Características:
+ * - Búsqueda debounced para optimización de rendimiento
+ * - Filtros múltiples con indicadores visuales
+ * - Interfaz responsiva con accordion para organización
+ * - Estados de carga y manejo de errores
+ * - Compatibilidad completa con SSR de Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ * @author TradeConnect Team
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

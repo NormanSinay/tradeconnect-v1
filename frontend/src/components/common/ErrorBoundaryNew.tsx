@@ -1,6 +1,29 @@
+/**
+ * @fileoverview ErrorBoundaryNew - Componente moderno de límite de error
+ * @description Componente React class-based para captura de errores con arquitectura moderna
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con class components y hooks
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Captura de errores en árbol de componentes
+ * - Reporte seguro de errores
+ * - UI moderna con shadcn/ui
+ * - Información técnica en desarrollo
+ * - Compatibilidad SSR con Astro
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
-import { FaExclamationTriangle, FaRedo, FaHome } from 'react-icons/fa';
+import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
 import { securityUtils } from '@/utils/security';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,8 +41,8 @@ interface State {
 }
 
 /**
- * ErrorBoundary - Componente que captura errores en el árbol de componentes
- * Migrado de MUI a Tailwind CSS + shadcn/ui
+ * ErrorBoundaryNew - Componente moderno de límite de error
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
  */
 class ErrorBoundaryNew extends Component<Props, State> {
   constructor(props: Props) {
@@ -68,7 +91,7 @@ class ErrorBoundaryNew extends Component<Props, State> {
           <Card className="max-w-2xl w-full shadow-lg">
             <CardHeader className="text-center pb-4">
               <div className="flex justify-center mb-4">
-                <FaExclamationTriangle className="text-6xl text-error" />
+                <AlertTriangle className="text-6xl text-destructive" />
               </div>
               <CardTitle className="text-3xl text-error">
                 ¡Ups! Algo salió mal
@@ -97,7 +120,7 @@ class ErrorBoundaryNew extends Component<Props, State> {
                   onClick={this.handleRetry}
                   className="gap-2"
                 >
-                  <FaRedo className="h-4 w-4" />
+                  <RotateCcw className="h-4 w-4" />
                   Intentar de nuevo
                 </Button>
 
@@ -115,7 +138,7 @@ class ErrorBoundaryNew extends Component<Props, State> {
                   onClick={() => window.location.href = '/'}
                   className="gap-2"
                 >
-                  <FaHome className="h-4 w-4" />
+                  <Home className="h-4 w-4" />
                   Ir al inicio
                 </Button>
               </div>

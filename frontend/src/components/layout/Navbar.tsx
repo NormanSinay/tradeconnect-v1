@@ -1,3 +1,17 @@
+/**
+ * @fileoverview Navbar Component - Arquitectura React/Astro + Tailwind CSS + shadcn/ui
+ *
+ * Arquitectura recomendada para migración:
+ * React (componentes interactivos) → Astro (routing y SSR) → shadcn/ui (componentes UI)
+ * → Tailwind CSS (estilos) → Radix UI (primitivos accesibles) → Lucide Icons (iconos)
+ *
+ * @version 2.0.0
+ * @author TradeConnect Team
+ * @description Componente de navegación principal con navegación responsiva,
+ * autenticación integrada, carrito de compras y búsqueda de eventos.
+ * Compatible con SSR de Astro y optimizado para performance.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -36,7 +50,7 @@ import MiniCart from '@/components/cart/MiniCart';
 import LanguageSelector from '@/components/common/LanguageSelector';
 import { useTranslation } from '@/hooks/useTranslation';
 
-const Navbar: React.FC = () => {
+export default function Navbar() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(max-width: 1024px)');
   const location = useLocation();
@@ -403,5 +417,7 @@ const Navbar: React.FC = () => {
       <div className="h-16" />
     </>
   );
-};
+}
+
+export { Navbar };
 

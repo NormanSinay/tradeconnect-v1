@@ -1,4 +1,24 @@
 /**
+ * @fileoverview index.ts - Punto central de exportación de servicios para TradeConnect
+ * @description Archivo que centraliza todas las exportaciones de servicios para facilitar su importación.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
+/**
  * TradeConnect Services Index
  * Central export point for all service modules
  */

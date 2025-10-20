@@ -1,3 +1,28 @@
+/**
+ * @fileoverview CartPage - Página principal del carrito de compras
+ * @description Componente React para gestión completa del carrito de compras
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Gestión completa del carrito con operaciones CRUD
+ * - Códigos promocionales y descuentos
+ * - Resumen de orden con cálculos automáticos
+ * - Estados de carga y manejo de errores
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ * - Integración con contexto de autenticación
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';

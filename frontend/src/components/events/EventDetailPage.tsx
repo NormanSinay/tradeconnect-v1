@@ -1,3 +1,29 @@
+/**
+ * @fileoverview EventDetailPage - Página de detalles de evento
+ * @description Componente React para mostrar información detallada de eventos
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Página completa de detalles de evento
+ * - Galería de imágenes con navegación
+ * - Información completa del evento
+ * - Sistema de favoritos y carrito
+ * - Compartir evento
+ * - Eventos relacionados
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -46,6 +72,11 @@ import { useAuth } from '@/context/AuthContext';
 import type { Event } from '@/types/event.types';
 import { cn } from '@/lib/utils';
 
+/**
+ * EventDetailPage - Página de detalles de evento
+ * Componente completamente migrado a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const EventDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

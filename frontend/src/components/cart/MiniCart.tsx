@@ -1,3 +1,27 @@
+/**
+ * @fileoverview MiniCart - Componente de carrito compacto
+ * @description Componente React para mostrar carrito en formato popover/dropdown
+ *
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ * - React: Componentes interactivos con hooks y state management
+ * - Astro: Server-side rendering (SSR) y routing
+ * - shadcn/ui: Componentes UI preconstruidos y accesibles
+ * - Tailwind CSS: Framework CSS utilitario para estilos
+ * - Radix UI: Primitivos accesibles subyacentes en shadcn/ui
+ * - Lucide Icons: Iconografía moderna y consistente
+ *
+ * Características:
+ * - Vista compacta del carrito en popover
+ * - Operaciones básicas de cantidad
+ * - Navegación rápida al carrito completo
+ * - Compatibilidad SSR con Astro
+ * - Diseño responsive con Tailwind CSS
+ * - Integración con contexto del carrito
+ *
+ * @version 1.0.0
+ * @since 2024
+ */
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -22,6 +46,11 @@ interface MiniCartProps {
   onOpen: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
+/**
+ * MiniCart - Componente de carrito compacto
+ * Migrado completamente a arquitectura moderna
+ * Arquitectura: React + Astro + Tailwind CSS + shadcn/ui + Radix UI + Lucide Icons
+ */
 const MiniCart: React.FC<MiniCartProps> = ({ anchorEl, onClose, onOpen }) => {
   const navigate = useNavigate();
   const { cart, updateItem, removeItem } = useCart();

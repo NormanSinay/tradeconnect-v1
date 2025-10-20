@@ -1,3 +1,23 @@
+/**
+ * @fileoverview felService.ts - Servicio FEL para TradeConnect
+ * @description Servicio que maneja la validación de NIT y CUI para facturación electrónica en Guatemala.
+ *
+ * Arquitectura recomendada:
+ * React (componentes interactivos)
+ *   ↓
+ * Astro (routing y SSR)
+ *   ↓
+ * shadcn/ui (componentes UI)
+ *   ↓
+ * Tailwind CSS (estilos)
+ *   ↓
+ * Radix UI (primitivos accesibles)
+ *   ↓
+ * Lucide Icons (iconos)
+ *
+ * @author TradeConnect Team
+ * @version 1.0.0
+ */
 import api from './api';
 import { apiService } from './api';
 
