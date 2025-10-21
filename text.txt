@@ -179,3 +179,14 @@ PÁGINAS ESPECIALES FALTANTES (6 páginas)
 /pago/pendiente - Pago pendiente confirmación
 ⚙️ A
 🔧 
+
+
+El proyecto TradeConnect ahora tiene una arquitectura completamente consistente donde:
+
+Las páginas están en .astro (framework Astro)
+Los componentes interactivos están en .tsx (React)
+El routing se maneja con Astro
+La UI usa shadcn/ui consistentemente
+Los estilos usan Tailwind CSS
+Los tipos están completamente tipados
+El backend se integra dinámicamente

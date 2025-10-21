@@ -1,39 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaCalendarAlt, FaCertificate, FaQrcode, FaCreditCard, FaBell, FaUser, FaCog, FaChartLine, FaClock, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
+import { FaCalendarAlt, FaCertificate, FaQrcode, FaCreditCard, FaBell, FaUser, FaCog, FaChartLine, FaClock, FaCheckCircle, FaExclamationTriangle, FaMapMarkerAlt } from 'react-icons/fa'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/context/AuthContext'
-import { api } from '@/services/api'
+import { userDashboardService, type DashboardStats, type UpcomingEvent, type RecentActivity } from '@/services/userDashboard.service'
 
-interface DashboardStats {
-  upcomingEvents: number
-  totalCertificates: number
-  activeQRCodes: number
-  pendingPayments: number
-  unreadNotifications: number
-}
-
-interface UpcomingEvent {
-  id: string
-  title: string
-  date: string
-  time: string
-  location: string
-  status: 'confirmed' | 'pending' | 'cancelled'
-}
-
-interface RecentActivity {
-  id: string
-  type: 'registration' | 'payment' | 'certificate' | 'notification'
-  title: string
-  description: string
-  date: string
-  status?: 'success' | 'pending' | 'failed'
-}
 
 export const UserDashboardPage: React.FC = () => {
   const navigate = useNavigate()
@@ -57,85 +32,12 @@ export const UserDashboardPage: React.FC = () => {
     try {
       setLoading(true)
 
-      // In a real app, you would call your API
-      // const response = await api.get('/user/dashboard')
+      // Obtener datos del servicio
+      const dashboardData = await userDashboardService.getDashboardData()
 
-      // Mock data for dashboard
-      const mockStats: DashboardStats = {
-        upcomingEvents: 3,
-        totalCertificates: 8,
-        activeQRCodes: 5,
-        pendingPayments: 1,
-        unreadNotifications: 2
-      }
-
-      const mockUpcomingEvents: UpcomingEvent[] = [
-        {
-          id: '1',
-          title: 'Conferencia Anual de Innovación Tecnológica',
-          date: '2024-02-15',
-          time: '09:00',
-          location: 'Centro de Convenciones, Ciudad de Guatemala',
-          status: 'confirmed'
-        },
-        {
-          id: '2',
-          title: 'Taller de Marketing Digital para Emprendedores',
-          date: '2024-03-20',
-          time: '14:00',
-          location: 'Hotel Marriott, Zona 10',
-          status: 'confirmed'
-        },
-        {
-          id: '3',
-          title: 'Seminario de Finanzas Personales',
-          date: '2024-04-10',
-          time: '10:00',
-          location: 'Centro Empresarial, Zona 4',
-          status: 'pending'
-        }
-      ]
-
-      const mockRecentActivity: RecentActivity[] = [
-        {
-          id: '1',
-          type: 'registration',
-          title: 'Inscripción confirmada',
-          description: 'Te has inscrito exitosamente al evento "Conferencia Anual de Innovación Tecnológica"',
-          date: '2024-01-15T10:30:00Z',
-          status: 'success'
-        },
-        {
-          id: '2',
-          type: 'certificate',
-          title: 'Certificado emitido',
-          description: 'Se ha emitido tu certificado para "Taller de Liderazgo Empresarial"',
-          date: '2024-01-12T16:45:00Z',
-          status: 'success'
-        },
-        {
-          id: '3',
-          type: 'payment',
-          title: 'Pago pendiente',
-          description: 'Tienes un pago pendiente por Q150.00 del evento "Seminario de Finanzas"',
-          date: '2024-01-10T09:15:00Z',
-          status: 'pending'
-        },
-        {
-          id: '4',
-          type: 'notification',
-          title: 'Recordatorio de evento',
-          description: 'El evento "Conferencia Anual" comienza en 2 días',
-          date: '2024-01-13T08:00:00Z'
-        }
-      ]
-
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      setStats(mockStats)
-      setUpcomingEvents(mockUpcomingEvents)
-      setRecentActivity(mockRecentActivity)
+      setStats(dashboardData.stats)
+      setUpcomingEvents(dashboardData.upcomingEvents)
+      setRecentActivity(dashboardData.recentActivity)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
     } finally {
