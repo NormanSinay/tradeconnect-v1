@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminEventEditPage from '@/components/admin/AdminEventEditPage'
+
+const title = "Editar Evento - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminEventEditPage client:load />
+</BaseLayout>

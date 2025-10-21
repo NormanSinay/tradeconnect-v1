@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminUserRolesPage from '@/components/admin/AdminUserRolesPage'
+
+const title = "Roles de Usuario - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminUserRolesPage client:load />
+</BaseLayout>

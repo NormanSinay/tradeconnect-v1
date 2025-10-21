@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminEventPublishPage from '@/components/admin/AdminEventPublishPage'
+
+const title = "Publicar Evento - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminEventPublishPage client:load />
+</BaseLayout>

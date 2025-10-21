@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminUserEditPage from '@/components/admin/AdminUserEditPage'
+
+const title = "Editar Usuario - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminUserEditPage client:load />
+</BaseLayout>

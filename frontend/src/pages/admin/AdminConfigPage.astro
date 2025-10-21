@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminConfigPage from '@/components/admin/AdminConfigPage'
+
+const title = "Configuración del Sistema - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminConfigPage client:load />
+</BaseLayout>

@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminCertificateBlockchainPage from '@/components/admin/AdminCertificateBlockchainPage'
+
+const title = "Certificados Blockchain - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminCertificateBlockchainPage client:load />
+</BaseLayout>

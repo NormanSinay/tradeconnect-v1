@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminFelPage from '@/components/admin/AdminFelPage'
+
+const title = "Panel de Facturación FEL - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminFelPage client:load />
+</BaseLayout>

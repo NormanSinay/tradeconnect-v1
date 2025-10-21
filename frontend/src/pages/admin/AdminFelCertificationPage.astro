@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminFelCertificationPage from '@/components/admin/AdminFelCertificationPage'
+
+const title = "Certificación SAT FEL - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminFelCertificationPage client:load />
+</BaseLayout>

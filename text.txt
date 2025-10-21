@@ -59,22 +59,7 @@ Arquitectura recomendada si migras:
 /pago/:id/detalle - Detalle pago específico
 /pago/:id/comprobante - Comprobante de pago
 
--------------------------------------------------------------
-
- PROCESO DE COMPRAS FALTANTE (12 páginas)
-/inscripcion/:eventoId - Formulario inscripción individual
-/inscripcion-grupal/:eventoId - Formulario inscripción grupal
-/checkout/resumen - Resumen de orden
-/aplicar-descuento - Aplicar código promocional
-/pago/metodo - Selección método de pago
-/pago/paypal - Integración PayPal
-/pago/stripe - Integración Stripe
-/pago/neonet - Integración NeoNet Guatemala
-/pago/bam - Integración BAM Pagos
-/pago/confirmacion/:ordenId - Confirmación pago exitoso
-/pago/error - Error en pago
-/pago/pendiente - Pago pendiente confirmación
-⚙️ ADMINISTRACIÓN COMPLETA FALTANTE
+ADMINISTRACIÓN COMPLETA FALTANTE
 Dashboard Administrativo (3 páginas)
 /admin - Dashboard principal admin
 /admin/inicio - Página inicio administrativa con KPIs
@@ -168,10 +153,29 @@ Sistema y Configuración (10 páginas)
 /admin/configuracion/backups - Gestión respaldos
 /admin/logs - Logs sistema
 /admin/auditoria - Auditoría cambios
-🔧 PÁGINAS ESPECIALES FALTANTES (6 páginas)
+
+PÁGINAS ESPECIALES FALTANTES (6 páginas)
 /404 - Página no encontrada
 /500 - Error servidor
 /mantenimiento - Página mantenimiento
 /no-autorizado - Acceso denegado (403)
 /estado-del-servicio - Status page
 */webhook/ ** - Callbacks pagos (PayPal, Stripe, etc.)
+
+-------------------------------------------------------------
+
+ PROCESO DE COMPRAS FALTANTE (12 páginas)
+/inscripcion/:eventoId - Formulario inscripción individual
+/inscripcion-grupal/:eventoId - Formulario inscripción grupal
+/checkout/resumen - Resumen de orden
+/aplicar-descuento - Aplicar código promocional
+/pago/metodo - Selección método de pago
+/pago/paypal - Integración PayPal
+/pago/stripe - Integración Stripe
+/pago/neonet - Integración NeoNet Guatemala
+/pago/bam - Integración BAM Pagos
+/pago/confirmacion/:ordenId - Confirmación pago exitoso
+/pago/error - Error en pago
+/pago/pendiente - Pago pendiente confirmación
+⚙️ A
+🔧 

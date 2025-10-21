@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminSpeakerCreatePage from '@/components/admin/AdminSpeakerCreatePage'
+
+const title = "Crear Nuevo Ponente - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminSpeakerCreatePage client:load />
+</BaseLayout>

@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminRejectedPaymentsPage from '@/components/admin/AdminRejectedPaymentsPage'
+
+const title = "Pagos Rechazados - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminRejectedPaymentsPage client:load />
+</BaseLayout>

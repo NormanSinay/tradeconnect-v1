@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminCompanyConfigPage from '@/components/admin/AdminCompanyConfigPage'
+
+const title = "Configuración de Empresa - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminCompanyConfigPage client:load />
+</BaseLayout>

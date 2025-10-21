@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminLocalizationConfigPage from '@/components/admin/AdminLocalizationConfigPage'
+
+const title = "Configuración de Localización - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminLocalizationConfigPage client:load />
+</BaseLayout>

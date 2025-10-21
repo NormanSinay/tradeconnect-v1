@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminFelConfigPage from '@/components/admin/AdminFelConfigPage'
+
+const title = "Configuración FEL - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminFelConfigPage client:load />
+</BaseLayout>

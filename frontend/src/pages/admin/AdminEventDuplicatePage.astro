@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminEventDuplicatePage from '@/components/admin/AdminEventDuplicatePage'
+
+const title = "Duplicar Evento - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminEventDuplicatePage client:load />
+</BaseLayout>

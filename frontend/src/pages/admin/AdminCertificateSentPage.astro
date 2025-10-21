@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminCertificateSentPage from '@/components/admin/AdminCertificateSentPage'
+
+const title = "Certificados Enviados - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminCertificateSentPage client:load />
+</BaseLayout>

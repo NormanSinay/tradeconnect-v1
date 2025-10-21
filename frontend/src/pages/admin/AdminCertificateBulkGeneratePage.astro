@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminCertificateBulkGeneratePage from '@/components/admin/AdminCertificateBulkGeneratePage'
+
+const title = "Generación Masiva de Certificados - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminCertificateBulkGeneratePage client:load />
+</BaseLayout>

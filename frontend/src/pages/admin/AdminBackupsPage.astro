@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminBackupsPage from '@/components/admin/AdminBackupsPage'
+
+const title = "Gestión de Backups - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminBackupsPage client:load />
+</BaseLayout>

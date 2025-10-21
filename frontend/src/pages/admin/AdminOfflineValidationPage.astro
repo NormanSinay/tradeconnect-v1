@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminOfflineValidationPage from '@/components/admin/AdminOfflineValidationPage'
+
+const title = "Validación Offline - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminOfflineValidationPage client:load />
+</BaseLayout>

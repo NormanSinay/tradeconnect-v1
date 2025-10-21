@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminStreamingPage from '@/components/admin/AdminStreamingPage'
+
+const title = "Transmisión en Vivo - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminStreamingPage client:load />
+</BaseLayout>

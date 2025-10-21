@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminEventParticipantsPage from '@/components/admin/AdminEventParticipantsPage'
+
+const title = "Participantes del Evento - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminEventParticipantsPage client:load />
+</BaseLayout>

@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminPaymentConfigPage from '@/components/admin/AdminPaymentConfigPage'
+
+const title = "Configuración de Pagos - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminPaymentConfigPage client:load />
+</BaseLayout>

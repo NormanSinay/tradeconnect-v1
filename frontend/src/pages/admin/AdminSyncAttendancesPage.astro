@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminSyncAttendancesPage from '@/components/admin/AdminSyncAttendancesPage'
+
+const title = "Sincronización de Asistencias - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminSyncAttendancesPage client:load />
+</BaseLayout>

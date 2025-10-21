@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FaCog, FaSave, FaTestTube, FaKey, FaBuilding, FaGlobe, FaServer, FaCertificate, FaCheck, FaTimes } from 'react-icons/fa'
+import { FaCog, FaSave, FaFlask, FaKey, FaBuilding, FaGlobe, FaServer, FaCertificate, FaCheck, FaTimes } from 'react-icons/fa'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -391,7 +391,7 @@ const AdminFelConfigPage: React.FC = () => {
                         onClick={() => testCertifierConnection(certifier)}
                         disabled={testResults[certifier]?.status === 'testing'}
                       >
-                        <FaTestTube className="h-4 w-4 mr-2" />
+                        <FaFlask className="h-4 w-4 mr-2" />
                         Probar
                       </Button>
                     </div>

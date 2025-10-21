@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminSpeakerPaymentsPage from '@/components/admin/AdminSpeakerPaymentsPage'
+
+const title = "Pagos de Ponentes - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminSpeakerPaymentsPage client:load />
+</BaseLayout>

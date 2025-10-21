@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminPromotionEditPage from '@/components/admin/AdminPromotionEditPage'
+
+const title = "Editar Promoción - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminPromotionEditPage client:load />
+</BaseLayout>

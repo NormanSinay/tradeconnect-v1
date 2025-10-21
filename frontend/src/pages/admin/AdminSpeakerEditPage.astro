@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminSpeakerEditPage from '@/components/admin/AdminSpeakerEditPage'
+
+const title = "Editar Ponente - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminSpeakerEditPage client:load />
+</BaseLayout>

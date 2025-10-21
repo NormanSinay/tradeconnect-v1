@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminQRScannerPage from '@/components/admin/AdminQRScannerPage'
+
+const title = "Escáner QR - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminQRScannerPage client:load />
+</BaseLayout>

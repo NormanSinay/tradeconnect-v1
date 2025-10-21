@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminRefundsPage from '@/components/admin/AdminRefundsPage'
+
+const title = "Gestión de Reembolsos - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminRefundsPage client:load />
+</BaseLayout>

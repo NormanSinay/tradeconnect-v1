@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminCertificatesPage from '@/components/admin/AdminCertificatesPage'
+
+const title = "Gestión de Certificados - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminCertificatesPage client:load />
+</BaseLayout>

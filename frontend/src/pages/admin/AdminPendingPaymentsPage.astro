@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminPendingPaymentsPage from '@/components/admin/AdminPendingPaymentsPage'
+
+const title = "Pagos Pendientes - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminPendingPaymentsPage client:load />
+</BaseLayout>

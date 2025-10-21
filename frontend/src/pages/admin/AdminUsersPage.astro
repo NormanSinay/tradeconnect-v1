@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminUsersPage from '@/components/admin/AdminUsersPage'
+
+const title = "Gestión de Usuarios - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminUsersPage client:load />
+</BaseLayout>

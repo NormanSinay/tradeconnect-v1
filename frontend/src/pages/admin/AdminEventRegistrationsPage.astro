@@ -1,0 +1,24 @@
+---
+import { AdminLayout } from '@/layouts/AdminLayout'
+import AdminEventRegistrationsPage from '@/components/admin/AdminEventRegistrationsPage'
+
+export async function getStaticPaths() {
+  // TODO: Generate paths based on events
+  return []
+}
+
+const { eventId } = Astro.params
+
+const breadcrumbs = [
+  { label: 'Dashboard', href: '/admin' },
+  { label: 'Eventos', href: '/admin/events' },
+  { label: 'Evento', href: `/admin/events/${eventId}/editar` },
+  { label: 'Inscripciones' },
+]
+
+const title = "Inscripciones del Evento"
+---
+
+<AdminLayout {title} {breadcrumbs}>
+  <AdminEventRegistrationsPage eventId={parseInt(eventId)} client:load />
+</AdminLayout>

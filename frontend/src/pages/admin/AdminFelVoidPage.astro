@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminFelVoidPage from '@/components/admin/AdminFelVoidPage'
+
+const title = "Anular Factura FEL - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminFelVoidPage client:load />
+</BaseLayout>

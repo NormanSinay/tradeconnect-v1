@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminReportsPage from '@/components/admin/AdminReportsPage'
+
+const title = "Reportes Generales - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminReportsPage client:load />
+</BaseLayout>

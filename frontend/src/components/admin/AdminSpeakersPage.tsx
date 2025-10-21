@@ -524,3 +524,5 @@ const AdminSpeakersPage: React.FC = () => {
     </AdminLayout>
   )
 }
+
+export default AdminSpeakersPage

@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminAuditPage from '@/components/admin/AdminAuditPage'
+
+const title = "Auditoría de Cambios - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminAuditPage client:load />
+</BaseLayout>

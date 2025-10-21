@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminDashboardPage from '@/components/admin/AdminDashboardPage'
+
+const title = "Dashboard Administrativo - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminDashboardPage client:load />
+</BaseLayout>

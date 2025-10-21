@@ -1,0 +1,19 @@
+---
+import WebhookHandler from '../../components/pages/WebhookHandler'
+const { provider } = Astro.params
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Procesando Webhook - TradeConnect</title>
+    <meta name="description" content="Procesando callback de pago automáticamente." />
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body>
+    <WebhookHandler client:load provider={provider} />
+  </body>
+</html>

@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminFelPendingPage from '@/components/admin/AdminFelPendingPage'
+
+const title = "Facturas FEL Pendientes - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminFelPendingPage client:load />
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+import { AdminLayout } from '@/layouts/AdminLayout'
+import AdminRegistrationCancelPage from '@/components/admin/AdminRegistrationCancelPage'
+
+export async function getStaticPaths() {
+  // TODO: Generate paths based on registrations
+  return []
+}
+
+const { registrationId } = Astro.params
+
+const breadcrumbs = [
+  { label: 'Dashboard', href: '/admin' },
+  { label: 'Inscripciones', href: '/admin/inscripciones' },
+  { label: `Inscripción #${registrationId}`, href: `/admin/inscripciones/${registrationId}/detalle` },
+  { label: 'Cancelar' },
+]
+
+const title = `Cancelar Inscripción #${registrationId}`
+---
+
+<AdminLayout {title} {breadcrumbs}>
+  <AdminRegistrationCancelPage registrationId={parseInt(registrationId)} client:load />
+</AdminLayout>

@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminSpeakerContractsPage from '@/components/admin/AdminSpeakerContractsPage'
+
+const title = "Contratos de Ponentes - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminSpeakerContractsPage client:load />
+</BaseLayout>

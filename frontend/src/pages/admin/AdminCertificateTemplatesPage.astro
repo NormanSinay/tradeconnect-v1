@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminCertificateTemplatesPage from '@/components/admin/AdminCertificateTemplatesPage'
+
+const title = "Plantillas de Certificados - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminCertificateTemplatesPage client:load />
+</BaseLayout>

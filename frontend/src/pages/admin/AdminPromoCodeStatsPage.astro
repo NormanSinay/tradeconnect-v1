@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminPromoCodeStatsPage from '@/components/admin/AdminPromoCodeStatsPage'
+
+const title = "Estadísticas de Códigos Promocionales - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminPromoCodeStatsPage client:load />
+</BaseLayout>

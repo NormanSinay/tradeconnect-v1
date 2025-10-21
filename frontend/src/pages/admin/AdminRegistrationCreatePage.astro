@@ -1,0 +1,16 @@
+---
+import { AdminLayout } from '@/layouts/AdminLayout'
+import AdminRegistrationCreatePage from '@/components/admin/AdminRegistrationCreatePage'
+
+const breadcrumbs = [
+  { label: 'Dashboard', href: '/admin' },
+  { label: 'Inscripciones', href: '/admin/inscripciones' },
+  { label: 'Crear Inscripción' },
+]
+
+const title = "Crear Inscripción"
+---
+
+<AdminLayout {title} {breadcrumbs}>
+  <AdminRegistrationCreatePage client:load />
+</AdminLayout>

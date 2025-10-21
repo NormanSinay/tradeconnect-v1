@@ -1,0 +1,17 @@
+---
+import ServerErrorPage from '../components/pages/ServerErrorPage'
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Error del Servidor - TradeConnect</title>
+    <meta name="description" content="Ha ocurrido un error interno del servidor. Nuestro equipo está trabajando para solucionarlo." />
+  </head>
+  <body>
+    <ServerErrorPage client:load />
+  </body>
+</html>

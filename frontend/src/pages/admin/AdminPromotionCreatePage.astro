@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import AdminPromotionCreatePage from '@/components/admin/AdminPromotionCreatePage'
+
+const title = "Crear Promoción - TradeConnect"
+---
+
+<BaseLayout title={title}>
+  <AdminPromotionCreatePage client:load />
+</BaseLayout>
