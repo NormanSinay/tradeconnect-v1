@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { FaArrowLeft, FaDownload, FaSync, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaDatabase, FaWifi, FaClock, FaUser } from 'react-icons/fa'
+import { FiWifiOff } from 'react-icons/fi'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -96,10 +97,10 @@ const AdminOfflineValidationPage: React.FC = () => {
   }
 
   // Validar QR offline
-  const validateOfflineQR = async (qrHash: string) => {
+  const validateOfflineQR = async (qrHash: string): Promise<ValidateOfflineQRResponse> => {
     if (!offlineData) {
       setError('Descargue la lista offline primero')
-      return
+      throw new Error('Lista offline no disponible')
     }
 
     try {
@@ -125,6 +126,7 @@ const AdminOfflineValidationPage: React.FC = () => {
     } catch (err: any) {
       console.error('Error validando QR offline:', err)
       setError('Error al validar el código QR offline')
+      throw err
     }
   }
 
@@ -244,7 +246,7 @@ const AdminOfflineValidationPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <FaWifiSlash className="mr-1 text-red-500" />
+                  <FiWifiOff className="mr-1 text-red-500" />
                   Offline
                 </>
               )}

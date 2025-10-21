@@ -15,11 +15,12 @@ import type {
   PerformanceMetric,
   LineChartData,
   BarChartData,
+  ExtendedSystemStats,
 } from '@/types/admin'
 
 const AdminDashboardInicioPage: React.FC = () => {
   const [kpis, setKpis] = useState<DashboardKPI[]>([])
-  const [systemStats, setSystemStats] = useState<SystemStats | null>(null)
+  const [systemStats, setSystemStats] = useState<ExtendedSystemStats | null>(null)
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetric[]>([])
   const [revenueChart, setRevenueChart] = useState<LineChartData | null>(null)
   const [userGrowthChart, setUserGrowthChart] = useState<BarChartData | null>(null)

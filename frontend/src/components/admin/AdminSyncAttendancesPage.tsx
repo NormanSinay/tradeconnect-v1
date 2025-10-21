@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { FaArrowLeft, FaSync, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaClock, FaDatabase, FaCloudUploadAlt, FaCloudDownloadAlt, FaWifi } from 'react-icons/fa'
+import { FiWifiOff } from 'react-icons/fi'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -228,7 +229,8 @@ const AdminSyncAttendancesPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <FaWifiSlash className="mr-1 text-red-500" />
+                  <FiWifiOff className="mr-1 text-red-500" />
+                  {/* TODO: Import FaWifiSlash from react-icons/fa */}
                   Offline
                 </>
               )}

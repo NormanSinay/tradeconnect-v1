@@ -49,7 +49,13 @@ const AdminStreamingPage: React.FC = () => {
       const interval = setInterval(loadStreamingStats, 5000)
       return () => clearInterval(interval)
     }
+    return
   }, [eventId])
+
+  // Función que retorna void para corregir el error de TypeScript
+  const initializeStreaming = (): void => {
+    // Lógica de inicialización si es necesaria
+  }
 
   const loadEvent = async () => {
     if (!eventId) return

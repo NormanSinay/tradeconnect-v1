@@ -1,12 +1,8 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import Navigation from '@/components/ui/navigation'
-import CartPage from '@/components/ui/cart-page'
-import Footer from '@/components/ui/footer'
+import CartPageWrapper from '@/components/ui/cart-page-wrapper'
 ---
 
 <BaseLayout title="Carrito de Compras - TradeConnect">
-  <Navigation client:load cartItemCount={3} />
-  <CartPage client:load />
-  <Footer client:load />
+  <CartPageWrapper client:only="react" />
 </BaseLayout>

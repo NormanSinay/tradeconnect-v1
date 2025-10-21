@@ -20,7 +20,7 @@ import type {
 const AdminPendingPaymentsPage: React.FC = () => {
   const [payments, setPayments] = useState<PaymentTransaction[]>([])
   const [selectedPayment, setSelectedPayment] = useState<PaymentTransaction | null>(null)
-  const [filters, setFilters] = useState<PaymentFilters>({ status: 'pending' })
+  const [filters, setFilters] = useState<PaymentFilters>({ status: ['pending'] })
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | 'all'>('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -44,7 +44,7 @@ const AdminPendingPaymentsPage: React.FC = () => {
       })
 
       setPayments(response.transactions)
-      setTotalPages(response.pagination.pages)
+      setTotalPages(response.pagination.totalPages)
     } catch (err) {
       console.error('Error cargando pagos pendientes:', err)
       setError('Error al cargar los pagos pendientes')
@@ -55,7 +55,7 @@ const AdminPendingPaymentsPage: React.FC = () => {
 
   // Manejar cambios en filtros
   const handleFiltersChange = () => {
-    const newFilters: PaymentFilters = { status: 'pending' }
+    const newFilters: PaymentFilters = { status: ['pending'] }
 
     if (selectedGateway !== 'all') {
       newFilters.gateway = selectedGateway
@@ -67,7 +67,7 @@ const AdminPendingPaymentsPage: React.FC = () => {
 
   // Limpiar filtros
   const clearFilters = () => {
-    setFilters({ status: 'pending' })
+    setFilters({ status: ['pending'] })
     setSearchTerm('')
     setSelectedGateway('all')
     setCurrentPage(1)

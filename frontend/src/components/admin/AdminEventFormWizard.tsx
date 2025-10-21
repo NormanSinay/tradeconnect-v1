@@ -57,6 +57,7 @@ const AdminEventFormWizard: React.FC<AdminEventFormWizardProps> = ({
     if (eventId) {
       loadEventData()
     }
+    return
   }, [eventId])
 
   const loadMetadata = async () => {
@@ -159,7 +160,7 @@ const AdminEventFormWizard: React.FC<AdminEventFormWizardProps> = ({
 
   const validateCurrentStep = (): boolean => {
     const step = steps[currentStep]
-    if (!step.validation) return true
+    if (!step || !step.validation) return true
 
     return step.validation(formData)
   }
@@ -214,7 +215,7 @@ const AdminEventFormWizard: React.FC<AdminEventFormWizardProps> = ({
 
   const progress = ((currentStep + 1) / steps.length) * 100
   const currentStepData = steps[currentStep]
-  const StepComponent = currentStepData.component
+  const StepComponent = currentStepData?.component || (() => <div>Error: Componente no encontrado</div>)
 
   if (loading) {
     return (
@@ -284,17 +285,19 @@ const AdminEventFormWizard: React.FC<AdminEventFormWizardProps> = ({
       {/* Step Content */}
       <Card>
         <CardHeader>
-          <CardTitle>{currentStepData.title}</CardTitle>
-          <p className="text-gray-600">{currentStepData.description}</p>
+          <CardTitle>{currentStepData?.title || 'Paso'}</CardTitle>
+          <p className="text-gray-600">{currentStepData?.description || 'Descripción del paso'}</p>
         </CardHeader>
         <CardContent>
-          <StepComponent
-            data={formData}
-            onChange={handleDataChange}
-            errors={errors}
-            eventTypes={eventTypes}
-            eventCategories={eventCategories}
-          />
+          {StepComponent && (
+            <StepComponent
+              data={formData}
+              onChange={handleDataChange}
+              errors={errors}
+              eventTypes={eventTypes}
+              eventCategories={eventCategories}
+            />
+          )}
         </CardContent>
       </Card>
 

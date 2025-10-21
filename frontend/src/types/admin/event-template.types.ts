@@ -337,4 +337,4 @@ export type CustomFieldType = 'text' | 'textarea' | 'select' | 'checkbox' | 'rad
 export type ValidationOperator = 'equals' | 'notEquals' | 'contains' | 'notContains' | 'startsWith' | 'endsWith' | 'regex' | 'min' | 'max' | 'range';
 
 // Import type from event.types.ts
-import { CreateEventData } from './event.types';
+import type { CreateEventData } from './event.types';

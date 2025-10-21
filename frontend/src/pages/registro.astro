@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { RegisterPage } from '@/components/auth/RegisterPage'
+---
+
+<BaseLayout title="Registrarse - TradeConnect">
+  <div class="min-h-screen bg-gray-50">
+    <RegisterPage client:only="react" />
+  </div>
+</BaseLayout>

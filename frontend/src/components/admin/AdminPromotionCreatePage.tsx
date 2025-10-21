@@ -11,9 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { adminPromotionService } from '@/services/admin'
 import type {
   CreatePromotionRequest,
-  PromotionType,
   PromotionRule,
 } from '@/types/admin'
+import { PROMOTION_TYPES } from '@/types/admin'
 
 const AdminPromotionCreatePage: React.FC = () => {
   const [loading, setLoading] = useState(false)
@@ -21,7 +21,7 @@ const AdminPromotionCreatePage: React.FC = () => {
   const [formData, setFormData] = useState<CreatePromotionRequest>({
     name: '',
     description: '',
-    type: PromotionType.GENERAL,
+    type: PROMOTION_TYPES.GENERAL,
     isActive: true,
     startDate: undefined,
     endDate: undefined,
@@ -79,11 +79,11 @@ const AdminPromotionCreatePage: React.FC = () => {
         throw new Error('El nombre de la promoción es requerido')
       }
 
-      if (formData.type === PromotionType.EVENT_SPECIFIC && (!formData.eventIds || formData.eventIds.length === 0)) {
+      if (formData.type === PROMOTION_TYPES.EVENT_SPECIFIC && (!formData.eventIds || formData.eventIds.length === 0)) {
         throw new Error('Debe seleccionar al menos un evento para promociones específicas de evento')
       }
 
-      if (formData.type === PromotionType.CATEGORY_SPECIFIC && (!formData.categoryIds || formData.categoryIds.length === 0)) {
+      if (formData.type === PROMOTION_TYPES.CATEGORY_SPECIFIC && (!formData.categoryIds || formData.categoryIds.length === 0)) {
         throw new Error('Debe seleccionar al menos una categoría para promociones específicas de categoría')
       }
 
@@ -96,7 +96,7 @@ const AdminPromotionCreatePage: React.FC = () => {
           adminPromotionService.createPromotionRule(promotion.id, {
             ...rule,
             promotionId: promotion.id,
-          })
+          } as any)
         ))
       }
 
@@ -171,16 +171,16 @@ const AdminPromotionCreatePage: React.FC = () => {
                   <Label htmlFor="type">Tipo de Promoción</Label>
                   <Select
                     value={formData.type}
-                    onValueChange={(value) => handleInputChange('type', value as PromotionType)}
+                    onValueChange={(value) => handleInputChange('type', value as PROMOTION_TYPES)}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={PromotionType.GENERAL}>General</SelectItem>
-                      <SelectItem value={PromotionType.EVENT_SPECIFIC}>Evento Específico</SelectItem>
-                      <SelectItem value={PromotionType.CATEGORY_SPECIFIC}>Categoría Específica</SelectItem>
-                      <SelectItem value={PromotionType.MEMBERSHIP}>Membresía</SelectItem>
+                      <SelectItem value={PROMOTION_TYPES.GENERAL}>General</SelectItem>
+                      <SelectItem value={PROMOTION_TYPES.EVENT_SPECIFIC}>Evento Específico</SelectItem>
+                      <SelectItem value={PROMOTION_TYPES.CATEGORY_SPECIFIC}>Categoría Específica</SelectItem>
+                      <SelectItem value={PROMOTION_TYPES.MEMBERSHIP}>Membresía</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

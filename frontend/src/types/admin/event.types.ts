@@ -142,6 +142,9 @@ export interface DetailedEvent extends PublicEvent {
   requirements?: string;
   agenda?: EventAgendaItem[];
   metadata?: any;
+  eventTypeId: number;
+  eventCategoryId: number;
+  eventStatusId: number;
   creator: {
     id: number;
     firstName: string;
@@ -413,9 +416,10 @@ export type SupportedCurrency = 'GTQ' | 'USD';
 export type MediaType = 'image' | 'video' | 'document' | 'audio' | 'other';
 
 /**
- * Estados de inscripción
+ * Estados de inscripción (alias para compatibilidad)
  */
-export type RegistrationStatus = 'pending' | 'confirmed' | 'cancelled' | 'attended' | 'no_show';
+export type EventRegistrationStatus = 'pending' | 'confirmed' | 'cancelled' | 'attended' | 'no_show';
+export type RegistrationStatus = EventRegistrationStatus;
 
 /**
  * Estados de pago

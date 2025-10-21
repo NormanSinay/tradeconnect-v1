@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { ResetPasswordPage } from '@/components/auth/ResetPasswordPage'
+
+const { token } = Astro.params
+---
+
+<BaseLayout title="Restablecer Contraseña - TradeConnect">
+  <div class="min-h-screen bg-gray-50">
+    <ResetPasswordPage token={token} client:only="react" />
+  </div>
+</BaseLayout>

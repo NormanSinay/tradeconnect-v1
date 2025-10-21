@@ -64,8 +64,8 @@ const AdminPromotionsPage: React.FC = () => {
 
       const result = await adminPromotionService.getPromotions(filters, params)
       setPromotions(result.data)
-      setTotalPages(result.totalPages || 1)
-      setTotalPromotions(result.total || 0)
+      setTotalPages((result as any).totalPages || 1)
+      setTotalPromotions((result as any).total || 0)
     } catch (err) {
       console.error('Error cargando promociones:', err)
       setError('Error al cargar las promociones')

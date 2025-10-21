@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FaHistory, FaSearch, FaFilter, FaEye, FaDownload, FaCalendarAlt, FaUser, FaShieldAlt, FaCreditCard, FaFileInvoice, FaQrcode, FaBell, FaExclamationTriangle } from 'react-icons/fa'
+import { FaHistory, FaSearch, FaFilter, FaEye, FaDownload, FaCalendarAlt, FaUser, FaShieldAlt, FaCreditCard, FaFileInvoice, FaQrcode, FaBell, FaExclamationTriangle, FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'

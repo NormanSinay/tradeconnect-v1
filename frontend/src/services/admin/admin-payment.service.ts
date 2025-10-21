@@ -20,7 +20,7 @@ import type {
   GatewayTransaction,
   ReconciliationDiscrepancy,
   ReconciliationReport,
-  PaymentFilters,
+  PaymentGatewayFilters,
   PaymentQueryParams,
   PaymentSearchResult,
   PaymentStats,
@@ -103,7 +103,7 @@ export class AdminPaymentService {
    * Lista transacciones con filtros
    */
   async getPaymentTransactions(
-    filters: PaymentFilters = {},
+    filters: PaymentGatewayFilters = {},
     pagination: { page?: number; limit?: number } = {}
   ): Promise<PaymentSearchResult> {
     try {
@@ -552,7 +552,7 @@ export class AdminPaymentService {
    * Obtiene estadísticas de pagos
    */
   async getPaymentStats(
-    filters: PaymentFilters = {}
+    filters: PaymentGatewayFilters = {}
   ): Promise<PaymentStats> {
     try {
       const response = await api.get(`${this.baseUrl}/stats`, {
@@ -651,7 +651,7 @@ export class AdminPaymentService {
    */
   async exportPaymentTransactions(
     format: 'csv' | 'excel' | 'pdf',
-    filters?: PaymentFilters
+    filters?: PaymentGatewayFilters
   ): Promise<Blob> {
     try {
       const response = await api.get(`${this.baseUrl}/export/transactions`, {

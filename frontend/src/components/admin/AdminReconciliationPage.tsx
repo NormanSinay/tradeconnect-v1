@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
+import { Label } from '@/components/ui/label'
 import { adminPaymentService } from '@/services/admin'
 import { cn } from '@/lib/utils'
 import type {
@@ -268,7 +269,7 @@ const AdminReconciliationPage: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Última Ejecución</p>
                   <p className="text-sm font-bold text-gray-600">
-                    {reports.length > 0 ? formatDate(reports[0].generatedAt) : 'Nunca'}
+                    {reports.length > 0 ? formatDate((reports[0] as any).generatedAt) : 'Nunca'}
                   </p>
                 </div>
                 <FaSync className="h-8 w-8 text-gray-500" />

@@ -19,7 +19,7 @@ import type {
 const AdminRejectedPaymentsPage: React.FC = () => {
   const [payments, setPayments] = useState<PaymentTransaction[]>([])
   const [selectedPayment, setSelectedPayment] = useState<PaymentTransaction | null>(null)
-  const [filters, setFilters] = useState<PaymentFilters>({ status: 'failed' })
+  const [filters, setFilters] = useState<PaymentFilters>({ status: ['failed'] })
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | 'all'>('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -39,8 +39,8 @@ const AdminRejectedPaymentsPage: React.FC = () => {
         limit: 20
       })
 
-      setPayments(response.transactions)
-      setTotalPages(response.pagination.pages)
+      setPayments((response as any).transactions)
+      setTotalPages(response.pagination.totalPages)
     } catch (err) {
       console.error('Error cargando pagos rechazados:', err)
       setError('Error al cargar los pagos rechazados')
@@ -51,10 +51,10 @@ const AdminRejectedPaymentsPage: React.FC = () => {
 
   // Manejar cambios en filtros
   const handleFiltersChange = () => {
-    const newFilters: PaymentFilters = { status: 'failed' }
+    const newFilters: PaymentFilters = { status: ['failed'] as any }
 
     if (selectedGateway !== 'all') {
-      newFilters.gateway = selectedGateway
+      (newFilters as any).gateway = selectedGateway
     }
 
     setFilters(newFilters)
@@ -63,7 +63,7 @@ const AdminRejectedPaymentsPage: React.FC = () => {
 
   // Limpiar filtros
   const clearFilters = () => {
-    setFilters({ status: 'failed' })
+    setFilters({ status: ['failed'] as any })
     setSearchTerm('')
     setSelectedGateway('all')
     setCurrentPage(1)

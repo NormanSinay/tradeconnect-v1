@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { EmailVerificationPage } from '@/components/auth/EmailVerificationPage'
+
+const { token } = Astro.params
+---
+
+<BaseLayout title="Verificar Email - TradeConnect">
+  <div class="min-h-screen bg-gray-50">
+    <EmailVerificationPage token={token} client:only="react" />
+  </div>
+</BaseLayout>

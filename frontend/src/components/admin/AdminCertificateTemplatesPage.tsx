@@ -73,7 +73,7 @@ const AdminCertificateTemplatesPage: React.FC = () => {
       )
 
       setTemplates(response.data)
-      setPagination(prev => ({ ...prev, total: response.total }))
+      setPagination(prev => ({ ...prev, total: response.pagination.total }))
 
     } catch (err: any) {
       console.error('Error cargando plantillas:', err)

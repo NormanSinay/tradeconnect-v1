@@ -119,7 +119,7 @@ Esta es una representación del archivo PDF que se descargaría.`
   </Emisor>
   <Receptor>
     <Nombre>${user?.name || 'Usuario'}</Nombre>
-    <NIT>${user?.nit || '123456789'}</NIT>
+    <NIT>${(user as any)?.nit || '123456789'}</NIT>
   </Receptor>
   <Detalle>
     <Linea>

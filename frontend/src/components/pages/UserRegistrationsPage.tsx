@@ -467,7 +467,7 @@ export const UserRegistrationsPage: React.FC = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDownloadCertificate(registration.certificateUrl)}
+                            onClick={() => handleDownloadCertificate(registration.certificateUrl!)}
                             className="w-full"
                           >
                             <FaDownload className="mr-2 h-3 w-3" />

@@ -25,8 +25,9 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
 
   // Calcular notificaciones no leídas
   useEffect(() => {
-    const unread = alerts.filter(alert => !alert.read).length
+    const unread = alerts.filter(alert => !(alert as any).read).length
     setUnreadNotifications(unread)
+    return
   }, [alerts])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

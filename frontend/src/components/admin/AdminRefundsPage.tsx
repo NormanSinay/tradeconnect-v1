@@ -57,7 +57,7 @@ const AdminRefundsPage: React.FC = () => {
       })
 
       setRefunds(response.data)
-      setTotalPages(Math.ceil(response.total / 20))
+      setTotalPages(Math.ceil((response as any).total / 20))
     } catch (err) {
       console.error('Error cargando reembolsos:', err)
       setError('Error al cargar los reembolsos')

@@ -1,5 +1,12 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+
+const router = {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true,
+  },
+}
 import Navigation from './navigation'
 import HomePage from './home-page'
 import EventDetailPage from './event-detail-page'
@@ -56,7 +63,7 @@ import { PaymentReceiptPage } from '@/components/pages/PaymentReceiptPage'
 // import ServiceStatusPage from '@/components/pages/ServiceStatusPage'
 // import WebhookHandler from '@/components/pages/WebhookHandler'
 import { } from '@/hooks/useWebSocket'
-import { AuthProvider } from '@/hooks/useAuth'
+import { AuthProvider } from '@/context/AuthContext'
 import { AdminProvider } from '@/context/AdminContext'
 import AdminDashboardPage from '@/components/admin/AdminDashboardPage'
 import AdminDashboardInicioPage from '@/components/admin/AdminDashboardInicioPage'
@@ -123,7 +130,7 @@ import AdminFelConfigPage from '@/components/admin/AdminFelConfigPage'
 
 export const AppRouter: React.FC = () => {
   return (
-    <Router>
+    <Router {...router}>
       <AuthProvider>
         <AdminProvider>
           <div id="app">

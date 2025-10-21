@@ -262,7 +262,22 @@ export interface ReconciliationReport {
  */
 export interface PaymentFilters {
   gateway?: PaymentGateway;
-  status?: PaymentStatus;
+  status?: PaymentStatus[];
+  registrationId?: number;
+  userId?: number;
+  startDate?: Date;
+  endDate?: Date;
+  minAmount?: number;
+  maxAmount?: number;
+  currency?: string;
+}
+
+/**
+ * Filtros para búsqueda de transacciones (versión alternativa para evitar conflictos)
+ */
+export interface PaymentGatewayFilters {
+  gateway?: PaymentGateway;
+  status?: PaymentStatus[];
   registrationId?: number;
   userId?: number;
   startDate?: Date;
@@ -293,7 +308,7 @@ export interface PaymentSearchResult {
     page: number;
     limit: number;
     total: number;
-    pages: number;
+    totalPages: number;
     hasNext: boolean;
     hasPrevious: boolean;
   };
@@ -313,6 +328,7 @@ export interface PaymentStats {
   totalFees: number;
   successRate: number;
   averageProcessingTime: number;
+  totalFeesPaid: number;
   byGateway: Record<PaymentGateway, {
     transactions: number;
     amount: number;

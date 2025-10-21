@@ -36,14 +36,17 @@ export const EventDetailPage: React.FC<EventDetailPageProps> = ({
   onShare,
   className,
 }) => {
-  const { joinEvent, leaveEvent } = useWebSocket()
+  const { joinEvent, leaveEvent } = useWebSocket() || {}
   const [imageLoaded, setImageLoaded] = useState(false)
   const [showFullDescription, setShowFullDescription] = useState(false)
 
   // Join event room for real-time updates
   useEffect(() => {
-    joinEvent(event.id)
-    return () => leaveEvent(event.id)
+    if (joinEvent && leaveEvent) {
+      joinEvent(event.id)
+      return () => leaveEvent(event.id)
+    }
+    return
   }, [event.id, joinEvent, leaveEvent])
 
   const isUpcoming = new Date(event.startDate) > new Date()

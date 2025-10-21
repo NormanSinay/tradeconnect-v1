@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import EventGrid from '@/components/ui/event-grid'
+---
+
+<BaseLayout title="Eventos - TradeConnect">
+  <div class="min-h-screen">
+    <EventGrid client:only="react" />
+  </div>
+</BaseLayout>

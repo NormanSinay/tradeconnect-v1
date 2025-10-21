@@ -7,13 +7,25 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { ComponentProps } from '@/types'
-import type { DashboardFilters, TimePeriod } from '@/types/admin'
+import type { TimePeriod } from '@/types/admin'
+
+interface DashboardFilters {
+  dateRange?: { start: Date; end: Date }
+  categories?: string[]
+  status?: string[]
+}
 
 interface DashboardFiltersProps extends ComponentProps {
   filters: DashboardFilters
   onFiltersChange: (filters: DashboardFilters) => void
   onExport?: (format: 'pdf' | 'excel' | 'csv') => void
   isLoading?: boolean
+}
+
+interface LocalDashboardFilters {
+  timePeriod?: string
+  search?: string
+  categories?: string[]
 }
 
 interface LocalFilters {

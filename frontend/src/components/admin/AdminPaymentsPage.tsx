@@ -13,7 +13,7 @@ import { adminPaymentService } from '@/services/admin'
 import { cn } from '@/lib/utils'
 import type {
   PaymentTransaction,
-  PaymentFilters,
+  PaymentGatewayFilters,
   PaymentStats,
   PaymentStatus,
   PaymentGateway,
@@ -23,7 +23,7 @@ import type {
 const AdminPaymentsPage: React.FC = () => {
   const [payments, setPayments] = useState<PaymentTransaction[]>([])
   const [stats, setStats] = useState<PaymentStats | null>(null)
-  const [filters, setFilters] = useState<PaymentFilters>({})
+  const [filters, setFilters] = useState<PaymentGatewayFilters>({})
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<PaymentStatus | 'all'>('all')
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | 'all'>('all')
@@ -46,7 +46,7 @@ const AdminPaymentsPage: React.FC = () => {
       ])
 
       setPayments(paymentsData.transactions)
-      setTotalPages(paymentsData.pagination.pages)
+      setTotalPages(paymentsData.pagination.totalPages)
       setStats(statsData)
     } catch (err) {
       console.error('Error cargando pagos:', err)
@@ -58,10 +58,10 @@ const AdminPaymentsPage: React.FC = () => {
 
   // Manejar cambios en filtros
   const handleFiltersChange = () => {
-    const newFilters: PaymentFilters = {}
+    const newFilters: PaymentGatewayFilters = {}
 
     if (selectedStatus !== 'all') {
-      newFilters.status = selectedStatus
+      newFilters.status = [selectedStatus as any]
     }
 
     if (selectedGateway !== 'all') {
@@ -86,17 +86,17 @@ const AdminPaymentsPage: React.FC = () => {
   }
 
   // Obtener badge de estado
-  const getStatusBadge = (status: PaymentStatus) => {
-    const statusConfig = {
-      pending: { variant: 'secondary' as const, label: 'Pendiente', icon: FaClock },
-      processing: { variant: 'default' as const, label: 'Procesando', icon: FaClock },
-      completed: { variant: 'default' as const, label: 'Completado', icon: FaCheck },
-      failed: { variant: 'destructive' as const, label: 'Fallido', icon: FaTimes },
-      cancelled: { variant: 'outline' as const, label: 'Cancelado', icon: FaTimes },
-      refunded: { variant: 'secondary' as const, label: 'Reembolsado', icon: FaUndo },
+  const getStatusBadge = (status: any) => {
+    const statusConfig: Record<string, { variant: 'secondary' | 'default' | 'destructive' | 'outline', label: string, icon: any }> = {
+      pending: { variant: 'secondary', label: 'Pendiente', icon: FaClock },
+      processing: { variant: 'default', label: 'Procesando', icon: FaClock },
+      completed: { variant: 'default', label: 'Completado', icon: FaCheck },
+      failed: { variant: 'destructive', label: 'Fallido', icon: FaTimes },
+      cancelled: { variant: 'outline', label: 'Cancelado', icon: FaTimes },
+      refunded: { variant: 'secondary', label: 'Reembolsado', icon: FaUndo },
     }
 
-    const config = statusConfig[status] || statusConfig.pending
+    const config = statusConfig[status] || statusConfig.pending || { variant: 'secondary' as const, label: 'Desconocido', icon: FaClock }
     const Icon = config.icon
 
     return (

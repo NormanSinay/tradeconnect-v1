@@ -50,7 +50,8 @@ export const EventGrid: React.FC<EventGridProps> = ({
           setError('Error al cargar eventos')
         }
       } catch (err) {
-        console.error('Error fetching events:', err)
+        // Silenciar errores de red cuando el backend no está disponible
+        // console.error('Error fetching events:', err)
         setError('Error al cargar eventos')
       } finally {
         setLoading(false)
@@ -99,13 +100,13 @@ export const EventGrid: React.FC<EventGridProps> = ({
         <div className="bento-grid">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="bento-item">
-              <div className="event-image" style={{ background: '#f0f0f0' }}>
+              <div className="event-image" style={{ background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ fontSize: '2rem', color: '#ccc' }}>⏳</div>
               </div>
-              <div className="event-title" style={{ background: '#f0f0f0', height: '20px', marginBottom: '8px' }}></div>
-              <div className="event-category" style={{ background: '#f0f0f0', height: '16px', marginBottom: '8px' }}></div>
-              <div className="event-price" style={{ background: '#f0f0f0', height: '24px', marginBottom: '8px' }}></div>
-              <div className="event-meta" style={{ background: '#f0f0f0', height: '16px' }}></div>
+              <div className="event-title" style={{ background: '#f0f0f0', height: '20px', marginBottom: '8px', borderRadius: '4px' }}></div>
+              <div className="event-category" style={{ background: '#f0f0f0', height: '16px', marginBottom: '8px', borderRadius: '4px' }}></div>
+              <div className="event-price" style={{ background: '#f0f0f0', height: '24px', marginBottom: '8px', borderRadius: '4px' }}></div>
+              <div className="event-meta" style={{ background: '#f0f0f0', height: '16px', borderRadius: '4px' }}></div>
               <button className="btn-add-cart" disabled style={{ opacity: 0.5 }}>
                 Cargando...
               </button>
@@ -145,9 +146,24 @@ export const EventGrid: React.FC<EventGridProps> = ({
           <h2>Próximos Eventos 🎯</h2>
           <p>Eventos empresariales y oportunidades de networking</p>
         </div>
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-light)' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📅</div>
-          <p>No hay eventos disponibles en este momento.</p>
+        <div className="bento-grid">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="bento-item">
+              <div className="event-image" style={{ background: '#f8f9fa', border: '2px dashed #dee2e6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontSize: '2rem', color: '#6c757d' }}>📅</div>
+              </div>
+              <div className="event-title" style={{ background: '#f8f9fa', height: '20px', marginBottom: '8px', borderRadius: '4px' }}></div>
+              <div className="event-category" style={{ background: '#f8f9fa', height: '16px', marginBottom: '8px', borderRadius: '4px' }}></div>
+              <div className="event-price" style={{ background: '#f8f9fa', height: '24px', marginBottom: '8px', borderRadius: '4px' }}></div>
+              <div className="event-meta" style={{ background: '#f8f9fa', height: '16px', borderRadius: '4px' }}></div>
+              <button className="btn-add-cart" disabled style={{ opacity: 0.5, background: '#6c757d' }}>
+                Próximamente
+              </button>
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-light)' }}>
+          <p>No hay eventos disponibles en este momento. ¡Vuelve pronto!</p>
         </div>
       </div>
     )

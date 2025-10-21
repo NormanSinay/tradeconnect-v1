@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { adminPromotionService } from '@/services/admin'
 import type {
   CreatePromoCodeRequest,
-  DiscountType,
 } from '@/types/admin'
+import { DISCOUNT_TYPES } from '@/types/admin'
 
 const AdminPromoCodeCreatePage: React.FC = () => {
   const [loading, setLoading] = useState(false)
@@ -22,7 +22,7 @@ const AdminPromoCodeCreatePage: React.FC = () => {
     code: '',
     name: '',
     description: '',
-    discountType: DiscountType.PERCENTAGE,
+    discountType: DISCOUNT_TYPES.PERCENTAGE,
     discountValue: 0,
     startDate: undefined,
     endDate: undefined,
@@ -84,7 +84,7 @@ const AdminPromoCodeCreatePage: React.FC = () => {
       }
 
       // Validaciones específicas por tipo de descuento
-      if (formData.discountType === DiscountType.PERCENTAGE && formData.discountValue > 100) {
+      if (formData.discountType === DISCOUNT_TYPES.PERCENTAGE && formData.discountValue > 100) {
         throw new Error('El porcentaje de descuento no puede ser mayor al 100%')
       }
 
@@ -233,33 +233,33 @@ const AdminPromoCodeCreatePage: React.FC = () => {
                   <Label htmlFor="discountType">Tipo de Descuento</Label>
                   <Select
                     value={formData.discountType}
-                    onValueChange={(value) => handleInputChange('discountType', value as DiscountType)}
+                    onValueChange={(value) => handleInputChange('discountType', value as DISCOUNT_TYPES)}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={DiscountType.PERCENTAGE}>Porcentaje (%)</SelectItem>
-                      <SelectItem value={DiscountType.FIXED_AMOUNT}>Monto Fijo (Q)</SelectItem>
-                      <SelectItem value={DiscountType.BUY_X_GET_Y}>Compra X Lleva Y</SelectItem>
-                      <SelectItem value={DiscountType.SPECIAL_PRICE}>Precio Especial</SelectItem>
+                      <SelectItem value={DISCOUNT_TYPES.PERCENTAGE}>Porcentaje (%)</SelectItem>
+                      <SelectItem value={DISCOUNT_TYPES.FIXED_AMOUNT}>Monto Fijo (Q)</SelectItem>
+                      <SelectItem value={DISCOUNT_TYPES.BUY_X_GET_Y}>Compra X Lleva Y</SelectItem>
+                      <SelectItem value={DISCOUNT_TYPES.SPECIAL_PRICE}>Precio Especial</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
                   <Label htmlFor="discountValue">
-                    Valor del Descuento * {formData.discountType === DiscountType.PERCENTAGE ? '(%)' : '(Q)'}
+                    Valor del Descuento * {formData.discountType === DISCOUNT_TYPES.PERCENTAGE ? '(%)' : '(Q)'}
                   </Label>
                   <Input
                     id="discountValue"
                     type="number"
                     min="0"
-                    step={formData.discountType === DiscountType.PERCENTAGE ? "1" : "0.01"}
-                    max={formData.discountType === DiscountType.PERCENTAGE ? "100" : undefined}
+                    step={formData.discountType === DISCOUNT_TYPES.PERCENTAGE ? "1" : "0.01"}
+                    max={formData.discountType === DISCOUNT_TYPES.PERCENTAGE ? "100" : undefined}
                     value={formData.discountValue}
                     onChange={(e) => handleInputChange('discountValue', parseFloat(e.target.value))}
-                    placeholder={formData.discountType === DiscountType.PERCENTAGE ? "10" : "50.00"}
+                    placeholder={formData.discountType === DISCOUNT_TYPES.PERCENTAGE ? "10" : "50.00"}
                     required
                   />
                 </div>

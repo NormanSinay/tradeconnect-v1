@@ -24,7 +24,7 @@ class WebSocketService {
 
   constructor(config: Partial<WebSocketConfig> = {}) {
     this.config = {
-      url: config.url || import.meta.env.VITE_WS_URL || 'ws://localhost:3001',
+      url: config.url || import.meta.env.VITE_WS_URL || 'ws://localhost:3000',
       authToken: config.authToken,
       userId: config.userId,
       reconnectAttempts: config.reconnectAttempts || 0,

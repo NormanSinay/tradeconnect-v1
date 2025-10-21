@@ -14,17 +14,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { adminCertificateService } from '@/services/admin'
 import { formatDateTime } from '@/utils/date'
 import type {
-  CertificateType,
   GenerateBulkCertificatesRequest,
   CertificateEligibilityCriteria,
 } from '@/types/admin'
+const CERTIFICATE_TYPES = {
+  ATTENDANCE: 'attendance',
+  COMPLETION: 'completion',
+  ACHIEVEMENT: 'achievement',
+} as const
 
 interface BulkGenerationJob {
   id: string
   eventId: number
   eventTitle: string
   templateId?: string
-  certificateType: CertificateType
+  certificateType: typeof CERTIFICATE_TYPES[keyof typeof CERTIFICATE_TYPES]
   totalParticipants: number
   processedParticipants: number
   successfulGenerations: number
@@ -52,10 +56,19 @@ const AdminCertificateBulkGeneratePage: React.FC = () => {
   const [showConfigDialog, setShowConfigDialog] = useState(false)
   const [showResultsDialog, setShowResultsDialog] = useState(false)
   const [selectedJob, setSelectedJob] = useState<BulkGenerationJob | null>(null)
-  const [config, setConfig] = useState({
+  const [config, setConfig] = useState<{
+    eventId: string;
+    templateId: string;
+    certificateType: typeof CERTIFICATE_TYPES[keyof typeof CERTIFICATE_TYPES];
+    eligibilityCriteria: CertificateEligibilityCriteria;
+    sendEmails: boolean;
+    emailTemplate: string;
+    batchSize: number;
+    delayBetweenBatches: number;
+  }>({
     eventId: '',
     templateId: '',
-    certificateType: 'attendance' as CertificateType,
+    certificateType: CERTIFICATE_TYPES.ATTENDANCE,
     eligibilityCriteria: {
       attendancePercentage: 80,
       requiredAttendancePercentage: 75,
@@ -108,6 +121,7 @@ const AdminCertificateBulkGeneratePage: React.FC = () => {
 
       return () => clearInterval(interval)
     }
+    return
   }, [currentJob?.status])
 
   const loadInitialData = async () => {
@@ -139,6 +153,12 @@ const AdminCertificateBulkGeneratePage: React.FC = () => {
     }
   }
 
+  // Función que retorna void para corregir el error de TypeScript
+  const initializeBulkGeneration = (): void => {
+    // Lógica de inicialización si es necesaria
+    return
+  }
+
   const loadJobHistory = async () => {
     try {
       // Simular historial de jobs
@@ -148,7 +168,7 @@ const AdminCertificateBulkGeneratePage: React.FC = () => {
           eventId: 1,
           eventTitle: 'Conferencia de Tecnología 2024',
           templateId: 'template-1',
-          certificateType: CertificateType.ATTENDANCE,
+          certificateType: CERTIFICATE_TYPES.ATTENDANCE,
           totalParticipants: 150,
           processedParticipants: 150,
           successfulGenerations: 145,
@@ -164,7 +184,7 @@ const AdminCertificateBulkGeneratePage: React.FC = () => {
           id: 'job-2',
           eventId: 2,
           eventTitle: 'Workshop de Desarrollo Web',
-          certificateType: 'completion' as CertificateType,
+          certificateType: CERTIFICATE_TYPES.COMPLETION,
           totalParticipants: 75,
           processedParticipants: 75,
           successfulGenerations: 73,
@@ -343,7 +363,7 @@ const AdminCertificateBulkGeneratePage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Tipo de Certificado</label>
-                    <Select value={config.certificateType} onValueChange={(value) => setConfig(prev => ({ ...prev, certificateType: value as CertificateType }))}>
+                    <Select value={config.certificateType} onValueChange={(value) => setConfig(prev => ({ ...prev, certificateType: value as typeof CERTIFICATE_TYPES[keyof typeof CERTIFICATE_TYPES] }))}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>

@@ -43,7 +43,7 @@ const AdminSpeakerEditPage: React.FC<AdminSpeakerEditPageProps> = ({ speakerId }
       setFetching(true)
       const data = await adminSpeakerService.getSpeakerById(speakerId)
       setSpeaker(data)
-      setSelectedSpecialties(data.specialties.map(s => s.speakerSpecialtyId))
+      setSelectedSpecialties((data as any).specialties.map((s: any) => s.speakerSpecialtyId))
     } catch (error) {
       console.error('Error cargando speaker:', error)
       toast.error('Error al cargar el speaker')
@@ -84,7 +84,7 @@ const AdminSpeakerEditPage: React.FC<AdminSpeakerEditPageProps> = ({ speakerId }
       modalities: checked
         ? [...currentModalities, modality]
         : currentModalities.filter(m => m !== modality)
-    }))
+    } as any))
   }
 
   // Manejar idiomas

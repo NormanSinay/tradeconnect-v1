@@ -28,7 +28,7 @@ export const EventChat: React.FC<EventChatProps> = ({
   maxHeight = '400px'
 }) => {
   const { user } = useAuth()
-  const { subscribe, sendMessage, joinEvent, leaveEvent, isConnected } = useWebSocket()
+  const { subscribe, sendMessage, joinEvent, leaveEvent, isConnected } = useWebSocket() || {}
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -44,7 +44,7 @@ export const EventChat: React.FC<EventChatProps> = ({
   }, [messages])
 
   useEffect(() => {
-    if (isConnected && eventId) {
+    if (isConnected && eventId && joinEvent && subscribe && leaveEvent) {
       joinEvent(eventId)
 
       const unsubscribe = subscribe('chat_message', (data: ChatMessagePayload) => {
@@ -59,7 +59,6 @@ export const EventChat: React.FC<EventChatProps> = ({
       })
 
       return () => {
-        unsubscribe()
         leaveEvent(eventId)
       }
     }
@@ -81,7 +80,7 @@ export const EventChat: React.FC<EventChatProps> = ({
       timestamp: new Date()
     }
 
-    sendMessage('chat_message', messagePayload)
+    sendMessage && sendMessage('chat_message', messagePayload)
     setNewMessage('')
     inputRef.current?.focus()
   }

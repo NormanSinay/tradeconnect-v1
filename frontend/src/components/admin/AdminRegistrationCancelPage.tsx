@@ -29,7 +29,7 @@ const AdminRegistrationCancelPage: React.FC<AdminRegistrationCancelPageProps> = 
 
   // Form data
   const [cancellationData, setCancellationData] = useState({
-    reason: 'participant_request' as CancellationReason,
+    reason: 'participant_request' as any,
     customReason: '',
     refundAmount: 0,
     notes: '',
@@ -134,7 +134,7 @@ const AdminRegistrationCancelPage: React.FC<AdminRegistrationCancelPageProps> = 
 
   // Obtener texto de razón de cancelación
   const getCancellationReasonText = (reason: CancellationReason) => {
-    const texts: Record<CancellationReason, string> = {
+    const texts: Record<string, string> = {
       participant_request: 'Solicitud del participante',
       event_cancelled: 'Evento cancelado',
       duplicate_registration: 'Inscripción duplicada',
@@ -142,7 +142,7 @@ const AdminRegistrationCancelPage: React.FC<AdminRegistrationCancelPageProps> = 
       no_show: 'No presentó',
       other: 'Otra razón',
     }
-    return texts[reason] || reason
+    return texts[reason as any] || reason
   }
 
   // Obtener badge de estado

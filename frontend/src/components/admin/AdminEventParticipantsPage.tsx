@@ -74,8 +74,8 @@ const AdminEventParticipantsPage: React.FC = () => {
         await adminEventService.getEventRegistrations(eventId, params)
 
       setParticipants(result.data)
-      setTotalPages(Math.ceil(result.total / result.limit))
-      setTotalParticipants(result.total)
+      setTotalPages(result.pagination.pages)
+      setTotalParticipants(result.pagination.total)
     } catch (err) {
       console.error('Error cargando participantes:', err)
       setError('Error al cargar los participantes')

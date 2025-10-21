@@ -11,7 +11,7 @@
 export type {
   DashboardKPI,
   PerformanceMetric,
-  SystemStats,
+  SystemStats as DashboardSystemStats,
   DashboardSummary,
   DashboardAlert,
   LineChartData,
@@ -160,44 +160,44 @@ export type {
 // CONTRATOS DE SPEAKERS
 // ====================================================================
 export type {
-  ContractInfo,
-  DetailedContractInfo,
-  PaymentInfo,
-  CreateContractData,
-  UpdateContractData,
-  CreatePaymentData,
-  UpdatePaymentData,
-  PublicContract,
-  DetailedContract,
-  PublicPayment,
-  DetailedPayment,
-  ContractFilters,
-  ContractQueryParams,
-  ContractSearchResult,
-  PaymentFilters,
-  PaymentQueryParams,
-  PaymentSearchResult,
-  ContractStats,
-  PaymentStats,
+  ContractInfo as SpeakerContractInfo,
+  DetailedContractInfo as SpeakerDetailedContractInfo,
+  PaymentInfo as SpeakerPaymentInfo,
+  CreateContractData as SpeakerCreateContractData,
+  UpdateContractData as SpeakerUpdateContractData,
+  CreatePaymentData as SpeakerCreatePaymentData,
+  UpdatePaymentData as SpeakerUpdatePaymentData,
+  PublicContract as SpeakerPublicContract,
+  DetailedContract as SpeakerDetailedContract,
+  PublicPayment as SpeakerPublicPayment,
+  DetailedPayment as SpeakerDetailedPayment,
+  ContractFilters as SpeakerContractFilters,
+  ContractQueryParams as SpeakerContractQueryParams,
+  ContractSearchResult as SpeakerContractSearchResult,
+  PaymentFilters as SpeakerContractPaymentFilters,
+  PaymentQueryParams as SpeakerContractPaymentQueryParams,
+  PaymentSearchResult as SpeakerContractPaymentSearchResult,
+  ContractStats as SpeakerContractStats,
+  PaymentStats as SpeakerContractPaymentStats,
   SpeakerFinancialReport,
   ContractComplianceReport,
-  ContractStatus,
-  PaymentTerms,
-  PaymentStatus as ContractPaymentStatus,
-  PaymentType as ContractPaymentType,
-  PaymentMethod as ContractPaymentMethod,
-  SupportedCurrency as ContractSupportedCurrency,
-  ComplianceStatus,
-  FinancialReportType,
-  ReportPeriod,
-  ExportFormat as ContractExportFormat,
+  ContractStatus as SpeakerContractStatus,
+  PaymentTerms as SpeakerPaymentTerms,
+  PaymentStatus as SpeakerContractPaymentStatus,
+  PaymentType as SpeakerContractPaymentType,
+  PaymentMethod as SpeakerContractPaymentMethod,
+  SupportedCurrency as SpeakerContractSupportedCurrency,
+  ComplianceStatus as SpeakerComplianceStatus,
+  FinancialReportType as SpeakerFinancialReportType,
+  ReportPeriod as SpeakerReportPeriod,
+  ExportFormat as SpeakerExportFormat,
 } from './speaker-contract.types';
 
 // ====================================================================
 // INSCRIPCIONES
 // ====================================================================
 export type {
-  RegistrationStatus as RegistrationStatusType,
+  RegistrationStatus as RegistrationRegistrationStatus,
   ParticipantType,
   GroupRegistrationStatus,
   CreateIndividualRegistrationData,
@@ -223,7 +223,7 @@ export type {
   CancellationPolicy,
   CancellationRule,
   GroupDiscountConfig,
-  CapacityValidationResult,
+  CapacityValidationResult as RegistrationCapacityValidationResult,
   ConflictValidationResult,
   ConflictingEvent,
   RegistrationAuditLog,
@@ -261,7 +261,7 @@ export type {
   CapacityQueryFilters,
   CapacityQueryParams,
   CapacityQueryResult,
-  CapacityValidationResult,
+  CapacityValidationResult as CapacityCapacityValidationResult,
   LockValidationResult,
   PaymentIntegrationData,
   RegistrationIntegrationData,
@@ -393,10 +393,10 @@ export type {
   GatewayTransaction,
   ReconciliationDiscrepancy,
   ReconciliationReport,
-  PaymentFilters,
-  PaymentQueryParams,
-  PaymentSearchResult,
-  PaymentStats,
+  PaymentFilters as PaymentGatewayFilters,
+  PaymentQueryParams as PaymentGatewayQueryParams,
+  PaymentSearchResult as PaymentGatewaySearchResult,
+  PaymentStats as PaymentGatewayStats,
   RevenueReport as PaymentRevenueReport,
   CardValidationConfig,
   CardValidationResult,
@@ -477,7 +477,7 @@ export type {
   AuditSearchResult,
   SystemConfig,
   BackupConfig,
-  SystemStats,
+  SystemStats as SystemSystemStats,
   PerformanceMetrics,
   SystemNotificationType,
   SystemNotification,
@@ -718,6 +718,7 @@ export * from './event-template.types';
 export * from './event-session.types';
 export * from './speaker.types';
 export * from './speaker-contract.types';
+export type { RegistrationStatus as EventRegistrationStatus } from './registration.types';
 export * from './registration.types';
 export * from './capacity.types';
 export * from './promotion.types';
@@ -726,3 +727,26 @@ export * from './certificate.types';
 export * from './payment.types';
 export * from './fel.types';
 export * from './system.types';
+
+// Exportaciones explícitas para resolver ambigüedades
+export type { CapacityValidationResult } from './capacity.types';
+export type { PaymentMethod, PaymentType } from './speaker.types';
+export type { PaymentFilters, PaymentQueryParams, PaymentSearchResult, PaymentStats } from './payment.types';
+export type { SystemStats } from './system.types';
+
+// Agregar propiedades faltantes a SystemStats
+export interface ExtendedSystemStats {
+  totalUsers?: number;
+  totalEvents?: number;
+  totalRevenue?: number;
+  conversionRate?: number;
+  totalRequests?: number;
+  activeUsers?: number;
+  systemLoad?: number;
+  uptime?: number;
+  memoryUsage?: number;
+  diskUsage?: number;
+  databaseConnections?: number;
+  errorRate?: number;
+  responseTime?: number;
+}

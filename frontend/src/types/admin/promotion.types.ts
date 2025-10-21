@@ -10,22 +10,26 @@ import type { AppliedDiscount } from './registration.types';
 /**
  * Tipos de promoción
  */
-export enum PromotionType {
-  GENERAL = 'GENERAL',
-  EVENT_SPECIFIC = 'EVENT_SPECIFIC',
-  CATEGORY_SPECIFIC = 'CATEGORY_SPECIFIC',
-  MEMBERSHIP = 'MEMBERSHIP'
-}
+export const PromotionType = {
+  GENERAL: 'GENERAL',
+  EVENT_SPECIFIC: 'EVENT_SPECIFIC',
+  CATEGORY_SPECIFIC: 'CATEGORY_SPECIFIC',
+  MEMBERSHIP: 'MEMBERSHIP'
+} as const
+
+export type PromotionType = typeof PromotionType[keyof typeof PromotionType]
 
 /**
  * Tipos de descuento para códigos promocionales
  */
-export enum DiscountType {
-  PERCENTAGE = 'PERCENTAGE',
-  FIXED_AMOUNT = 'FIXED_AMOUNT',
-  BUY_X_GET_Y = 'BUY_X_GET_Y',
-  SPECIAL_PRICE = 'SPECIAL_PRICE'
-}
+export const DiscountType = {
+  PERCENTAGE: 'PERCENTAGE',
+  FIXED_AMOUNT: 'FIXED_AMOUNT',
+  BUY_X_GET_Y: 'BUY_X_GET_Y',
+  SPECIAL_PRICE: 'SPECIAL_PRICE'
+} as const
+
+export type DiscountType = typeof DiscountType[keyof typeof DiscountType]
 
 /**
  * Estados de uso del código promocional

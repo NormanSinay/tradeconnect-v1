@@ -13,12 +13,17 @@ interface WebSocketHookReturn {
   socket: Socket | null
   isConnected: boolean
   isConnecting: boolean
+  connectionState?: string
   error: Error | null
   connect: () => void
   disconnect: () => void
   emit: (event: string, data?: any) => void
   on: (event: string, callback: (...args: any[]) => void) => void
   off: (event: string, callback?: (...args: any[]) => void) => void
+  subscribe?: (event: string, callback: (...args: any[]) => void) => void
+  sendMessage?: (event: string, data?: any) => void
+  joinEvent?: (eventId: string) => void
+  leaveEvent?: (eventId: string) => void
 }
 
 /**
@@ -26,7 +31,7 @@ interface WebSocketHookReturn {
  */
 export const useWebSocket = (options: WebSocketHookOptions = {}): WebSocketHookReturn => {
   const {
-    url = process.env.REACT_APP_WS_URL || 'ws://localhost:3001',
+    url = import.meta.env.VITE_WS_URL || 'ws://localhost:3000',
     enabled = true,
     onConnect,
     onDisconnect,
@@ -131,16 +136,38 @@ export const useWebSocket = (options: WebSocketHookOptions = {}): WebSocketHookR
     }
   }, [enabled, connect, disconnect])
 
+  // Funciones específicas para eventos
+  const subscribe = useCallback((event: string, callback: (...args: any[]) => void) => {
+    on(event, callback)
+  }, [on])
+
+  const sendMessage = useCallback((event: string, data?: any) => {
+    emit(event, data)
+  }, [emit])
+
+  const joinEvent = useCallback((eventId: string) => {
+    emit('join_event', { eventId })
+  }, [emit])
+
+  const leaveEvent = useCallback((eventId: string) => {
+    emit('leave_event', { eventId })
+  }, [emit])
+
   return {
     socket: socketRef.current,
     isConnected,
     isConnecting,
+    connectionState: isConnected ? 'connected' : isConnecting ? 'connecting' : 'disconnected',
     error,
     connect,
     disconnect,
     emit,
     on,
     off,
+    subscribe,
+    sendMessage,
+    joinEvent,
+    leaveEvent,
   }
 }
 
@@ -153,7 +180,7 @@ export const useRealtimeMetrics = (enabled: boolean = true) => {
 
   const { isConnected, on, off } = useWebSocket({
     enabled,
-    url: process.env.REACT_APP_WS_URL || 'ws://localhost:3001',
+    url: import.meta.env.VITE_WS_URL || 'ws://localhost:3000',
   })
 
   useEffect(() => {
@@ -191,7 +218,7 @@ export const useRealtimeAlerts = (enabled: boolean = true) => {
 
   const { isConnected, on, off } = useWebSocket({
     enabled,
-    url: process.env.REACT_APP_WS_URL || 'ws://localhost:3001',
+    url: import.meta.env.VITE_WS_URL || 'ws://localhost:3000',
   })
 
   useEffect(() => {

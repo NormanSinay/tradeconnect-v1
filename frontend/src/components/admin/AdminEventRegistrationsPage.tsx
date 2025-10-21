@@ -34,6 +34,7 @@ import type {
   RegistrationResponse,
   AdminEvent,
 } from '@/types/admin'
+import type { EventRegistrationStatus } from '@/types/admin'
 
 interface AdminEventRegistrationsPageProps {
   eventId: number
@@ -183,7 +184,7 @@ const AdminEventRegistrationsPage: React.FC<AdminEventRegistrationsPageProps> = 
   }
 
   // Obtener badge de estado
-  const getStatusBadge = (status: RegistrationStatus) => {
+  const getStatusBadge = (status: RegistrationStatus | EventRegistrationStatus) => {
     const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       BORRADOR: 'secondary',
       PENDIENTE_PAGO: 'outline',
@@ -192,12 +193,17 @@ const AdminEventRegistrationsPage: React.FC<AdminEventRegistrationsPageProps> = 
       CANCELADO: 'destructive',
       EXPIRADO: 'destructive',
       REEMBOLSADO: 'destructive',
+      pending: 'secondary',
+      confirmed: 'default',
+      cancelled: 'destructive',
+      attended: 'default',
+      no_show: 'outline',
     }
-    return variants[status] || 'secondary'
+    return variants[status as string] || 'secondary'
   }
 
   // Obtener texto de estado
-  const getStatusText = (status: RegistrationStatus) => {
+  const getStatusText = (status: RegistrationStatus | EventRegistrationStatus) => {
     const texts: Record<string, string> = {
       BORRADOR: 'Borrador',
       PENDIENTE_PAGO: 'Pendiente de Pago',
@@ -206,8 +212,13 @@ const AdminEventRegistrationsPage: React.FC<AdminEventRegistrationsPageProps> = 
       CANCELADO: 'Cancelado',
       EXPIRADO: 'Expirado',
       REEMBOLSADO: 'Reembolsado',
+      pending: 'Pendiente',
+      confirmed: 'Confirmado',
+      cancelled: 'Cancelado',
+      attended: 'Asistió',
+      no_show: 'No Asistió',
     }
-    return texts[status] || status
+    return texts[status as string] || status as string
   }
 
   // Obtener texto de tipo de participante
@@ -355,7 +366,7 @@ const AdminEventRegistrationsPage: React.FC<AdminEventRegistrationsPageProps> = 
                 <select
                   value={filters.status?.[0] || ''}
                   onChange={(e) => handleFilterChange({
-                    status: e.target.value ? [e.target.value as RegistrationStatus] : undefined
+                    status: e.target.value ? [e.target.value as any] : undefined
                   })}
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
@@ -481,21 +492,21 @@ const AdminEventRegistrationsPage: React.FC<AdminEventRegistrationsPageProps> = 
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {registration.firstName} {registration.lastName}
+                            {(registration as any).firstName} {(registration as any).lastName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {registration.email}
+                            {(registration as any).email}
                           </div>
-                          {registration.companyName && (
+                          {(registration as any).companyName && (
                             <div className="text-sm text-gray-500">
-                              {registration.companyName}
+                              {(registration as any).companyName}
                             </div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {getParticipantTypeText(registration.participantType)}
+                          {getParticipantTypeText((registration as any).participantType)}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -506,8 +517,8 @@ const AdminEventRegistrationsPage: React.FC<AdminEventRegistrationsPageProps> = 
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getStatusBadge(registration.status)}>
-                          {getStatusText(registration.status)}
+                        <Badge variant={getStatusBadge(registration.status as any)}>
+                          {getStatusText(registration.status as any)}
                         </Badge>
                       </TableCell>
                       <TableCell>

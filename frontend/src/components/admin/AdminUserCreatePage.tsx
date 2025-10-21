@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { adminSystemService } from '@/services/admin'
 import { useNavigate } from 'react-router-dom'
-import { useForm } from '@/hooks/useForm'
 import type { UserCreateData, UserRole } from '@/types/admin'
 
 const AdminUserCreatePage: React.FC = () => {
@@ -20,42 +19,64 @@ const AdminUserCreatePage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const { values, errors, handleChange, handleSubmit, setFieldValue } = useForm<UserCreateData>({
-    initialValues: {
-      email: '',
-      password: '',
-      firstName: '',
-      lastName: '',
-      phone: '',
-      role: undefined,
-    },
-    onSubmit: handleCreateUser,
-    validate: (values) => {
-      const errors: Partial<Record<keyof UserCreateData, string>> = {}
-
-      if (!values.email) {
-        errors.email = 'El email es requerido'
-      } else if (!/\S+@\S+\.\S+/.test(values.email)) {
-        errors.email = 'El email no es válido'
-      }
-
-      if (!values.password) {
-        errors.password = 'La contraseña es requerida'
-      } else if (values.password.length < 8) {
-        errors.password = 'La contraseña debe tener al menos 8 caracteres'
-      }
-
-      if (!values.firstName) {
-        errors.firstName = 'El nombre es requerido'
-      }
-
-      if (!values.lastName) {
-        errors.lastName = 'El apellido es requerido'
-      }
-
-      return errors
-    },
+  const [formData, setFormData] = useState<UserCreateData>({
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    role: undefined,
   })
+
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof UserCreateData, string>>>({})
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    if (formErrors[name as keyof UserCreateData]) {
+      setFormErrors(prev => ({ ...prev, [name]: undefined }))
+    }
+  }
+
+  const setFieldValue = (field: keyof UserCreateData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    if (formErrors[field]) {
+      setFormErrors(prev => ({ ...prev, [field]: undefined }))
+    }
+  }
+
+  const validateForm = () => {
+    const errors: Partial<Record<keyof UserCreateData, string>> = {}
+
+    if (!formData.email) {
+      errors.email = 'El email es requerido'
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'El email no es válido'
+    }
+
+    if (!formData.password) {
+      errors.password = 'La contraseña es requerida'
+    } else if (formData.password.length < 8) {
+      errors.password = 'La contraseña debe tener al menos 8 caracteres'
+    }
+
+    if (!formData.firstName) {
+      errors.firstName = 'El nombre es requerido'
+    }
+
+    if (!formData.lastName) {
+      errors.lastName = 'El apellido es requerido'
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validateForm()) return
+    await handleCreateUser(formData)
+  }
 
   async function handleCreateUser(data: UserCreateData) {
     try {
@@ -132,13 +153,13 @@ const AdminUserCreatePage: React.FC = () => {
                     id="firstName"
                     name="firstName"
                     type="text"
-                    value={values.firstName}
+                    value={formData.firstName}
                     onChange={handleChange}
-                    className={errors.firstName ? 'border-red-500' : ''}
+                    className={formErrors.firstName ? 'border-red-500' : ''}
                     placeholder="Ingrese el nombre"
                   />
-                  {errors.firstName && (
-                    <p className="text-sm text-red-600 mt-1">{errors.firstName}</p>
+                  {formErrors.firstName && (
+                    <p className="text-sm text-red-600 mt-1">{formErrors.firstName}</p>
                   )}
                 </div>
 
@@ -150,13 +171,13 @@ const AdminUserCreatePage: React.FC = () => {
                     id="lastName"
                     name="lastName"
                     type="text"
-                    value={values.lastName}
+                    value={formData.lastName}
                     onChange={handleChange}
-                    className={errors.lastName ? 'border-red-500' : ''}
+                    className={formErrors.lastName ? 'border-red-500' : ''}
                     placeholder="Ingrese el apellido"
                   />
-                  {errors.lastName && (
-                    <p className="text-sm text-red-600 mt-1">{errors.lastName}</p>
+                  {formErrors.lastName && (
+                    <p className="text-sm text-red-600 mt-1">{formErrors.lastName}</p>
                   )}
                 </div>
               </div>
@@ -170,13 +191,13 @@ const AdminUserCreatePage: React.FC = () => {
                   id="email"
                   name="email"
                   type="email"
-                  value={values.email}
+                  value={formData.email}
                   onChange={handleChange}
-                  className={errors.email ? 'border-red-500' : ''}
+                  className={formErrors.email ? 'border-red-500' : ''}
                   placeholder="usuario@ejemplo.com"
                 />
-                {errors.email && (
-                  <p className="text-sm text-red-600 mt-1">{errors.email}</p>
+                {formErrors.email && (
+                  <p className="text-sm text-red-600 mt-1">{formErrors.email}</p>
                 )}
                 <p className="text-xs text-gray-500 mt-1">
                   El email será usado para iniciar sesión y notificaciones
@@ -193,9 +214,9 @@ const AdminUserCreatePage: React.FC = () => {
                     id="password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
-                    value={values.password}
+                    value={formData.password}
                     onChange={handleChange}
-                    className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
+                    className={formErrors.password ? 'border-red-500 pr-10' : 'pr-10'}
                     placeholder="Mínimo 8 caracteres"
                   />
                   <button
@@ -210,8 +231,8 @@ const AdminUserCreatePage: React.FC = () => {
                     )}
                   </button>
                 </div>
-                {errors.password && (
-                  <p className="text-sm text-red-600 mt-1">{errors.password}</p>
+                {formErrors.password && (
+                  <p className="text-sm text-red-600 mt-1">{formErrors.password}</p>
                 )}
                 <div className="text-xs text-gray-500 mt-1 space-y-1">
                   <p>La contraseña debe contener:</p>
@@ -234,7 +255,7 @@ const AdminUserCreatePage: React.FC = () => {
                   id="phone"
                   name="phone"
                   type="tel"
-                  value={values.phone || ''}
+                  value={formData.phone || ''}
                   onChange={handleChange}
                   placeholder="+502 1234 5678"
                 />
@@ -249,7 +270,7 @@ const AdminUserCreatePage: React.FC = () => {
                   Rol Inicial
                 </Label>
                 <Select
-                  value={values.role || ''}
+                  value={formData.role || ''}
                   onValueChange={(value) => setFieldValue('role', value as UserRole)}
                 >
                   <SelectTrigger>

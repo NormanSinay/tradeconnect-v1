@@ -64,8 +64,8 @@ const AdminPromoCodesPage: React.FC = () => {
 
       const result = await adminPromotionService.getPromoCodes(filters, params)
       setPromoCodes(result.data)
-      setTotalPages(result.totalPages || 1)
-      setTotalPromoCodes(result.total || 0)
+      setTotalPages((result as any).totalPages || 1)
+      setTotalPromoCodes((result as any).total || 0)
     } catch (err) {
       console.error('Error cargando códigos promocionales:', err)
       setError('Error al cargar los códigos promocionales')

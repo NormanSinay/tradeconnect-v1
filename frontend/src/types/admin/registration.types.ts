@@ -18,6 +18,9 @@ export type RegistrationStatus =
   | 'EXPIRADO'
   | 'REEMBOLSADO';
 
+// Alias para compatibilidad con event.types.ts
+export type EventRegistrationStatus = RegistrationStatus;
+
 export type ParticipantType = 'individual' | 'empresa';
 
 export type GroupRegistrationStatus =

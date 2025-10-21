@@ -89,11 +89,11 @@ const AdminFelVoidedPage: React.FC = () => {
 
   // Obtener badge de estado
   const getStatusBadge = (status: FelInvoiceStatus) => {
-    const statusConfig = {
+    const statusConfig: Partial<Record<FelInvoiceStatus, { variant: 'default' | 'secondary' | 'destructive', label: string, icon: any }>> = {
       cancelled: { variant: 'destructive' as const, label: 'Anulada', icon: FaBan },
     }
 
-    const config = statusConfig[status] || statusConfig.cancelled
+    const config = statusConfig[status] || statusConfig.cancelled || { variant: 'secondary' as const, label: 'Desconocido', icon: FaBan }
     const Icon = config.icon
 
     return (

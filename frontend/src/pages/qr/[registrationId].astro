@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import QRPageWrapper from '@/components/ui/qr-page-wrapper'
+
+const { registrationId } = Astro.params
+---
+
+<BaseLayout title="Código QR - TradeConnect">
+  <QRPageWrapper registrationId={registrationId} client:only="react" />
+</BaseLayout>

@@ -97,7 +97,7 @@ const AdminSpeakerPaymentsPage: React.FC<AdminSpeakerPaymentsPageProps> = ({ spe
 
   // Manejar filtros
   const handleFilterChange = (newFilters: Partial<PaymentFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }))
+    setFilters(prev => ({ ...prev, ...newFilters } as PaymentFilters))
     setCurrentPage(1)
   }
 
@@ -293,10 +293,10 @@ const AdminSpeakerPaymentsPage: React.FC<AdminSpeakerPaymentsPageProps> = ({ spe
                 </select>
 
                 <select
-                  value={filters.paymentType?.[0] || ''}
+                  value={(filters as any).paymentType?.[0] || ''}
                   onChange={(e) => handleFilterChange({
                     paymentType: e.target.value ? [e.target.value as PaymentType] : undefined
-                  })}
+                  } as any)}
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
                   <option value="">Todos los tipos</option>
@@ -440,8 +440,8 @@ const AdminSpeakerPaymentsPage: React.FC<AdminSpeakerPaymentsPageProps> = ({ spe
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getStatusBadge(payment.status)}>
-                          {getStatusText(payment.status)}
+                        <Badge variant={getStatusBadge(payment.status as any)}>
+                          {getStatusText(payment.status as any)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">

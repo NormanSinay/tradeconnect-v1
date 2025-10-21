@@ -15,12 +15,12 @@ export const LiveEventStats: React.FC<LiveEventStatsProps> = ({
   eventId,
   className
 }) => {
-  const { subscribe, joinEvent, leaveEvent, isConnected } = useWebSocket()
+  const { subscribe, joinEvent, leaveEvent, isConnected } = useWebSocket() || {}
   const [stats, setStats] = useState<LiveStatsPayload | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (isConnected && eventId) {
+    if (isConnected && eventId && joinEvent && subscribe && leaveEvent) {
       joinEvent(eventId)
 
       const unsubscribe = subscribe('live_stats_updated', (data: LiveStatsPayload) => {
@@ -31,7 +31,7 @@ export const LiveEventStats: React.FC<LiveEventStatsProps> = ({
       })
 
       return () => {
-        unsubscribe()
+        // Cleanup function - unsubscribe and leave event
         leaveEvent(eventId)
       }
     }

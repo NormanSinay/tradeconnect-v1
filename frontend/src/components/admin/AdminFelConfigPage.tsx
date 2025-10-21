@@ -52,6 +52,7 @@ const AdminFelConfigPage: React.FC = () => {
     } finally {
       setIsLoading(false)
     }
+    return
   }
 
   // Guardar configuración general
@@ -121,11 +122,13 @@ const AdminFelConfigPage: React.FC = () => {
 
       if (field.includes('.')) {
         const [parent, child] = field.split('.')
+        const parentKey = parent as keyof typeof prev
+        const parentObj = prev[parentKey]
         return {
           ...prev,
-          [parent]: {
-            ...prev[parent as keyof FelConfig],
-            [child]: value,
+          [parentKey]: {
+            ...(parentObj as any) || {},
+            [child as any]: value,
           },
         }
       }

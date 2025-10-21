@@ -5,6 +5,8 @@ import { useAuth } from '@/context/AuthContext'
 import ConnectionStatus from './connection-status'
 import Notifications from './notifications'
 
+const SCROLL_THRESHOLD = 100
+
 interface NavigationProps {
   onVoiceAssistantToggle?: () => void
 }
@@ -18,9 +20,20 @@ export const Navigation: React.FC<NavigationProps> = ({
   const [cartCount, setCartCount] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
   const [isVoiceActive, setIsVoiceActive] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
     fetchCartCount()
+  }, [])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > SCROLL_THRESHOLD)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const fetchCartCount = async () => {
@@ -32,12 +45,14 @@ export const Navigation: React.FC<NavigationProps> = ({
         setCartCount(totalCount)
       }
     } catch (err) {
-      console.error('Error fetching cart count:', err)
+      // Silenciar errores de red cuando el backend no está disponible
+      // console.error('Error fetching cart count:', err)
+      setCartCount(0)
     }
   }
 
   const handleNavigation = (path: string) => {
-    navigate(path)
+    window.location.href = path
   }
 
   const handleLogout = async () => {
@@ -69,7 +84,7 @@ export const Navigation: React.FC<NavigationProps> = ({
   return (
     <>
       {/* Fixed Navigation */}
-      <nav>
+      <nav className={isScrolled ? 'nav-scrolled' : ''}>
         <div className="nav-container">
           <div className="logo" onClick={() => handleNavigation('/')}>
             <div className="logo-icon"></div>

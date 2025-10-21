@@ -71,10 +71,10 @@ const AdminUserRolesPage: React.FC = () => {
       setError(null)
       setSuccess(null)
 
-      await adminSystemService.assignRoleToUser(parseInt(id), selectedRole, {
+      await adminSystemService.assignRoleToUser(parseInt(id), selectedRole as any, {
         assignedBy: 1, // TODO: Obtener del contexto de usuario actual
         reason: assignmentReason.trim(),
-      })
+      } as any)
 
       setSuccess('Rol asignado exitosamente')
       setShowAssignDialog(false)

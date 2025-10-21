@@ -301,7 +301,7 @@ const AdminRegistrationsPage: React.FC = () => {
                 <select
                   value={filters.status?.[0] || ''}
                   onChange={(e) => handleFilterChange({
-                    status: e.target.value ? [e.target.value as RegistrationStatus] : undefined
+                    status: e.target.value ? [e.target.value as any] : undefined
                   })}
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
@@ -427,21 +427,21 @@ const AdminRegistrationsPage: React.FC = () => {
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {registration.firstName} {registration.lastName}
+                            {(registration as any).firstName} {(registration as any).lastName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {registration.email}
+                            {(registration as any).email}
                           </div>
-                          {registration.companyName && (
+                          {(registration as any).companyName && (
                             <div className="text-sm text-gray-500">
-                              {registration.companyName}
+                              {(registration as any).companyName}
                             </div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">Evento #{registration.eventId}</div>
+                          <div className="font-medium">Evento #{(registration as any).eventId}</div>
                           <div className="text-sm text-gray-500">
                             {/* TODO: Add event title */}
                           </div>
@@ -449,7 +449,7 @@ const AdminRegistrationsPage: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {getParticipantTypeText(registration.participantType)}
+                          {getParticipantTypeText((registration as any).participantType)}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -460,8 +460,8 @@ const AdminRegistrationsPage: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getStatusBadge(registration.status)}>
-                          {getStatusText(registration.status)}
+                        <Badge variant={getStatusBadge(registration.status as any)}>
+                          {getStatusText(registration.status as any)}
                         </Badge>
                       </TableCell>
                       <TableCell>

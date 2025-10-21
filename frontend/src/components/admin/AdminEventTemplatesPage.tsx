@@ -24,26 +24,6 @@ import {
 import { adminEventService } from '@/services/admin'
 import type { EventTemplateInfo } from '@/types/admin'
 
-interface EventTemplateInfo {
-  id: number
-  name: string
-  description?: string
-  eventTypeId: number
-  eventCategoryId: number
-  isActive: boolean
-  usageCount: number
-  createdAt: Date
-  updatedAt: Date
-  eventType: {
-    id: number
-    displayName: string
-  }
-  eventCategory: {
-    id: number
-    displayName: string
-  }
-}
-
 const AdminEventTemplatesPage: React.FC = () => {
   const [templates, setTemplates] = useState<EventTemplateInfo[]>([])
   const [loading, setLoading] = useState(true)
@@ -54,6 +34,7 @@ const AdminEventTemplatesPage: React.FC = () => {
   // Cargar templates
   useEffect(() => {
     loadTemplates()
+    return
   }, [])
 
   const loadTemplates = async () => {
@@ -70,27 +51,21 @@ const AdminEventTemplatesPage: React.FC = () => {
           id: 1,
           name: 'Conferencia Técnica',
           description: 'Template para conferencias técnicas con sesiones paralelas',
-          eventTypeId: 1,
-          eventCategoryId: 1,
-          isActive: true,
+          isPublic: true,
           usageCount: 15,
+          createdBy: 1,
           createdAt: new Date('2024-01-15'),
           updatedAt: new Date('2024-01-15'),
-          eventType: { id: 1, displayName: 'Conferencia' },
-          eventCategory: { id: 1, displayName: 'Tecnología' },
         },
         {
           id: 2,
           name: 'Taller Práctico',
           description: 'Template para talleres prácticos con ejercicios',
-          eventTypeId: 2,
-          eventCategoryId: 2,
-          isActive: true,
+          isPublic: true,
           usageCount: 8,
+          createdBy: 1,
           createdAt: new Date('2024-02-01'),
           updatedAt: new Date('2024-02-01'),
-          eventType: { id: 2, displayName: 'Taller' },
-          eventCategory: { id: 2, displayName: 'Educación' },
         },
       ])
     } catch (err) {
@@ -263,8 +238,6 @@ const AdminEventTemplatesPage: React.FC = () => {
                       />
                     </TableHead>
                     <TableHead>Template</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Categoría</TableHead>
                     <TableHead>Usos</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead className="text-right">Acciones</TableHead>
@@ -290,17 +263,11 @@ const AdminEventTemplatesPage: React.FC = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{template.eventType.displayName}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{template.eventCategory.displayName}</Badge>
-                      </TableCell>
-                      <TableCell>
                         <span className="font-medium">{template.usageCount}</span>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={template.isActive ? 'default' : 'secondary'}>
-                          {template.isActive ? 'Activo' : 'Inactivo'}
+                        <Badge variant={template.isPublic ? 'default' : 'secondary'}>
+                          {template.isPublic ? 'Público' : 'Privado'}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">

@@ -1,12 +1,11 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import Navigation from '@/components/ui/navigation'
-import EventDetail from '@/components/ui/event-detail'
-import Footer from '@/components/ui/footer'
+import EventDetailPage from '@/components/ui/event-detail-page'
+
+const url = new URL(Astro.request.url)
+const eventId = url.searchParams.get('id')
 ---
 
-<BaseLayout title="Detalles del Evento - TradeConnect">
-  <Navigation client:load cartItemCount={3} />
-  <EventDetail client:load />
-  <Footer client:load />
+<BaseLayout title="Detalle del Evento - TradeConnect">
+  <EventDetailPage eventId={eventId} client:only="react" />
 </BaseLayout>

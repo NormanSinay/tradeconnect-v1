@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FaCreditCard, FaPaypal, FaMoneyBillWave, FaCheckCircle, FaClock, FaTimesCircle, FaExclamationTriangle, FaEye, FaDownload } from 'react-icons/fa'
+import { FaCreditCard, FaPaypal, FaMoneyBillWave, FaCheckCircle, FaClock, FaTimesCircle, FaExclamationTriangle, FaEye, FaDownload, FaFileInvoice } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

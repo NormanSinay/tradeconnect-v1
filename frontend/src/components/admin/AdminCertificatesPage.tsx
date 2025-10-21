@@ -47,7 +47,7 @@ const AdminCertificatesPage: React.FC = () => {
       setLoading(true)
       setError(null)
 
-      const response: AdminPaginatedResponse<CertificateAttributes> = await adminCertificateService.getCertificates(
+      const response: AdminPaginatedResponse<any> = await adminCertificateService.getCertificates(
         {
           eventId: filters.eventId ? parseInt(filters.eventId) : undefined,
           status: filters.status || undefined,
@@ -59,7 +59,7 @@ const AdminCertificatesPage: React.FC = () => {
       )
 
       setCertificates(response.data)
-      setPagination(prev => ({ ...prev, total: response.total }))
+      setPagination(prev => ({ ...prev, total: response.pagination.total }))
 
     } catch (err: any) {
       console.error('Error cargando certificados:', err)

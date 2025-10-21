@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CertificatePageWrapper from '@/components/ui/certificate-page-wrapper'
+
+const { registrationId } = Astro.params
+---
+
+<BaseLayout title="Certificado - TradeConnect">
+  <CertificatePageWrapper registrationId={registrationId} client:only="react" />
+</BaseLayout>

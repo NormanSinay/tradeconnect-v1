@@ -202,16 +202,16 @@ const AdminRegistrationsExportPage: React.FC = () => {
                 <div>
                   <Label className="text-sm font-medium">Estado</Label>
                   <div className="mt-2 space-y-2">
-                    {(['BORRADOR', 'PENDIENTE_PAGO', 'PAGADO', 'CONFIRMADO', 'CANCELADO', 'EXPIRADO', 'REEMBOLSADO'] as RegistrationStatus[]).map((status) => (
+                    {(['BORRADOR', 'PENDIENTE_PAGO', 'PAGADO', 'CONFIRMADO', 'CANCELADO', 'EXPIRADO', 'REEMBOLSADO'] as any).map((status: any) => (
                       <div key={status} className="flex items-center space-x-2">
                         <Checkbox
                           id={`status-${status}`}
-                          checked={filters.status?.includes(status) || false}
+                          checked={filters.status?.includes(status as any) || false}
                           onCheckedChange={(checked) => {
                             const currentStatuses = filters.status || []
                             const newStatuses = checked
                               ? [...currentStatuses, status]
-                              : currentStatuses.filter(s => s !== status)
+                              : currentStatuses.filter(s => s !== (status as any))
                             handleFilterChange('status', newStatuses.length > 0 ? newStatuses : undefined)
                           }}
                         />

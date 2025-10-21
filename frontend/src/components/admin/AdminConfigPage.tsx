@@ -77,16 +77,19 @@ const AdminConfigPage: React.FC = () => {
   const updateNestedConfig = (section: keyof SystemConfig, subsection: string, field: string, value: any) => {
     if (!config) return
 
-    setConfig(prev => ({
-      ...prev!,
-      [section]: {
-        ...prev![section],
-        [subsection]: {
-          ...prev![section][subsection],
-          [field]: value,
+    setConfig(prev => {
+      const sectionData = prev![section] as any
+      return {
+        ...prev!,
+        [section]: {
+          ...sectionData,
+          [subsection]: {
+            ...sectionData[subsection],
+            [field]: value,
+          },
         },
-      },
-    }))
+      }
+    })
   }
 
   useEffect(() => {
@@ -379,7 +382,7 @@ const AdminConfigPage: React.FC = () => {
                         id="sessionTimeout"
                         type="number"
                         value={config.security.sessionTimeout}
-                        onChange={(e) => updateNestedConfig('security', 'sessionTimeout', parseInt(e.target.value))}
+                        onChange={(e) => updateConfig('security', 'sessionTimeout', parseInt(e.target.value))}
                         placeholder="60"
                       />
                     </div>
@@ -513,8 +516,16 @@ const AdminConfigPage: React.FC = () => {
                               checked={gateway.enabled}
                               onCheckedChange={(checked) => {
                                 const newGateways = [...config.integrations.paymentGateways]
-                                newGateways[index] = { ...newGateways[index], enabled: checked }
-                                updateConfig('integrations', 'paymentGateways', newGateways)
+                                const gateway = newGateways[index]
+                                if (gateway) {
+                                  newGateways[index] = {
+                                    ...gateway,
+                                    enabled: checked,
+                                    name: gateway.name || '',
+                                    sandbox: gateway.sandbox ?? false
+                                  }
+                                  updateConfig('integrations', 'paymentGateways', newGateways)
+                                }
                               }}
                             />
                             <Label>Habilitado</Label>

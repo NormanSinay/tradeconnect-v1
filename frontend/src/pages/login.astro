@@ -1,0 +1,10 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { LoginPage } from '@/components/auth/LoginPage'
+---
+
+<BaseLayout title="Iniciar Sesión - TradeConnect">
+  <div class="min-h-screen bg-gray-50">
+    <LoginPage client:only="react" />
+  </div>
+</BaseLayout>
