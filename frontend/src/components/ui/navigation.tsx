@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { api } from '@/services/api'
+import { useAuth } from '@/context/AuthContext'
 import ConnectionStatus from './connection-status'
 import Notifications from './notifications'
 
@@ -13,6 +14,7 @@ export const Navigation: React.FC<NavigationProps> = ({
 }) => {
   const navigate = useNavigate()
   const location = useLocation()
+  const { user, logout } = useAuth()
   const [cartCount, setCartCount] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
   const [isVoiceActive, setIsVoiceActive] = useState(false)
@@ -36,6 +38,15 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   const handleNavigation = (path: string) => {
     navigate(path)
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate('/')
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
   }
 
   const handleSearch = (e: React.FormEvent) => {
@@ -90,14 +101,45 @@ export const Navigation: React.FC<NavigationProps> = ({
                 Cursos 📚
               </a>
             </li>
-            <li>
-              <a
-                onClick={() => handleNavigation('/profile')}
-                className={isActive('/profile') ? 'active' : ''}
-              >
-                Mi Cuenta 👤
-              </a>
-            </li>
+            {user ? (
+              <>
+                <li>
+                  <a
+                    onClick={() => handleNavigation('/profile')}
+                    className={isActive('/profile') ? 'active' : ''}
+                  >
+                    Mi Cuenta 👤
+                  </a>
+                </li>
+                <li>
+                  <a
+                    onClick={handleLogout}
+                    className="logout-link"
+                  >
+                    Cerrar Sesión 🚪
+                  </a>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <a
+                    onClick={() => handleNavigation('/login')}
+                    className={isActive('/login') ? 'active' : ''}
+                  >
+                    Iniciar Sesión 🔑
+                  </a>
+                </li>
+                <li>
+                  <a
+                    onClick={() => handleNavigation('/registro')}
+                    className={isActive('/registro') ? 'active' : ''}
+                  >
+                    Registrarse 📝
+                  </a>
+                </li>
+              </>
+            )}
           </ul>
 
           <div className="ai-search">
