@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { FaCalendarAlt, FaClock, FaMapMarkerAlt } from 'react-icons/fa'
+import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaSearch } from 'react-icons/fa'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -41,10 +41,26 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
 
   if (events.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">
-          No se encontraron eventos que coincidan con tu búsqueda.
-        </p>
+      <div className="text-center py-16">
+        <div className="max-w-md mx-auto">
+          <motion.div
+            className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6 mx-auto"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            <FaSearch size={32} className="text-gray-400" />
+          </motion.div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No se encontraron eventos
+          </h3>
+          <p className="text-gray-500 mb-6">
+            No hay eventos disponibles que coincidan con tu búsqueda en este momento.
+          </p>
+          <p className="text-sm text-gray-400">
+            Intenta con otros términos de búsqueda o revisa más tarde.
+          </p>
+        </div>
       </div>
     )
   }

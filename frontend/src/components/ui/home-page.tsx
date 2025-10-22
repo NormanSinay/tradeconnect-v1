@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaCalendarAlt, FaGraduationCap, FaHandshake } from 'react-icons/fa'
+import { FaCalendarAlt, FaGraduationCap, FaHandshake, FaLaptop, FaChartLine, FaUsers, FaLightbulb, FaGlobe, FaMoneyBillWave, FaRocket } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import Navigation from './navigation'
 import Footer from './footer'
@@ -50,8 +50,14 @@ const HomePage: React.FC = () => {
     }
   }, [searchQuery, featuredEvents])
 
-  const handleSearch = (_query: string) => {
-    // Search is handled by useEffect
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      // Navigate to events page with search query
+      navigate(`/events?search=${encodeURIComponent(query.trim())}`)
+    } else {
+      // Navigate to events page without search
+      navigate('/events')
+    }
   }
 
   const handleExploreEvents = () => {
@@ -195,7 +201,7 @@ const HomePage: React.FC = () => {
           </div>
 
           {/* Events Grid */}
-          <EventGrid events={filteredEvents} loading={eventsLoading} />
+          <EventGrid events={filteredEvents} loading={eventsLoading && filteredEvents.length === 0} />
 
           {/* View All Button */}
           <div className="text-center mt-12">
@@ -257,66 +263,108 @@ const HomePage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
               {
                 title: 'Tecnología',
-                description: 'Eventos y cursos sobre las últimas tendencias tecnológicas.',
-                image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                count: 15
+                description: 'Innovación y tendencias tecnológicas',
+                icon: FaLaptop,
+                color: 'bg-blue-500'
               },
               {
                 title: 'Negocios',
-                description: 'Estrategias y herramientas para el crecimiento empresarial.',
-                image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                count: 22
+                description: 'Estrategias empresariales',
+                icon: FaChartLine,
+                color: 'bg-green-500'
               },
               {
                 title: 'Marketing',
-                description: 'Técnicas modernas de marketing digital y tradicional.',
-                image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                count: 18
+                description: 'Marketing digital y tradicional',
+                icon: FaUsers,
+                color: 'bg-purple-500'
+              },
+              {
+                title: 'Innovación',
+                description: 'Ideas disruptivas y creativas',
+                icon: FaLightbulb,
+                color: 'bg-yellow-500'
+              },
+              {
+                title: 'Global',
+                description: 'Perspectivas internacionales',
+                icon: FaGlobe,
+                color: 'bg-indigo-500'
+              },
+              {
+                title: 'Finanzas',
+                description: 'Gestión financiera y contable',
+                icon: FaMoneyBillWave,
+                color: 'bg-emerald-500'
+              },
+              {
+                title: 'Emprendimiento',
+                description: 'Iniciar y crecer negocios',
+                icon: FaRocket,
+                color: 'bg-orange-500'
+              },
+              {
+                title: 'Networking',
+                description: 'Conexiones profesionales',
+                icon: FaHandshake,
+                color: 'bg-pink-500'
+              },
+              {
+                title: 'Liderazgo',
+                description: 'Desarrollo de liderazgo',
+                icon: FaGraduationCap,
+                color: 'bg-teal-500'
+              },
+              {
+                title: 'Sostenibilidad',
+                description: 'Negocios responsables',
+                icon: FaCalendarAlt,
+                color: 'bg-cyan-500'
               }
-            ].map((category, index) => (
-              <motion.div
-                key={index}
-                className="group cursor-pointer"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                onClick={handleExploreEvents}
-              >
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-                  <img
-                    src={category.image}
-                    alt={category.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {category.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {category.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">{category.count} eventos</span>
-                      <Button
-                        variant="outline"
-                        className="border-[#6B1E22] text-[#6B1E22] hover:bg-[#6B1E22] hover:text-white"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleExploreEvents()
-                        }}
+            ].map((category, index) => {
+              const IconComponent = category.icon
+              return (
+                <motion.div
+                  key={index}
+                  className="group cursor-pointer"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  viewport={{ once: true }}
+                  onClick={handleExploreEvents}
+                >
+                  <motion.div
+                    className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 p-4 h-full cursor-pointer"
+                    whileHover={{
+                      scale: 1.05,
+                      y: -5,
+                      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <motion.div
+                        className={`w-12 h-12 ${category.color} rounded-full flex items-center justify-center mb-3 text-white`}
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
                       >
-                        Explorar
-                      </Button>
+                        <IconComponent size={20} />
+                      </motion.div>
+                      <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                        {category.title}
+                      </h3>
+                      <p className="text-xs text-gray-600 line-clamp-2">
+                        {category.description}
+                      </p>
                     </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                  </motion.div>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>
