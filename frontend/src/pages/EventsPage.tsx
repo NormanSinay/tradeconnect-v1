@@ -38,7 +38,7 @@ const EventsPage: React.FC = () => {
     setFilteredEvents(filtered)
   }, [searchQuery, selectedCategory])
 
-  const handleSearch = (query: string) => {
+  const handleSearch = (_query: string) => {
     // Search is handled by useEffect
   }
 

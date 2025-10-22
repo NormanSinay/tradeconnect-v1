@@ -1,68 +1,62 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaCalendarAlt, FaGraduationCap, FaHandshake, FaSearch } from 'react-icons/fa'
+import { FaCalendarAlt, FaGraduationCap, FaHandshake } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 import Navigation from './navigation'
 import Footer from './footer'
 import SearchForm from './search-form'
 import EventGrid from './event-grid'
 import { Button } from '@/components/ui/button'
 import { useUIStore } from '@/stores/uiStore'
-import { sampleEvents, formatCurrency, formatDate, getModalityText, getTypeText } from '@/utils/sampleData'
 import { Event } from '@/types'
-import { useCartStore } from '@/stores/cartStore'
-import toast from 'react-hot-toast'
+import { useQuery } from '@tanstack/react-query'
 
 const HomePage: React.FC = () => {
-  const [filteredEvents, setFilteredEvents] = useState<Event[]>(sampleEvents.filter(e => e.featured))
-  const { searchQuery, selectedCategory } = useUIStore()
-  const { addToCart } = useCartStore()
+  const navigate = useNavigate()
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([])
+  const { searchQuery } = useUIStore()
 
-  // Filter events based on search and category
+  // Fetch featured events from backend API (most recent events)
+  const { data: featuredEvents, isLoading: eventsLoading } = useQuery({
+    queryKey: ['featured-events'],
+    queryFn: async () => {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/public/events?limit=3&sortBy=createdAt&sortOrder=DESC`)
+      if (!response.ok) {
+        throw new Error('Failed to fetch featured events')
+      }
+      const result = await response.json()
+      return result.data?.events || []
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
+
+  // Filter events based on search query only
   useEffect(() => {
-    let filtered = sampleEvents.filter(event => event.featured)
+    if (featuredEvents) {
+      let filtered = featuredEvents
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(query) ||
-        event.description.toLowerCase().includes(query) ||
-        event.type.toLowerCase().includes(query) ||
-        event.modality.toLowerCase().includes(query)
-      )
+      // Filter by search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase()
+        filtered = filtered.filter((event: any) =>
+          event.title.toLowerCase().includes(query) ||
+          event.description.toLowerCase().includes(query) ||
+          event.eventType?.name.toLowerCase().includes(query) ||
+          event.eventCategory?.name.toLowerCase().includes(query)
+        )
+      }
+
+      setFilteredEvents(filtered)
     }
+  }, [searchQuery, featuredEvents])
 
-    // Filter by category
-    if (selectedCategory !== 'Todos') {
-      filtered = filtered.filter(event =>
-        event.category === selectedCategory.toLowerCase()
-      )
-    }
-
-    setFilteredEvents(filtered)
-  }, [searchQuery, selectedCategory])
-
-  const handleSearch = (query: string) => {
+  const handleSearch = (_query: string) => {
     // Search is handled by useEffect
   }
 
-  const handleCategoryFilter = (category: string) => {
-    useUIStore.getState().setSelectedCategory(category)
+  const handleExploreEvents = () => {
+    navigate('/events')
   }
-
-  const handleAddToCart = (event: Event) => {
-    addToCart(event)
-    toast.success(`"${event.title}" agregado al carrito`)
-  }
-
-  const categories = [
-    'Todos',
-    'Conferencias',
-    'Talleres',
-    'Networking',
-    'Seminarios',
-    'Cursos'
-  ]
 
   const stats = [
     { value: '25-35%', label: 'Reducción en tiempos de gestión' },
@@ -102,17 +96,10 @@ const HomePage: React.FC = () => {
                 <Button
                   size="lg"
                   className="bg-white text-[#6B1E22] hover:bg-gray-100 px-8 py-3 text-lg"
+                  onClick={handleExploreEvents}
                 >
                   <FaCalendarAlt className="mr-2" />
-                  Explorar Eventos
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-[#6B1E22] px-8 py-3 text-lg"
-                >
-                  <FaGraduationCap className="mr-2" />
-                  Ver Cursos
+                  Explorar Eventos y Cursos
                 </Button>
               </div>
             </motion.div>
@@ -207,26 +194,8 @@ const HomePage: React.FC = () => {
             <SearchForm onSearch={handleSearch} />
           </div>
 
-          {/* Category Filters */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                onClick={() => handleCategoryFilter(category)}
-                className={`rounded-full px-6 py-2 ${
-                  selectedCategory === category
-                    ? 'bg-[#6B1E22] text-white hover:bg-[#5a191e]'
-                    : 'border-gray-300 text-gray-700 hover:border-[#6B1E22] hover:text-[#6B1E22]'
-                }`}
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-
           {/* Events Grid */}
-          <EventGrid events={filteredEvents} />
+          <EventGrid events={filteredEvents} loading={eventsLoading} />
 
           {/* View All Button */}
           <div className="text-center mt-12">
@@ -234,6 +203,7 @@ const HomePage: React.FC = () => {
               variant="outline"
               size="lg"
               className="px-8 py-3 text-lg border-[#6B1E22] text-[#6B1E22] hover:bg-[#6B1E22] hover:text-white"
+              onClick={handleExploreEvents}
             >
               Ver Todos los Eventos
             </Button>
@@ -315,6 +285,7 @@ const HomePage: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
+                onClick={handleExploreEvents}
               >
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105">
                   <img
@@ -334,6 +305,10 @@ const HomePage: React.FC = () => {
                       <Button
                         variant="outline"
                         className="border-[#6B1E22] text-[#6B1E22] hover:bg-[#6B1E22] hover:text-white"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleExploreEvents()
+                        }}
                       >
                         Explorar
                       </Button>
