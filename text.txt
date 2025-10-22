@@ -12,9 +12,6 @@ Zustand + React Query (estado y API)
 ↓
 Framer Motion (animaciones)
 
-
-Instala Tailwind, shadcn/ui, Radix, React Icons, Zustand, React Query y Framer Motion
-
 GUÍA DE DISEÑO Y MAQUETACIÓN
 Paleta de Colores (Según documento)
 •	Color Primario: #6B1E22 (Rojo corporativo)

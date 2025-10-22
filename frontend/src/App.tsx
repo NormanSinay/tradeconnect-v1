@@ -5,6 +5,10 @@ import HomePage from './pages/HomePage'
 import EventsPage from './pages/EventsPage'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
 
 function App() {
   return (
@@ -13,6 +17,10 @@ function App() {
       <Route path="/events" element={<EventsPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
     </Routes>
   )
 }
