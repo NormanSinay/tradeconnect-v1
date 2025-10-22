@@ -1,10 +1,13 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { LoginPage } from '@/components/auth/LoginPage'
+import { AuthProvider } from '@/context/AuthContext'
 ---
 
 <BaseLayout title="Iniciar Sesión - TradeConnect">
-  <div class="min-h-screen bg-gray-50">
-    <LoginPage client:only="react" />
-  </div>
+  <AuthProvider client:load>
+    <div class="min-h-screen bg-gray-50">
+      <LoginPage client:load />
+    </div>
+  </AuthProvider>
 </BaseLayout>

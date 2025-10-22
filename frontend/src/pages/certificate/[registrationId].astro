@@ -6,5 +6,5 @@ const { registrationId } = Astro.params
 ---
 
 <BaseLayout title="Certificado - TradeConnect">
-  <CertificatePageWrapper registrationId={registrationId} client:only="react" />
+  <CertificatePageWrapper registrationId={registrationId} client:load />
 </BaseLayout>

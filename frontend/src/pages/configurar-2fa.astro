@@ -1,10 +1,13 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { TwoFactorSetupPage } from '@/components/auth/TwoFactorSetupPage'
+import { AuthProvider } from '@/context/AuthContext'
 ---
 
 <BaseLayout title="Configurar Autenticación de Dos Factores - TradeConnect">
-  <div class="min-h-screen bg-gray-50">
-    <TwoFactorSetupPage client:only="react" />
-  </div>
+  <AuthProvider client:load>
+    <div class="min-h-screen bg-gray-50">
+      <TwoFactorSetupPage client:load />
+    </div>
+  </AuthProvider>
 </BaseLayout>

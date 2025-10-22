@@ -29,6 +29,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   const checkAuthStatus = async () => {
+    // Skip auth check during SSR - only run in browser
+    if (typeof window === 'undefined') {
+      setIsLoading(false)
+      return
+    }
+
     try {
       const token = localStorage.getItem('authToken')
       if (token) {
@@ -57,8 +63,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const userData = response.data.data as User
         setUser(userData)
 
-        // Store token if provided
-         if ((response.data as any).token) {
+        // Store token if provided (browser only)
+         if (typeof window !== 'undefined' && (response.data as any).token) {
            localStorage.setItem('authToken', (response.data as any).token)
          }
 
@@ -86,8 +92,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const newUser = response.data.data as User
         setUser(newUser)
 
-        // Store token if provided
-        if ((response.data as any).token) {
+        // Store token if provided (browser only)
+        if (typeof window !== 'undefined' && (response.data as any).token) {
           localStorage.setItem('authToken', (response.data as any).token)
         }
 
@@ -108,9 +114,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('authToken')
-    // Clear any other auth-related data
-    localStorage.removeItem('userPreferences')
+    // Only access localStorage in browser
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('authToken')
+      // Clear any other auth-related data
+      localStorage.removeItem('userPreferences')
+    }
   }
 
   const updateProfile = async (userData: Partial<User>): Promise<ApiResponse<User>> => {

@@ -63,7 +63,15 @@ interface AdminProviderProps {
 }
 
 export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
-  const { user: authUser, isAuthenticated: authIsAuthenticated } = useAuth()
+  // Handle SSR case where AuthProvider might not be available yet
+  let authContext
+  try {
+    authContext = useAuth()
+  } catch (error) {
+    // During SSR or when AuthProvider is not yet available
+    authContext = { user: null, isAuthenticated: false }
+  }
+  const { user: authUser, isAuthenticated: authIsAuthenticated } = authContext
 
   // Estado del usuario admin (derivado del contexto de autenticación)
   const [user, setUser] = useState<AdminUser | null>(null)
@@ -161,8 +169,10 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
   const updateSystemConfig = async (config: Partial<AdminContextType['systemConfig']>) => {
     try {
       setSystemConfig(prev => ({ ...prev, ...config }))
-      // Aquí se podría guardar en localStorage o enviar al backend
-      localStorage.setItem('adminSystemConfig', JSON.stringify({ ...systemConfig, ...config }))
+      // Aquí se podría guardar en localStorage o enviar al backend (browser only)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('adminSystemConfig', JSON.stringify({ ...systemConfig, ...config }))
+      }
     } catch (err) {
       console.error('Error actualizando configuración:', err)
       setError('Error al actualizar la configuración')
@@ -245,14 +255,16 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
       setIsAuthenticated(false)
     }
 
-    // Cargar configuración del sistema desde localStorage
-    const savedConfig = localStorage.getItem('adminSystemConfig')
-    if (savedConfig) {
-      try {
-        const parsedConfig = JSON.parse(savedConfig)
-        setSystemConfig(prev => ({ ...prev, ...parsedConfig }))
-      } catch (err) {
-        console.error('Error cargando configuración:', err)
+    // Cargar configuración del sistema desde localStorage (browser only)
+    if (typeof window !== 'undefined') {
+      const savedConfig = localStorage.getItem('adminSystemConfig')
+      if (savedConfig) {
+        try {
+          const parsedConfig = JSON.parse(savedConfig)
+          setSystemConfig(prev => ({ ...prev, ...parsedConfig }))
+        } catch (err) {
+          console.error('Error cargando configuración:', err)
+        }
       }
     }
   }, [authIsAuthenticated, authUser])

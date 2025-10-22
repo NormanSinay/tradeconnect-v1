@@ -7,5 +7,5 @@ const eventId = url.searchParams.get('id')
 ---
 
 <BaseLayout title="Detalle del Evento - TradeConnect">
-  <EventDetailPage eventId={eventId} client:only="react" />
+  <EventDetailPage eventId={eventId} client:load />
 </BaseLayout>

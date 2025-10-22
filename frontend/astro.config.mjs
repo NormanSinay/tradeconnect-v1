@@ -7,9 +7,7 @@ import { fileURLToPath, URL } from 'node:url';
 export default defineConfig({
   site: 'https://tradeconnect.gt',
   integrations: [
-    react({
-      include: ['**/ClientApp.tsx', '**/ContactPage.tsx', '**/ReportIssuePage.tsx', '**/Footer.tsx'],
-    }),
+    react(), // Removed restrictive include - now processes all .tsx/.jsx files
     tailwind({
       applyBaseStyles: false, // We'll apply our own base styles
     }),

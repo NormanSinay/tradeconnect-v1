@@ -20,5 +20,5 @@ const title = "Inscripciones del Evento"
 ---
 
 <AdminLayout {title} {breadcrumbs}>
-  <AdminEventRegistrationsPage eventId={parseInt(eventId)} client:load />
+  <AdminEventRegistrationsPage eventId={parseInt(eventId)} client:only="react" />
 </AdminLayout>

@@ -6,5 +6,5 @@ const { registrationId } = Astro.params
 ---
 
 <BaseLayout title="Código QR - TradeConnect">
-  <QRPageWrapper registrationId={registrationId} client:only="react" />
+  <QRPageWrapper registrationId={registrationId} client:load />
 </BaseLayout>

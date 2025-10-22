@@ -20,5 +20,5 @@ const title = "Control de Asistencia"
 ---
 
 <AdminLayout {title} {breadcrumbs}>
-  <AdminAttendancePage eventId={parseInt(eventId)} client:load />
+  <AdminAttendancePage eventId={parseInt(eventId)} client:only="react" />
 </AdminLayout>

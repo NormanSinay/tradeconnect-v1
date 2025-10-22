@@ -110,7 +110,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   }, [])
 
   return (
-    <section className="hero">
+    <section className="hero" suppressHydrationWarning>
       <div className="blur-orb blur-orb-1"></div>
       <div className="blur-orb blur-orb-2"></div>
 
@@ -131,7 +131,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="hero-buttons">
             <button className="btn-primary" onClick={onExploreEvents}>
               Explorar Eventos
-              🚀
             </button>
             <button className="btn-secondary" onClick={onOrganizeEvent}>
               Organizar Evento

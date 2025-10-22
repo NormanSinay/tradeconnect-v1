@@ -19,5 +19,5 @@ const title = `Detalle de Inscripción #${registrationId}`
 ---
 
 <AdminLayout {title} {breadcrumbs}>
-  <AdminRegistrationDetailPage registrationId={parseInt(registrationId)} client:load />
+  <AdminRegistrationDetailPage registrationId={parseInt(registrationId)} client:only="react" />
 </AdminLayout>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '@/services/api'
+import { FaMicrophone, FaTools, FaBook, FaHandshake, FaCalendarAlt, FaUsers } from 'react-icons/fa'
 
 interface Event {
   id: number
@@ -32,17 +33,33 @@ export const EventGrid: React.FC<EventGridProps> = ({
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true)
-        const response = await api.get('/public/events', {
-          params: {
-            limit: 8,
-            page: 1
+        const params: any = {
+          limit: 8,
+          page: 1
+        }
+
+        // Check URL parameters for search query
+        if (typeof window !== 'undefined') {
+          const urlParams = new URLSearchParams(window.location.search)
+          const urlSearch = urlParams.get('search')
+          if (urlSearch) {
+            setSearchQuery(urlSearch)
+            params.search = urlSearch
           }
-        })
+        }
+
+        // Add search parameter if provided
+        if (searchQuery.trim()) {
+          params.search = searchQuery.trim()
+        }
+
+        const response = await api.get('/public/events', { params })
 
         if (response.data.success) {
           setEvents((response.data.data as any).events || [])
@@ -59,7 +76,7 @@ export const EventGrid: React.FC<EventGridProps> = ({
     }
 
     fetchEvents()
-  }, [])
+  }, [searchQuery])
 
   const formatPrice = (price: number, currency: string) => {
     return `Q${price.toFixed(2)}`
@@ -76,17 +93,23 @@ export const EventGrid: React.FC<EventGridProps> = ({
 
   const getEventIcon = (eventType?: string) => {
     switch (eventType?.toLowerCase()) {
-      case 'conferencia': return '🎤'
-      case 'taller': return '🛠️'
-      case 'curso': return '📚'
-      case 'networking': return '🤝'
-      default: return '📅'
+      case 'conference':
+      case 'conferencia': return <FaMicrophone />
+      case 'workshop':
+      case 'taller': return <FaTools />
+      case 'training':
+      case 'curso': return <FaBook />
+      case 'networking': return <FaHandshake />
+      case 'webinar': return <FaMicrophone />
+      case 'seminar':
+      case 'seminario': return <FaBook />
+      default: return <FaCalendarAlt />
     }
   }
 
   const getEventBadge = (isVirtual: boolean, eventType?: string) => {
     if (isVirtual) return 'Virtual'
-    if (eventType?.toLowerCase().includes('curso')) return 'Curso'
+    if (eventType?.toLowerCase().includes('training') || eventType?.toLowerCase().includes('curso')) return 'Curso'
     return 'Presencial'
   }
 
@@ -94,8 +117,32 @@ export const EventGrid: React.FC<EventGridProps> = ({
     return (
       <div className="bento-section">
         <div className="section-header">
-          <h2>Próximos Eventos 🎯</h2>
-          <p>Eventos empresariales y oportunidades de networking</p>
+          <h2>Próximos Eventos y Cursos</h2>
+          <p>Eventos empresariales, cursos y oportunidades de networking</p>
+
+          {/* Search bar for home page */}
+          <div className="search-bar-container">
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              if (typeof window !== 'undefined') {
+                const url = searchQuery.trim()
+                  ? `/events?search=${encodeURIComponent(searchQuery.trim())}`
+                  : '/events'
+                window.location.href = url
+              }
+            }} className="search-form">
+              <input
+                type="text"
+                placeholder="Buscar eventos o cursos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+              <button type="submit" className="search-button">
+                Buscar
+              </button>
+            </form>
+          </div>
         </div>
         <div className="bento-grid">
           {[...Array(8)].map((_, i) => (
@@ -121,8 +168,32 @@ export const EventGrid: React.FC<EventGridProps> = ({
     return (
       <div className="bento-section">
         <div className="section-header">
-          <h2>Próximos Eventos 🎯</h2>
-          <p>Eventos empresariales y oportunidades de networking</p>
+          <h2>Próximos Eventos y Cursos</h2>
+          <p>Eventos empresariales, cursos y oportunidades de networking</p>
+
+          {/* Search bar for home page */}
+          <div className="search-bar-container">
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              if (typeof window !== 'undefined') {
+                const url = searchQuery.trim()
+                  ? `/events?search=${encodeURIComponent(searchQuery.trim())}`
+                  : '/events'
+                window.location.href = url
+              }
+            }} className="search-form">
+              <input
+                type="text"
+                placeholder="Buscar eventos o cursos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+              <button type="submit" className="search-button">
+                Buscar
+              </button>
+            </form>
+          </div>
         </div>
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-light)' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
@@ -143,8 +214,32 @@ export const EventGrid: React.FC<EventGridProps> = ({
     return (
       <div className="bento-section">
         <div className="section-header">
-          <h2>Próximos Eventos 🎯</h2>
-          <p>Eventos empresariales y oportunidades de networking</p>
+          <h2>Próximos Eventos y Cursos</h2>
+          <p>Eventos empresariales, cursos y oportunidades de networking</p>
+
+          {/* Search bar for home page */}
+          <div className="search-bar-container">
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              if (typeof window !== 'undefined') {
+                const url = searchQuery.trim()
+                  ? `/events?search=${encodeURIComponent(searchQuery.trim())}`
+                  : '/events'
+                window.location.href = url
+              }
+            }} className="search-form">
+              <input
+                type="text"
+                placeholder="Buscar eventos o cursos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+              <button type="submit" className="search-button">
+                Buscar
+              </button>
+            </form>
+          </div>
         </div>
         <div className="bento-grid">
           {[...Array(8)].map((_, i) => (
@@ -181,11 +276,69 @@ export const EventGrid: React.FC<EventGridProps> = ({
     onAddToCart(eventId)
   }
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    // For home page, redirect to events page with search
+    if (typeof window !== 'undefined') {
+      const url = searchQuery.trim()
+        ? `/events?search=${encodeURIComponent(searchQuery.trim())}`
+        : '/events'
+      window.location.href = url
+    }
+  }
+
   return (
     <section className="bento-section">
       <div className="section-header">
-        <h2>Próximos Eventos 🎯</h2>
-        <p>Eventos empresariales y oportunidades de networking</p>
+        <h2>Próximos Eventos y Cursos</h2>
+        <p>Eventos empresariales, cursos y oportunidades de networking</p>
+
+        {/* Search bar for home page */}
+        <div className="search-bar-container" style={{
+          marginTop: '2rem',
+          display: 'flex',
+          justifyContent: 'center'
+        }}>
+          <form onSubmit={handleSearch} className="search-form" style={{
+            display: 'flex',
+            gap: '0.5rem',
+            maxWidth: '600px',
+            width: '100%',
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+            padding: '0.75rem 1rem',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <input
+              type="text"
+              placeholder="Buscar eventos o cursos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+              style={{
+                flex: 1,
+                border: 'none',
+                outline: 'none',
+                backgroundColor: 'transparent',
+                color: 'var(--foreground)',
+                fontSize: '1rem'
+              }}
+            />
+            <button type="submit" className="search-button" style={{
+              backgroundColor: 'var(--primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '0.5rem 1rem',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease'
+            }}>
+              Buscar
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className="bento-grid">
@@ -196,7 +349,9 @@ export const EventGrid: React.FC<EventGridProps> = ({
             onClick={(e) => handleEventClick(event.id, e)}
           >
             <div className="event-image">
-              {getEventIcon(event.eventType?.name)}
+              <div className="event-icon">
+                {getEventIcon(event.eventType?.name)}
+              </div>
               <div className="event-badge">{getEventBadge(event.isVirtual, event.eventType?.name)}</div>
             </div>
             <div className="event-title">{event.title}</div>
@@ -205,14 +360,14 @@ export const EventGrid: React.FC<EventGridProps> = ({
             </div>
             <div className="event-price">{formatPrice(event.price, event.currency)}</div>
             <div className="event-meta">
-              <span>📅 {formatDate(event.startDate)}</span>
-              <span>👥 {event.capacity} cupos</span>
+              <span><FaCalendarAlt className="inline mr-1" />{formatDate(event.startDate)}</span>
+              <span><FaUsers className="inline mr-1" />{event.capacity} cupos</span>
             </div>
             <button
               className="btn-add-cart"
               onClick={(e) => handleAddToCart(event.id, e)}
             >
-              Agregar al Carrito 🛒
+              Agregar al Carrito
             </button>
           </div>
         ))}

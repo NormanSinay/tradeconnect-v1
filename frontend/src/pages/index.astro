@@ -1,8 +1,16 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import AppRouter from '@/components/ui/app-router'
+import HomePage from '@/components/ui/home-page'
+import Navigation from '@/components/ui/navigation'
+import { AuthProvider } from '@/context/AuthContext'
+import { AdminProvider } from '@/context/AdminContext'
 ---
 
 <BaseLayout title="TradeConnect - Conecta con Eventos Empresariales">
-  <AppRouter client:only="react" />
+  <AuthProvider client:load>
+    <Navigation client:load />
+    <AdminProvider client:load>
+      <HomePage client:load />
+    </AdminProvider>
+  </AuthProvider>
 </BaseLayout>

@@ -73,6 +73,7 @@ npm run dev
 - PostgreSQL (port 5432): Database `tradeconnect_dev`, user `tradeconnect_user`, password `tradeconnect123`
 - Redis (port 6379): Password `tradeconnect_redis_password`
 - MailHog (ports 8025 UI, 1025 SMTP): Email testing tool
+- pgAdmin (port 5050): PostgreSQL administration UI (login: admin@tradeconnect.com / admin123)
 
 **Configuration Files**:
 - `backend/.env` - Environment variables (copy from `.env.example`)
@@ -642,4 +643,162 @@ refundService.processRefund(paymentId, amount, reason)
 - Puppeteer/pdf-lib for PDF generation
 - Ethers.js for blockchain integration
 
-**Project Focus**: Backend API development (frontend directory is currently empty)
+**Project Focus**: Full-stack platform with Node.js backend API and Astro+React frontend
+
+## Frontend Development
+
+### Frontend Stack
+
+The frontend is built with:
+- **Astro 5** - Static site generator with partial hydration
+- **React 18** - UI component library
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Utility-first styling
+- **Radix UI** - Accessible component primitives
+- **TanStack Query** - Server state management
+- **React Hook Form + Zod** - Form validation
+- **Socket.IO Client** - Real-time updates
+- **i18next** - Internationalization
+
+### Frontend Commands
+
+All frontend commands are run from the `frontend/` directory:
+
+```bash
+# Development
+npm run dev              # Start Astro dev server (default: port 4321)
+npm start                # Alias for dev
+
+# Building & Preview
+npm run build            # Build for production
+npm run preview          # Preview production build
+
+# Code Quality
+npm run lint             # Run ESLint
+npm run lint:fix         # Auto-fix linting issues
+npm run format           # Format code with Prettier
+npm run type-check       # TypeScript type checking
+
+# Analysis
+npm run analyze          # Bundle size analysis
+npm run lighthouse       # Lighthouse performance audit
+```
+
+### Frontend Structure
+
+```
+frontend/src/
+├── components/         # React components (UI, common, features)
+├── context/           # React context providers
+├── hooks/             # Custom React hooks
+├── layouts/           # Astro layout components
+├── pages/             # Astro pages (file-based routing)
+├── services/          # API client services (axios)
+├── schemas/           # Zod validation schemas
+├── types/             # TypeScript type definitions
+├── utils/             # Helper functions
+├── styles/            # Global styles and Tailwind config
+└── i18n/              # Internationalization files
+```
+
+### Frontend Architecture
+
+**Astro with Partial Hydration**: The frontend uses Astro's Islands Architecture for optimal performance:
+- Static pages are pre-rendered at build time
+- React components hydrate only when needed (client-side interactivity)
+- Configured in `astro.config.mjs` with specific React components included
+
+**Path Aliases**: Import using `@/` prefix:
+```typescript
+import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/services/api';
+```
+
+**API Communication**: Centralized API client in `services/` using axios to connect to backend at `http://localhost:3000/api/v1/*`
+
+**State Management**:
+- TanStack Query for server state (caching, refetching)
+- React Context for global client state (auth, theme)
+- React Hook Form for form state
+
+**Component Organization**:
+- `components/ui/` - Reusable UI primitives (Radix UI-based)
+- `components/common/` - Shared components (Header, Footer, etc.)
+- `components/features/` - Feature-specific components (events, payments, etc.)
+
+**Routing**: File-based routing via Astro pages:
+- `pages/index.astro` - Homepage
+- `pages/events.astro` - Events listing
+- `pages/login.astro` - Authentication
+- `pages/[dynamic].astro` - Dynamic routes
+
+**Performance Optimizations** (configured in `astro.config.mjs`):
+- Manual vendor chunks for better caching (react, ui, query, utils, i18n, icons, websocket, charts, forms)
+- CSS code splitting
+- Production console.log removal via terser
+- Image optimization with Sharp
+- HTML compression
+
+### Frontend-Backend Integration
+
+**API Base URL**: Configure via environment variables (`.env` in frontend):
+```bash
+PUBLIC_API_URL=http://localhost:3000/api/v1
+```
+
+**Real-time Updates**: Socket.IO client connects to backend for live features:
+- Attendance tracking
+- Payment status updates
+- Capacity monitoring
+- Notifications
+
+**Authentication Flow**:
+1. Login via `/api/v1/auth/login` returns JWT token
+2. Store token in localStorage or secure cookie
+3. Include token in Authorization header for protected requests
+4. Handle token refresh with `/api/v1/auth/refresh`
+
+### Development Workflow
+
+**Full-Stack Development**:
+```bash
+# Terminal 1: Start backend
+cd backend
+npm run dev              # Runs on port 3000
+
+# Terminal 2: Start frontend
+cd frontend
+npm run dev              # Runs on port 4321
+
+# Terminal 3 (optional): Docker services
+docker-compose up -d     # PostgreSQL, Redis, MailHog, pgAdmin
+```
+
+**Environment Configuration**:
+- Backend: `backend/.env` (database, APIs, secrets)
+- Frontend: `frontend/.env` (public API URL, feature flags)
+
+### Adding Frontend Features
+
+1. **Create Page**: Add `.astro` file in `src/pages/`
+2. **Create Components**: Add React components in `src/components/`
+3. **Add API Service**: Extend API client in `src/services/`
+4. **Add Types**: Define TypeScript types in `src/types/`
+5. **Add Validation**: Create Zod schemas in `src/schemas/`
+6. **Connect to Backend**: Use TanStack Query for data fetching
+
+**Example React Component in Astro**:
+```astro
+---
+// src/pages/events.astro
+import Layout from '@/layouts/Layout.astro';
+import EventList from '@/components/features/EventList';
+---
+
+<Layout title="Events">
+  <EventList client:load />
+</Layout>
+```
+
+**Project Focus**: Full-stack platform with comprehensive backend API and modern frontend

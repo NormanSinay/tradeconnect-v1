@@ -5,7 +5,10 @@ import EventGrid from './event-grid'
 
 export const HomePage: React.FC = () => {
   const handleEventClick = (eventId: number) => {
-    window.location.href = `/event-detail?id=${eventId}`
+    // Browser-only navigation
+    if (typeof window !== 'undefined') {
+      window.location.href = `/event-detail?id=${eventId}`
+    }
   }
 
   const handleAddToCart = (eventId: number) => {

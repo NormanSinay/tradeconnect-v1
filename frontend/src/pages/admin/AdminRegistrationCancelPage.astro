@@ -20,5 +20,5 @@ const title = `Cancelar Inscripción #${registrationId}`
 ---
 
 <AdminLayout {title} {breadcrumbs}>
-  <AdminRegistrationCancelPage registrationId={parseInt(registrationId)} client:load />
+  <AdminRegistrationCancelPage registrationId={parseInt(registrationId)} client:only="react" />
 </AdminLayout>
