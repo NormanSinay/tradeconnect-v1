@@ -1,192 +1,44 @@
-Arquitectura recomendada si migras:
-  React (componentes interactivos)
-    ↓
-  Astro (routing y SSR)
-    ↓
-  shadcn/ui (componentes UI)
-    ↓
-  Tailwind CSS (estilos)
-    ↓
-  Radix UI (primitivos accesibles)
-    ↓
-  React Icons (iconos)
+React (componentes, routing con React Router)
+↓
+shadcn/ui (UI moderna)
+↓
+Tailwind CSS (estilos)
+↓
+Radix UI (accesibilidad)
+↓
+React Icons (iconografía)
+↓
+Zustand + React Query (estado y API)
+↓
+Framer Motion (animaciones)
 
 
-🔐 AUTENTICACIÓN FALTANTE (6 páginas)
-/login - (Componente LoginPage.tsx existe pero NO está en rutas)
-/registro - (Componente RegisterPage.tsx existe pero NO está en rutas)
-/recuperar-password - (Componente ForgotPasswordPage.tsx existe pero NO está en rutas)
-/restablecer-password/:token - Restablecer contraseña
-/verificar-email/:token - Verificación de email
-/configurar-2fa - Configuración 2FA
+Instala Tailwind, shadcn/ui, Radix, React Icons, Zustand, React Query y Framer Motion
 
-📄 PÁGINAS PÚBLICAS FALTANTES (14 páginas)
-/contacto - Formulario de contacto
-/cookies - Política de cookies
-/politica-privacidad - Política de privacidad
-/preguntas-frecuentes - FAQ
-/terminos-y-condiciones - Términos legales
-/eventos/categoria/:categoria - Eventos por categoría
-/eventos/buscar - Búsqueda avanzada
-/conferencias - Listado específico de conferencias
-/talleres - Listado específico de talleres
-/speakers - Directorio de expositores
-/speakers/:id - Perfil público de expositor
-/verificar-certificado - Verificación pública de certificado
-/descargar-app-qr - Descarga de app móvil
-/verificacion-publica/:codigo - Verificación pública QR/certificado
-
-ÁREA DE USUARIO FALTANTE (21 páginas)
-/mi-cuenta - Dashboard principal usuario
-/mi-cuenta/perfil - Editar perfil personal
-/mi-cuenta/seguridad - Configuración seguridad (cambiar password, 2FA)
-/mi-cuenta/notificaciones - Preferencias notificaciones
-/mis-inscripciones - Listado inscripciones usuario
-/mis-inscripciones/:id - Detalle inscripción
-/mis-eventos/proximos - Próximos eventos inscritos
-/mis-eventos/pasados - Eventos pasados
-/mis-eventos/cancelados - Eventos cancelados
-/mis-certificados - Listado certificados obtenidos
-/certificado/:id/descargar - Descargar certificado PDF
-/certificado/:id/verificar - Verificar autenticidad blockchain
-/mis-codigos-qr - Códigos QR del usuario
-/codigo-qr/:inscripcionId/descargar - Descargar QR offline
-/mis-facturas - Listado facturas FEL
-/factura/:id - Ver factura individual
-/factura/:id/descargar - Descargar XML/PDF factura
-/solicitar-factura/:ordenId - Solicitar factura para orden
-/mis-pagos - Historial pagos realizados
-/pago/:id/detalle - Detalle pago específico
-/pago/:id/comprobante - Comprobante de pago
-
-ADMINISTRACIÓN COMPLETA FALTANTE
-Dashboard Administrativo (3 páginas)
-/admin - Dashboard principal admin
-/admin/inicio - Página inicio administrativa con KPIs
-Gestión de Eventos (12 páginas)
-/admin/eventos - Listado eventos
-/admin/eventos/crear - Crear evento
-/admin/eventos/:id/editar - Editar evento
-/admin/eventos/:id/duplicar - Duplicar evento
-/admin/eventos/templates - Gestión templates
-/admin/eventos/:id/configuracion - Configuración avanzada
-/admin/eventos/:id/publicar - Publicar/despublicar
-/admin/eventos/:id/zoom - Integración Zoom
-/admin/eventos/:id/participantes - Participantes online
-/admin/transmision/:eventoId - Panel transmisión en vivo
-Gestión Speakers (8 páginas)
-/admin/speakers - Listado speakers
-/admin/speakers/crear - Agregar speaker
-/admin/speakers/:id/editar - Editar speaker
-/admin/speakers/:id/contratos - Gestión contratos
-/admin/speakers/:id/pagos - Gestión pagos speaker
-/admin/speakers/:id/evaluaciones - Evaluaciones speaker
-Gestión Inscripciones (10 páginas)
-/admin/inscripciones - Listado inscripciones
-/admin/inscripciones/:eventoId - Inscripciones por evento
-/admin/inscripciones/:id/detalle - Detalle inscripción
-/admin/inscripciones/crear - Crear inscripción manual
-/admin/inscripciones/:id/editar - Editar inscripción
-/admin/inscripciones/:id/cancelar - Cancelar inscripción
-/admin/inscripciones/exportar - Exportar listado
-/admin/asistencias/:eventoId - Reporte asistencias
-Aforos y Overbooking (4 páginas)
-/admin/aforos/:eventoId - Control aforo
-/admin/aforos/:eventoId/overbooking - Config overbooking
-/admin/aforos/:eventoId/estadisticas - Estadísticas ocupación
-Promociones (6 páginas)
-/admin/promociones - Listado promociones
-/admin/promociones/crear - Crear promoción
-/admin/promociones/:id/editar - Editar promoción
-/admin/codigos-descuento - Gestión códigos
-/admin/codigos-descuento/crear - Crear código
-/admin/codigos-descuento/:id/estadisticas - Uso código
-Control QR (6 páginas)
-/admin/control-acceso/:eventoId - Panel control acceso
-/admin/escanear-qr - Escáner QR en vivo
-/admin/validaciones-offline - Gestión validaciones offline
-/admin/sincronizar-asistencias - Sincronizar asistencias
-Certificados (8 páginas)
-/admin/certificados - Gestión certificados
-/admin/certificados/templates - Templates certificados
-/admin/certificados/:eventoId/generar-lote - Generar masivos
-/admin/certificados/:eventoId/enviados - Certificados enviados
-/admin/certificados/blockchain - Registro blockchain
-Reportes y Analytics (12 páginas)
-/admin/reportes - Dashboard reportes
-/admin/reportes/ventas - Reporte ventas
-/admin/reportes/inscripciones - Reporte inscripciones
-/admin/reportes/asistencias - Reporte asistencias
-/admin/reportes/financiero - Reporte financiero
-/admin/reportes/speakers - Reporte speakers
-/admin/reportes/certificados - Reporte certificación
-/admin/reportes/promociones - Efectividad promociones
-/admin/reportes/custom - Reportes personalizados
-/admin/analytics - Analytics tiempo real
-/admin/kpis - Dashboard KPIs
-Gestión Pagos (8 páginas)
-/admin/pagos - Listado pagos
-/admin/pagos/:id/detalle - Detalle pago
-/admin/pagos/pendientes - Pagos pendientes
-/admin/pagos/rechazados - Pagos rechazados
-/admin/pagos/reembolsos - Gestión reembolsos
-/admin/pagos/reconciliacion - Reconciliación bancaria
-/admin/pagos/configuracion - Config pasarelas
-/admin/pagos/webhooks - Gestión webhooks
-Facturación FEL (8 páginas)
-/admin/facturacion - Panel facturación FEL
-/admin/facturacion/pendientes - Facturas pendientes
-/admin/facturacion/emitidas - Facturas emitidas
-/admin/facturacion/anuladas - Facturas anuladas
-/admin/facturacion/certificacion - Certificación SAT
-/admin/facturacion/configuracion - Config FEL
-/admin/facturacion/:id/anular - Anular factura
-Sistema y Configuración (10 páginas)
-/admin/usuarios - Gestión usuarios
-/admin/usuarios/crear - Crear usuario
-/admin/usuarios/:id/editar - Editar usuario
-/admin/usuarios/:id/roles - Gestión roles
-/admin/configuracion - Config general
-/admin/configuracion/empresa - Datos empresa
-/admin/configuracion/localizacion - Config regional
-/admin/configuracion/seguridad - Políticas seguridad
-/admin/configuracion/backups - Gestión respaldos
-/admin/logs - Logs sistema
-/admin/auditoria - Auditoría cambios
-
-PÁGINAS ESPECIALES FALTANTES (6 páginas)
-/404 - Página no encontrada
-/500 - Error servidor
-/mantenimiento - Página mantenimiento
-/no-autorizado - Acceso denegado (403)
-/estado-del-servicio - Status page
-*/webhook/ ** - Callbacks pagos (PayPal, Stripe, etc.)
-
--------------------------------------------------------------
-
- PROCESO DE COMPRAS FALTANTE (12 páginas)
-/inscripcion/:eventoId - Formulario inscripción individual
-/inscripcion-grupal/:eventoId - Formulario inscripción grupal
-/checkout/resumen - Resumen de orden
-/aplicar-descuento - Aplicar código promocional
-/pago/metodo - Selección método de pago
-/pago/paypal - Integración PayPal
-/pago/stripe - Integración Stripe
-/pago/neonet - Integración NeoNet Guatemala
-/pago/bam - Integración BAM Pagos
-/pago/confirmacion/:ordenId - Confirmación pago exitoso
-/pago/error - Error en pago
-/pago/pendiente - Pago pendiente confirmación
-⚙️ A
-🔧 
+GUÍA DE DISEÑO Y MAQUETACIÓN
+Paleta de Colores (Según documento)
+•	Color Primario: #6B1E22 (Rojo corporativo)
+•	Color Secundario: #2c5aa0 (Azul para acciones secundarias)
+•	Éxito: #28a745 (Verde)
+•	Advertencia: #ffc107 (Amarillo)
+•	Error: #dc3545 (Rojo)
+•	Texto: #343a40 (Gris oscuro)
+•	Fondo: #f8f9fa (Gris claro)
+Tipografía
+•	Principal: Roboto (compatible con Material Design)
+•	Tamaños:
+o	H1: 32px, H2: 24px, H3: 20px
+o	Body: 16px, Small: 14px
+Componentes Reutilizables
+•	Cards con sombras y hover effects
+•	Botones con estados (normal, hover, active, disabled)
+•	Formularios con validación visual
+•	Tablas con filas interactivas
+•	Modales para acciones críticas
+•	Badges para estados y categorías
+Estructura de Maquetación
+1.	Header con navegación responsive
+2.	Contenido principal con container máximo 1200px
+3.	Sidebar en dashboards (colapsable en móvil)
 
 
-El proyecto TradeConnect ahora tiene una arquitectura completamente consistente donde:
-
-Las páginas están en .astro (framework Astro)
-Los componentes interactivos están en .tsx (React)
-El routing se maneja con Astro
-La UI usa shadcn/ui consistentemente
-Los estilos usan Tailwind CSS
-Los tipos están completamente tipados
-El backend se integra dinámicamente

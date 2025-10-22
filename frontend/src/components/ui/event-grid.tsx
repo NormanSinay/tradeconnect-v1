@@ -1,378 +1,126 @@
-import React, { useState, useEffect } from 'react'
-import { api } from '@/services/api'
-import { FaMicrophone, FaTools, FaBook, FaHandshake, FaCalendarAlt, FaUsers } from 'react-icons/fa'
-
-interface Event {
-  id: number
-  title: string
-  shortDescription?: string
-  price: number
-  currency: string
-  startDate: string
-  endDate: string
-  location?: string
-  isVirtual: boolean
-  capacity: number
-  eventCategory?: {
-    name: string
-  }
-  eventType?: {
-    name: string
-  }
-}
+import React from 'react'
+import { motion } from 'framer-motion'
+import { FaCalendarAlt, FaClock, FaMapMarkerAlt } from 'react-icons/fa'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Event } from '@/types'
+import { formatCurrency, formatDate, getModalityText, getTypeText } from '@/utils/sampleData'
+import { useCartStore } from '@/stores/cartStore'
+import toast from 'react-hot-toast'
 
 interface EventGridProps {
-  onEventClick?: (eventId: number) => void
-  onAddToCart?: (eventId: number) => void
+  events: Event[]
+  loading?: boolean
 }
 
-export const EventGrid: React.FC<EventGridProps> = ({
-  onEventClick = () => {},
-  onAddToCart = () => {}
-}) => {
-  const [events, setEvents] = useState<Event[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
+const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
+  const { addToCart } = useCartStore()
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true)
-        const params: any = {
-          limit: 8,
-          page: 1
-        }
-
-        // Check URL parameters for search query
-        if (typeof window !== 'undefined') {
-          const urlParams = new URLSearchParams(window.location.search)
-          const urlSearch = urlParams.get('search')
-          if (urlSearch) {
-            setSearchQuery(urlSearch)
-            params.search = urlSearch
-          }
-        }
-
-        // Add search parameter if provided
-        if (searchQuery.trim()) {
-          params.search = searchQuery.trim()
-        }
-
-        const response = await api.get('/public/events', { params })
-
-        if (response.data.success) {
-          setEvents((response.data.data as any).events || [])
-        } else {
-          setError('Error al cargar eventos')
-        }
-      } catch (err) {
-        // Silenciar errores de red cuando el backend no está disponible
-        // console.error('Error fetching events:', err)
-        setError('Error al cargar eventos')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchEvents()
-  }, [searchQuery])
-
-  const formatPrice = (price: number, currency: string) => {
-    return `Q${price.toFixed(2)}`
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-GT', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    })
-  }
-
-  const getEventIcon = (eventType?: string) => {
-    switch (eventType?.toLowerCase()) {
-      case 'conference':
-      case 'conferencia': return <FaMicrophone />
-      case 'workshop':
-      case 'taller': return <FaTools />
-      case 'training':
-      case 'curso': return <FaBook />
-      case 'networking': return <FaHandshake />
-      case 'webinar': return <FaMicrophone />
-      case 'seminar':
-      case 'seminario': return <FaBook />
-      default: return <FaCalendarAlt />
-    }
-  }
-
-  const getEventBadge = (isVirtual: boolean, eventType?: string) => {
-    if (isVirtual) return 'Virtual'
-    if (eventType?.toLowerCase().includes('training') || eventType?.toLowerCase().includes('curso')) return 'Curso'
-    return 'Presencial'
+  const handleAddToCart = (event: Event) => {
+    addToCart(event)
+    toast.success(`"${event.title}" agregado al carrito`)
   }
 
   if (loading) {
     return (
-      <div className="bento-section">
-        <div className="section-header">
-          <h2>Próximos Eventos y Cursos</h2>
-          <p>Eventos empresariales, cursos y oportunidades de networking</p>
-
-          {/* Search bar for home page */}
-          <div className="search-bar-container">
-            <form onSubmit={(e) => {
-              e.preventDefault()
-              if (typeof window !== 'undefined') {
-                const url = searchQuery.trim()
-                  ? `/events?search=${encodeURIComponent(searchQuery.trim())}`
-                  : '/events'
-                window.location.href = url
-              }
-            }} className="search-form">
-              <input
-                type="text"
-                placeholder="Buscar eventos o cursos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-              <button type="submit" className="search-button">
-                Buscar
-              </button>
-            </form>
-          </div>
-        </div>
-        <div className="bento-grid">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="bento-item">
-              <div className="event-image" style={{ background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontSize: '2rem', color: '#ccc' }}>⏳</div>
-              </div>
-              <div className="event-title" style={{ background: '#f0f0f0', height: '20px', marginBottom: '8px', borderRadius: '4px' }}></div>
-              <div className="event-category" style={{ background: '#f0f0f0', height: '16px', marginBottom: '8px', borderRadius: '4px' }}></div>
-              <div className="event-price" style={{ background: '#f0f0f0', height: '24px', marginBottom: '8px', borderRadius: '4px' }}></div>
-              <div className="event-meta" style={{ background: '#f0f0f0', height: '16px', borderRadius: '4px' }}></div>
-              <button className="btn-add-cart" disabled style={{ opacity: 0.5 }}>
-                Cargando...
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="bento-section">
-        <div className="section-header">
-          <h2>Próximos Eventos y Cursos</h2>
-          <p>Eventos empresariales, cursos y oportunidades de networking</p>
-
-          {/* Search bar for home page */}
-          <div className="search-bar-container">
-            <form onSubmit={(e) => {
-              e.preventDefault()
-              if (typeof window !== 'undefined') {
-                const url = searchQuery.trim()
-                  ? `/events?search=${encodeURIComponent(searchQuery.trim())}`
-                  : '/events'
-                window.location.href = url
-              }
-            }} className="search-form">
-              <input
-                type="text"
-                placeholder="Buscar eventos o cursos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-              <button type="submit" className="search-button">
-                Buscar
-              </button>
-            </form>
-          </div>
-        </div>
-        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-light)' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
-          <p>{error}</p>
-          <button
-            className="btn-primary"
-            onClick={() => window.location.reload()}
-            style={{ marginTop: '1rem' }}
-          >
-            Reintentar
-          </button>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <div className="h-48 bg-gray-300 rounded-t-lg"></div>
+            <CardContent className="p-6">
+              <div className="h-4 bg-gray-300 rounded mb-2"></div>
+              <div className="h-3 bg-gray-300 rounded mb-4"></div>
+              <div className="h-8 bg-gray-300 rounded"></div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     )
   }
 
   if (events.length === 0) {
     return (
-      <div className="bento-section">
-        <div className="section-header">
-          <h2>Próximos Eventos y Cursos</h2>
-          <p>Eventos empresariales, cursos y oportunidades de networking</p>
-
-          {/* Search bar for home page */}
-          <div className="search-bar-container">
-            <form onSubmit={(e) => {
-              e.preventDefault()
-              if (typeof window !== 'undefined') {
-                const url = searchQuery.trim()
-                  ? `/events?search=${encodeURIComponent(searchQuery.trim())}`
-                  : '/events'
-                window.location.href = url
-              }
-            }} className="search-form">
-              <input
-                type="text"
-                placeholder="Buscar eventos o cursos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-              <button type="submit" className="search-button">
-                Buscar
-              </button>
-            </form>
-          </div>
-        </div>
-        <div className="bento-grid">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="bento-item">
-              <div className="event-image" style={{ background: '#f8f9fa', border: '2px dashed #dee2e6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontSize: '2rem', color: '#6c757d' }}>📅</div>
-              </div>
-              <div className="event-title" style={{ background: '#f8f9fa', height: '20px', marginBottom: '8px', borderRadius: '4px' }}></div>
-              <div className="event-category" style={{ background: '#f8f9fa', height: '16px', marginBottom: '8px', borderRadius: '4px' }}></div>
-              <div className="event-price" style={{ background: '#f8f9fa', height: '24px', marginBottom: '8px', borderRadius: '4px' }}></div>
-              <div className="event-meta" style={{ background: '#f8f9fa', height: '16px', borderRadius: '4px' }}></div>
-              <button className="btn-add-cart" disabled style={{ opacity: 0.5, background: '#6c757d' }}>
-                Próximamente
-              </button>
-            </div>
-          ))}
-        </div>
-        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-light)' }}>
-          <p>No hay eventos disponibles en este momento. ¡Vuelve pronto!</p>
-        </div>
+      <div className="text-center py-12">
+        <p className="text-gray-500 text-lg">
+          No se encontraron eventos que coincidan con tu búsqueda.
+        </p>
       </div>
     )
   }
-  const handleEventClick = (eventId: number, e: React.MouseEvent) => {
-    // Prevent event bubbling if clicking on add to cart button
-    if ((e.target as HTMLElement).closest('.btn-add-cart')) {
-      return
-    }
-    onEventClick(eventId)
-  }
-
-  const handleAddToCart = (eventId: number, e: React.MouseEvent) => {
-    e.stopPropagation()
-    onAddToCart(eventId)
-  }
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    // For home page, redirect to events page with search
-    if (typeof window !== 'undefined') {
-      const url = searchQuery.trim()
-        ? `/events?search=${encodeURIComponent(searchQuery.trim())}`
-        : '/events'
-      window.location.href = url
-    }
-  }
 
   return (
-    <section className="bento-section">
-      <div className="section-header">
-        <h2>Próximos Eventos y Cursos</h2>
-        <p>Eventos empresariales, cursos y oportunidades de networking</p>
-
-        {/* Search bar for home page */}
-        <div className="search-bar-container" style={{
-          marginTop: '2rem',
-          display: 'flex',
-          justifyContent: 'center'
-        }}>
-          <form onSubmit={handleSearch} className="search-form" style={{
-            display: 'flex',
-            gap: '0.5rem',
-            maxWidth: '600px',
-            width: '100%',
-            backgroundColor: 'var(--card)',
-            border: '1px solid var(--border)',
-            borderRadius: '12px',
-            padding: '0.75rem 1rem',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-          }}>
-            <input
-              type="text"
-              placeholder="Buscar eventos o cursos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="search-input"
-              style={{
-                flex: 1,
-                border: 'none',
-                outline: 'none',
-                backgroundColor: 'transparent',
-                color: 'var(--foreground)',
-                fontSize: '1rem'
-              }}
-            />
-            <button type="submit" className="search-button" style={{
-              backgroundColor: 'var(--primary)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '0.5rem 1rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s ease'
-            }}>
-              Buscar
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <div className="bento-grid">
-        {events.map((event) => (
-          <div
-            key={event.id}
-            className="bento-item"
-            onClick={(e) => handleEventClick(event.id, e)}
-          >
-            <div className="event-image">
-              <div className="event-icon">
-                {getEventIcon(event.eventType?.name)}
+    <motion.div
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {events.map((event, index) => (
+        <motion.div
+          key={event.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: index * 0.1 }}
+        >
+          <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+            <div className="relative overflow-hidden">
+              <img
+                src={event.image}
+                alt={event.title}
+                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute top-4 right-4">
+                <Badge
+                  variant="secondary"
+                  className="bg-white/90 text-gray-800 hover:bg-white"
+                >
+                  {getTypeText(event.type)}
+                </Badge>
               </div>
-              <div className="event-badge">{getEventBadge(event.isVirtual, event.eventType?.name)}</div>
             </div>
-            <div className="event-title">{event.title}</div>
-            <div className="event-category">
-              {event.eventCategory?.name || 'Evento'} • {event.isVirtual ? 'Virtual' : 'Presencial'}
-            </div>
-            <div className="event-price">{formatPrice(event.price, event.currency)}</div>
-            <div className="event-meta">
-              <span><FaCalendarAlt className="inline mr-1" />{formatDate(event.startDate)}</span>
-              <span><FaUsers className="inline mr-1" />{event.capacity} cupos</span>
-            </div>
-            <button
-              className="btn-add-cart"
-              onClick={(e) => handleAddToCart(event.id, e)}
-            >
-              Agregar al Carrito
-            </button>
-          </div>
-        ))}
-      </div>
-    </section>
+
+            <CardContent className="p-6 flex flex-col h-full">
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 line-clamp-2">
+                  {event.title}
+                </h3>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                  {event.description}
+                </p>
+
+                <div className="space-y-2 text-sm text-gray-600">
+                  <div className="flex items-center">
+                    <FaCalendarAlt className="mr-2 text-[#6B1E22]" size={14} />
+                    <span>{formatDate(event.date)}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <FaClock className="mr-2 text-[#6B1E22]" size={14} />
+                    <span>{event.time}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <FaMapMarkerAlt className="mr-2 text-[#6B1E22]" size={14} />
+                    <span className="capitalize">{getModalityText(event.modality)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+                <span className="text-2xl font-bold text-[#6B1E22]">
+                  {formatCurrency(event.price)}
+                </span>
+                <Button
+                  onClick={() => handleAddToCart(event)}
+                  className="bg-[#6B1E22] hover:bg-[#5a191e] text-white px-6"
+                >
+                  Inscribirse
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </motion.div>
   )
 }
 

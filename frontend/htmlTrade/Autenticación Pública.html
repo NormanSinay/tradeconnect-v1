@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticación - TradeConnect</title>
+    <style>
+        /* Variables CSS para consistencia */
+        :root {
+            --primary-color: #6B1E22;
+            --primary-light: #8a2b30;
+            --secondary-color: #2c5aa0;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* Reset y estilos base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header y Navegación */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-text {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-left: 20px;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+        }
+
+        .nav-menu a:hover {
+            color: var(--primary-color);
+            background-color: rgba(107, 30, 34, 0.1);
+        }
+
+        .nav-menu a.active {
+            color: var(--primary-color);
+            background-color: rgba(107, 30, 34, 0.1);
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(107, 30, 34, 0.1);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1e4a8a;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+            padding: 12px;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-color);
+        }
+
+        /* Sección de Autenticación */
+        .auth-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4a1518 100%);
+            position: relative;
+        }
+
+        .auth-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M1200 120L0 16.48 0 0 1200 0 1200 120z" fill="white"/></svg>');
+            background-size: 100% 150px;
+            background-repeat: no-repeat;
+            background-position: bottom;
+        }
+
+        .auth-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .auth-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            width: 100%;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-logo {
+            margin-bottom: 20px;
+        }
+
+        .auth-title {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: var(--gray-color);
+            font-size: 1rem;
+        }
+
+        .auth-form {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(107, 30, 34, 0.1);
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-check-input {
+            margin-right: 10px;
+        }
+
+        .form-check-label {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .auth-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .divider-text {
+            padding: 0 15px;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .social-auth {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .social-btn:hover {
+            background-color: #f8f9fa;
+        }
+
+        .social-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 50px 0 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section a {
+            color: #ddd;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            .nav-menu.active {
+                display: flex;
+            }
+            
+            .nav-menu li {
+                margin: 10px 0;
+            }
+
+            .auth-card {
+                padding: 30px 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .auth-section {
+                padding: 40px 0;
+            }
+            
+            .auth-card {
+                padding: 25px 20px;
+            }
+            
+            .social-auth {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .auth-title {
+                font-size: 1.5rem;
+            }
+            
+            .auth-card {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html" class="logo-text">TradeConnect</a>
+                </div>
+                
+                <button class="mobile-menu-btn">☰</button>
+                
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Inicio</a></li>
+                    <li><a href="#" class="nav-link">Eventos y Cursos</a></li>
+                    <li><a href="#" class="nav-link">Acerca de</a></li>
+                    <li><a href="#" class="nav-link">Contacto</a></li>
+                </ul>
+                
+                <div class="user-actions">
+                    <a href="login.html" class="btn btn-outline">Iniciar Sesión</a>
+                    <a href="register.html" class="btn btn-primary">Registrarse</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido de Autenticación (se cambiará según la página) -->
+    <main>
+        <!-- Página de Login -->
+        <section class="auth-section" id="login-section">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <div class="auth-logo">
+                            <div class="logo-text" style="font-size: 2rem;">TradeConnect</div>
+                        </div>
+                        <h1 class="auth-title">Iniciar Sesión</h1>
+                        <p class="auth-subtitle">Accede a tu cuenta para gestionar tus eventos y cursos</p>
+                    </div>
+
+                    <div class="auth-form">
+                        <form id="login-form">
+                            <div class="form-group">
+                                <label for="login-email" class="form-label">Correo Electrónico</label>
+                                <input type="email" id="login-email" class="form-control" placeholder="tu@email.com" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="login-password" class="form-label">Contraseña</label>
+                                <input type="password" id="login-password" class="form-control" placeholder="Ingresa tu contraseña" required>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" id="remember-me" class="form-check-input">
+                                <label for="remember-me" class="form-check-label">Recordar mi sesión</label>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+                        </form>
+                        
+                        <div class="auth-links">
+                            <a href="forgot-password.html" class="auth-link">¿Olvidaste tu contraseña?</a>
+                        </div>
+                        
+                        <div class="divider">
+                            <span class="divider-text">O continuar con</span>
+                        </div>
+                        
+                        <div class="social-auth">
+                            <button class="social-btn">
+                                <svg class="social-icon" viewBox="0 0 24 24" fill="#4285F4">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                Google
+                            </button>
+                            <button class="social-btn">
+                                <svg class="social-icon" viewBox="0 0 24 24" fill="#1877F2">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                                Facebook
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="auth-footer">
+                        ¿No tienes una cuenta? <a href="register.html" class="auth-link">Regístrate aquí</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Página de Registro (oculta por defecto) -->
+        <section class="auth-section" id="register-section" style="display: none;">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <div class="auth-logo">
+                            <div class="logo-text" style="font-size: 2rem;">TradeConnect</div>
+                        </div>
+                        <h1 class="auth-title">Crear Cuenta</h1>
+                        <p class="auth-subtitle">Únete a nuestra comunidad de eventos y cursos</p>
+                    </div>
+
+                    <div class="auth-form">
+                        <form id="register-form">
+                            <div class="form-group">
+                                <label for="register-name" class="form-label">Nombre Completo</label>
+                                <input type="text" id="register-name" class="form-control" placeholder="Ingresa tu nombre completo" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="register-email" class="form-label">Correo Electrónico</label>
+                                <input type="email" id="register-email" class="form-control" placeholder="tu@email.com" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="register-password" class="form-label">Contraseña</label>
+                                <input type="password" id="register-password" class="form-control" placeholder="Crea una contraseña segura" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="register-confirm" class="form-label">Confirmar Contraseña</label>
+                                <input type="password" id="register-confirm" class="form-control" placeholder="Repite tu contraseña" required>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" id="terms" class="form-check-input" required>
+                                <label for="terms" class="form-check-label">Acepto los <a href="#" class="auth-link">Términos y Condiciones</a> y la <a href="#" class="auth-link">Política de Privacidad</a></label>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block">Crear Cuenta</button>
+                        </form>
+                        
+                        <div class="divider">
+                            <span class="divider-text">O registrarse con</span>
+                        </div>
+                        
+                        <div class="social-auth">
+                            <button class="social-btn">
+                                <svg class="social-icon" viewBox="0 0 24 24" fill="#4285F4">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                Google
+                            </button>
+                            <button class="social-btn">
+                                <svg class="social-icon" viewBox="0 0 24 24" fill="#1877F2">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                                Facebook
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="auth-footer">
+                        ¿Ya tienes una cuenta? <a href="login.html" class="auth-link">Inicia sesión aquí</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Página de Recuperar Contraseña (oculta por defecto) -->
+        <section class="auth-section" id="forgot-section" style="display: none;">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <div class="auth-logo">
+                            <div class="logo-text" style="font-size: 2rem;">TradeConnect</div>
+                        </div>
+                        <h1 class="auth-title">Recuperar Contraseña</h1>
+                        <p class="auth-subtitle">Te enviaremos un enlace para restablecer tu contraseña</p>
+                    </div>
+
+                    <div class="auth-form">
+                        <form id="forgot-form">
+                            <div class="form-group">
+                                <label for="forgot-email" class="form-label">Correo Electrónico</label>
+                                <input type="email" id="forgot-email" class="form-control" placeholder="tu@email.com" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block">Enviar Enlace de Recuperación</button>
+                        </form>
+                        
+                        <div class="auth-links">
+                            <a href="login.html" class="auth-link">Volver al inicio de sesión</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Página de Verificación de Email (oculta por defecto) -->
+        <section class="auth-section" id="verify-section" style="display: none;">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <div class="auth-logo">
+                            <div class="logo-text" style="font-size: 2rem;">TradeConnect</div>
+                        </div>
+                        <h1 class="auth-title">Verifica tu Email</h1>
+                        <p class="auth-subtitle">Hemos enviado un código de verificación a tu correo electrónico</p>
+                    </div>
+
+                    <div class="alert alert-success">
+                        Se ha enviado un código de 6 dígitos a <strong>usuario@ejemplo.com</strong>
+                    </div>
+
+                    <div class="auth-form">
+                        <form id="verify-form">
+                            <div class="form-group">
+                                <label for="verify-code" class="form-label">Código de Verificación</label>
+                                <input type="text" id="verify-code" class="form-control" placeholder="Ingresa el código de 6 dígitos" maxlength="6" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block">Verificar Cuenta</button>
+                        </form>
+                        
+                        <div class="auth-links">
+                            <a href="#" class="auth-link">¿No recibiste el código? Reenviar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>TradeConnect</h3>
+                    <p>Plataforma e-commerce para la gestión de eventos y cursos de la Cámara de Comercio de Guatemala.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="#">Eventos y Cursos</a></li>
+                        <li><a href="#">Acerca de</a></li>
+                        <li><a href="#">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <ul>
+                        <li>Email: info@tradeconnect.com</li>
+                        <li>Teléfono: +502 1234 5678</li>
+                        <li>Dirección: Ciudad de Guatemala, Guatemala</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Síguenos</h3>
+                    <ul>
+                        <li><a href="#">Facebook</a></li>
+                        <li><a href="#">Twitter</a></li>
+                        <li><a href="#">LinkedIn</a></li>
+                        <li><a href="#">Instagram</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 TradeConnect. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Menú móvil
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-menu').classList.toggle('active');
+        });
+
+        // Simulación de envío de formularios
+        document.getElementById('login-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Inicio de sesión exitoso. Redirigiendo...');
+            // En una aplicación real, aquí iría la lógica de autenticación
+        });
+
+        document.getElementById('register-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Cuenta creada exitosamente. Te hemos enviado un email de verificación.');
+            // En una aplicación real, aquí iría la lógica de registro
+        });
+
+        document.getElementById('forgot-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Se ha enviado un enlace de recuperación a tu correo electrónico.');
+            // En una aplicación real, aquí iría la lógica de recuperación
+        });
+
+        document.getElementById('verify-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Email verificado exitosamente. Redirigiendo...');
+            // En una aplicación real, aquí iría la lógica de verificación
+        });
+
+        // Para propósitos de demostración: cambiar entre páginas de autenticación
+        // En una implementación real, estas serían páginas separadas
+        function showAuthPage(pageId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.auth-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(pageId).style.display = 'flex';
+        }
+
+        // Por defecto, mostrar la página de login
+        // En una implementación real, esto se manejaría con archivos HTML separados
+        document.addEventListener('DOMContentLoaded', function() {
+            // Determinar qué página mostrar basado en la URL
+            const path = window.location.pathname;
+            if (path.includes('register.html')) {
+                showAuthPage('register-section');
+            } else if (path.includes('forgot-password.html')) {
+                showAuthPage('forgot-section');
+            } else if (path.includes('verify-email.html')) {
+                showAuthPage('verify-section');
+            } else {
+                showAuthPage('login-section');
+            }
+        });
+    </script>
+</body>
+</html>

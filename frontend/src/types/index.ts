@@ -1,143 +1,45 @@
-// Base types for the application
-export interface User {
-  id: string
-  email: string
-  name: string
-  role: 'admin' | 'organizer' | 'speaker' | 'attendee'
-  avatar?: string
-  createdAt: Date
-  updatedAt: Date
-}
-
+// Event types
 export interface Event {
-  id: string
+  id: number
   title: string
   description: string
-  startDate: Date
-  endDate: Date
+  date: string
+  time: string
   location: string
-  capacity: number
+  modality: 'presencial' | 'virtual' | 'hibrido'
+  type: 'conferencia' | 'taller' | 'networking' | 'seminario' | 'curso'
   price: number
+  image: string
+  featured: boolean
   category: string
-  status: 'draft' | 'published' | 'cancelled' | 'completed'
-  organizerId: string
-  imageUrl?: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface Registration {
-  id: string
-  eventId: string
-  userId: string
-  status: 'pending' | 'confirmed' | 'cancelled' | 'attended'
-  registrationDate: Date
-  paymentStatus: 'pending' | 'paid' | 'refunded'
-  paymentAmount: number
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface CartItem {
-  id: string
-  eventId: string
-  quantity: number
-  price: number
-  event: Event
-}
-
-export interface Cart {
-  id: string
-  userId: string
-  items: CartItem[]
-  total: number
-  createdAt: Date
-  updatedAt: Date
 }
 
 // API Response types
 export interface ApiResponse<T> {
-  success: boolean
-  data?: T
-  error?: string
+  data: T
   message?: string
+  success: boolean
 }
 
-export interface PaginatedResponse<T> {
-  data: T[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
+// Search and filter types
+export interface SearchFilters {
+  query?: string
+  category?: string
+  modality?: string
+  dateFrom?: string
+  dateTo?: string
 }
 
-// Form types
-export interface LoginForm {
-  email: string
-  password: string
-  rememberMe?: boolean
+// Cart types
+export interface CartItem {
+  event: Event
+  quantity: number
 }
 
-export interface RegisterForm {
-  name: string
-  email: string
-  password: string
-  confirmPassword: string
-  acceptTerms: boolean
+// UI State types
+export interface UIState {
+  isLoading: boolean
+  error: string | null
+  searchQuery: string
+  selectedCategory: string
 }
-
-export interface EventForm {
-  title: string
-  description: string
-  startDate: Date
-  endDate: Date
-  location: string
-  capacity: number
-  price: number
-  category: string
-  imageUrl?: string
-}
-
-// Component props types
-export interface ComponentProps {
-  className?: string
-  children?: React.ReactNode
-}
-
-// Error types
-export interface ValidationError {
-  field: string
-  message: string
-}
-
-export interface ApiError {
-  code: string
-  message: string
-  details?: ValidationError[]
-}
-
-// Notification types
-export interface Notification {
-  id: string
-  type: 'success' | 'error' | 'warning' | 'info'
-  title: string
-  message: string
-  duration?: number
-  action?: {
-    label: string
-    onClick: () => void
-  }
-}
-
-// Theme types
-export type Theme = 'light' | 'dark' | 'system'
-
-// Language types
-export type Language = 'es' | 'en'
-
-// Status types
-export type LoadingState = 'idle' | 'loading' | 'success' | 'error'
-
-// Generic utility types
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
-export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>
