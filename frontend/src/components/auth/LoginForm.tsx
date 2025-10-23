@@ -42,7 +42,7 @@ const LoginForm: React.FC = () => {
     try {
       setError('')
       await login(data.email, data.password)
-      navigate('/')
+      navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
     }

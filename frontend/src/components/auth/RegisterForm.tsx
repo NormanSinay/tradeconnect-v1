@@ -54,6 +54,9 @@ const RegisterForm: React.FC = () => {
         email: data.email,
         password: data.password,
         confirmPassword: data.confirmPassword,
+        firstName: data.name.split(' ')[0] || '',
+        lastName: data.name.split(' ').slice(1).join(' ') || '',
+        termsAccepted: data.terms,
       })
       setSuccess('Cuenta creada exitosamente. Te hemos enviado un email de verificación.')
       setTimeout(() => {

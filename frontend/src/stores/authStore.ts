@@ -17,7 +17,7 @@ interface AuthState {
   register: (userData: RegisterData) => Promise<void>
   logout: () => void
   forgotPassword: (email: string) => Promise<void>
-  verifyEmail: (code: string) => Promise<void>
+  verifyEmail: (token: string) => Promise<void>
   setLoading: (loading: boolean) => void
 }
 
@@ -26,6 +26,9 @@ interface RegisterData {
   email: string
   password: string
   confirmPassword: string
+  firstName: string
+  lastName: string
+  termsAccepted: boolean
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -39,24 +42,28 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true })
         try {
-          // TODO: Implementar llamada a API
-          const response = await fetch('/api/auth/login', {
+          const response = await fetch('/api/v1/auth/login', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify({ email, password }),
           })
-
+    
           if (!response.ok) {
-            throw new Error('Credenciales inválidas')
+            const errorData = await response.json()
+            throw new Error(errorData.message || 'Credenciales inválidas')
           }
-
+    
           const data = await response.json()
 
+          // Log para debug
+          console.log('Respuesta del login:', data)
+
           set({
-            user: data.user,
-            token: data.token,
+            user: data.data?.user || data.user,
+            token: data.data?.tokens?.accessToken || data.token || data.accessToken,
             isAuthenticated: true,
             isLoading: false,
           })
@@ -69,19 +76,26 @@ export const useAuthStore = create<AuthState>()(
       register: async (userData: RegisterData) => {
         set({ isLoading: true })
         try {
-          // TODO: Implementar llamada a API
-          const response = await fetch('/api/auth/register', {
+          const response = await fetch('/api/v1/auth/register', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(userData),
+            body: JSON.stringify({
+              email: userData.email,
+              password: userData.password,
+              confirmPassword: userData.confirmPassword,
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+              termsAccepted: userData.termsAccepted,
+            }),
           })
-
+    
           if (!response.ok) {
-            throw new Error('Error al registrar usuario')
+            const errorData = await response.json()
+            throw new Error(errorData.message || 'Error al registrar usuario')
           }
-
+    
           set({ isLoading: false })
         } catch (error) {
           set({ isLoading: false })
@@ -100,19 +114,19 @@ export const useAuthStore = create<AuthState>()(
       forgotPassword: async (email: string) => {
         set({ isLoading: true })
         try {
-          // TODO: Implementar llamada a API
-          const response = await fetch('/api/auth/forgot-password', {
+          const response = await fetch('/api/v1/auth/forgot-password', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({ email }),
           })
-
+    
           if (!response.ok) {
-            throw new Error('Error al enviar email de recuperación')
+            const errorData = await response.json()
+            throw new Error(errorData.message || 'Error al enviar email de recuperación')
           }
-
+    
           set({ isLoading: false })
         } catch (error) {
           set({ isLoading: false })
@@ -123,17 +137,17 @@ export const useAuthStore = create<AuthState>()(
       verifyEmail: async (code: string) => {
         set({ isLoading: true })
         try {
-          // TODO: Implementar llamada a API
-          const response = await fetch('/api/auth/verify-email', {
+          const response = await fetch('/api/v1/auth/verify-email', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ code }),
+            body: JSON.stringify({ token: code }),
           })
 
           if (!response.ok) {
-            throw new Error('Código de verificación inválido')
+            const errorData = await response.json()
+            throw new Error(errorData.message || 'Código de verificación inválido')
           }
 
           set({ isLoading: false })
