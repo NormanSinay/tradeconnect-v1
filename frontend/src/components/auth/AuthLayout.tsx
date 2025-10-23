@@ -11,49 +11,9 @@ interface AuthLayoutProps {
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold text-[#6B1E22]">TradeConnect</span>
-            </Link>
-
-            <nav className="hidden md:flex space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-[#6B1E22] transition-colors">
-                Inicio
-              </Link>
-              <Link to="/events" className="text-gray-700 hover:text-[#6B1E22] transition-colors">
-                Eventos y Cursos
-              </Link>
-              <Link to="/about" className="text-gray-700 hover:text-[#6B1E22] transition-colors">
-                Acerca de
-              </Link>
-              <Link to="/contact" className="text-gray-700 hover:text-[#6B1E22] transition-colors">
-                Contacto
-              </Link>
-            </nav>
-
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/login"
-                className="text-gray-700 hover:text-[#6B1E22] transition-colors"
-              >
-                Iniciar Sesión
-              </Link>
-              <Link
-                to="/register"
-                className="bg-[#6B1E22] text-white px-4 py-2 rounded-lg hover:bg-[#8a2b30] transition-colors"
-              >
-                Registrarse
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16 pb-8">
         <div className="w-full max-w-md">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -68,7 +28,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) =>
                 transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
                 className="mb-6"
               >
-                <h1 className="text-3xl font-bold text-[#6B1E22]">TradeConnect</h1>
+                <Link to="/" className="text-3xl font-bold text-[#6B1E22] hover:text-[#8a2b30] transition-colors cursor-pointer">
+                  TradeConnect
+                </Link>
               </motion.div>
               <motion.h2
                 initial={{ opacity: 0 }}
