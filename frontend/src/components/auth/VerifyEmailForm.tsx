@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -22,6 +22,10 @@ const VerifyEmailForm: React.FC = () => {
   const [countdown, setCountdown] = useState(0)
   const { verifyEmail, isLoading } = useAuthStore()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // Obtener token de la URL si existe
+  const tokenFromUrl = searchParams.get('token')
 
   const {
     register,
@@ -40,6 +44,26 @@ const VerifyEmailForm: React.FC = () => {
     }
     return () => clearTimeout(timer)
   }, [countdown])
+
+  // Auto-verificar si hay token en la URL
+  useEffect(() => {
+    if (tokenFromUrl) {
+      const autoVerify = async () => {
+        try {
+          setError('')
+          setSuccess('')
+          await verifyEmail(tokenFromUrl)
+          setSuccess('Email verificado exitosamente. Redirigiendo...')
+          setTimeout(() => {
+            navigate('/login')
+          }, 2000)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Token de verificación inválido')
+        }
+      }
+      autoVerify()
+    }
+  }, [tokenFromUrl, verifyEmail, navigate])
 
   const onSubmit = async (data: VerifyEmailFormData) => {
     try {
@@ -62,6 +86,38 @@ const VerifyEmailForm: React.FC = () => {
     console.log('Reenviando código de verificación')
   }
 
+  // Si hay token en la URL, mostrar solo el estado de verificación automática
+  if (tokenFromUrl) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="space-y-6"
+      >
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {success && (
+          <Alert variant="success">
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        )}
+
+        {!error && !success && (
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6B1E22] mx-auto mb-4"></div>
+            <p className="text-gray-600">Verificando tu email...</p>
+          </div>
+        )}
+      </motion.div>
+    )
+  }
+
+  // Si no hay token, mostrar el formulario manual
   return (
     <motion.div
       initial={{ opacity: 0 }}

@@ -13,11 +13,16 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuthStore } from '@/stores/authStore'
 
 const registerSchema = z.object({
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  firstName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'El nombre solo puede contener letras'),
+  lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres').regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'El apellido solo puede contener letras'),
   email: z.string().email('Correo electrónico inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres').regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'La contraseña debe contener mayúsculas, minúsculas y números'),
   confirmPassword: z.string(),
-  terms: z.boolean().refine(val => val === true, 'Debes aceptar los términos y condiciones'),
+  phone: z.string().regex(/^\+502\s?\d{4}-?\d{4}$/, 'El teléfono debe tener formato guatemalteco (+502 1234-5678)').optional(),
+  nit: z.string().regex(/^\d{8}(-[0-9K])?$/i, 'El NIT debe tener formato guatemalteco (12345678 o 12345678-9)').optional(),
+  cui: z.string().length(13, 'El CUI debe tener 13 dígitos').regex(/^\d{13}$/, 'El CUI debe contener solo números').optional(),
+  termsAccepted: z.boolean().refine(val => val === true, 'Debes aceptar los términos y condiciones'),
+  marketingAccepted: z.boolean().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
@@ -43,20 +48,23 @@ const RegisterForm: React.FC = () => {
     resolver: zodResolver(registerSchema),
   })
 
-  const terms = watch('terms')
+  const termsAccepted = watch('termsAccepted') || false
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError('')
       setSuccess('')
       await registerUser({
-        name: data.name,
+        firstName: data.firstName,
+        lastName: data.lastName,
         email: data.email,
         password: data.password,
         confirmPassword: data.confirmPassword,
-        firstName: data.name.split(' ')[0] || '',
-        lastName: data.name.split(' ').slice(1).join(' ') || '',
-        termsAccepted: data.terms,
+        phone: data.phone,
+        nit: data.nit,
+        cui: data.cui,
+        termsAccepted: data.termsAccepted,
+        marketingAccepted: data.marketingAccepted,
       })
       setSuccess('Cuenta creada exitosamente. Te hemos enviado un email de verificación.')
       setTimeout(() => {
@@ -93,18 +101,34 @@ const RegisterForm: React.FC = () => {
       )}
 
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-          Nombre Completo
+        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+          Nombre
         </label>
         <Input
-          id="name"
+          id="firstName"
           type="text"
-          placeholder="Ingresa tu nombre completo"
-          {...register('name')}
-          className={errors.name ? 'border-red-500' : ''}
+          placeholder="Ingresa tu nombre"
+          {...register('firstName')}
+          className={errors.firstName ? 'border-red-500' : ''}
         />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+        {errors.firstName && (
+          <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+          Apellido
+        </label>
+        <Input
+          id="lastName"
+          type="text"
+          placeholder="Ingresa tu apellido"
+          {...register('lastName')}
+          className={errors.lastName ? 'border-red-500' : ''}
+        />
+        {errors.lastName && (
+          <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
         )}
       </div>
 
@@ -184,12 +208,12 @@ const RegisterForm: React.FC = () => {
 
       <div className="flex items-start space-x-2">
         <Checkbox
-          id="terms"
-          checked={terms}
-          onCheckedChange={(checked) => setValue('terms', !!checked)}
+          id="termsAccepted"
+          checked={termsAccepted}
+          onCheckedChange={(checked) => setValue('termsAccepted', !!checked)}
           className="mt-1"
         />
-        <label htmlFor="terms" className="text-sm text-gray-600 leading-relaxed">
+        <label htmlFor="termsAccepted" className="text-sm text-gray-600 leading-relaxed">
           Acepto los{' '}
           <Link to="/terms" className="text-[#6B1E22] hover:text-[#8a2b30] transition-colors">
             Términos y Condiciones
@@ -200,8 +224,8 @@ const RegisterForm: React.FC = () => {
           </Link>
         </label>
       </div>
-      {errors.terms && (
-        <p className="text-sm text-red-600">{errors.terms.message}</p>
+      {errors.termsAccepted && (
+        <p className="text-sm text-red-600">{errors.termsAccepted.message}</p>
       )}
 
       <Button

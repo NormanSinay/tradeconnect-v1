@@ -22,13 +22,16 @@ interface AuthState {
 }
 
 interface RegisterData {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   password: string
   confirmPassword: string
-  firstName: string
-  lastName: string
+  phone?: string
+  nit?: string
+  cui?: string
   termsAccepted: boolean
+  marketingAccepted?: boolean
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -87,7 +90,11 @@ export const useAuthStore = create<AuthState>()(
               confirmPassword: userData.confirmPassword,
               firstName: userData.firstName,
               lastName: userData.lastName,
+              phone: userData.phone,
+              nit: userData.nit,
+              cui: userData.cui,
               termsAccepted: userData.termsAccepted,
+              marketingAccepted: userData.marketingAccepted,
             }),
           })
     
