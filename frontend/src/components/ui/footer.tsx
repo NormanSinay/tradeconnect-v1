@@ -69,6 +69,23 @@ const Footer: React.FC = () => {
             </ul>
           </div>
 
+          {/* Verification */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Verificación</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/verify" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Verificar Certificados
+                </Link>
+              </li>
+              <li>
+                <Link to="/verify" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Verificar Tickets
+                </Link>
+              </li>
+            </ul>
+          </div>
+
           {/* Contact Info */}
           <div>
             <h4 className="text-lg font-semibold mb-4">Contacto</h4>
