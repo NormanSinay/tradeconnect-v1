@@ -227,11 +227,11 @@ const RegisterForm: React.FC = () => {
         />
         <label htmlFor="termsAccepted" className="text-sm text-gray-600 leading-relaxed">
           Acepto los{' '}
-          <Link to="/terms" className="text-[#6B1E22] hover:text-[#8a2b30] transition-colors">
+          <Link to="/terms" className="text-[#6B1E22] hover:text-[#8a2b30] transition-colors underline">
             Términos y Condiciones
           </Link>{' '}
           y la{' '}
-          <Link to="/privacy" className="text-[#6B1E22] hover:text-[#8a2b30] transition-colors">
+          <Link to="/terms" className="text-[#6B1E22] hover:text-[#8a2b30] transition-colors underline">
             Política de Privacidad
           </Link>
         </label>

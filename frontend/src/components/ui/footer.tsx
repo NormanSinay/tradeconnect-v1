@@ -42,6 +42,33 @@ const Footer: React.FC = () => {
             </ul>
           </div>
 
+          {/* Legal Info */}
+          <div>
+            <h4 className="text-lg font-semibold mb-4">Información Legal</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/terms" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Términos y Condiciones
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Política de Privacidad
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Política de Cookies
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="text-gray-300 hover:text-white transition-colors text-sm">
+                  Aviso Legal
+                </Link>
+              </li>
+            </ul>
+          </div>
+
           {/* Contact Info */}
           <div>
             <h4 className="text-lg font-semibold mb-4">Contacto</h4>
