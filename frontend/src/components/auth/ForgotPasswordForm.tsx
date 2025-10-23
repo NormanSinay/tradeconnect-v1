@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuthStore } from '@/stores/authStore'
+import ReCAPTCHAComponent from '@/components/ui/recaptcha'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Correo electrónico inválido'),
@@ -18,6 +19,7 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
 const ForgotPasswordForm: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const { forgotPassword, isLoading } = useAuthStore()
 
   const {
@@ -32,10 +34,19 @@ const ForgotPasswordForm: React.FC = () => {
     try {
       setError('')
       setSuccess('')
-      await forgotPassword(data.email)
+
+      // Verificar reCAPTCHA
+      if (!recaptchaToken) {
+        setError('Por favor, completa la verificación reCAPTCHA')
+        return
+      }
+
+      await forgotPassword(data.email, recaptchaToken)
       setSuccess('Se ha enviado un enlace de recuperación a tu correo electrónico.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al enviar el email de recuperación')
+      // Reset reCAPTCHA on error
+      setRecaptchaToken(null)
     }
   }
 
@@ -75,10 +86,19 @@ const ForgotPasswordForm: React.FC = () => {
         )}
       </div>
 
+      <ReCAPTCHAComponent
+        siteKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+        onVerify={setRecaptchaToken}
+        onExpired={() => setRecaptchaToken(null)}
+        onError={() => setRecaptchaToken(null)}
+        action="forgot_password"
+        className="mb-4"
+      />
+
       <Button
         type="submit"
         className="w-full bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
-        disabled={isLoading}
+        disabled={isLoading || !recaptchaToken}
       >
         {isLoading ? 'Enviando...' : 'Enviar Enlace de Recuperación'}
       </Button>

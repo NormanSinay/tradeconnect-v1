@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuthStore } from '@/stores/authStore'
+import ReCAPTCHAComponent from '@/components/ui/recaptcha'
 
 const resetPasswordSchema = z.object({
   password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres').regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'La contraseña debe contener mayúsculas, minúsculas y números'),
@@ -26,6 +27,7 @@ const ResetPasswordForm: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isValidToken, setIsValidToken] = useState(false)
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const { isLoading } = useAuthStore()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -60,6 +62,12 @@ const ResetPasswordForm: React.FC = () => {
       setError('')
       setSuccess('')
 
+      // Verificar reCAPTCHA
+      if (!recaptchaToken) {
+        setError('Por favor, completa la verificación reCAPTCHA')
+        return
+      }
+
       // TODO: Implementar llamada a API para reset password
       const response = await fetch('/api/v1/auth/reset-password', {
         method: 'POST',
@@ -70,6 +78,7 @@ const ResetPasswordForm: React.FC = () => {
           resetToken: token,
           newPassword: data.password,
           confirmPassword: data.confirmPassword,
+          recaptchaToken,
         }),
       })
 
@@ -84,6 +93,8 @@ const ResetPasswordForm: React.FC = () => {
       }, 2000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al restablecer contraseña')
+      // Reset reCAPTCHA on error
+      setRecaptchaToken(null)
     }
   }
 
@@ -204,10 +215,19 @@ const ResetPasswordForm: React.FC = () => {
         )}
       </div>
 
+      <ReCAPTCHAComponent
+        siteKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+        onVerify={setRecaptchaToken}
+        onExpired={() => setRecaptchaToken(null)}
+        onError={() => setRecaptchaToken(null)}
+        action="reset_password"
+        className="mb-4"
+      />
+
       <Button
         type="submit"
         className="w-full bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
-        disabled={isLoading}
+        disabled={isLoading || !recaptchaToken}
       >
         {isLoading ? 'Restableciendo...' : 'Restablecer Contraseña'}
       </Button>

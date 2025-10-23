@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuthStore } from '@/stores/authStore'
+import ReCAPTCHAComponent from '@/components/ui/recaptcha'
 
 const registerSchema = z.object({
   firstName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres').regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'El nombre solo puede contener letras'),
@@ -35,6 +36,7 @@ const RegisterForm: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const { register: registerUser, isLoading } = useAuthStore()
   const navigate = useNavigate()
 
@@ -54,6 +56,13 @@ const RegisterForm: React.FC = () => {
     try {
       setError('')
       setSuccess('')
+
+      // Verificar reCAPTCHA
+      if (!recaptchaToken) {
+        setError('Por favor, completa la verificación reCAPTCHA')
+        return
+      }
+
       await registerUser({
         firstName: data.firstName,
         lastName: data.lastName,
@@ -65,6 +74,7 @@ const RegisterForm: React.FC = () => {
         cui: data.cui,
         termsAccepted: data.termsAccepted,
         marketingAccepted: data.marketingAccepted,
+        recaptchaToken,
       })
       setSuccess('Cuenta creada exitosamente. Te hemos enviado un email de verificación.')
       setTimeout(() => {
@@ -72,6 +82,8 @@ const RegisterForm: React.FC = () => {
       }, 2000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear la cuenta')
+      // Reset reCAPTCHA on error
+      setRecaptchaToken(null)
     }
   }
 
@@ -228,10 +240,19 @@ const RegisterForm: React.FC = () => {
         <p className="text-sm text-red-600">{errors.termsAccepted.message}</p>
       )}
 
+      <ReCAPTCHAComponent
+        siteKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+        onVerify={setRecaptchaToken}
+        onExpired={() => setRecaptchaToken(null)}
+        onError={() => setRecaptchaToken(null)}
+        action="register"
+        className="mb-4"
+      />
+
       <Button
         type="submit"
         className="w-full bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
-        disabled={isLoading}
+        disabled={isLoading || !recaptchaToken}
       >
         {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
       </Button>

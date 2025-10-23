@@ -13,10 +13,10 @@ interface AuthState {
   token: string | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string, recaptchaToken?: string) => Promise<void>
   register: (userData: RegisterData) => Promise<void>
   logout: () => void
-  forgotPassword: (email: string) => Promise<void>
+  forgotPassword: (email: string, recaptchaToken?: string) => Promise<void>
   verifyEmail: (token: string) => Promise<void>
   setLoading: (loading: boolean) => void
 }
@@ -32,6 +32,7 @@ interface RegisterData {
   cui?: string
   termsAccepted: boolean
   marketingAccepted?: boolean
+  recaptchaToken?: string
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -42,7 +43,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
 
-      login: async (email: string, password: string) => {
+      login: async (email: string, password: string, recaptchaToken?: string) => {
         set({ isLoading: true })
         try {
           const response = await fetch('/api/v1/auth/login', {
@@ -51,7 +52,7 @@ export const useAuthStore = create<AuthState>()(
               'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ email, password, recaptchaToken }),
           })
     
           if (!response.ok) {
@@ -95,6 +96,7 @@ export const useAuthStore = create<AuthState>()(
               cui: userData.cui,
               termsAccepted: userData.termsAccepted,
               marketingAccepted: userData.marketingAccepted,
+              recaptchaToken: userData.recaptchaToken,
             }),
           })
     
@@ -118,7 +120,7 @@ export const useAuthStore = create<AuthState>()(
         })
       },
 
-      forgotPassword: async (email: string) => {
+      forgotPassword: async (email: string, recaptchaToken?: string) => {
         set({ isLoading: true })
         try {
           const response = await fetch('/api/v1/auth/forgot-password', {
@@ -126,7 +128,7 @@ export const useAuthStore = create<AuthState>()(
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email }),
+            body: JSON.stringify({ email, recaptchaToken }),
           })
     
           if (!response.ok) {

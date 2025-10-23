@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuthStore } from '@/stores/authStore'
+import ReCAPTCHAComponent from '@/components/ui/recaptcha'
 
 const loginSchema = z.object({
   email: z.string().email('Correo electrónico inválido'),
@@ -23,6 +24,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
   const { login, isLoading } = useAuthStore()
   const navigate = useNavigate()
 
@@ -41,10 +43,19 @@ const LoginForm: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError('')
-      await login(data.email, data.password)
+
+      // Verificar reCAPTCHA
+      if (!recaptchaToken) {
+        setError('Por favor, completa la verificación reCAPTCHA')
+        return
+      }
+
+      await login(data.email, data.password, recaptchaToken)
       navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
+      // Reset reCAPTCHA on error
+      setRecaptchaToken(null)
     }
   }
 
@@ -131,10 +142,19 @@ const LoginForm: React.FC = () => {
         </Link>
       </div>
 
+      <ReCAPTCHAComponent
+        siteKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+        onVerify={setRecaptchaToken}
+        onExpired={() => setRecaptchaToken(null)}
+        onError={() => setRecaptchaToken(null)}
+        action="login"
+        className="mb-4"
+      />
+
       <Button
         type="submit"
         className="w-full bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
-        disabled={isLoading}
+        disabled={isLoading || !recaptchaToken}
       >
         {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
       </Button>
