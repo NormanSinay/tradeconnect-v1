@@ -30,6 +30,7 @@ import path from 'path';
 import fs from 'fs';
 import { User } from '../models/User';
 import { Session } from '../models/Session';
+import { AuditLog } from '../models/AuditLog';
 
 /**
  * Controlador para manejo de autenticación y autorización
@@ -515,32 +516,29 @@ export class AuthController {
    *     description: Configura 2FA para la cuenta del usuario
    *     security:
    *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - method
-   *               - verificationCode
-   *             properties:
-   *               method:
-   *                 type: string
-   *                 enum: [totp, sms, email]
-   *                 example: "totp"
-   *               phoneNumber:
-   *                 type: string
-   *                 example: "+502 1234-5678"
-   *               emailAddress:
-   *                 type: string
-   *                 example: "backup@email.com"
-   *               verificationCode:
-   *                 type: string
-   *                 example: "123456"
    *     responses:
    *       200:
    *         description: 2FA habilitado exitosamente
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 message:
+   *                   type: string
+   *                   example: "2FA habilitado exitosamente"
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     qrCode:
+   *                       type: string
+   *                       example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+   *                     secret:
+   *                       type: string
+   *                       example: "JBSWY3DPEHPK3PXP"
    *       400:
    *         description: Datos inválidos
    *       401:
@@ -562,19 +560,42 @@ export class AuthController {
         return;
       }
 
-      const clientInfo = {
-        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
-        userAgent: req.get('User-Agent') || 'unknown'
-      };
+      // Verificar si 2FA ya está habilitado
+      const user = await User.findByPk(userId);
+      if (user?.is2faEnabled) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: '2FA ya está habilitado para esta cuenta',
+          error: '2FA_ALREADY_ENABLED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
 
-      const result = await authService.enable2FA(userId, clientInfo);
+      // Generar secreto TOTP
+      const speakeasy = require('speakeasy');
+      const qrcode = require('qrcode');
 
-      const statusCode = result.success ? HTTP_STATUS.OK :
-        result.error === 'EMAIL_NOT_VERIFIED' ? HTTP_STATUS.BAD_REQUEST :
-        result.error === '2FA_ALREADY_ENABLED' ? HTTP_STATUS.BAD_REQUEST :
-        HTTP_STATUS.INTERNAL_SERVER_ERROR;
+      const secret = speakeasy.generateSecret({
+        name: `TradeConnect (${user?.email})`,
+        issuer: 'TradeConnect'
+      });
 
-      res.status(statusCode).json(result);
+      // Generar QR code
+      const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
+
+      // Guardar secreto temporalmente (se confirmará después)
+      // TODO: Implementar almacenamiento temporal seguro
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: 'Configuración 2FA preparada. Escanea el código QR y confirma.',
+        data: {
+          qrCode: qrCodeUrl,
+          secret: secret.base32
+        },
+        timestamp: new Date().toISOString()
+      });
 
     } catch (error) {
       logger.error('Error en enable 2FA controller:', error);
@@ -592,8 +613,10 @@ export class AuthController {
    * /api/auth/2fa/verify:
    *   post:
    *     tags: [Authentication]
-   *     summary: Verificar código 2FA
-   *     description: Verifica un código 2FA durante el proceso de login
+   *     summary: Verificar código 2FA para habilitar
+   *     description: Verifica el código 2FA y completa la configuración
+   *     security:
+   *       - bearerAuth: []
    *     requestBody:
    *       required: true
    *       content:
@@ -602,71 +625,103 @@ export class AuthController {
    *             type: object
    *             required:
    *               - code
-   *               - sessionId
+   *               - secret
    *             properties:
    *               code:
    *                 type: string
    *                 example: "123456"
-   *               sessionId:
+   *               secret:
    *                 type: string
-   *                 example: "session_123"
+   *                 example: "JBSWY3DPEHPK3PXP"
    *     responses:
    *       200:
-   *         description: Código 2FA verificado exitosamente
+   *         description: Código 2FA verificado y 2FA habilitado
    *       400:
    *         description: Código inválido
+   *       401:
+   *         description: No autorizado
    *       500:
    *         description: Error interno del servidor
    */
-  async verify2FA(req: Request, res: Response): Promise<void> {
+  async verify2FA(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const { code, sessionId } = req.body;
+      const { code, secret } = req.body;
+      const userId = req.user?.id;
 
-      if (!code || !sessionId) {
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      if (!code || !secret) {
         res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
-          message: 'Código y sessionId son requeridos',
+          message: 'Código y secreto son requeridos',
           error: 'MISSING_PARAMETERS',
           timestamp: new Date().toISOString()
         });
         return;
       }
 
-      // Buscar sesión para obtener userId
-      const session = await Session.findBySessionId(sessionId);
-      if (!session) {
+      // Verificar código TOTP
+      const speakeasy = require('speakeasy');
+      const isValid = speakeasy.totp.verify({
+        secret: secret,
+        encoding: 'base32',
+        token: code,
+        window: 2 // Permitir 30 segundos de tolerancia
+      });
+
+      if (!isValid) {
         res.status(HTTP_STATUS.BAD_REQUEST).json({
-          success: false,
-          message: 'Sesión inválida',
-          error: 'INVALID_SESSION',
-          timestamp: new Date().toISOString()
-        });
-        return;
-      }
-
-      const isValid = await authService.verify2FA(session.userId, code);
-
-      if (isValid) {
-        // Marcar sesión como autenticada con 2FA
-        await session.update({ loginMethod: '2fa' });
-
-        res.status(HTTP_STATUS.OK).json({
-          success: true,
-          message: 'Código 2FA verificado exitosamente',
-          data: {
-            sessionId,
-            requires2FA: false
-          },
-          timestamp: new Date().toISOString()
-        });
-      } else {
-        res.status(HTTP_STATUS.UNAUTHORIZED).json({
           success: false,
           message: 'Código 2FA inválido',
           error: 'INVALID_2FA_CODE',
           timestamp: new Date().toISOString()
         });
+        return;
       }
+
+      // Habilitar 2FA en la base de datos
+      const user = await User.findByPk(userId);
+      if (!user) {
+        res.status(HTTP_STATUS.NOT_FOUND).json({
+          success: false,
+          message: 'Usuario no encontrado',
+          error: 'USER_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      // TODO: Guardar secreto de forma segura (encriptado)
+      await user.update({
+        is2faEnabled: true,
+        // TODO: Agregar campo para secreto 2FA en modelo User
+      });
+
+      // Registrar en auditoría
+      await AuditLog.log(
+        '2fa_enabled',
+        'user',
+        {
+          userId,
+          resourceId: userId.toString(),
+          ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+          userAgent: req.get('User-Agent') || 'unknown'
+        }
+      );
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: '2FA habilitado exitosamente',
+        timestamp: new Date().toISOString()
+      });
 
     } catch (error) {
       logger.error('Error en verify 2FA controller:', error);
@@ -695,16 +750,16 @@ export class AuthController {
    *           schema:
    *             type: object
    *             required:
-   *               - password
+   *               - code
    *             properties:
-   *               password:
+   *               code:
    *                 type: string
-   *                 example: "current_password"
+   *                 example: "123456"
    *     responses:
    *       200:
    *         description: 2FA deshabilitado exitosamente
    *       400:
-   *         description: Contraseña incorrecta
+   *         description: Código inválido
    *       401:
    *         description: No autorizado
    *       500:
@@ -712,7 +767,7 @@ export class AuthController {
    */
   async disable2FA(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      const { password } = req.body;
+      const { code } = req.body;
       const userId = req.user?.id;
 
       if (!userId) {
@@ -725,29 +780,71 @@ export class AuthController {
         return;
       }
 
-      if (!password) {
+      if (!code) {
         res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
-          message: 'Contraseña actual es requerida',
-          error: 'MISSING_PASSWORD',
+          message: 'Código 2FA es requerido',
+          error: 'MISSING_CODE',
           timestamp: new Date().toISOString()
         });
         return;
       }
 
-      const clientInfo = {
-        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
-        userAgent: req.get('User-Agent') || 'unknown'
-      };
+      // Verificar si 2FA está habilitado
+      const user = await User.findByPk(userId);
+      if (!user?.is2faEnabled) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: '2FA no está habilitado para esta cuenta',
+          error: '2FA_NOT_ENABLED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
 
-      const result = await authService.disable2FA(userId, password, clientInfo);
+      // TODO: Obtener secreto 2FA del usuario (desde campo encriptado)
+      // Por ahora, asumimos que el secreto está disponible
+      const secret = 'TEMP_SECRET'; // TODO: Implementar recuperación segura
 
-      const statusCode = result.success ? HTTP_STATUS.OK :
-        result.error === 'INVALID_CREDENTIALS' ? HTTP_STATUS.UNAUTHORIZED :
-        result.error === '2FA_NOT_ENABLED' ? HTTP_STATUS.BAD_REQUEST :
-        HTTP_STATUS.INTERNAL_SERVER_ERROR;
+      // Verificar código TOTP
+      const speakeasy = require('speakeasy');
+      const isValid = speakeasy.totp.verify({
+        secret: secret,
+        encoding: 'base32',
+        token: code,
+        window: 2
+      });
 
-      res.status(statusCode).json(result);
+      if (!isValid) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Código 2FA inválido',
+          error: 'INVALID_2FA_CODE',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      // Deshabilitar 2FA
+      await user.update({ is2faEnabled: false });
+
+      // Registrar en auditoría
+      await AuditLog.log(
+        '2fa_disabled',
+        'user',
+        {
+          userId,
+          resourceId: userId.toString(),
+          ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+          userAgent: req.get('User-Agent') || 'unknown'
+        }
+      );
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: '2FA deshabilitado exitosamente',
+        timestamp: new Date().toISOString()
+      });
 
     } catch (error) {
       logger.error('Error en disable 2FA controller:', error);

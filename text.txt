@@ -39,3 +39,24 @@ Estructura de Maquetación
 3.	Sidebar en dashboards (colapsable en móvil)
 
 
+
+
+
+RESUMEN DE PRIORIDADES
+🚨 CRÍTICO (Backend)
+Endpoints de estadísticas de usuario
+Sistema completo de 2FA
+Validación de sesiones
+⚡ ALTO (Frontend)
+Integración real de APIs (reemplazar mocks)
+Funciones de transformación de datos
+Manejo de errores mejorado
+🔧 MEDIO (Ambos)
+Testing completo
+Optimizaciones de performance
+UX/UI mejorado
+📈 BAJO (Futuro)
+Offline support
+Service worker
+Notificaciones push
+Total de TODOs identificados: 24

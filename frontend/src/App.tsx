@@ -1,4 +1,18 @@
 import { Routes, Route } from 'react-router-dom'
+import { useAuthStore } from './stores/authStore'
+
+// Componente para proteger rutas
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuthStore()
+
+  if (!isAuthenticated) {
+    // Redirigir al login si no está autenticado
+    window.location.href = '/login'
+    return null
+  }
+
+  return <>{children}</>
+}
 
 // Pages
 import HomePage from './pages/HomePage'
@@ -11,8 +25,16 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import VerifyEmailPage from './pages/VerifyEmailPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import DashboardPage from './pages/DashboardPage'
+import DashboardEventsPage from './pages/DashboardEventsPage'
+import DashboardCertificatesPage from './pages/DashboardCertificatesPage'
+import DashboardProfilePage from './pages/DashboardProfilePage'
+import DashboardSettingsPage from './pages/DashboardSettingsPage'
 import TermsPage from './pages/TermsPage'
 import VerificationPage from './pages/VerificationPage'
+import UserEventsPage from './pages/UserEventsPage'
+import UserCertificatesPage from './pages/UserCertificatesPage'
+import UserProfilePage from './pages/UserProfilePage'
+import UserSettingsPage from './pages/UserSettingsPage'
 
 function App() {
   return (
@@ -26,7 +48,15 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/events" element={<ProtectedRoute><UserEventsPage /></ProtectedRoute>} />
+      <Route path="/certificates" element={<ProtectedRoute><UserCertificatesPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><UserSettingsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/events" element={<ProtectedRoute><DashboardEventsPage /></ProtectedRoute>} />
+      <Route path="/dashboard/certificates" element={<ProtectedRoute><DashboardCertificatesPage /></ProtectedRoute>} />
+      <Route path="/dashboard/profile" element={<ProtectedRoute><DashboardProfilePage /></ProtectedRoute>} />
+      <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardSettingsPage /></ProtectedRoute>} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/verify" element={<VerificationPage />} />
     </Routes>

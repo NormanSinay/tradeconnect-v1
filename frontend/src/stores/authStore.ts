@@ -2,9 +2,11 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 interface User {
-  id: string
+  id: string | number
   email: string
-  name: string
+  name?: string
+  firstName?: string
+  lastName?: string
   role: string
 }
 
@@ -65,9 +67,29 @@ export const useAuthStore = create<AuthState>()(
           // Log para debug
           console.log('Respuesta del login:', data)
 
+          // Log para debug
+          console.log('Respuesta del login:', data)
+
+          // Extraer datos del usuario
+          const userData = data.data?.user || data.user
+          const tokenData = data.data?.tokens?.accessToken || data.token || data.accessToken
+
+          console.log('Usuario extraído:', userData)
+          console.log('Token extraído:', tokenData ? `${tokenData.substring(0, 20)}...` : 'null')
+
+          // Crear objeto user consistente
+          const user = {
+            id: userData.id || userData.userId,
+            email: userData.email,
+            name: userData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            role: userData.role || 'user'
+          }
+
           set({
-            user: data.data?.user || data.user,
-            token: data.data?.tokens?.accessToken || data.token || data.accessToken,
+            user,
+            token: tokenData,
             isAuthenticated: true,
             isLoading: false,
           })

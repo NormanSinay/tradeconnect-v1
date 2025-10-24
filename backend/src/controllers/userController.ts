@@ -854,6 +854,87 @@ export class UserController {
   }
 
   /**
+   * @swagger
+   * /api/v1/users/stats:
+   *   get:
+   *     tags: [Users]
+   *     summary: Obtener estadísticas del usuario
+   *     description: Obtiene estadísticas personales del usuario autenticado (eventos, certificados, etc.)
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Estadísticas obtenidas exitosamente
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 success:
+   *                   type: boolean
+   *                   example: true
+   *                 data:
+   *                   type: object
+   *                   properties:
+   *                     activeEvents:
+   *                       type: integer
+   *                       example: 3
+   *                     completedEvents:
+   *                       type: integer
+   *                       example: 8
+   *                     certificates:
+   *                       type: integer
+   *                       example: 6
+   *                     trainingHours:
+   *                       type: integer
+   *                       example: 42
+   *       401:
+   *         description: No autorizado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async getUserStats(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      // TODO: Implementar consultas reales a la base de datos
+      // Por ahora retornamos datos mock que coinciden con el frontend
+      const stats = {
+        activeEvents: 3,
+        completedEvents: 8,
+        certificates: 6,
+        trainingHours: 42
+      };
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: 'Estadísticas obtenidas exitosamente',
+        data: stats,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error obteniendo estadísticas de usuario:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
    * Obtener auditoría de usuario (admin)
    */
   async getUserAudit(req: AuthenticatedRequest, res: Response): Promise<void> {

@@ -328,6 +328,48 @@ router.get('/profile', authenticated, userLimiter, userController.getProfile);
 
 /**
  * @swagger
+ * /api/v1/users/stats:
+ *   get:
+ *     tags: [Users]
+ *     summary: Obtener estadísticas del usuario
+ *     description: Obtiene estadísticas personales del usuario autenticado (eventos, certificados, etc.)
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Estadísticas obtenidas exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     activeEvents:
+ *                       type: integer
+ *                       example: 3
+ *                     completedEvents:
+ *                       type: integer
+ *                       example: 8
+ *                     certificates:
+ *                       type: integer
+ *                       example: 6
+ *                     trainingHours:
+ *                       type: integer
+ *                       example: 42
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/stats', authenticated, userLimiter, userController.getUserStats);
+
+/**
+ * @swagger
  * /api/users/profile:
  *   put:
  *     tags: [Users]

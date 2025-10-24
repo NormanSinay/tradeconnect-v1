@@ -1504,7 +1504,12 @@ router.post('/2fa/enable', authenticated, enable2FAValidation, authController.en
  *                   type: string
  *                   example: "TWO_FA_NOT_ENABLED"
  */
-router.post('/2fa/disable', authenticated, disable2FAValidation, authController.disable2FA);
+router.post('/2fa/disable', authenticated, [
+  body('code')
+    .isLength({ min: 6, max: 6 })
+    .isNumeric()
+    .withMessage('Código 2FA debe tener 6 dígitos')
+], authController.disable2FA);
 
 /**
  * @swagger
