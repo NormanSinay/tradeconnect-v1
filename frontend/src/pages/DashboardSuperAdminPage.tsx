@@ -64,38 +64,35 @@ const DashboardSuperAdminPage: React.FC = () => {
           DashboardService.getSalesReport()
         ]);
 
-        // Calcular estadísticas del dashboard
+        // Calcular estadísticas del dashboard con datos reales
         setStats({
-          totalUsers: systemMetrics.totalEvents || 2847, // Usar datos reales cuando estén disponibles
-          activeEvents: systemMetrics.activeEvents || 156,
-          totalCourses: 89, // Mantener por ahora hasta que se implemente API de cursos
-          totalRevenue: salesReport.totalRevenue || 245680,
-          userSatisfaction: 94.2, // Mantener por ahora
-          incidentReports: 23 // Mantener por ahora
+          totalUsers: systemMetrics.totalEvents || 0, // Usar totalEvents como proxy de usuarios registrados
+          activeEvents: systemMetrics.activeEvents || 0,
+          totalCourses: 0, // API no implementada aún
+          totalRevenue: salesReport.totalRevenue || 0,
+          userSatisfaction: 0, // API no implementada aún
+          incidentReports: 0 // API no implementada aún
         });
       }, 'Error al cargar los datos del dashboard');
 
       await loadData();
 
-      // Fallback a datos simulados si las APIs fallan
-      if (!stats.totalUsers) {
-        setStats({
-          totalUsers: 2847,
-          activeEvents: 156,
-          totalCourses: 89,
-          totalRevenue: 245680,
-          userSatisfaction: 94.2,
-          incidentReports: 23
-        });
-      }
-
     } catch (error) {
       // El error ya fue manejado por withErrorHandling
       console.error('Error in loadDashboardData:', error);
+      // Mantener valores en 0 si hay error, no usar datos ficticios
+      setStats({
+        totalUsers: 0,
+        activeEvents: 0,
+        totalCourses: 0,
+        totalRevenue: 0,
+        userSatisfaction: 0,
+        incidentReports: 0
+      });
     } finally {
       setLoading(false);
     }
-  }, [withErrorHandling, stats.totalUsers]);
+  }, [withErrorHandling]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-GT', {
@@ -272,13 +269,15 @@ const DashboardSuperAdminPage: React.FC = () => {
                   <p className="text-gray-600">Vista general y métricas de toda la plataforma</p>
                 </div>
 
-                {/* Alertas del Sistema */}
-                <Alert className="mb-8 border-yellow-200 bg-yellow-50">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>⚠️ Alertas del Sistema:</strong> 3 eventos requieren aprobación, 2 usuarios reportados, 1 pago pendiente de verificación.
-                  </AlertDescription>
-                </Alert>
+                {/* Alertas del Sistema - Solo mostrar si hay datos reales */}
+                {stats.incidentReports > 0 && (
+                  <Alert className="mb-8 border-yellow-200 bg-yellow-50">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>⚠️ Alertas del Sistema:</strong> {stats.incidentReports} incidentes requieren atención.
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 {/* Métricas Principales */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
@@ -288,10 +287,12 @@ const DashboardSuperAdminPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">Usuarios Registrados</p>
                           <p className="text-2xl font-bold text-primary">{stats.totalUsers.toLocaleString()}</p>
-                          <p className="text-xs text-green-600 flex items-center mt-1">
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            +5.2% este mes
-                          </p>
+                          {stats.totalUsers > 0 && (
+                            <p className="text-xs text-green-600 flex items-center mt-1">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              Datos actualizados
+                            </p>
+                          )}
                         </div>
                         <Users className="w-8 h-8 text-primary" />
                       </div>
@@ -304,10 +305,12 @@ const DashboardSuperAdminPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">Eventos Activos</p>
                           <p className="text-2xl font-bold text-primary">{stats.activeEvents}</p>
-                          <p className="text-xs text-green-600 flex items-center mt-1">
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            +12 este mes
-                          </p>
+                          {stats.activeEvents > 0 && (
+                            <p className="text-xs text-green-600 flex items-center mt-1">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              Datos actualizados
+                            </p>
+                          )}
                         </div>
                         <Calendar className="w-8 h-8 text-primary" />
                       </div>
@@ -320,10 +323,12 @@ const DashboardSuperAdminPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">Cursos Publicados</p>
                           <p className="text-2xl font-bold text-primary">{stats.totalCourses}</p>
-                          <p className="text-xs text-green-600 flex items-center mt-1">
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            +8 este mes
-                          </p>
+                          {stats.totalCourses > 0 && (
+                            <p className="text-xs text-green-600 flex items-center mt-1">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              Datos actualizados
+                            </p>
+                          )}
                         </div>
                         <BookOpen className="w-8 h-8 text-primary" />
                       </div>
@@ -336,10 +341,12 @@ const DashboardSuperAdminPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">Ingresos Totales</p>
                           <p className="text-2xl font-bold text-primary">{formatCurrency(stats.totalRevenue)}</p>
-                          <p className="text-xs text-green-600 flex items-center mt-1">
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            +18.7% este mes
-                          </p>
+                          {stats.totalRevenue > 0 && (
+                            <p className="text-xs text-green-600 flex items-center mt-1">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              Datos actualizados
+                            </p>
+                          )}
                         </div>
                         <DollarSign className="w-8 h-8 text-primary" />
                       </div>
@@ -351,11 +358,13 @@ const DashboardSuperAdminPage: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Satisfacción Usuarios</p>
-                          <p className="text-2xl font-bold text-primary">{stats.userSatisfaction}%</p>
-                          <p className="text-xs text-green-600 flex items-center mt-1">
-                            <TrendingUp className="w-3 h-3 mr-1" />
-                            +2.1% este mes
-                          </p>
+                          <p className="text-2xl font-bold text-primary">{stats.userSatisfaction > 0 ? `${stats.userSatisfaction}%` : 'N/A'}</p>
+                          {stats.userSatisfaction > 0 && (
+                            <p className="text-xs text-green-600 flex items-center mt-1">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              Datos actualizados
+                            </p>
+                          )}
                         </div>
                         <TrendingUp className="w-8 h-8 text-primary" />
                       </div>
@@ -368,10 +377,12 @@ const DashboardSuperAdminPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-600">Incidentes Reportados</p>
                           <p className="text-2xl font-bold text-primary">{stats.incidentReports}</p>
-                          <p className="text-xs text-red-600 flex items-center mt-1">
-                            <AlertTriangle className="w-3 h-3 mr-1" />
-                            -5 este mes
-                          </p>
+                          {stats.incidentReports > 0 && (
+                            <p className="text-xs text-red-600 flex items-center mt-1">
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              Requiere atención
+                            </p>
+                          )}
                         </div>
                         <AlertTriangle className="w-8 h-8 text-primary" />
                       </div>
@@ -384,13 +395,13 @@ const DashboardSuperAdminPage: React.FC = () => {
                   <h2 className="text-xl font-semibold mb-4">Acciones Rápidas</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                     {[
-                      { icon: Plus, title: 'Crear Usuario', desc: 'Agregar nuevo usuario', action: () => setActiveTab('users') },
-                      { icon: Calendar, title: 'Crear Evento', desc: 'Publicar nuevo evento', action: () => toast.success('Funcionalidad en desarrollo') },
-                      { icon: BookOpen, title: 'Crear Curso', desc: 'Publicar nuevo curso', action: () => toast.success('Funcionalidad en desarrollo') },
-                      { icon: TrendingUp, title: 'Generar Reporte', desc: 'Crear reporte personalizado', action: () => toast.success('Funcionalidad en desarrollo') },
-                      { icon: Settings, title: 'Backup Sistema', desc: 'Realizar copia de seguridad', action: () => toast.success('Backup iniciado') },
-                      { icon: Search, title: 'Ver Auditoría', desc: 'Revisar logs del sistema', action: () => toast.success('Funcionalidad en desarrollo') }
-                    ].map((item, index) => (
+                      { icon: Plus, title: 'Crear Usuario', desc: 'Agregar nuevo usuario', action: () => setActiveTab('users'), enabled: permissions.canManageUsers },
+                      { icon: Calendar, title: 'Crear Evento', desc: 'Publicar nuevo evento', action: () => toast.success('Funcionalidad en desarrollo'), enabled: permissions.canManageEvents },
+                      { icon: BookOpen, title: 'Crear Curso', desc: 'Publicar nuevo curso', action: () => toast.success('Funcionalidad en desarrollo'), enabled: false },
+                      { icon: TrendingUp, title: 'Generar Reporte', desc: 'Crear reporte personalizado', action: () => toast.success('Funcionalidad en desarrollo'), enabled: false },
+                      { icon: Settings, title: 'Backup Sistema', desc: 'Realizar copia de seguridad', action: () => toast.success('Backup iniciado'), enabled: permissions.canManageSystem },
+                      { icon: Search, title: 'Ver Auditoría', desc: 'Revisar logs del sistema', action: () => setActiveTab('auditoria'), enabled: permissions.canViewAuditLogs }
+                    ].filter(item => item.enabled !== false).map((item, index) => (
                       <Card key={index} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={item.action}>
                         <CardContent className="p-6 text-center">
                           <item.icon className="w-8 h-8 text-primary mx-auto mb-3" />
@@ -402,51 +413,24 @@ const DashboardSuperAdminPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Gráficos y Estadísticas */}
-                <ChartsSection activeTab={activeTab} />
+                {/* Gráficos y Estadísticas - Solo mostrar si hay datos */}
+                {stats.totalUsers > 0 && <ChartsSection activeTab={activeTab} />}
 
-                {/* Actividad Reciente */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Actividad Reciente del Sistema</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Fecha/Hora</TableHead>
-                          <TableHead>Usuario</TableHead>
-                          <TableHead>Acción</TableHead>
-                          <TableHead>Detalles</TableHead>
-                          <TableHead>IP</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>2023-10-25 09:32:15</TableCell>
-                          <TableCell>admin_master</TableCell>
-                          <TableCell>Creó nuevo evento</TableCell>
-                          <TableCell>Conferencia de Innovación 2023</TableCell>
-                          <TableCell>192.168.1.100</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>2023-10-25 08:15:42</TableCell>
-                          <TableCell>maria_gonzalez</TableCell>
-                          <TableCell>Completó evaluación</TableCell>
-                          <TableCell>Taller de Marketing Digital</TableCell>
-                          <TableCell>201.159.32.45</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>2023-10-24 22:05:18</TableCell>
-                          <TableCell>sistema</TableCell>
-                          <TableCell>Backup automático</TableCell>
-                          <TableCell>Base de datos completa</TableCell>
-                          <TableCell>127.0.0.1</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
+                {/* Actividad Reciente - Solo mostrar si hay datos */}
+                {stats.totalUsers > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Actividad Reciente del Sistema</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center text-gray-500 py-8">
+                        <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                        <p>La API de auditoría no está implementada aún.</p>
+                        <p className="text-sm">Esta sección mostrará logs de actividad cuando esté disponible.</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </motion.div>
             )}
 

@@ -2791,6 +2791,10 @@ app.use(`${API_VERSION}/hybrid-events`, hybridEventRoutes);
 app.use(`${API_VERSION}/streaming`, streamingRoutes);
 app.use(`${API_VERSION}/virtual-participants`, virtualParticipantRoutes);
 
+// Rutas de administración
+import adminRoutes from './routes/admin';
+app.use(`${API_VERSION}/admin`, adminRoutes);
+
 // Backward compatibility - redirect old API routes to v1
 app.use('/api/auth', (req, res) => res.redirect(301, `${API_VERSION}/auth${req.path}`));
 app.use('/api/users', (req, res) => res.redirect(301, `${API_VERSION}/users${req.path}`));
