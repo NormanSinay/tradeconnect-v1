@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { encryptPassword } from '@/utils/encryption'
 
 interface User {
   id: string | number
@@ -48,13 +49,20 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string, recaptchaToken?: string) => {
         set({ isLoading: true })
         try {
-          const response = await fetch('/api/v1/auth/login', {
+          // La contraseña se envía en texto plano - el backend la compara con bcrypt
+          // NO encriptar aquí porque el backend espera texto plano
+
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: JSON.stringify({ email, password, recaptchaToken }),
+            body: JSON.stringify({
+              email,
+              password, // Enviar contraseña en texto plano
+              recaptchaToken
+            }),
           })
     
           if (!response.ok) {
@@ -64,18 +72,20 @@ export const useAuthStore = create<AuthState>()(
     
           const data = await response.json()
 
-          // Log para debug
-          console.log('Respuesta del login:', data)
+          // Log para debug (solo en desarrollo)
+          if (import.meta.env.DEV) {
+            console.log('Respuesta del login:', data)
+          }
 
-          // Log para debug
-          console.log('Respuesta del login:', data)
-
-          // Extraer datos del usuario
+          // Extraer datos del usuario y token
           const userData = data.data?.user || data.user
-          const tokenData = data.data?.tokens?.accessToken || data.token || data.accessToken
+          const tokenData = data.data?.accessToken || data.data?.tokens?.accessToken || data.token || data.accessToken
 
-          console.log('Usuario extraído:', userData)
-          console.log('Token extraído:', tokenData ? `${tokenData.substring(0, 20)}...` : 'null')
+          // Logs de debug solo en desarrollo
+          if (import.meta.env.DEV) {
+            console.log('Usuario extraído:', userData)
+            console.log('Token extraído:', tokenData ? `${tokenData.substring(0, 20)}...` : 'null')
+          }
 
           // Crear objeto user consistente
           const user = {
@@ -102,15 +112,24 @@ export const useAuthStore = create<AuthState>()(
       register: async (userData: RegisterData) => {
         set({ isLoading: true })
         try {
-          const response = await fetch('/api/v1/auth/register', {
+          // Encriptar las contraseñas antes de enviar
+          const encryptedPassword = encryptPassword(userData.password)
+          const encryptedConfirmPassword = encryptPassword(userData.confirmPassword)
+
+          // Logs de encriptación solo en desarrollo
+          if (import.meta.env.DEV) {
+            console.log('Contraseñas encriptadas correctamente para registro')
+          }
+
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
               email: userData.email,
-              password: userData.password,
-              confirmPassword: userData.confirmPassword,
+              password: encryptedPassword, // Enviar contraseña encriptada
+              confirmPassword: encryptedConfirmPassword, // Enviar confirmación encriptada
               firstName: userData.firstName,
               lastName: userData.lastName,
               phone: userData.phone,
@@ -145,7 +164,7 @@ export const useAuthStore = create<AuthState>()(
       forgotPassword: async (email: string, recaptchaToken?: string) => {
         set({ isLoading: true })
         try {
-          const response = await fetch('/api/v1/auth/forgot-password', {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -168,7 +187,7 @@ export const useAuthStore = create<AuthState>()(
       verifyEmail: async (code: string) => {
         set({ isLoading: true })
         try {
-          const response = await fetch('/api/v1/auth/verify-email', {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/verify-email`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

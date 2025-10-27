@@ -2,51 +2,42 @@ import React from 'react'
 import { motion } from 'framer-motion'
 
 interface ProgressBarProps {
-  progress: number
+  progress: number // 0-100
   className?: string
   showPercentage?: boolean
+  color?: string
   size?: 'sm' | 'md' | 'lg'
-  color?: 'primary' | 'success' | 'warning' | 'danger'
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   progress,
   className = '',
-  showPercentage = true,
-  size = 'md',
-  color = 'primary'
+  showPercentage = false,
+  color = 'bg-[#6B1E22]',
+  size = 'md'
 }) => {
-  const sizeClasses = {
-    sm: 'h-1',
-    md: 'h-2',
-    lg: 'h-3'
+  const heightClasses = {
+    sm: 'h-2',
+    md: 'h-3',
+    lg: 'h-4'
   }
-
-  const colorClasses = {
-    primary: 'bg-[#6B1E22]',
-    success: 'bg-green-600',
-    warning: 'bg-yellow-600',
-    danger: 'bg-red-600'
-  }
-
-  const clampedProgress = Math.min(Math.max(progress, 0), 100)
 
   return (
-    <div className={`w-full ${className}`}>
-      <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${sizeClasses[size]}`}>
-        <motion.div
-          className={`h-full ${colorClasses[color]} rounded-full transition-all duration-300`}
-          initial={{ width: 0 }}
-          animate={{ width: `${clampedProgress}%` }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-        />
-      </div>
-      {showPercentage && (
-        <div className="flex justify-between items-center mt-2">
-          <span className="text-sm text-gray-600">Progreso</span>
-          <span className="text-sm font-medium text-gray-900">{clampedProgress}%</span>
-        </div>
-      )}
+    <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${heightClasses[size]} ${className}`}>
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className={`h-full ${color} rounded-full relative`}
+      >
+        {showPercentage && progress > 10 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-xs font-medium text-white">
+              {Math.round(progress)}%
+            </span>
+          </div>
+        )}
+      </motion.div>
     </div>
   )
 }

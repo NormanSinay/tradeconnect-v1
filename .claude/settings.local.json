@@ -8,7 +8,10 @@
       "Bash(npm run type-check)",
       "Bash(npm install @radix-ui/react-select --legacy-peer-deps)",
       "Bash(npx tsc --noEmit src/components/common/ToastContainer.tsx src/components/common/ErrorBoundary.tsx src/components/profile/PaymentHistory.tsx src/components/profile/ProfileForm.tsx)",
-      "Bash(dir \"C:\\Users\\NSINAY\\Downloads\\tradeconnect-v1\\frontend\\src\\hooks\")"
+      "Bash(dir \"C:\\Users\\NSINAY\\Downloads\\tradeconnect-v1\\frontend\\src\\hooks\")",
+      "Bash(npm uninstall:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

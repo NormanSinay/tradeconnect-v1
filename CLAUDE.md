@@ -643,22 +643,24 @@ refundService.processRefund(paymentId, amount, reason)
 - Puppeteer/pdf-lib for PDF generation
 - Ethers.js for blockchain integration
 
-**Project Focus**: Full-stack platform with Node.js backend API and Astro+React frontend
+**Project Focus**: Full-stack platform with Node.js backend API and React SPA frontend
 
 ## Frontend Development
 
 ### Frontend Stack
 
 The frontend is built with:
-- **Astro 5** - Static site generator with partial hydration
-- **React 18** - UI component library
+- **Vite 5.4** - Build tool and dev server
+- **React 18** - UI framework
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Utility-first styling
-- **Radix UI** - Accessible component primitives
-- **TanStack Query** - Server state management
+- **Radix UI** - Accessible component primitives (comprehensive collection)
+- **TanStack Query v5** - Server state management
 - **React Hook Form + Zod** - Form validation
-- **Socket.IO Client** - Real-time updates
-- **i18next** - Internationalization
+- **Zustand** - Global state management
+- **React Router v6** - Client-side routing
+- **Framer Motion** - Animations
+- **React Hot Toast** - Toast notifications
 
 ### Frontend Commands
 
@@ -666,47 +668,52 @@ All frontend commands are run from the `frontend/` directory:
 
 ```bash
 # Development
-npm run dev              # Start Astro dev server (default: port 4321)
-npm start                # Alias for dev
+npm run dev              # Start Vite dev server (default: port 5175)
 
 # Building & Preview
-npm run build            # Build for production
+npm run build            # Build for production (TypeScript + Vite)
 npm run preview          # Preview production build
 
 # Code Quality
 npm run lint             # Run ESLint
-npm run lint:fix         # Auto-fix linting issues
-npm run format           # Format code with Prettier
-npm run type-check       # TypeScript type checking
 
-# Analysis
-npm run analyze          # Bundle size analysis
-npm run lighthouse       # Lighthouse performance audit
+# SSR (Server-Side Rendering)
+npm run dev:ssr          # Start SSR dev server
+npm run build:ssr        # Build for SSR
+npm run preview:ssr      # Preview SSR build
 ```
 
 ### Frontend Structure
 
 ```
 frontend/src/
-├── components/         # React components (UI, common, features)
-├── context/           # React context providers
-├── hooks/             # Custom React hooks
-├── layouts/           # Astro layout components
-├── pages/             # Astro pages (file-based routing)
-├── services/          # API client services (axios)
-├── schemas/           # Zod validation schemas
+├── components/         # React components
+│   ├── auth/          # Authentication components
+│   ├── ui/            # Reusable UI primitives (Radix UI-based)
+│   └── ...            # Feature-specific components
+├── pages/             # Page components (21+ files)
+├── stores/            # Zustand state stores
+│   ├── authStore.ts   # Authentication state
+│   ├── userStore.ts   # User state
+│   ├── cartStore.ts   # Cart state
+│   └── uiStore.ts     # UI state
+├── services/          # API client services
+│   └── userService.ts # Main API client (axios)
 ├── types/             # TypeScript type definitions
 ├── utils/             # Helper functions
-├── styles/            # Global styles and Tailwind config
-└── i18n/              # Internationalization files
+│   └── encryption.ts  # Client-side encryption utilities
+├── App.tsx            # Root component with routing
+├── main.tsx           # Application entry point
+└── index.css          # Global styles
 ```
 
 ### Frontend Architecture
 
-**Astro with Partial Hydration**: The frontend uses Astro's Islands Architecture for optimal performance:
-- Static pages are pre-rendered at build time
-- React components hydrate only when needed (client-side interactivity)
-- Configured in `astro.config.mjs` with specific React components included
+**Single Page Application (SPA)**: The frontend is a React SPA built with Vite:
+- Client-side routing via React Router v6
+- Fast HMR (Hot Module Replacement) during development
+- Optimized production builds with code splitting
+- API proxy configured in `vite.config.ts` (port 5175 → backend port 3000)
 
 **Path Aliases**: Import using `@/` prefix:
 ```typescript
@@ -715,43 +722,41 @@ import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/services/api';
 ```
 
-**API Communication**: Centralized API client in `services/` using axios to connect to backend at `http://localhost:3000/api/v1/*`
+**API Communication**: Centralized API client in `services/userService.ts` using axios:
+- Connects to backend at `http://localhost:3000/api/v1/*`
+- Vite proxy handles API requests in development
+- Automatic token injection for authenticated requests
 
 **State Management**:
-- TanStack Query for server state (caching, refetching)
-- React Context for global client state (auth, theme)
-- React Hook Form for form state
+- **Zustand** for global state (auth, user, cart, UI)
+- **TanStack Query v5** for server state (caching, refetching, mutations)
+- **React Hook Form** for form state with Zod validation
 
 **Component Organization**:
 - `components/ui/` - Reusable UI primitives (Radix UI-based)
-- `components/common/` - Shared components (Header, Footer, etc.)
-- `components/features/` - Feature-specific components (events, payments, etc.)
+- `components/auth/` - Authentication components (LoginForm, etc.)
+- Feature-specific components organized by domain
 
-**Routing**: File-based routing via Astro pages:
-- `pages/index.astro` - Homepage
-- `pages/events.astro` - Events listing
-- `pages/login.astro` - Authentication
-- `pages/[dynamic].astro` - Dynamic routes
+**Routing**: React Router v6 with programmatic routing:
+- Client-side navigation with protected routes
+- Route configuration in `App.tsx`
+- Nested routes for dashboard sections
+- 21+ page components
 
-**Performance Optimizations** (configured in `astro.config.mjs`):
-- Manual vendor chunks for better caching (react, ui, query, utils, i18n, icons, websocket, charts, forms)
-- CSS code splitting
-- Production console.log removal via terser
-- Image optimization with Sharp
-- HTML compression
+**Performance Optimizations** (configured in `vite.config.ts`):
+- Manual vendor chunks for better caching (vendor, router, ui, utils)
+- Code splitting via dynamic imports
+- Tree shaking for unused code removal
+- SSR support with noExternal configuration for Radix UI
 
 ### Frontend-Backend Integration
 
 **API Base URL**: Configure via environment variables (`.env` in frontend):
 ```bash
-PUBLIC_API_URL=http://localhost:3000/api/v1
+VITE_API_URL=http://localhost:3000/api/v1
 ```
 
-**Real-time Updates**: Socket.IO client connects to backend for live features:
-- Attendance tracking
-- Payment status updates
-- Capacity monitoring
-- Notifications
+**Development Proxy**: Vite's built-in proxy (configured in `vite.config.ts`) forwards `/api/*` requests to `http://localhost:3000` to avoid CORS issues during development
 
 **Authentication Flow**:
 1. Login via `/api/v1/auth/login` returns JWT token
@@ -769,7 +774,7 @@ npm run dev              # Runs on port 3000
 
 # Terminal 2: Start frontend
 cd frontend
-npm run dev              # Runs on port 4321
+npm run dev              # Runs on port 5175
 
 # Terminal 3 (optional): Docker services
 docker-compose up -d     # PostgreSQL, Redis, MailHog, pgAdmin
@@ -781,24 +786,36 @@ docker-compose up -d     # PostgreSQL, Redis, MailHog, pgAdmin
 
 ### Adding Frontend Features
 
-1. **Create Page**: Add `.astro` file in `src/pages/`
-2. **Create Components**: Add React components in `src/components/`
-3. **Add API Service**: Extend API client in `src/services/`
-4. **Add Types**: Define TypeScript types in `src/types/`
-5. **Add Validation**: Create Zod schemas in `src/schemas/`
-6. **Connect to Backend**: Use TanStack Query for data fetching
+1. **Create Page Component**: Add React component in `src/pages/`
+2. **Add Route**: Configure route in `src/App.tsx` using React Router
+3. **Create UI Components**: Add components in `src/components/`
+4. **Add API Service**: Extend API client in `src/services/userService.ts`
+5. **Add Types**: Define TypeScript types in `src/types/`
+6. **Add State**: Create/update Zustand store if needed
+7. **Connect to Backend**: Use TanStack Query for data fetching
 
-**Example React Component in Astro**:
-```astro
----
-// src/pages/events.astro
-import Layout from '@/layouts/Layout.astro';
-import EventList from '@/components/features/EventList';
----
+**Example Page with TanStack Query**:
+```typescript
+// src/pages/EventsPage.tsx
+import { useQuery } from '@tanstack/react-query';
+import { userService } from '@/services/userService';
 
-<Layout title="Events">
-  <EventList client:load />
-</Layout>
+export default function EventsPage() {
+  const { data: events, isLoading } = useQuery({
+    queryKey: ['events'],
+    queryFn: () => userService.getEvents()
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      {events?.map(event => (
+        <EventCard key={event.id} event={event} />
+      ))}
+    </div>
+  );
+}
 ```
 
-**Project Focus**: Full-stack platform with comprehensive backend API and modern frontend
+**Project Focus**: Full-stack platform with comprehensive backend API and modern React SPA frontend

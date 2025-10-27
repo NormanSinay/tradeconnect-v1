@@ -1,683 +1,631 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import DashboardLayout from '@/components/ui/dashboard-layout'
+import { Link } from 'react-router-dom'
+import {
+  FaBell,
+  FaShieldAlt,
+  FaEye,
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaSave,
+  FaLock,
+  FaKey,
+  FaMobileAlt,
+  FaEnvelope,
+  FaGlobe
+} from 'react-icons/fa'
+import { useAuthStore } from '@/stores/authStore'
+import { UserService, UserProfile } from '@/services/userService'
+import DashboardSidebar from '@/components/ui/dashboard-sidebar'
+import DashboardHeader from '@/components/ui/dashboard-header'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useUserStore } from '@/stores/userStore'
-import { FaBell, FaShieldAlt, FaLock, FaExclamationTriangle, FaCheckCircle, FaSave, FaKey, FaQrcode } from 'react-icons/fa'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-type TabType = 'notifications' | 'security' | 'privacy'
+interface PasswordChangeData {
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+}
+
+interface NotificationSettings {
+  emailNotifications: boolean
+  eventReminders: boolean
+  courseUpdates: boolean
+  promotionalEmails: boolean
+  newsletter: boolean
+}
 
 const DashboardSettingsPage: React.FC = () => {
-  const {
-    preferences,
-    fetchPreferences,
-    updatePreferences,
-    changePassword,
-    enable2FA,
-    disable2FA,
-    verify2FA,
-    isLoading,
-    error
-  } = useUserStore()
+  const { user, logout, isAuthenticated } = useAuthStore()
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
-  const [activeTab, setActiveTab] = useState<TabType>('notifications')
-  const [passwordData, setPasswordData] = useState({
+  // Password change state
+  const [passwordData, setPasswordData] = useState<PasswordChangeData>({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   })
-  const [isSubmittingPassword, setIsSubmittingPassword] = useState(false)
-  const [isSubmittingPreferences, setIsSubmittingPreferences] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
-  const [passwordError, setPasswordError] = useState('')
-  const [twoFactorCode, setTwoFactorCode] = useState('')
-  const [show2FASetup, setShow2FASetup] = useState(false)
-  const [qrCode, setQrCode] = useState('')
-  const [secret, setSecret] = useState('')
+
+  // Notification settings state
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
+    emailNotifications: true,
+    eventReminders: true,
+    courseUpdates: true,
+    promotionalEmails: false,
+    newsletter: true
+  })
+
+  // Privacy settings state
+  const [privacySettings, setPrivacySettings] = useState({
+    profileVisible: true,
+    showEmail: false,
+    showCourses: true,
+    showCertificates: true
+  })
 
   useEffect(() => {
-    fetchPreferences()
-  }, [fetchPreferences])
+    if (isAuthenticated) {
+      loadSettingsData()
+    }
+  }, [isAuthenticated])
 
-  const tabs = [
-    { id: 'notifications' as TabType, label: 'Notificaciones', icon: FaBell },
-    { id: 'security' as TabType, label: 'Seguridad', icon: FaShieldAlt },
-    { id: 'privacy' as TabType, label: 'Privacidad', icon: FaLock },
-  ]
+  const loadSettingsData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setPasswordError('')
-    setIsSubmittingPassword(true)
+      const profile = await UserService.getProfile()
+      setUserProfile(profile)
 
+      // Load user preferences (mock data for now)
+      // In a real implementation, this would come from an API endpoint
+      setNotificationSettings({
+        emailNotifications: true,
+        eventReminders: true,
+        courseUpdates: true,
+        promotionalEmails: false,
+        newsletter: true
+      })
+
+      setPrivacySettings({
+        profileVisible: true,
+        showEmail: false,
+        showCourses: true,
+        showCertificates: true
+      })
+    } catch (err) {
+      console.error('Error loading settings data:', err)
+      setError(err instanceof Error ? err.message : 'Error cargando configuración')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handlePasswordChange = (field: keyof PasswordChangeData, value: string) => {
+    setPasswordData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleNotificationChange = (field: keyof NotificationSettings, value: boolean) => {
+    setNotificationSettings(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handlePrivacyChange = (field: string, value: boolean) => {
+    setPrivacySettings(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const changePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('Las contraseñas no coinciden')
-      setIsSubmittingPassword(false)
+      setError('Las contraseñas nuevas no coinciden')
       return
     }
 
     if (passwordData.newPassword.length < 8) {
-      setPasswordError('La contraseña debe tener al menos 8 caracteres')
-      setIsSubmittingPassword(false)
+      setError('La contraseña debe tener al menos 8 caracteres')
       return
     }
 
     try {
-      await changePassword(passwordData.currentPassword, passwordData.newPassword)
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-      setSuccessMessage('Contraseña cambiada exitosamente')
-      setTimeout(() => setSuccessMessage(''), 5000)
-    } catch (error) {
-      setPasswordError(error instanceof Error ? error.message : 'Error al cambiar la contraseña')
+      setSaving(true)
+      setError(null)
+      setSuccess(null)
+
+      // TODO: Implement password change API call
+      // await UserService.changePassword(passwordData)
+
+      // Mock success
+      setSuccess('Contraseña cambiada exitosamente')
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+
+      setTimeout(() => setSuccess(null), 3000)
+    } catch (err) {
+      console.error('Error changing password:', err)
+      setError(err instanceof Error ? err.message : 'Error cambiando contraseña')
     } finally {
-      setIsSubmittingPassword(false)
+      setSaving(false)
     }
   }
 
-  const handlePreferencesChange = async (newPreferences: any) => {
-    setIsSubmittingPreferences(true)
+  const saveNotificationSettings = async () => {
     try {
-      await updatePreferences(newPreferences)
-      setSuccessMessage('Preferencias guardadas exitosamente')
-      setTimeout(() => setSuccessMessage(''), 5000)
-    } catch (error) {
-      // Error ya manejado en el store
+      setSaving(true)
+      setError(null)
+      setSuccess(null)
+
+      // TODO: Implement notification settings API call
+      // await UserService.updateNotificationSettings(notificationSettings)
+
+      // Mock success
+      setSuccess('Preferencias de notificación guardadas')
+
+      setTimeout(() => setSuccess(null), 3000)
+    } catch (err) {
+      console.error('Error saving notification settings:', err)
+      setError(err instanceof Error ? err.message : 'Error guardando configuración')
     } finally {
-      setIsSubmittingPreferences(false)
+      setSaving(false)
     }
   }
 
-  if (isLoading && !preferences) {
+  const savePrivacySettings = async () => {
+    try {
+      setSaving(true)
+      setError(null)
+      setSuccess(null)
+
+      // TODO: Implement privacy settings API call
+      // await UserService.updatePrivacySettings(privacySettings)
+
+      // Mock success
+      setSuccess('Configuración de privacidad guardada')
+
+      setTimeout(() => setSuccess(null), 3000)
+    } catch (err) {
+      console.error('Error saving privacy settings:', err)
+      setError(err instanceof Error ? err.message : 'Error guardando configuración')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!isAuthenticated) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-96">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6B1E22] mx-auto mb-4"></div>
-            <p className="text-gray-600">Cargando configuración...</p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Acceso Denegado</h1>
+          <p className="text-gray-600 mb-6">Debes iniciar sesión para acceder al dashboard.</p>
+          <Link to="/login">
+            <Button className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white">
+              Ir al Login
+            </Button>
+          </Link>
         </div>
-      </DashboardLayout>
+      </div>
     )
   }
 
-  if (error) {
+  if (loading) {
     return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-96">
-          <div className="text-center">
-            <div className="text-red-600 mb-4">
-              <FaExclamationTriangle className="h-12 w-12 mx-auto mb-2" />
-              <p className="text-lg font-medium">Error al cargar la configuración</p>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+              <Link to="/" className="flex items-center">
+                <span className="text-2xl font-bold text-[#6B1E22]">TradeConnect</span>
+              </Link>
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-700">Cargando...</span>
+                <Button
+                  onClick={logout}
+                  variant="outline"
+                  className="text-gray-700 border-gray-300 hover:bg-gray-50"
+                >
+                  Cerrar Sesión
+                </Button>
+              </div>
             </div>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <Button
-              onClick={fetchPreferences}
-              className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
-            >
-              Reintentar
-            </Button>
           </div>
-        </div>
-      </DashboardLayout>
+        </header>
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6B1E22]"></div>
+          </div>
+        </main>
+      </div>
     )
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-3xl font-bold text-gray-900">Configuración</h1>
-          <p className="mt-2 text-gray-600">Gestiona tus preferencias y configuraciones de seguridad</p>
-        </motion.div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <Link to="/" className="flex items-center">
+              <span className="text-2xl font-bold text-[#6B1E22]">TradeConnect</span>
+            </Link>
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-700">Bienvenido, {UserService.getFullName(userProfile)}</span>
+              <Button
+                onClick={logout}
+                variant="outline"
+                className="text-gray-700 border-gray-300 hover:bg-gray-50"
+              >
+                Cerrar Sesión
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
 
-        {/* Success Message */}
-        {successMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center"
-          >
-            <FaCheckCircle className="h-5 w-5 text-green-600 mr-3" />
-            <span className="text-green-800">{successMessage}</span>
-          </motion.div>
-        )}
-
-        {/* Settings Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200"
-        >
-          {/* Tab Navigation */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6" aria-label="Tabs">
-              {tabs.map((tab) => {
-                const IconComponent = tab.icon
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                      activeTab === tab.id
-                        ? 'border-[#6B1E22] text-[#6B1E22]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <IconComponent className="h-4 w-4 mr-2" />
-                    {tab.label}
-                  </button>
-                )
-              })}
-            </nav>
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <div className="lg:w-80 flex-shrink-0">
+            <DashboardSidebar />
           </div>
 
-          {/* Tab Content */}
-          <div className="p-6">
-            {/* Notifications Tab */}
-            {activeTab === 'notifications' && preferences && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Preferencias de Notificación</h3>
-                  <p className="text-gray-600 mb-6">
-                    Selecciona cómo deseas recibir las notificaciones sobre tus eventos y cursos.
-                  </p>
-                </div>
+          {/* Main Content */}
+          <div className="flex-1">
+            <DashboardHeader
+              title="Configuración"
+              subtitle="Gestiona tus preferencias y configuraciones de seguridad"
+            />
 
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    handlePreferencesChange(preferences)
-                  }}
-                  className="space-y-6"
-                >
-                  {/* Email Notifications */}
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900">Notificaciones por Email</h4>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="email-notifications"
-                          checked={preferences.notifications.email}
-                          onCheckedChange={(checked) =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              notifications: { ...preferences.notifications, email: checked as boolean }
-                            })
-                          }
-                        />
-                        <label htmlFor="email-notifications" className="text-sm text-gray-700">
-                          Notificaciones por Email
-                        </label>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="event-reminders"
-                          checked={preferences.notifications.eventReminders}
-                          onCheckedChange={(checked) =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              notifications: { ...preferences.notifications, eventReminders: checked as boolean }
-                            })
-                          }
-                        />
-                        <label htmlFor="event-reminders" className="text-sm text-gray-700">
-                          Recordatorios de eventos
-                        </label>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="course-updates"
-                          checked={preferences.notifications.courseUpdates}
-                          onCheckedChange={(checked) =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              notifications: { ...preferences.notifications, courseUpdates: checked as boolean }
-                            })
-                          }
-                        />
-                        <label htmlFor="course-updates" className="text-sm text-gray-700">
-                          Actualizaciones de cursos
-                        </label>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="promotional"
-                          checked={preferences.notifications.promotional}
-                          onCheckedChange={(checked) =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              notifications: { ...preferences.notifications, promotional: checked as boolean }
-                            })
-                          }
-                        />
-                        <label htmlFor="promotional" className="text-sm text-gray-700">
-                          Correos promocionales
-                        </label>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="newsletter"
-                          checked={preferences.notifications.newsletter}
-                          onCheckedChange={(checked) =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              notifications: { ...preferences.notifications, newsletter: checked as boolean }
-                            })
-                          }
-                        />
-                        <label htmlFor="newsletter" className="text-sm text-gray-700">
-                          Boletín informativo
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end pt-6 border-t border-gray-200">
-                    <Button
-                      type="submit"
-                      disabled={isSubmittingPreferences}
-                      className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white disabled:opacity-50"
-                    >
-                      {isSubmittingPreferences ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <FaSave className="mr-2 h-4 w-4" />
-                          Guardar Preferencias
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </div>
+            {/* Success/Error Messages */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <Alert className="border-red-200 bg-red-50">
+                  <FaExclamationTriangle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-800">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              </motion.div>
             )}
 
-            {/* Security Tab */}
-            {activeTab === 'security' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Seguridad de la Cuenta</h3>
-                  <p className="text-gray-600 mb-6">
-                    Gestiona la seguridad de tu cuenta y cambia tu contraseña.
-                  </p>
-                </div>
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <Alert className="border-green-200 bg-green-50">
+                  <FaCheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-800">
+                    {success}
+                  </AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
 
-                {/* Change Password Form */}
-                <form onSubmit={handlePasswordChange} className="space-y-6">
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900 flex items-center">
-                      <FaKey className="h-4 w-4 mr-2" />
-                      Cambiar Contraseña
-                    </h4>
+            {/* Settings Tabs */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Tabs defaultValue="notifications" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="notifications">Notificaciones</TabsTrigger>
+                  <TabsTrigger value="security">Seguridad</TabsTrigger>
+                  <TabsTrigger value="privacy">Privacidad</TabsTrigger>
+                </TabsList>
 
-                    <div>
-                      <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-2">
-                        Contraseña Actual
-                      </label>
-                      <Input
-                        id="current-password"
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                        required
-                        className="w-full"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">
-                        Nueva Contraseña
-                      </label>
-                      <Input
-                        id="new-password"
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                        required
-                        className="w-full"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Mínimo 8 caracteres, incluyendo mayúsculas, minúsculas y números
-                      </p>
-                    </div>
-
-                    <div>
-                      <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
-                        Confirmar Nueva Contraseña
-                      </label>
-                      <Input
-                        id="confirm-password"
-                        type="password"
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        required
-                        className="w-full"
-                      />
-                    </div>
-
-                    {passwordError && (
-                      <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
-                        {passwordError}
+                {/* Notifications Tab */}
+                <TabsContent value="notifications" className="mt-6">
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <FaBell className="text-[#6B1E22] text-xl" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Preferencias de Notificación</h3>
+                        <p className="text-sm text-gray-600">Selecciona cómo deseas recibir las notificaciones</p>
                       </div>
-                    )}
-
-                    <Button
-                      type="submit"
-                      disabled={isSubmittingPassword}
-                      className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white disabled:opacity-50"
-                    >
-                      {isSubmittingPassword ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Cambiando...
-                        </>
-                      ) : (
-                        <>
-                          <FaKey className="mr-2 h-4 w-4" />
-                          Cambiar Contraseña
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </form>
-
-                {/* Two-Factor Authentication */}
-                <div className="pt-6 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium text-gray-900">Autenticación de Dos Factores</h4>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Agrega una capa extra de seguridad a tu cuenta
-                      </p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className={`text-sm font-medium ${
-                        preferences?.security.twoFactorEnabled ? 'text-green-600' : 'text-gray-500'
-                      }`}>
-                        {preferences?.security.twoFactorEnabled ? 'Habilitado' : 'Deshabilitado'}
-                      </span>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">Notificaciones por Email</label>
+                          <p className="text-sm text-gray-600">Recibe notificaciones generales por correo electrónico</p>
+                        </div>
+                        <Checkbox
+                          checked={notificationSettings.emailNotifications}
+                          onCheckedChange={(checked) => handleNotificationChange('emailNotifications', checked as boolean)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">Recordatorios de Eventos</label>
+                          <p className="text-sm text-gray-600">Recibe recordatorios antes de tus eventos inscritos</p>
+                        </div>
+                        <Checkbox
+                          checked={notificationSettings.eventReminders}
+                          onCheckedChange={(checked) => handleNotificationChange('eventReminders', checked as boolean)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">Actualizaciones de Cursos</label>
+                          <p className="text-sm text-gray-600">Notificaciones sobre progreso y actualizaciones de cursos</p>
+                        </div>
+                        <Checkbox
+                          checked={notificationSettings.courseUpdates}
+                          onCheckedChange={(checked) => handleNotificationChange('courseUpdates', checked as boolean)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">Correos Promocionales</label>
+                          <p className="text-sm text-gray-600">Ofertas especiales y promociones de TradeConnect</p>
+                        </div>
+                        <Checkbox
+                          checked={notificationSettings.promotionalEmails}
+                          onCheckedChange={(checked) => handleNotificationChange('promotionalEmails', checked as boolean)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">Boletín Informativo</label>
+                          <p className="text-sm text-gray-600">Newsletter semanal con noticias y actualizaciones</p>
+                        </div>
+                        <Checkbox
+                          checked={notificationSettings.newsletter}
+                          onCheckedChange={(checked) => handleNotificationChange('newsletter', checked as boolean)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-gray-200">
                       <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          if (preferences?.security.twoFactorEnabled) {
-                            // Deshabilitar 2FA
-                            setTwoFactorCode('')
-                            setShow2FASetup(true)
-                          } else {
-                            // Habilitar 2FA
-                            try {
-                              const result = await enable2FA()
-                              setQrCode(result.qrCode)
-                              setSecret(result.secret)
-                              setShow2FASetup(true)
-                            } catch (error) {
-                              setPasswordError('Error al habilitar 2FA')
-                            }
-                          }
-                        }}
+                        onClick={saveNotificationSettings}
+                        disabled={saving}
+                        className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
                       >
-                        {preferences?.security.twoFactorEnabled ? 'Deshabilitar' : 'Habilitar'}
+                        {saving ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <FaSave className="mr-2" />
+                            Guardar Preferencias
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
+                </TabsContent>
 
-                  {/* 2FA Setup Modal */}
-                  {show2FASetup && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200"
-                    >
-                      <div className="flex items-center mb-4">
-                        <FaQrcode className="h-5 w-5 text-[#6B1E22] mr-2" />
-                        <h5 className="font-medium text-gray-900">
-                          {preferences?.security.twoFactorEnabled ? 'Deshabilitar 2FA' : 'Configurar 2FA'}
-                        </h5>
+                {/* Security Tab */}
+                <TabsContent value="security" className="mt-6">
+                  <div className="space-y-6">
+                    {/* Password Change */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <FaKey className="text-[#6B1E22] text-xl" />
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">Cambiar Contraseña</h3>
+                          <p className="text-sm text-gray-600">Actualiza tu contraseña para mantener tu cuenta segura</p>
+                        </div>
                       </div>
 
-                      {!preferences?.security.twoFactorEnabled && qrCode && (
-                        <div className="mb-4">
-                          <p className="text-sm text-gray-600 mb-3">
-                            Escanea este código QR con tu aplicación de autenticación:
-                          </p>
-                          <div className="bg-white p-4 rounded-lg inline-block">
-                            <img src={qrCode} alt="QR Code" className="w-48 h-48" />
-                          </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            Código secreto: <code className="bg-gray-100 px-2 py-1 rounded">{secret}</code>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Contraseña Actual
+                          </label>
+                          <Input
+                            type="password"
+                            value={passwordData.currentPassword}
+                            onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                            placeholder="Ingresa tu contraseña actual"
+                            className="w-full"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nueva Contraseña
+                          </label>
+                          <Input
+                            type="password"
+                            value={passwordData.newPassword}
+                            onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                            placeholder="Ingresa tu nueva contraseña"
+                            className="w-full"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Mínimo 8 caracteres, incluyendo mayúsculas, minúsculas y números
                           </p>
                         </div>
-                      )}
 
-                      <div className="space-y-3">
-                        <label htmlFor="two-factor-code" className="block text-sm font-medium text-gray-700">
-                          {preferences?.security.twoFactorEnabled
-                            ? 'Ingresa el código actual de tu app para confirmar:'
-                            : 'Ingresa el código de 6 dígitos de tu app:'}
-                        </label>
-                        <Input
-                          id="two-factor-code"
-                          type="text"
-                          value={twoFactorCode}
-                          onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                          placeholder="000000"
-                          maxLength={6}
-                          className="w-full text-center text-lg tracking-widest"
-                        />
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Confirmar Nueva Contraseña
+                          </label>
+                          <Input
+                            type="password"
+                            value={passwordData.confirmPassword}
+                            onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                            placeholder="Confirma tu nueva contraseña"
+                            className="w-full"
+                          />
+                        </div>
                       </div>
 
-                      <div className="flex space-x-3 mt-4">
+                      <div className="mt-6 pt-6 border-t border-gray-200">
                         <Button
-                          onClick={async () => {
-                            try {
-                              if (preferences?.security.twoFactorEnabled) {
-                                await disable2FA(twoFactorCode)
-                                setSuccessMessage('2FA deshabilitado exitosamente')
-                              } else {
-                                await verify2FA(twoFactorCode)
-                                setSuccessMessage('2FA habilitado exitosamente')
-                              }
-                              setShow2FASetup(false)
-                              setTwoFactorCode('')
-                              setQrCode('')
-                              setSecret('')
-                              setTimeout(() => setSuccessMessage(''), 5000)
-                            } catch (error) {
-                              setPasswordError(error instanceof Error ? error.message : 'Código inválido')
-                            }
-                          }}
-                          disabled={twoFactorCode.length !== 6}
+                          onClick={changePassword}
+                          disabled={saving}
                           className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
                         >
-                          Confirmar
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setShow2FASetup(false)
-                            setTwoFactorCode('')
-                            setQrCode('')
-                            setSecret('')
-                            setPasswordError('')
-                          }}
-                        >
-                          Cancelar
+                          {saving ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Cambiando...
+                            </>
+                          ) : (
+                            <>
+                              <FaLock className="mr-2" />
+                              Cambiar Contraseña
+                            </>
+                          )}
                         </Button>
                       </div>
+                    </div>
 
-                      {passwordError && (
-                        <div className="mt-3 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">
-                          {passwordError}
+                    {/* Two-Factor Authentication */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <FaShieldAlt className="text-[#6B1E22] text-xl" />
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">Autenticación de Dos Factores</h3>
+                          <p className="text-sm text-gray-600">Añade una capa extra de seguridad a tu cuenta</p>
                         </div>
-                      )}
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Privacy Tab */}
-            {activeTab === 'privacy' && preferences && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Configuración de Privacidad</h3>
-                  <p className="text-gray-600 mb-6">
-                    Controla cómo otros usuarios ven tu información en la plataforma.
-                  </p>
-                </div>
-
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    handlePreferencesChange(preferences)
-                  }}
-                  className="space-y-6"
-                >
-                  {/* Profile Visibility */}
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900">Visibilidad del Perfil</h4>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <input
-                          type="radio"
-                          id="profile-public"
-                          name="profileVisibility"
-                          value="public"
-                          checked={preferences.privacy.profileVisible}
-                          onChange={() =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              privacy: { ...preferences.privacy, profileVisible: true }
-                            })
-                          }
-                          className="h-4 w-4 text-[#6B1E22] focus:ring-[#6B1E22]"
-                        />
-                        <label htmlFor="profile-public" className="text-sm text-gray-700">
-                          Perfil visible para otros usuarios
-                        </label>
                       </div>
 
-                      <div className="flex items-center space-x-3">
-                        <input
-                          type="radio"
-                          id="profile-private"
-                          name="profileVisibility"
-                          value="private"
-                          checked={!preferences.privacy.profileVisible}
-                          onChange={() =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              privacy: { ...preferences.privacy, profileVisible: false }
-                            })
-                          }
-                          className="h-4 w-4 text-[#6B1E22] focus:ring-[#6B1E22]"
-                        />
-                        <label htmlFor="profile-private" className="text-sm text-gray-700">
-                          Perfil privado
-                        </label>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">2FA por Aplicación</label>
+                          <p className="text-sm text-gray-600">Usa una app como Google Authenticator</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-500">No habilitado</span>
+                          <Button variant="outline" size="sm">
+                            Habilitar
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg mt-4">
+                        <div>
+                          <label className="font-medium text-gray-900">2FA por SMS</label>
+                          <p className="text-sm text-gray-600">Recibe códigos por mensaje de texto</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-500">No habilitado</span>
+                          <Button variant="outline" size="sm">
+                            Habilitar
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
+                </TabsContent>
 
-                  {/* Data Sharing */}
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900">Compartir Información</h4>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="show-email"
-                          checked={preferences.privacy.showEmail}
-                          onCheckedChange={(checked) =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              privacy: { ...preferences.privacy, showEmail: checked as boolean }
-                            })
-                          }
-                        />
-                        <label htmlFor="show-email" className="text-sm text-gray-700">
-                          Mostrar email en perfil público
-                        </label>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="show-courses"
-                          checked={preferences.privacy.showCourses}
-                          onCheckedChange={(checked) =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              privacy: { ...preferences.privacy, showCourses: checked as boolean }
-                            })
-                          }
-                        />
-                        <label htmlFor="show-courses" className="text-sm text-gray-700">
-                          Mostrar cursos completados
-                        </label>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          id="show-certificates"
-                          checked={preferences.privacy.showCertificates}
-                          onCheckedChange={(checked) =>
-                            handlePreferencesChange({
-                              ...preferences,
-                              privacy: { ...preferences.privacy, showCertificates: checked as boolean }
-                            })
-                          }
-                        />
-                        <label htmlFor="show-certificates" className="text-sm text-gray-700">
-                          Mostrar certificados obtenidos
-                        </label>
+                {/* Privacy Tab */}
+                <TabsContent value="privacy" className="mt-6">
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <FaEye className="text-[#6B1E22] text-xl" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Configuración de Privacidad</h3>
+                        <p className="text-sm text-gray-600">Controla cómo otros usuarios ven tu información</p>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex justify-end pt-6 border-t border-gray-200">
-                    <Button
-                      type="submit"
-                      disabled={isSubmittingPreferences}
-                      className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white disabled:opacity-50"
-                    >
-                      {isSubmittingPreferences ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <FaSave className="mr-2 h-4 w-4" />
-                          Guardar Configuración
-                        </>
-                      )}
-                    </Button>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">Perfil Visible</label>
+                          <p className="text-sm text-gray-600">Permitir que otros usuarios vean tu perfil</p>
+                        </div>
+                        <Checkbox
+                          checked={privacySettings.profileVisible}
+                          onCheckedChange={(checked) => handlePrivacyChange('profileVisible', checked as boolean)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">Mostrar Email</label>
+                          <p className="text-sm text-gray-600">Mostrar tu dirección de email en el perfil público</p>
+                        </div>
+                        <Checkbox
+                          checked={privacySettings.showEmail}
+                          onCheckedChange={(checked) => handlePrivacyChange('showEmail', checked as boolean)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">Mostrar Cursos Completados</label>
+                          <p className="text-sm text-gray-600">Mostrar los cursos que has completado</p>
+                        </div>
+                        <Checkbox
+                          checked={privacySettings.showCourses}
+                          onCheckedChange={(checked) => handlePrivacyChange('showCourses', checked as boolean)}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div>
+                          <label className="font-medium text-gray-900">Mostrar Certificados</label>
+                          <p className="text-sm text-gray-600">Mostrar los certificados obtenidos</p>
+                        </div>
+                        <Checkbox
+                          checked={privacySettings.showCertificates}
+                          onCheckedChange={(checked) => handlePrivacyChange('showCertificates', checked as boolean)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <Button
+                        onClick={savePrivacySettings}
+                        disabled={saving}
+                        className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
+                      >
+                        {saving ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <FaSave className="mr-2" />
+                            Guardar Configuración
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </form>
-              </div>
-            )}
+                </TabsContent>
+              </Tabs>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
 

@@ -26,6 +26,8 @@ export interface LoginCredentials {
   twoFactorCode?: string;
   /** Indica si mantener la sesión activa */
   rememberMe?: boolean;
+  /** Token de reCAPTCHA (opcional) */
+  recaptchaToken?: string;
 }
 
 /**
@@ -52,6 +54,8 @@ export interface RegisterData {
   termsAccepted: boolean;
   /** Marketing emails aceptados */
   marketingAccepted?: boolean;
+  /** Token de reCAPTCHA (opcional) */
+  recaptchaToken?: string;
 }
 
 /**
@@ -116,6 +120,8 @@ export interface ChangePasswordData {
   newPassword: string;
   /** Confirmación de nueva contraseña */
   confirmNewPassword: string;
+  /** Token de reCAPTCHA (opcional) */
+  recaptchaToken?: string;
 }
 
 /**

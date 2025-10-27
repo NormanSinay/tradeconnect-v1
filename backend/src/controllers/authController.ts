@@ -12,6 +12,7 @@ import { validationResult } from 'express-validator';
 import { authService } from '../services/authService';
 import { userService } from '../services/userService';
 import { sessionService } from '../services/sessionService';
+import { turnstileService } from '../services/turnstileService';
 import {
   LoginCredentials,
   RegisterData,
@@ -98,6 +99,29 @@ export class AuthController {
         ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
         userAgent: req.get('User-Agent') || 'unknown'
       };
+
+      // Verificar Turnstile si se proporciona
+      if (credentials.recaptchaToken) {
+        console.log('🔍 Verificando Cloudflare Turnstile para login...');
+        const turnstileResult = await turnstileService.verifyLoginToken(
+          credentials.recaptchaToken,
+          clientInfo.ipAddress
+        );
+
+        if (!turnstileResult.isValid) {
+          console.warn('❌ Turnstile inválido para login:', turnstileResult.reasons);
+          res.status(HTTP_STATUS.BAD_REQUEST).json({
+            success: false,
+            message: 'Verificación de seguridad fallida',
+            error: 'TURNSTILE_FAILED',
+            details: turnstileResult.reasons,
+            timestamp: new Date().toISOString()
+          });
+          return;
+        }
+
+        console.log('✅ Turnstile válido para login');
+      }
 
       const result = await authService.login(credentials, clientInfo);
 
@@ -187,6 +211,29 @@ export class AuthController {
         ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
         userAgent: req.get('User-Agent') || 'unknown'
       };
+
+      // Verificar Turnstile si se proporciona
+      if (userData.recaptchaToken) {
+        console.log('🔍 Verificando Cloudflare Turnstile para registro...');
+        const turnstileResult = await turnstileService.verifyRegisterToken(
+          userData.recaptchaToken,
+          clientInfo.ipAddress
+        );
+
+        if (!turnstileResult.isValid) {
+          console.warn('❌ Turnstile inválido para registro:', turnstileResult.reasons);
+          res.status(HTTP_STATUS.BAD_REQUEST).json({
+            success: false,
+            message: 'Verificación de seguridad fallida',
+            error: 'TURNSTILE_FAILED',
+            details: turnstileResult.reasons,
+            timestamp: new Date().toISOString()
+          });
+          return;
+        }
+
+        console.log('✅ Turnstile válido para registro');
+      }
 
       const result = await authService.register(userData, clientInfo);
 
@@ -364,11 +411,34 @@ export class AuthController {
         return;
       }
 
-      const { email } = req.body;
+      const { email, recaptchaToken } = req.body;
       const clientInfo = {
         ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
         userAgent: req.get('User-Agent') || 'unknown'
       };
+
+      // Verificar Turnstile si se proporciona
+      if (recaptchaToken) {
+        console.log('🔍 Verificando Cloudflare Turnstile para recuperación de contraseña...');
+        const turnstileResult = await turnstileService.verifyForgotPasswordToken(
+          recaptchaToken,
+          clientInfo.ipAddress
+        );
+
+        if (!turnstileResult.isValid) {
+          console.warn('❌ Turnstile inválido para recuperación de contraseña:', turnstileResult.reasons);
+          res.status(HTTP_STATUS.BAD_REQUEST).json({
+            success: false,
+            message: 'Verificación de seguridad fallida',
+            error: 'TURNSTILE_FAILED',
+            details: turnstileResult.reasons,
+            timestamp: new Date().toISOString()
+          });
+          return;
+        }
+
+        console.log('✅ Turnstile válido para recuperación de contraseña');
+      }
 
       const result = await authService.forgotPassword(email, clientInfo);
       res.status(HTTP_STATUS.OK).json(result);
@@ -913,6 +983,29 @@ export class AuthController {
         ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
         userAgent: req.get('User-Agent') || 'unknown'
       };
+
+      // Verificar Turnstile si se proporciona (para cambio de contraseña sensible)
+      if (passwordData.recaptchaToken) {
+        console.log('🔍 Verificando Cloudflare Turnstile para cambio de contraseña...');
+        const turnstileResult = await turnstileService.verifyChangePasswordToken(
+          passwordData.recaptchaToken,
+          clientInfo.ipAddress
+        );
+
+        if (!turnstileResult.isValid) {
+          console.warn('❌ Turnstile inválido para cambio de contraseña:', turnstileResult.reasons);
+          res.status(HTTP_STATUS.BAD_REQUEST).json({
+            success: false,
+            message: 'Verificación de seguridad fallida',
+            error: 'TURNSTILE_FAILED',
+            details: turnstileResult.reasons,
+            timestamp: new Date().toISOString()
+          });
+          return;
+        }
+
+        console.log('✅ Turnstile válido para cambio de contraseña');
+      }
 
       const result = await authService.changePassword(userId, passwordData, clientInfo);
 

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuthStore } from '@/stores/authStore'
-import ReCAPTCHAComponent from '@/components/ui/recaptcha'
+import Turnstile from '@/components/ui/turnstile'
 
 const loginSchema = z.object({
   email: z.string().email('Correo electrónico inválido'),
@@ -24,7 +24,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const { login, isLoading } = useAuthStore()
   const navigate = useNavigate()
 
@@ -44,18 +44,18 @@ const LoginForm: React.FC = () => {
     try {
       setError('')
 
-      // Verificar reCAPTCHA
-      if (!recaptchaToken) {
-        setError('Por favor, completa la verificación reCAPTCHA')
+      // Verificar Turnstile
+      if (!turnstileToken) {
+        setError('Por favor, completa la verificación de seguridad')
         return
       }
 
-      await login(data.email, data.password, recaptchaToken)
+      await login(data.email, data.password, turnstileToken)
       navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
-      // Reset reCAPTCHA on error
-      setRecaptchaToken(null)
+      // Reset Turnstile on error
+      setTurnstileToken(null)
     }
   }
 
@@ -142,19 +142,20 @@ const LoginForm: React.FC = () => {
         </Link>
       </div>
 
-      <ReCAPTCHAComponent
-        siteKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-        onVerify={setRecaptchaToken}
-        onExpired={() => setRecaptchaToken(null)}
-        onError={() => setRecaptchaToken(null)}
-        action="login"
+      <Turnstile
+        siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+        onVerify={setTurnstileToken}
+        onExpired={() => setTurnstileToken(null)}
+        onError={() => setTurnstileToken(null)}
+        theme="light"
+        size="normal"
         className="mb-4"
       />
 
       <Button
         type="submit"
         className="w-full bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
-        disabled={isLoading || !recaptchaToken}
+        disabled={isLoading || !turnstileToken}
       >
         {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
       </Button>

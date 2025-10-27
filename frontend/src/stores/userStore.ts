@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { encryptPassword } from '@/utils/encryption'
 
 // Interfaces para el estado del usuario
 interface UserStats {
@@ -458,12 +459,21 @@ export const useUserStore = create<UserState>()(
       changePassword: async (currentPassword, newPassword) => {
         set({ isLoading: true, error: null })
         try {
+          // Encriptar las contraseñas antes de enviar
+          const encryptedCurrentPassword = encryptPassword(currentPassword)
+          const encryptedNewPassword = encryptPassword(newPassword)
+
+          // Logs de encriptación solo en desarrollo
+          if (import.meta.env.DEV) {
+            console.log('Contraseñas encriptadas correctamente para cambio de contraseña')
+          }
+
           const response = await authenticatedFetch('/api/v1/auth/change-password', {
             method: 'PUT',
             body: JSON.stringify({
-              currentPassword,
-              newPassword,
-              confirmPassword: newPassword,
+              currentPassword: encryptedCurrentPassword, // Enviar encriptada
+              newPassword: encryptedNewPassword, // Enviar encriptada
+              confirmPassword: encryptedNewPassword, // Enviar encriptada
             }),
           })
 

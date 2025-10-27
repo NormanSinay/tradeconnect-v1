@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FaDownload, FaEye, FaCertificate, FaCalendarAlt, FaClock } from 'react-icons/fa';
+import { FaDownload, FaEye, FaCertificate } from 'react-icons/fa';
 
 interface Certificate {
   id: number;

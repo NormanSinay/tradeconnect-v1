@@ -24,7 +24,7 @@ import RegisterPage from './pages/RegisterPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import VerifyEmailPage from './pages/VerifyEmailPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
-import DashboardPage from './pages/DashboardPage'
+import DashboardMainPage from './pages/DashboardMainPage'
 import DashboardEventsPage from './pages/DashboardEventsPage'
 import DashboardCertificatesPage from './pages/DashboardCertificatesPage'
 import DashboardProfilePage from './pages/DashboardProfilePage'
@@ -48,7 +48,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardMainPage /></ProtectedRoute>} />
       <Route path="/events" element={<ProtectedRoute><UserEventsPage /></ProtectedRoute>} />
       <Route path="/certificates" element={<ProtectedRoute><UserCertificatesPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
