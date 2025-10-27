@@ -14,6 +14,26 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>
 }
 
+// Componente para redirigir según rol
+const RoleBasedRedirect: React.FC = () => {
+  const { user } = useAuthStore()
+
+  // Debug log para verificar el rol
+  console.log('RoleBasedRedirect - User:', user)
+  console.log('RoleBasedRedirect - Role:', user?.role)
+
+  // Si es super_admin, redirigir al dashboard de super admin
+  if (user?.role === 'super_admin') {
+    console.log('RoleBasedRedirect - Redirecting to super admin dashboard')
+    window.location.href = '/dashboard/super-admin'
+    return null
+  }
+
+  // Para otros roles, mantener en dashboard normal
+  console.log('RoleBasedRedirect - Using normal dashboard')
+  return <DashboardMainPage />
+}
+
 // Pages
 import HomePage from './pages/HomePage'
 import EventsPage from './pages/EventsPage'
@@ -29,6 +49,7 @@ import DashboardEventsPage from './pages/DashboardEventsPage'
 import DashboardCertificatesPage from './pages/DashboardCertificatesPage'
 import DashboardProfilePage from './pages/DashboardProfilePage'
 import DashboardSettingsPage from './pages/DashboardSettingsPage'
+import DashboardSuperAdminPage from './pages/DashboardSuperAdminPage'
 import TermsPage from './pages/TermsPage'
 import VerificationPage from './pages/VerificationPage'
 import UserEventsPage from './pages/UserEventsPage'
@@ -48,7 +69,8 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/dashboard" element={<ProtectedRoute><DashboardMainPage /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><RoleBasedRedirect /></ProtectedRoute>} />
+      <Route path="/dashboard/super-admin" element={<ProtectedRoute><DashboardSuperAdminPage /></ProtectedRoute>} />
       <Route path="/events" element={<ProtectedRoute><UserEventsPage /></ProtectedRoute>} />
       <Route path="/certificates" element={<ProtectedRoute><UserCertificatesPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />

@@ -88,13 +88,18 @@ export const useAuthStore = create<AuthState>()(
           }
 
           // Crear objeto user consistente
+          // El backend envía roles como array, tomar el primer rol o 'user' por defecto
+          const primaryRole = Array.isArray(userData.roles) && userData.roles.length > 0
+            ? userData.roles[0]
+            : userData.role || 'user'
+
           const user = {
             id: userData.id || userData.userId,
             email: userData.email,
             name: userData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || userData.email,
             firstName: userData.firstName,
             lastName: userData.lastName,
-            role: userData.role || 'user'
+            role: primaryRole
           }
 
           set({

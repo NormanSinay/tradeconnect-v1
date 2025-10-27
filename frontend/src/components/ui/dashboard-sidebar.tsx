@@ -41,10 +41,10 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ className = '' }) =
   const menuItems = [
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: user?.role === 'super_admin' ? 'Dashboard Super Admin' : 'Dashboard',
       icon: FaTachometerAlt,
-      path: '/dashboard',
-      roles: ['user', 'participant', 'speaker', 'admin', 'manager']
+      path: user?.role === 'super_admin' ? '/dashboard/super-admin' : '/dashboard',
+      roles: ['user', 'participant', 'speaker', 'admin', 'manager', 'super_admin']
     },
     {
       id: 'events',

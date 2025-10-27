@@ -42,21 +42,170 @@ Estructura de Maquetación
 
 
 
-RESUMEN DE PRIORIDADES
-🚨 CRÍTICO (Backend)
-Endpoints de estadísticas de usuario
-Sistema completo de 2FA
-Validación de sesiones
-⚡ ALTO (Frontend)
-Integración real de APIs (reemplazar mocks)
-Funciones de transformación de datos
-Manejo de errores mejorado
-🔧 MEDIO (Ambos)
-Testing completo
-Optimizaciones de performance
-UX/UI mejorado
-📈 BAJO (Futuro)
-Offline support
-Service worker
-Notificaciones push
-Total de TODOs identificados: 24
+ROLES DEL SISTEMA (8 Roles)
+
+  1. SUPER_ADMIN (Super Administrador) 👑
+
+  Nivel: 10 | Color: Rojo (#D32F2F) | Icono: shield-crown
+
+  Descripción: Acceso total al sistema, incluyendo configuración de infraestructura
+
+  Permisos: ✅ TODOS LOS PERMISOS (100% acceso completo)
+
+  ---
+  2. ADMIN (Administrador) 🛡️
+
+  Nivel: 9 | Color: Naranja profundo (#FF5722) | Icono: shield-admin
+
+  Descripción: Administrador con acceso amplio al sistema
+
+  Permisos:
+  - ✅ Usuarios: Crear, leer, actualizar, eliminar, gestionar roles, auditoría
+  - ✅ Eventos: CRUD completo, publicar, duplicar, gestionar capacidad
+  - ✅ Speakers: CRUD completo, gestionar contratos
+  - ✅ Inscripciones: CRUD completo, grupos
+  - ✅ Pagos: Procesar, reembolsar, ver reportes financieros, gestionar métodos
+  - ✅ FEL: Generar, cancelar, ver facturas, configurar, reintentar
+  - ✅ Promociones: CRUD completo, aplicar descuentos
+  - ✅ QR & Acceso: Generar, validar, control de acceso, asistencia
+  - ✅ Certificados: Generar, ver, gestionar plantillas, verificar
+  - ✅ Notificaciones: Enviar, gestionar plantillas de email, logs
+  - ✅ Reportes: Ver, exportar, analytics, dashboards
+  - ✅ Sistema: Configuración, audit logs, integraciones
+  - ✅ Workflows: Crear, ejecutar, historial
+
+  Total: ~60 permisos (todos excepto algunos reservados para super_admin)
+
+  ---
+  3. MANAGER (Gerente) 💼
+
+  Nivel: 7 | Color: Naranja (#FF9800) | Icono: briefcase
+
+  Descripción: Gerente con permisos de gestión de eventos y usuarios
+
+  Permisos:
+  - ✅ Usuarios: Leer, actualizar (sin eliminar), auditoría
+  - ✅ Eventos: Crear, leer, actualizar, publicar, duplicar, gestionar capacidad
+  - ✅ Speakers: Crear, leer, actualizar, gestionar contratos
+  - ✅ Inscripciones: Crear, leer, actualizar, grupos
+  - ✅ Pagos: Solo ver pagos y reportes financieros
+  - ✅ FEL: Solo ver facturas
+  - ✅ Promociones: CRUD completo, aplicar descuentos
+  - ✅ QR & Acceso: Generar, validar, ver asistencia
+  - ✅ Certificados: Generar, ver, verificar
+  - ✅ Notificaciones: Enviar, ver logs
+  - ✅ Reportes: Ver, exportar, analytics
+
+  Total: ~30 permisos (gestión sin eliminaciones críticas)
+
+  ---
+  4. OPERATOR (Operador) ⚙️
+
+  Nivel: 5 | Color: Azul (#2196F3) | Icono: settings
+
+  Descripción: Operador con permisos limitados de gestión
+
+  Permisos:
+  - ✅ Usuarios: Solo leer
+  - ✅ Eventos: Leer, actualizar (sin crear/eliminar)
+  - ✅ Inscripciones: Crear, leer, actualizar
+  - ✅ Pagos: Solo ver
+  - ✅ FEL: Solo ver facturas
+  - ✅ QR & Acceso: Validar, ver asistencia
+  - ✅ Certificados: Generar, ver, verificar
+  - ✅ Notificaciones: Enviar
+  - ✅ Reportes: Solo ver
+
+  Total: ~15 permisos (operaciones diarias básicas)
+
+  ---
+  5. USER (Usuario) 👤
+
+  Nivel: 3 | Color: Verde (#4CAF50) | Icono: user
+
+  Descripción: Usuario regular del sistema
+
+  Permisos:
+  - ✅ Inscripciones: Crear, leer, actualizar propias
+  - ✅ Pagos: Ver propios
+  - ✅ FEL: Ver facturas propias
+  - ✅ Certificados: Ver, verificar
+  - ✅ Notificaciones: Ver logs propios
+
+  Total: ~6 permisos (autogestión básica)
+
+  ---
+  6. SPEAKER (Expositor) 🎤
+
+  Nivel: 4 | Color: Morado (#9C27B0) | Icono: microphone
+
+  Descripción: Expositor o conferencista de eventos
+
+  Permisos:
+  - ✅ Usuarios: Leer y actualizar perfil propio
+  - ✅ Inscripciones: Crear, leer, actualizar propias
+  - ✅ Pagos: Ver propios
+  - ✅ FEL: Ver facturas propias
+  - ✅ Certificados: Ver, verificar
+  - ✅ Notificaciones: Ver logs
+
+  Total: ~8 permisos (similar a user + gestión propia)
+
+  ---
+  7. PARTICIPANT (Participante) 👥
+
+  Nivel: 2 | Color: Gris azulado (#607D8B) | Icono: user-group
+
+  Descripción: Participante en eventos
+
+  Permisos:
+  - ✅ Inscripciones: Leer, actualizar propia (sin crear nueva)
+  - ✅ Pagos: Ver propios
+  - ✅ FEL: Ver facturas propias
+  - ✅ Certificados: Ver, verificar
+  - ✅ Notificaciones: Ver logs
+
+  Total: ~5 permisos (mínimos para participación)
+
+  ---
+  8. CLIENT (Cliente) 🏢
+
+  Nivel: 1 | Color: Marrón (#795548) | Icono: user-tie
+
+  Descripción: Cliente externo
+
+  Permisos:
+  - ✅ Inscripciones: Crear, leer propias
+  - ✅ Pagos: Ver propios
+  - ✅ FEL: Ver facturas propias
+  - ✅ Certificados: Ver, verificar
+
+  Total: ~5 permisos (acceso muy limitado)
+
+  ---
+  📊 RESUMEN DE JERARQUÍA
+
+  Nivel 10: SUPER_ADMIN ────────── 100% permisos
+  Nivel 9:  ADMIN ─────────────────  95% permisos
+  Nivel 7:  MANAGER ───────────────  50% permisos
+  Nivel 5:  OPERATOR ──────────────  25% permisos
+  Nivel 4:  SPEAKER ───────────────  13% permisos
+  Nivel 3:  USER ──────────────────  10% permisos
+  Nivel 2:  PARTICIPANT ───────────   8% permisos
+  Nivel 1:  CLIENT ────────────────   8% permisos
+
+  🔑 CATEGORÍAS DE PERMISOS (66 permisos totales)
+
+  1. Usuarios (6): create, read, update, delete, manage_roles, audit
+  2. Eventos (8): CRUD, publish, capacity, duplicate, manage
+  3. Speakers (5): CRUD, contracts
+  4. Inscripciones (5): CRUD, groups
+  5. Pagos (5): process, refund, view, methods, reports
+  6. FEL (5): generate, cancel, view, config, retry
+  7. Promociones (5): CRUD, apply
+  8. QR & Acceso (8): CRUD, generate, validate, control, attendance
+  9. Certificados (4): generate, view, templates, verify
+  10. Notificaciones (3): send, templates, logs
+  11. Reportes (4): view, export, analytics, dashboards
+  12. Sistema (3): config, audit, integrations
+  13. Workflows (3): create, execute, history
