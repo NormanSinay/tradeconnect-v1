@@ -231,7 +231,7 @@ router.get('/audit',
   authenticated,
   adminLimiter,
   auditValidation,
-  async (req, res) => {
+  async (req: any, res: any) => {
     try {
       // Verificar permisos
       const userPermissions = req.user?.permissions || [];
@@ -263,7 +263,8 @@ router.get('/audit',
         endDate: endDate ? new Date(endDate as string) : undefined
       };
 
-      const result = await SecurityService.getAuditLogs(filters);
+      const securityService = new SecurityService();
+      const result = await securityService.getAuditLogs(filters);
 
       res.json(result);
     } catch (error) {

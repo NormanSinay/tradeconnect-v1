@@ -130,7 +130,7 @@ const AuditLogsTab: React.FC<AuditLogsTabProps> = ({ activeTab }) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los usuarios</SelectItem>
-              <SelectItem value="admin_master">Admin Master</SelectItem>
+              <SelectItem value="admin_master">Admin User</SelectItem>
               {/* Aquí se cargarían dinámicamente los usuarios */}
             </SelectContent>
           </Select>

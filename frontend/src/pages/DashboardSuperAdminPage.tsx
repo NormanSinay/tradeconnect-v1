@@ -68,10 +68,10 @@ const DashboardSuperAdminPage: React.FC = () => {
         setStats({
           totalUsers: systemMetrics.totalEvents || 0, // Usar totalEvents como proxy de usuarios registrados
           activeEvents: systemMetrics.activeEvents || 0,
-          totalCourses: 0, // API no implementada aún
+          totalCourses: systemMetrics.totalCourses || 0,
           totalRevenue: salesReport.totalRevenue || 0,
-          userSatisfaction: 0, // API no implementada aún
-          incidentReports: 0 // API no implementada aún
+          userSatisfaction: systemMetrics.userSatisfaction || 0,
+          incidentReports: systemMetrics.incidentReports || 0
         });
       }, 'Error al cargar los datos del dashboard');
 
@@ -163,11 +163,17 @@ const DashboardSuperAdminPage: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  SA
+                  {user?.firstName?.charAt(0).toUpperCase() || 'A'}
+                  {user?.lastName?.charAt(0).toUpperCase() || 'D'}
                 </div>
-                <span className="text-sm font-medium">Admin Master</span>
+                <span className="text-sm font-medium">
+                  {user?.firstName || 'Admin'} {user?.lastName || 'User'}
+                </span>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => {
+                useAuthStore.getState().logout();
+                window.location.href = '/login';
+              }}>
                 Cerrar Sesión
               </Button>
             </div>
@@ -183,10 +189,13 @@ const DashboardSuperAdminPage: React.FC = () => {
               <CardHeader className="pb-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                    SA
+                    {user?.firstName?.charAt(0).toUpperCase() || 'A'}
+                    {user?.lastName?.charAt(0).toUpperCase() || 'D'}
                   </div>
                   <div>
-                    <h3 className="font-semibold">Admin Master</h3>
+                    <h3 className="font-semibold">
+                      {user?.firstName || 'Admin'} {user?.lastName || 'User'}
+                    </h3>
                     <p className="text-sm text-gray-600">Super Administrador</p>
                   </div>
                 </div>

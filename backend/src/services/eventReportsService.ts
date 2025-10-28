@@ -70,7 +70,7 @@ export class EventReportsService {
 
       // Satisfacción de usuarios (simulada basada en asistencia y reseñas)
       // En un futuro esto vendría de un sistema de reseñas/encuestas
-      const userSatisfaction = averageAttendanceRate > 0 ? Math.min(100, averageAttendanceRate + 10) : 85;
+      const userSatisfaction = averageAttendanceRate > 0 ? Math.min(100, averageAttendanceRate + 10) : 0;
 
       // Reportes de incidentes (contar logs de auditoría críticos)
       const recentIncidents = await AuditLog.count({
@@ -101,6 +101,92 @@ export class EventReportsService {
       return metrics;
     } catch (error) {
       logger.error('Error getting system metrics', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Genera reporte de ventas
+   */
+  static async generateSalesReport(filters: any): Promise<any> {
+    try {
+      // Implementación básica del reporte de ventas
+      const totalEvents = await Event.count();
+      const totalRevenue = await EventRegistration.sum('paymentAmount', {
+        where: { paymentStatus: 'paid' }
+      }) || 0;
+      const totalRegistrations = await EventRegistration.count();
+      const paidRegistrations = await EventRegistration.count({
+        where: { paymentStatus: 'paid' }
+      });
+
+      return {
+        totalEvents,
+        totalRevenue,
+        totalRegistrations,
+        paidRegistrations,
+        averagePrice: paidRegistrations > 0 ? totalRevenue / paidRegistrations : 0,
+        topEvents: [],
+        revenueByCategory: []
+      };
+    } catch (error) {
+      logger.error('Error generating sales report', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Genera reporte de asistencia
+   */
+  static async generateAttendanceReport(filters: any): Promise<any> {
+    try {
+      // Implementación básica del reporte de asistencia
+      const totalEvents = await Event.count();
+      const totalAttendees = await EventRegistration.count({
+        where: { status: 'attended' }
+      });
+
+      return {
+        totalEvents,
+        totalAttendees,
+        averageAttendance: totalEvents > 0 ? totalAttendees / totalEvents : 0,
+        attendanceRate: totalEvents > 0 ? (totalAttendees / totalEvents) * 100 : 0,
+        topAttendedEvents: [],
+        attendanceByCategory: []
+      };
+    } catch (error) {
+      logger.error('Error generating attendance report', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Genera analytics de un evento específico
+   */
+  static async generateEventAnalytics(eventId: number): Promise<any> {
+    try {
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        throw new Error('Evento no encontrado');
+      }
+
+      const registrations = await EventRegistration.count({
+        where: { eventId }
+      });
+
+      const attendees = await EventRegistration.count({
+        where: { eventId, status: 'attended' }
+      });
+
+      return {
+        eventId,
+        eventTitle: event.title,
+        totalRegistrations: registrations,
+        attendees,
+        attendanceRate: registrations > 0 ? (attendees / registrations) * 100 : 0
+      };
+    } catch (error) {
+      logger.error('Error generating event analytics', { error, eventId });
       throw error;
     }
   }

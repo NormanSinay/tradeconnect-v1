@@ -182,12 +182,12 @@ export class EventReportsController {
         'ID,Título,Ingresos,Inscripciones'
       ];
 
-      report.topEvents.forEach(event => {
+      report.topEvents.forEach((event: any) => {
         csvData.push(`${event.eventId},"${event.eventTitle}",${event.revenue},${event.registrations}`);
       });
 
       csvData.push('', 'Ingresos por Categoría', 'ID,Categoría,Ingresos,Eventos');
-      report.revenueByCategory.forEach(cat => {
+      report.revenueByCategory.forEach((cat: any) => {
         csvData.push(`${cat.categoryId},"${cat.categoryName}",${cat.revenue},${cat.events}`);
       });
 
@@ -241,12 +241,12 @@ export class EventReportsController {
         'ID,Título,Inscripciones,Asistentes,Tasa de Asistencia'
       ];
 
-      report.topAttendedEvents.forEach(event => {
+      report.topAttendedEvents.forEach((event: any) => {
         csvData.push(`${event.eventId},"${event.eventTitle}",${event.totalRegistrations},${event.attendees},${event.attendanceRate.toFixed(2)}%`);
       });
 
       csvData.push('', 'Asistencia por Categoría', 'ID,Categoría,Asistentes,Promedio');
-      report.attendanceByCategory.forEach(cat => {
+      report.attendanceByCategory.forEach((cat: any) => {
         csvData.push(`${cat.categoryId},"${cat.categoryName}",${cat.totalAttendees},${cat.averageAttendance.toFixed(2)}`);
       });
 

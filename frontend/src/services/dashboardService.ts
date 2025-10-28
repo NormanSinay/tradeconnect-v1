@@ -250,6 +250,9 @@ export class DashboardService {
     totalRegistrations: number;
     totalRevenue: number;
     averageAttendanceRate: number;
+    totalCourses: number;
+    userSatisfaction: number;
+    incidentReports: number;
   }> {
     const { token } = useAuthStore.getState();
 
