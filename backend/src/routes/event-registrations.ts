@@ -179,6 +179,133 @@ router.get('/my',
 
 /**
  * @swagger
+ * /api/event-registrations/users/{userId}:
+ *   get:
+ *     tags: [Event Registrations]
+ *     summary: Obtener inscripciones de un usuario específico (admin)
+ *     description: Obtiene lista paginada de inscripciones de un usuario específico (requiere permisos administrativos)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Elementos por página
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, confirmed, cancelled, attended, no_show]
+ *         description: Filtrar por estado
+ *       - in: query
+ *         name: paymentStatus
+ *         schema:
+ *           type: string
+ *           enum: [pending, paid, refunded, cancelled]
+ *         description: Filtrar por estado de pago
+ *     responses:
+ *       200:
+ *         description: Inscripciones obtenidas exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     registrations:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 1
+ *                           eventId:
+ *                             type: integer
+ *                             example: 123
+ *                           eventTitle:
+ *                             type: string
+ *                             example: "Conferencia de Tecnología"
+ *                           eventDate:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2023-11-15T10:00:00.000Z"
+ *                           status:
+ *                             type: string
+ *                             enum: [pending, confirmed, cancelled, attended, no_show]
+ *                             example: "confirmed"
+ *                           paymentStatus:
+ *                             type: string
+ *                             enum: [pending, paid, refunded, cancelled]
+ *                             example: "paid"
+ *                           paymentAmount:
+ *                             type: number
+ *                             example: 225.00
+ *                           registeredAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2023-10-25T09:15:22.000Z"
+ *                     pagination:
+ *                       type: object
+ *                       properties:
+ *                         page:
+ *                           type: integer
+ *                           example: 1
+ *                         limit:
+ *                           type: integer
+ *                           example: 10
+ *                         total:
+ *                           type: integer
+ *                           example: 25
+ *                         totalPages:
+ *                           type: integer
+ *                           example: 3
+ *                         hasNext:
+ *                           type: boolean
+ *                           example: true
+ *                         hasPrev:
+ *                           type: boolean
+ *                           example: false
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/users/:userId',
+  authenticated,
+  registrationLimiter,
+  [
+    param('userId')
+      .isInt({ min: 1 })
+      .withMessage('ID de usuario debe ser un número entero positivo')
+  ],
+  queryValidation,
+  EventRegistrationController.getUserRegistrationsByAdmin
+);
+
+/**
+ * @swagger
  * /api/event-registrations/check/{eventId}:
  *   get:
  *     tags: [Event Registrations]

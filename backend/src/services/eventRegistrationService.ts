@@ -11,6 +11,7 @@ import { Transaction } from 'sequelize';
 import { EventRegistration, EventRegistrationAttributes, EventRegistrationCreationAttributes } from '../models/EventRegistration';
 import { Event } from '../models/Event';
 import { User } from '../models/User';
+import { EventStatus } from '../models/EventStatus';
 import { cacheRedis } from '../config/redis';
 import { logger } from '../utils/logger';
 import { eventService } from './eventService';
@@ -436,7 +437,7 @@ export class EventRegistrationService {
             attributes: ['id', 'title', 'startDate', 'endDate', 'location', 'price'],
             include: [
               {
-                model: require('./models/EventStatus').EventStatus,
+                model: EventStatus,
                 as: 'eventStatus',
                 attributes: ['name', 'displayName']
               }

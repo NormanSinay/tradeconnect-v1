@@ -345,4 +345,80 @@ export class EventRegistrationController {
       res.status(500).json(errorResponse('Error al obtener estadísticas'));
     }
   }
+
+  /**
+   * Obtener inscripciones de un usuario específico (para admin)
+   */
+  static async getUserRegistrationsByAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const userIdNum = parseInt(userId);
+      const { page = 1, limit = 10, status, paymentStatus } = req.query;
+
+      console.log('🔍 Debug - Request params:', req.params);
+      console.log('🔍 Debug - User ID:', userId);
+
+      // Verificar permisos administrativos - Super Admin puede ver información de usuarios
+      const userRoles = req.user?.roles || [];
+      const isSuperAdmin = userRoles.includes('super_admin');
+
+      console.log('🔍 Debug - User roles:', userRoles);
+      console.log('🔍 Debug - Is super admin:', isSuperAdmin);
+
+      if (!isSuperAdmin) {
+        console.log('❌ Debug - Access denied - not super admin');
+        res.status(403).json(errorResponse('Solo Super Administradores pueden acceder a esta información'));
+        return;
+      }
+
+      console.log('✅ Debug - Access granted, fetching registrations for user:', userIdNum);
+
+      const options: any = {
+        page: Number(page),
+        limit: Number(limit),
+        filters: {}
+      };
+
+      if (status) options.filters.status = status as string;
+      if (paymentStatus) options.filters.paymentStatus = paymentStatus as string;
+
+      console.log('🔍 Debug - Options:', options);
+
+      const result = await EventRegistrationService.getUserRegistrations(userIdNum, options);
+
+      console.log('✅ Debug - Service result:', result);
+
+      // Transformar datos para el frontend
+      const transformedRegistrations = result.data.map((registration: any) => ({
+        id: registration.id,
+        eventId: registration.eventId,
+        eventTitle: registration.event?.title || 'Evento desconocido',
+        eventDate: registration.event?.startDate || registration.createdAt,
+        status: registration.status,
+        paymentStatus: registration.paymentStatus,
+        paymentAmount: registration.paymentAmount || 0,
+        registeredAt: registration.createdAt
+      }));
+
+      const transformedResult = {
+        registrations: transformedRegistrations,
+        pagination: {
+          page: result.pagination.page,
+          limit: result.pagination.limit,
+          total: result.pagination.total,
+          totalPages: result.pagination.pages,
+          hasNext: result.pagination.hasNext,
+          hasPrev: result.pagination.hasPrevious
+        }
+      };
+
+      console.log('✅ Debug - Sending response with', transformedRegistrations.length, 'registrations');
+
+      res.status(200).json(successResponse(transformedResult));
+    } catch (error) {
+      console.error('❌ Debug - Error in getUserRegistrationsByAdmin:', error);
+      logger.error('Error getting user registrations by admin', { error, userId: req.params.userId });
+      res.status(500).json(errorResponse('Error al obtener inscripciones del usuario'));
+    }
+  }
 }

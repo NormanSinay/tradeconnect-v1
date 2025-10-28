@@ -571,4 +571,56 @@ export class DashboardService {
 
     return data.data!;
   }
+
+  /**
+   * Obtener inscripciones de un usuario específico (para modal de detalles)
+   */
+  static async getUserRegistrations(userId: number, params: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  } = {}): Promise<{
+    registrations: Array<{
+      id: number;
+      eventId: number;
+      eventTitle: string;
+      eventDate: string;
+      status: string;
+      paymentStatus: string;
+      paymentAmount: number;
+      registeredAt: string;
+    }>;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  }> {
+    const { token } = useAuthStore.getState();
+
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.status) queryParams.append('status', params.status);
+
+    const response = await fetch(`${this.BASE_URL}/event-registrations/users/${userId}?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo inscripciones del usuario');
+    }
+
+    return data.data!;
+  }
 }

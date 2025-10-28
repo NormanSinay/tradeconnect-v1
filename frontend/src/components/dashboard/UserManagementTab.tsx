@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -58,6 +58,8 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userAudit, setUserAudit] = useState<AuditLog[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(false);
+  const [userRegistrations, setUserRegistrations] = useState<any[]>([]);
+  const [userStats, setUserStats] = useState<any>({});
 
   // Estado del formulario
   const [formData, setFormData] = useState<UserFormData>({
@@ -229,6 +231,7 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
     setSelectedUser(user);
     setShowDetailModal(true);
     loadUserAudit(user.id);
+    loadUserRegistrations(user.id);
   };
 
   const handleEditUserClick = (user: User) => {
@@ -260,6 +263,27 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
       console.error('Error in loadUserAudit:', error);
     } finally {
       setLoadingAudit(false);
+    }
+  };
+
+  const loadUserRegistrations = async (userId: number) => {
+    try {
+      const loadRegs = withErrorHandling(async () => {
+        const result = await DashboardService.getUserRegistrations(userId);
+        setUserRegistrations(result.registrations);
+        setUserStats({
+          totalEvents: result.registrations.length,
+          activeEvents: result.registrations.filter(r => r.status === 'confirmed').length,
+          totalRegistrations: result.registrations.length,
+          totalRevenue: result.registrations.reduce((sum, r) => sum + (r.paymentAmount || 0), 0)
+        });
+      }, 'Error al cargar inscripciones del usuario');
+
+      await loadRegs();
+    } catch (error) {
+      console.error('Error in loadUserRegistrations:', error);
+      setUserRegistrations([]);
+      setUserStats({ totalEvents: 0, activeEvents: 0, totalRegistrations: 0, totalRevenue: 0 });
     }
   };
 
@@ -638,6 +662,9 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Detalles del Usuario</DialogTitle>
+            <DialogDescription>
+              Información completa del usuario seleccionado, incluyendo perfil, estadísticas y auditoría.
+            </DialogDescription>
           </DialogHeader>
           {selectedUser && (
             <Tabs defaultValue="info" className="w-full">
@@ -726,18 +753,52 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
               </TabsContent>
 
               <TabsContent value="stats" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Estadísticas del Usuario</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center text-gray-500 py-8">
-                      <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                      <p>Las estadísticas detalladas del usuario estarán disponibles próximamente.</p>
-                      <p className="text-sm">Esta funcionalidad se implementará en futuras versiones.</p>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-2">Estadísticas</h4>
+                      <div className="space-y-2 text-sm">
+                        <p><span className="font-medium">Total Eventos:</span> {userStats.totalEvents || 0}</p>
+                        <p><span className="font-medium">Eventos Activos:</span> {userStats.activeEvents || 0}</p>
+                        <p><span className="font-medium">Total Inscripciones:</span> {userStats.totalRegistrations || 0}</p>
+                        <p><span className="font-medium">Ingresos Generados:</span> Q {userStats.totalRevenue?.toFixed(2) || '0.00'}</p>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 mb-2">Eventos y Cursos Inscritos</h4>
+                      <div className="space-y-2 text-sm max-h-32 overflow-y-auto">
+                        {userRegistrations.length > 0 ? (
+                          userRegistrations.slice(0, 5).map((reg: any) => (
+                            <div key={reg.id} className="flex justify-between items-center py-1 border-b border-gray-200 last:border-b-0">
+                              <div className="flex-1">
+                                <p className="font-medium text-xs truncate">{reg.eventTitle}</p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(reg.eventDate).toLocaleDateString('es-GT')}
+                                </p>
+                              </div>
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                reg.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                reg.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
+                              }`}>
+                                {reg.status === 'confirmed' ? 'Confirmado' :
+                                 reg.status === 'pending' ? 'Pendiente' : reg.status}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-xs">No hay inscripciones registradas</p>
+                        )}
+                        {userRegistrations.length > 5 && (
+                          <p className="text-xs text-blue-600 mt-2">
+                            +{userRegistrations.length - 5} más...
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="audit" className="space-y-4">
