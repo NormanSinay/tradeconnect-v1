@@ -446,7 +446,6 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
               <TableHead>Usuario</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Rol</TableHead>
@@ -459,20 +458,19 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   Cargando usuarios...
                 </TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   No se encontraron usuarios
                 </TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.id}</TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">

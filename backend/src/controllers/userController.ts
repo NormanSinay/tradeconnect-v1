@@ -408,11 +408,27 @@ export class UserController {
         ]
       });
 
+      // Transformar usuarios para incluir el rol principal como string
+      const transformedUsers = users.map(user => {
+        const userData = user.toJSON() as any;
+        // Obtener el rol principal (primer rol activo)
+        const primaryRole = userData.roles && userData.roles.length > 0
+          ? userData.roles[0].name
+          : 'user';
+
+        return {
+          ...userData,
+          role: primaryRole,
+          // Mantener roles como array para compatibilidad futura
+          roles: userData.roles
+        };
+      });
+
       res.status(HTTP_STATUS.OK).json({
         success: true,
         message: 'Usuarios obtenidos exitosamente',
         data: {
-          users,
+          users: transformedUsers,
           pagination: {
             page: Number(page),
             limit: Number(limit),
