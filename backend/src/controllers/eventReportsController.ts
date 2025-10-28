@@ -139,6 +139,66 @@ export class EventReportsController {
   }
 
   // ====================================================================
+  // ANALYTICS PARA DASHBOARD
+  // ====================================================================
+
+  /**
+   * Obtiene datos de actividad de usuarios para gráficos
+   */
+  static async getUserActivityData(req: Request, res: Response): Promise<void> {
+    try {
+      const data = await EventReportsService.getUserActivityData();
+
+      res.json(successResponse(data, 'Datos de actividad de usuarios obtenidos exitosamente'));
+    } catch (error) {
+      logger.error('Error getting user activity data', { error });
+      res.status(500).json(errorResponse('Error al obtener datos de actividad de usuarios'));
+    }
+  }
+
+  /**
+   * Obtiene datos de ingresos por categoría para gráficos
+   */
+  static async getRevenueByCategory(req: Request, res: Response): Promise<void> {
+    try {
+      const data = await EventReportsService.getRevenueByCategory();
+
+      res.json(successResponse(data, 'Datos de ingresos por categoría obtenidos exitosamente'));
+    } catch (error) {
+      logger.error('Error getting revenue by category data', { error });
+      res.status(500).json(errorResponse('Error al obtener datos de ingresos por categoría'));
+    }
+  }
+
+  /**
+   * Obtiene datos de eventos populares para gráficos
+   */
+  static async getPopularEventsData(req: Request, res: Response): Promise<void> {
+    try {
+      const data = await EventReportsService.getPopularEventsData();
+
+      res.json(successResponse(data, 'Datos de eventos populares obtenidos exitosamente'));
+    } catch (error) {
+      logger.error('Error getting popular events data', { error });
+      res.status(500).json(errorResponse('Error al obtener datos de eventos populares'));
+    }
+  }
+
+  /**
+   * Obtiene datos de rendimiento del sistema para gráficos
+   */
+  static async getSystemPerformanceData(req: Request, res: Response): Promise<void> {
+    try {
+      const data = await EventReportsService.getSystemPerformanceData();
+
+      res.json(successResponse(data, 'Datos de rendimiento del sistema obtenidos exitosamente'));
+    } catch (error) {
+      logger.error('Error getting system performance data', { error });
+      res.status(500).json(errorResponse('Error al obtener datos de rendimiento del sistema'));
+    }
+  }
+
+  // ====================================================================
   // EXPORTACIÓN DE REPORTES
   // ====================================================================
 

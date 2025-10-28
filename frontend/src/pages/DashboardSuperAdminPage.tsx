@@ -8,14 +8,14 @@ import EventManagementTab from '@/components/dashboard/EventManagementTab';
 import FinanceManagementTab from '@/components/dashboard/FinanceManagementTab';
 import SystemManagementTab from '@/components/dashboard/SystemManagementTab';
 import AuditLogsTab from '@/components/dashboard/AuditLogsTab';
-import ChartsSection from '@/components/dashboard/ChartsSection';
+import AnalyticsTab from '@/components/dashboard/AnalyticsTab';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { motion } from 'framer-motion';
-import { Users, Calendar, BookOpen, DollarSign, TrendingUp, AlertTriangle, Settings, Search, Plus } from 'lucide-react';
+import { Users, Calendar, BookOpen, DollarSign, TrendingUp, AlertTriangle, Settings, Search, Plus, BarChart3 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface DashboardStats {
@@ -111,9 +111,9 @@ const DashboardSuperAdminPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Fixed Header */}
+      <header className="bg-white shadow-sm border-b fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
@@ -121,44 +121,6 @@ const DashboardSuperAdminPage: React.FC = () => {
               <Badge variant="destructive" className="text-xs">SUPER ADMIN</Badge>
             </div>
 
-            <nav className="hidden md:flex space-x-6">
-              <button
-                onClick={() => setActiveTab('dashboard')}
-                className={`text-sm font-medium ${activeTab === 'dashboard' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={() => setActiveTab('usuarios')}
-                className={`text-sm font-medium ${activeTab === 'usuarios' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}
-              >
-                Usuarios
-              </button>
-              <button
-                onClick={() => setActiveTab('events')}
-                className={`text-sm font-medium ${activeTab === 'events' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}
-              >
-                Eventos
-              </button>
-              <button
-                onClick={() => setActiveTab('finance')}
-                className={`text-sm font-medium ${activeTab === 'finance' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}
-              >
-                Finanzas
-              </button>
-              <button
-                onClick={() => setActiveTab('settings')}
-                className={`text-sm font-medium ${activeTab === 'settings' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}
-              >
-                Configuración
-              </button>
-              <button
-                onClick={() => setActiveTab('auditoria')}
-                className={`text-sm font-medium ${activeTab === 'auditoria' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}
-              >
-                Auditoría
-              </button>
-            </nav>
 
             <Button variant="outline" size="sm" onClick={() => {
               useAuthStore.getState().logout();
@@ -170,92 +132,55 @@ const DashboardSuperAdminPage: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Sidebar */}
-          <aside className="w-64 flex-shrink-0">
-            <Card>
-              <CardHeader className="pb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                    {user?.firstName?.charAt(0).toUpperCase() || 'A'}
-                    {user?.lastName?.charAt(0).toUpperCase() || 'D'}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">
-                      {user?.firstName || 'Admin'} {user?.lastName || 'User'}
-                    </h3>
-                    <p className="text-sm text-gray-600">Super Administrador</p>
-                  </div>
+      <div className="flex flex-1 pt-16">
+        {/* Sidebar - Isla fija como en el diseño original */}
+        <aside className="fixed left-6 top-24 bottom-6 w-72 bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+          <div className="h-full flex flex-col">
+            {/* User Card */}
+            <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-6 border-b border-gray-100">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-red-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
+                  SA
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-2">
-                  <Button
-                    variant={activeTab === 'dashboard' ? 'default' : 'ghost'}
-                    className="w-full justify-start"
-                    onClick={() => setActiveTab('dashboard')}
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Dashboard Principal
-                  </Button>
-                  {permissions.canManageUsers && (
-                    <Button
-                      variant={activeTab === 'usuarios' ? 'default' : 'ghost'}
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab('usuarios')}
-                    >
-                      <Users className="w-4 h-4 mr-2" />
-                      Gestión de Usuarios
-                    </Button>
-                  )}
-                  {permissions.canManageEvents && (
-                    <Button
-                      variant={activeTab === 'events' ? 'default' : 'ghost'}
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab('events')}
-                    >
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Gestión de Eventos
-                    </Button>
-                  )}
-                  {permissions.canManageFinance && (
-                    <Button
-                      variant={activeTab === 'finance' ? 'default' : 'ghost'}
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab('finance')}
-                    >
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      Gestión Financiera
-                    </Button>
-                  )}
-                  {permissions.canManageSystem && (
-                    <Button
-                      variant={activeTab === 'settings' ? 'default' : 'ghost'}
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab('settings')}
-                    >
-                      <Settings className="w-4 h-4 mr-2" />
-                      Configuración
-                    </Button>
-                  )}
-                  {permissions.canViewAuditLogs && (
-                    <Button
-                      variant={activeTab === 'auditoria' ? 'default' : 'ghost'}
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab('auditoria')}
-                    >
-                      <Search className="w-4 h-4 mr-2" />
-                      Auditoría y Logs
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
+                <h3 className="font-bold text-gray-900 mb-1 text-lg">Admin Master</h3>
+                <p className="text-red-600 font-semibold">Super Administrador</p>
+              </div>
+            </div>
 
-          {/* Main Content */}
-          <main className="flex-1">
+            {/* Navigation */}
+            <nav className="flex-1 p-4 overflow-y-auto">
+              <ul className="space-y-2">
+                {[
+                  { id: 'dashboard', icon: BarChart3, label: 'Dashboard Principal', enabled: true },
+                  { id: 'analytics', icon: TrendingUp, label: 'Analítica', enabled: true },
+                  { id: 'usuarios', icon: Users, label: 'Gestión de Usuarios', enabled: permissions.canManageUsers },
+                  { id: 'events', icon: Calendar, label: 'Gestión de Eventos', enabled: permissions.canManageEvents },
+                  { id: 'finance', icon: DollarSign, label: 'Gestión Financiera', enabled: permissions.canManageFinance },
+                  { id: 'settings', icon: Settings, label: 'Configuración', enabled: permissions.canManageSystem },
+                  { id: 'auditoria', icon: Search, label: 'Auditoría y Logs', enabled: permissions.canViewAuditLogs }
+                ].filter(item => item.enabled !== false).map((item) => (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 ${
+                        activeTab === item.id
+                          ? 'bg-primary text-white shadow-md'
+                          : 'text-gray-700 hover:bg-primary/10 hover:text-primary'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5 flex-shrink-0" />
+                      <span className="text-sm font-medium">{item.label}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+        </aside>
+
+        {/* Scrollable Main Content */}
+        <main className="flex-1 ml-80 overflow-y-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {activeTab === 'dashboard' && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -392,25 +317,6 @@ const DashboardSuperAdminPage: React.FC = () => {
                     ))}
                   </div>
                 </div>
-
-                {/* Gráficos y Estadísticas - Solo mostrar si hay datos */}
-                {stats.totalUsers > 0 && <ChartsSection activeTab={activeTab} />}
-
-                {/* Actividad Reciente - Solo mostrar si hay datos */}
-                {stats.totalUsers > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Actividad Reciente del Sistema</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center text-gray-500 py-8">
-                        <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                        <p>La API de auditoría no está implementada aún.</p>
-                        <p className="text-sm">Esta sección mostrará logs de actividad cuando esté disponible.</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
               </motion.div>
             )}
 
@@ -470,6 +376,20 @@ const DashboardSuperAdminPage: React.FC = () => {
               </motion.div>
             )}
 
+            {activeTab === 'analytics' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="mb-8">
+                  <h1 className="text-3xl font-bold text-primary mb-2">Analítica del Sistema</h1>
+                  <p className="text-gray-600">Gráficos y estadísticas detalladas de la plataforma</p>
+                </div>
+                <AnalyticsTab activeTab={activeTab} />
+              </motion.div>
+            )}
+
             {activeTab === 'auditoria' && permissions.canViewAuditLogs && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -483,8 +403,8 @@ const DashboardSuperAdminPage: React.FC = () => {
                 <AuditLogsTab activeTab={activeTab} />
               </motion.div>
             )}
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   );

@@ -389,4 +389,140 @@ router.get('/system/metrics',
   EventReportsController.getSystemMetrics
 );
 
+// ====================================================================
+// ANALYTICS PARA DASHBOARD
+// ====================================================================
+
+/**
+ * @swagger
+ * /api/analytics/user-activity:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Obtener datos de actividad de usuarios
+ *     description: Obtiene datos de actividad de usuarios para gráficos del dashboard
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Datos obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 labels:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ */
+router.get('/analytics/user-activity',
+  authenticated,
+  reportsLimiter,
+  EventReportsController.getUserActivityData
+);
+
+/**
+ * @swagger
+ * /api/analytics/revenue-by-category:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Obtener ingresos por categoría
+ *     description: Obtiene datos de ingresos por categoría de eventos para gráficos
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Datos obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 labels:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ */
+router.get('/analytics/revenue-by-category',
+  authenticated,
+  reportsLimiter,
+  EventReportsController.getRevenueByCategory
+);
+
+/**
+ * @swagger
+ * /api/analytics/popular-events:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Obtener eventos populares
+ *     description: Obtiene datos de eventos más populares por número de registros
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Datos obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 labels:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ */
+router.get('/analytics/popular-events',
+  authenticated,
+  reportsLimiter,
+  EventReportsController.getPopularEventsData
+);
+
+/**
+ * @swagger
+ * /api/analytics/system-performance:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Obtener rendimiento del sistema
+ *     description: Obtiene métricas de rendimiento del sistema para gráficos
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Datos obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 labels:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 responseTime:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ *                 uptime:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ */
+router.get('/analytics/system-performance',
+  authenticated,
+  reportsLimiter,
+  EventReportsController.getSystemPerformanceData
+);
+
 export default router;
