@@ -251,16 +251,15 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
     try {
       setLoadingAudit(true);
       const loadAudit = withErrorHandling(async () => {
-        // Aquí iría la llamada a la API de auditoría cuando esté implementada
-        // const result = await DashboardService.getUserAudit(userId);
-        // setUserAudit(result.auditLogs);
-        setUserAudit([]); // Temporalmente vacío
+        const result = await DashboardService.getUserAudit(userId);
+        setUserAudit(result.logs || []);
       }, 'Error al cargar auditoría del usuario');
 
       await loadAudit();
     } catch (error) {
       // Error ya manejado por withErrorHandling
       console.error('Error in loadUserAudit:', error);
+      setUserAudit([]);
     } finally {
       setLoadingAudit(false);
     }
@@ -768,7 +767,7 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="font-semibold text-gray-900 mb-2">Eventos y Cursos Inscritos</h4>
                       <div className="space-y-2 text-sm max-h-32 overflow-y-auto">
-                        {userRegistrations.length > 0 ? (
+                        {Array.isArray(userRegistrations) && userRegistrations.length > 0 ? (
                           userRegistrations.slice(0, 5).map((reg: any) => (
                             <div key={reg.id} className="flex justify-between items-center py-1 border-b border-gray-200 last:border-b-0">
                               <div className="flex-1">
@@ -790,7 +789,7 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
                         ) : (
                           <p className="text-gray-500 text-xs">No hay inscripciones registradas</p>
                         )}
-                        {userRegistrations.length > 5 && (
+                        {Array.isArray(userRegistrations) && userRegistrations.length > 5 && (
                           <p className="text-xs text-blue-600 mt-2">
                             +{userRegistrations.length - 5} más...
                           </p>

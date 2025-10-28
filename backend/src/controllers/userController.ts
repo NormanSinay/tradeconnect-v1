@@ -998,7 +998,7 @@ export class UserController {
         success: true,
         message: 'Auditoría obtenida exitosamente',
         data: {
-          auditLogs,
+          logs: auditLogs,
           pagination: {
             page: Number(page),
             limit: Number(limit),
