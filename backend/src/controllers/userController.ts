@@ -344,9 +344,14 @@ export class UserController {
    */
   async getUsers(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      // TODO: Verificar permisos de administrador
+      // Verificar permisos de administrador - Super Admin tiene acceso total
+      const userRoles = req.user?.roles || [];
       const userPermissions = req.user?.permissions || [];
-      if (!userPermissions.includes('read_user')) {
+
+      const isSuperAdmin = userRoles.includes('super_admin');
+      const hasReadPermission = userPermissions.includes('read_user');
+
+      if (!isSuperAdmin && !hasReadPermission) {
         res.status(HTTP_STATUS.FORBIDDEN).json({
           success: false,
           message: 'Permisos insuficientes para listar usuarios',

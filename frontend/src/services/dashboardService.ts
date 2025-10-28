@@ -21,10 +21,14 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  phone?: string;
   role: string;
   isActive: boolean;
+  isEmailVerified: boolean;
+  is2faEnabled: boolean;
   createdAt: string;
   lastLoginAt?: string;
+  updatedAt: string;
 }
 
 export interface Event {

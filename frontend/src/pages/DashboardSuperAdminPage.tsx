@@ -129,8 +129,8 @@ const DashboardSuperAdminPage: React.FC = () => {
                 Dashboard
               </button>
               <button
-                onClick={() => setActiveTab('users')}
-                className={`text-sm font-medium ${activeTab === 'users' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}
+                onClick={() => setActiveTab('usuarios')}
+                className={`text-sm font-medium ${activeTab === 'usuarios' ? 'text-primary border-b-2 border-primary' : 'text-gray-600 hover:text-primary'}`}
               >
                 Usuarios
               </button>
@@ -212,9 +212,9 @@ const DashboardSuperAdminPage: React.FC = () => {
                   </Button>
                   {permissions.canManageUsers && (
                     <Button
-                      variant={activeTab === 'users' ? 'default' : 'ghost'}
+                      variant={activeTab === 'usuarios' ? 'default' : 'ghost'}
                       className="w-full justify-start"
-                      onClick={() => setActiveTab('users')}
+                      onClick={() => setActiveTab('usuarios')}
                     >
                       <Users className="w-4 h-4 mr-2" />
                       Gestión de Usuarios
@@ -443,7 +443,7 @@ const DashboardSuperAdminPage: React.FC = () => {
               </motion.div>
             )}
 
-            {activeTab === 'users' && permissions.canManageUsers && (
+            {activeTab === 'usuarios' && permissions.canManageUsers && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
