@@ -254,6 +254,7 @@ export class DashboardService {
     totalRegistrations: number;
     totalRevenue: number;
     averageAttendanceRate: number;
+    totalUsers: number;
     totalCourses: number;
     userSatisfaction: number;
     incidentReports: number;

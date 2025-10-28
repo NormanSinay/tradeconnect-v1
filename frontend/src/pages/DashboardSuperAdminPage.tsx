@@ -66,7 +66,7 @@ const DashboardSuperAdminPage: React.FC = () => {
 
         // Calcular estadísticas del dashboard con datos reales
         setStats({
-          totalUsers: systemMetrics.totalEvents || 0, // Usar totalEvents como proxy de usuarios registrados
+          totalUsers: systemMetrics.totalUsers || 0, // Usar totalUsers del backend
           activeEvents: systemMetrics.activeEvents || 0,
           totalCourses: systemMetrics.totalCourses || 0,
           totalRevenue: salesReport.totalRevenue || 0,
@@ -160,23 +160,12 @@ const DashboardSuperAdminPage: React.FC = () => {
               </button>
             </nav>
 
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {user?.firstName?.charAt(0).toUpperCase() || 'A'}
-                  {user?.lastName?.charAt(0).toUpperCase() || 'D'}
-                </div>
-                <span className="text-sm font-medium">
-                  {user?.firstName || 'Admin'} {user?.lastName || 'User'}
-                </span>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => {
-                useAuthStore.getState().logout();
-                window.location.href = '/login';
-              }}>
-                Cerrar Sesión
-              </Button>
-            </div>
+            <Button variant="outline" size="sm" onClick={() => {
+              useAuthStore.getState().logout();
+              window.location.href = '/login';
+            }}>
+              Cerrar Sesión
+            </Button>
           </div>
         </div>
       </header>
@@ -289,7 +278,7 @@ const DashboardSuperAdminPage: React.FC = () => {
                 )}
 
                 {/* Métricas Principales */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
                   <Card>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -312,34 +301,16 @@ const DashboardSuperAdminPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">Eventos Activos</p>
-                          <p className="text-2xl font-bold text-primary">{stats.activeEvents}</p>
-                          {stats.activeEvents > 0 && (
+                          <p className="text-sm font-medium text-gray-600">Eventos y Cursos</p>
+                          <p className="text-2xl font-bold text-primary">{stats.activeEvents + stats.totalCourses}</p>
+                          {(stats.activeEvents > 0 || stats.totalCourses > 0) && (
                             <p className="text-xs text-green-600 flex items-center mt-1">
                               <TrendingUp className="w-3 h-3 mr-1" />
-                              Datos actualizados
+                              {stats.activeEvents} eventos, {stats.totalCourses} cursos
                             </p>
                           )}
                         </div>
                         <Calendar className="w-8 h-8 text-primary" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">Cursos Publicados</p>
-                          <p className="text-2xl font-bold text-primary">{stats.totalCourses}</p>
-                          {stats.totalCourses > 0 && (
-                            <p className="text-xs text-green-600 flex items-center mt-1">
-                              <TrendingUp className="w-3 h-3 mr-1" />
-                              Datos actualizados
-                            </p>
-                          )}
-                        </div>
-                        <BookOpen className="w-8 h-8 text-primary" />
                       </div>
                     </CardContent>
                   </Card>
@@ -404,7 +375,7 @@ const DashboardSuperAdminPage: React.FC = () => {
                   <h2 className="text-xl font-semibold mb-4">Acciones Rápidas</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                     {[
-                      { icon: Plus, title: 'Crear Usuario', desc: 'Agregar nuevo usuario', action: () => setActiveTab('users'), enabled: permissions.canManageUsers },
+                      { icon: Plus, title: 'Crear Usuario', desc: 'Agregar nuevo usuario', action: () => setActiveTab('usuarios'), enabled: permissions.canManageUsers },
                       { icon: Calendar, title: 'Crear Evento', desc: 'Publicar nuevo evento', action: () => toast.success('Funcionalidad en desarrollo'), enabled: permissions.canManageEvents },
                       { icon: BookOpen, title: 'Crear Curso', desc: 'Publicar nuevo curso', action: () => toast.success('Funcionalidad en desarrollo'), enabled: false },
                       { icon: TrendingUp, title: 'Generar Reporte', desc: 'Crear reporte personalizado', action: () => toast.success('Funcionalidad en desarrollo'), enabled: false },

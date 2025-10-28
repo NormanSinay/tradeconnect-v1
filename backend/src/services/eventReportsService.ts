@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import { cacheRedis } from '../config/redis';
 import { logger } from '../utils/logger';
-import { Event, EventStatus, EventRegistration, AuditLog } from '../models';
+import { Event, EventStatus, EventRegistration, AuditLog, User } from '../models';
 
 export class EventReportsService {
   private static readonly CACHE_PREFIX = 'event_reports';
@@ -15,6 +15,7 @@ export class EventReportsService {
     totalRegistrations: number;
     totalRevenue: number;
     averageAttendanceRate: number;
+    totalUsers: number;
     totalCourses: number;
     userSatisfaction: number;
     incidentReports: number;
@@ -41,6 +42,9 @@ export class EventReportsService {
       const totalRevenueResult = await EventRegistration.sum('paymentAmount', {
         where: { paymentStatus: 'paid' }
       }) || 0;
+
+      // Obtener total de usuarios
+      const totalUsers = await User.count();
 
       // Calcular tasa de asistencia promedio
       const eventsWithAttendance = await Event.findAll({
@@ -90,6 +94,7 @@ export class EventReportsService {
         totalRegistrations,
         totalRevenue: totalRevenueResult,
         averageAttendanceRate,
+        totalUsers,
         totalCourses,
         userSatisfaction: Math.round(userSatisfaction * 100) / 100, // Redondear a 2 decimales
         incidentReports: recentIncidents
