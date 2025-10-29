@@ -518,11 +518,73 @@ router.get('/analytics/popular-events',
  *                   type: array
  *                   items:
  *                     type: number
+ *                 activeUsers:
+ *                   type: array
+ *                   items:
+ *                     type: number
+ *                 errorRate:
+ *                   type: array
+ *                   items:
+ *                     type: number
  */
 router.get('/analytics/system-performance',
   authenticated,
   reportsLimiter,
   EventReportsController.getSystemPerformanceData
+);
+
+/**
+ * @swagger
+ * /api/analytics/recent-activity:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Obtener actividad reciente del sistema
+ *     description: Obtiene la actividad reciente del sistema para auditoría y monitoreo
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 200
+ *           default: 50
+ *         description: Número máximo de actividades a retornar
+ *     responses:
+ *       200:
+ *         description: Actividad obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   type:
+ *                     type: string
+ *                     enum: [audit, session, access]
+ *                   action:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   user:
+ *                     type: object
+ *                   timestamp:
+ *                     type: string
+ *                     format: date-time
+ *                   severity:
+ *                     type: string
+ *                     enum: [info, warning, error, critical]
+ *                   metadata:
+ *                     type: object
+ */
+router.get('/analytics/recent-activity',
+  authenticated,
+  reportsLimiter,
+  EventReportsController.getRecentSystemActivity
 );
 
 export default router;

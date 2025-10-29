@@ -1073,25 +1073,12 @@ export class DashboardService {
   }
 
   /**
-   * Obtener reportes/analytics de eventos
+   * Obtener analytics de un evento específico
    */
-  static async getEventAnalytics(params: {
-    startDate?: string;
-    endDate?: string;
-    eventId?: number;
-    eventTypeId?: number;
-    eventCategoryId?: number;
-  } = {}): Promise<any> {
+  static async getEventAnalytics(eventId: number): Promise<any> {
     const { token } = useAuthStore.getState();
 
-    const queryParams = new URLSearchParams();
-    if (params.startDate) queryParams.append('startDate', params.startDate);
-    if (params.endDate) queryParams.append('endDate', params.endDate);
-    if (params.eventId) queryParams.append('eventId', params.eventId.toString());
-    if (params.eventTypeId) queryParams.append('eventTypeId', params.eventTypeId.toString());
-    if (params.eventCategoryId) queryParams.append('eventCategoryId', params.eventCategoryId.toString());
-
-    const response = await fetch(`${this.BASE_URL}/event-reports/analytics?${queryParams}`, {
+    const response = await fetch(`${this.BASE_URL}/event-reports/events/${eventId}/analytics`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1103,7 +1090,7 @@ export class DashboardService {
     const data: ApiResponse<any> = await response.json();
 
     if (!response.ok || !data.success) {
-      throw new Error(data.message || 'Error obteniendo analytics de eventos');
+      throw new Error(data.message || 'Error obteniendo analytics del evento');
     }
 
     return data.data!;
@@ -1512,7 +1499,7 @@ export class DashboardService {
   static async getUserActivityData(): Promise<{ labels: string[]; data: number[] }> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/analytics/user-activity`, {
+    const response = await fetch(`${this.BASE_URL}/event-reports/analytics/user-activity`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1536,7 +1523,7 @@ export class DashboardService {
   static async getRevenueByCategory(): Promise<{ labels: string[]; data: number[] }> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/analytics/revenue-by-category`, {
+    const response = await fetch(`${this.BASE_URL}/event-reports/analytics/revenue-by-category`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1560,7 +1547,7 @@ export class DashboardService {
   static async getPopularEventsData(): Promise<{ labels: string[]; data: number[] }> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/analytics/popular-events`, {
+    const response = await fetch(`${this.BASE_URL}/event-reports/analytics/popular-events`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1588,7 +1575,7 @@ export class DashboardService {
   }> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/analytics/system-performance`, {
+    const response = await fetch(`${this.BASE_URL}/event-reports/analytics/system-performance`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

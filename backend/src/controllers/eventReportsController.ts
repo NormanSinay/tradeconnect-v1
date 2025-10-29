@@ -198,6 +198,27 @@ export class EventReportsController {
     }
   }
 
+  /**
+   * Obtiene actividad reciente del sistema para auditoría
+   */
+  static async getRecentSystemActivity(req: Request, res: Response): Promise<void> {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
+
+      if (limit < 1 || limit > 200) {
+        res.status(400).json(errorResponse('El límite debe estar entre 1 y 200'));
+        return;
+      }
+
+      const data = await EventReportsService.getRecentSystemActivity(limit);
+
+      res.json(successResponse(data, 'Actividad reciente del sistema obtenida exitosamente'));
+    } catch (error) {
+      logger.error('Error getting recent system activity', { error });
+      res.status(500).json(errorResponse('Error al obtener actividad reciente del sistema'));
+    }
+  }
+
   // ====================================================================
   // EXPORTACIÓN DE REPORTES
   // ====================================================================
