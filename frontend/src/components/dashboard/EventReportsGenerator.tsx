@@ -1,23 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { DashboardService } from '@/services/dashboardService';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Download, FileText, FileSpreadsheet, Mail, Printer, AlertTriangle, RefreshCw, Eye } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet, Image, AlertTriangle, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface EventReportsGeneratorProps {
   filters: {
-    dateRange: {
-      startDate: string;
-      endDate: string;
-    };
+    dateRange: { startDate: string; endDate: string };
     eventTypeId?: number;
     eventCategoryId?: number;
     eventStatus?: string;
@@ -27,21 +23,13 @@ interface EventReportsGeneratorProps {
   withErrorHandling: any;
 }
 
-interface ReportConfig {
-  type: 'sales' | 'attendance' | 'events' | 'registrations' | 'revenue';
+interface ExportOptions {
   format: 'pdf' | 'excel' | 'csv';
   includeCharts: boolean;
   includeDetails: boolean;
-  customTitle?: string;
-  customDescription?: string;
-}
-
-interface ReportData {
-  sales?: any;
-  attendance?: any;
-  events?: any;
-  registrations?: any;
-  revenue?: any;
+  includeFinancial: boolean;
+  includeAttendance: boolean;
+  reportType: 'summary' | 'detailed' | 'financial' | 'attendance';
 }
 
 const EventReportsGenerator: React.FC<EventReportsGeneratorProps> = ({
@@ -49,493 +37,320 @@ const EventReportsGenerator: React.FC<EventReportsGeneratorProps> = ({
   permissions,
   withErrorHandling
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [reportConfig, setReportConfig] = useState<ReportConfig>({
-    type: 'sales',
+  const [exporting, setExporting] = useState(false);
+  const [exportOptions, setExportOptions] = useState<ExportOptions>({
     format: 'pdf',
     includeCharts: true,
     includeDetails: true,
+    includeFinancial: true,
+    includeAttendance: true,
+    reportType: 'summary'
   });
-  const [reportData, setReportData] = useState<ReportData | null>(null);
-  const [previewData, setPreviewData] = useState<any[]>([]);
 
-  useEffect(() => {
-    if (reportConfig.type) {
-      loadReportPreview();
-    }
-  }, [reportConfig.type, filters]);
-
-  const loadReportPreview = async () => {
-    try {
-      setLoading(true);
-      const loadData = withErrorHandling(async () => {
-        let data;
-
-        switch (reportConfig.type) {
-          case 'sales':
-            data = await DashboardService.getSalesReport({
-              startDate: filters.dateRange.startDate,
-              endDate: filters.dateRange.endDate,
-              eventId: filters.eventId?.toString(),
-            });
-            setReportData({ sales: data });
-            setPreviewData(data.transactions || []);
-            break;
-
-          case 'attendance':
-            data = await DashboardService.getAttendanceReport({
-              startDate: filters.dateRange.startDate,
-              endDate: filters.dateRange.endDate,
-              eventId: filters.eventId?.toString(),
-            });
-            setReportData({ attendance: data });
-            setPreviewData(data.attendance || []);
-            break;
-
-          case 'events':
-            const eventsResult = await DashboardService.getEvents({
-              startDateFrom: filters.dateRange.startDate,
-              startDateTo: filters.dateRange.endDate,
-              eventTypeId: filters.eventTypeId,
-              eventCategoryId: filters.eventCategoryId,
-              status: filters.eventStatus,
-              limit: 100,
-            });
-            setReportData({ events: eventsResult.events });
-            setPreviewData(eventsResult.events || []);
-            break;
-
-          case 'revenue':
-            const revenueData = await DashboardService.getEventAnalytics({
-              startDate: filters.dateRange.startDate,
-              endDate: filters.dateRange.endDate,
-              eventId: filters.eventId,
-              eventTypeId: filters.eventTypeId,
-              eventCategoryId: filters.eventCategoryId,
-            });
-            setReportData({ revenue: revenueData });
-            setPreviewData(revenueData.revenueByCategory || []);
-            break;
-
-          default:
-            setPreviewData([]);
-        }
-      }, 'Error cargando vista previa del reporte');
-
-      await loadData();
-    } catch (error) {
-      console.error('Error in loadReportPreview:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleExportOptionChange = (key: keyof ExportOptions, value: any) => {
+    setExportOptions(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
   const generateReport = async () => {
     try {
-      setGenerating(true);
-      const generateData = withErrorHandling(async () => {
-        // Simular generación del reporte
-        // En una implementación real, esto llamaría a un endpoint del backend
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simular delay
+      setExporting(true);
 
-        toast.success(`Reporte ${reportConfig.type} generado exitosamente en formato ${reportConfig.format.toUpperCase()}`);
-      }, 'Error generando reporte');
-
-      await generateData();
-    } catch (error) {
-      console.error('Error in generateReport:', error);
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const exportReport = async (format: 'pdf' | 'excel' | 'csv') => {
-    try {
-      setGenerating(true);
       const exportData = withErrorHandling(async () => {
-        // Simular exportación
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Preparar parámetros de exportación
+        const exportParams = {
+          ...filters,
+          ...exportOptions,
+          filename: `reporte-eventos-${new Date().toISOString().split('T')[0]}`
+        };
 
-        // Crear un enlace de descarga simulado
-        const link = document.createElement('a');
-        link.href = '#'; // En una implementación real, esto sería la URL del archivo
-        link.download = `reporte-${reportConfig.type}-${new Date().toISOString().split('T')[0]}.${format}`;
-        link.click();
+        // Aquí irían las llamadas reales a las APIs de exportación
+        // Por ahora simulamos la exportación
 
-        toast.success(`Reporte exportado exitosamente en formato ${format.toUpperCase()}`);
-      }, `Error exportando reporte en ${format.toUpperCase()}`);
+        // Simular tiempo de procesamiento
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Simular descarga
+        const mockBlob = new Blob(['Mock report content'], {
+          type: exportOptions.format === 'pdf' ? 'application/pdf' :
+                exportOptions.format === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' :
+                'text/csv'
+        });
+
+        const url = URL.createObjectURL(mockBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = exportParams.filename + '.' + exportOptions.format;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        toast.success(`Reporte exportado exitosamente en formato ${exportOptions.format.toUpperCase()}`);
+      }, 'Error generando reporte');
 
       await exportData();
     } catch (error) {
-      console.error('Error in exportReport:', error);
+      console.error('Error in generateReport:', error);
     } finally {
-      setGenerating(false);
+      setExporting(false);
     }
   };
 
-  const sendReportByEmail = async () => {
-    try {
-      setGenerating(true);
-      const sendData = withErrorHandling(async () => {
-        // Simular envío por email
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        toast.success('Reporte enviado exitosamente por correo electrónico');
-      }, 'Error enviando reporte por email');
-
-      await sendData();
-    } catch (error) {
-      console.error('Error in sendReportByEmail:', error);
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const printReport = () => {
-    window.print();
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-GT', {
-      style: 'currency',
-      currency: 'GTQ'
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-GT');
-  };
-
-  const renderPreviewTable = () => {
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center py-8">
-          <RefreshCw className="h-6 w-6 animate-spin text-gray-400" />
-          <span className="ml-2 text-gray-600">Cargando vista previa...</span>
-        </div>
-      );
-    }
-
-    if (previewData.length === 0) {
-      return (
-        <div className="text-center py-8 text-gray-500">
-          No hay datos disponibles para mostrar
-        </div>
-      );
-    }
-
-    switch (reportConfig.type) {
-      case 'sales':
-        return (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Usuario</TableHead>
-                <TableHead>Concepto</TableHead>
-                <TableHead>Método</TableHead>
-                <TableHead className="text-right">Monto</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {previewData.slice(0, 10).map((item: any, index: number) => (
-                <TableRow key={index}>
-                  <TableCell>{formatDate(item.date)}</TableCell>
-                  <TableCell>{item.user}</TableCell>
-                  <TableCell>{item.concept}</TableCell>
-                  <TableCell>{item.method}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(item.amount)}</TableCell>
-                  <TableCell>
-                    <Badge variant={item.status === 'completed' ? 'default' : 'secondary'}>
-                      {item.status}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        );
-
+  const getReportTypeDescription = (type: string) => {
+    switch (type) {
+      case 'summary':
+        return 'Resumen general con métricas principales y estadísticas básicas';
+      case 'detailed':
+        return 'Reporte detallado con información completa de cada evento';
+      case 'financial':
+        return 'Enfoque en datos financieros, ingresos y transacciones';
       case 'attendance':
-        return (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Evento</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Inscritos</TableHead>
-                <TableHead>Asistieron</TableHead>
-                <TableHead>No Asistieron</TableHead>
-                <TableHead>Tasa de Asistencia</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {previewData.slice(0, 10).map((item: any, index: number) => (
-                <TableRow key={index}>
-                  <TableCell>{item.eventTitle}</TableCell>
-                  <TableCell>{formatDate(item.eventDate)}</TableCell>
-                  <TableCell>{item.totalRegistrations}</TableCell>
-                  <TableCell>{item.attendedCount}</TableCell>
-                  <TableCell>{item.noShowCount}</TableCell>
-                  <TableCell>
-                    {item.totalRegistrations > 0
-                      ? `${((item.attendedCount / item.totalRegistrations) * 100).toFixed(1)}%`
-                      : '0%'
-                    }
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        );
-
-      case 'events':
-        return (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Evento</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Categoría</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Precio</TableHead>
-                <TableHead>Inscritos</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {previewData.slice(0, 10).map((event: any, index: number) => (
-                <TableRow key={event.id || index}>
-                  <TableCell>{event.title}</TableCell>
-                  <TableCell>{event.eventType?.displayName}</TableCell>
-                  <TableCell>{event.eventCategory?.displayName}</TableCell>
-                  <TableCell>{formatDate(event.startDate)}</TableCell>
-                  <TableCell>{event.price > 0 ? formatCurrency(event.price) : 'Gratuito'}</TableCell>
-                  <TableCell>{event.registeredCount}</TableCell>
-                  <TableCell>
-                    <Badge variant={
-                      event.eventStatus?.name === 'published' ? 'default' :
-                      event.eventStatus?.name === 'completed' ? 'secondary' :
-                      event.eventStatus?.name === 'cancelled' ? 'destructive' : 'outline'
-                    }>
-                      {event.eventStatus?.displayName}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        );
-
-      case 'revenue':
-        return (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Categoría</TableHead>
-                <TableHead className="text-right">Ingresos</TableHead>
-                <TableHead className="text-right">Porcentaje</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {previewData.slice(0, 10).map((item: any, index: number) => (
-                <TableRow key={index}>
-                  <TableCell>{item.category}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(item.revenue)}</TableCell>
-                  <TableCell className="text-right">{item.percentage}%</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        );
-
+        return 'Información detallada sobre asistencia e inscripciones';
       default:
-        return null;
+        return '';
+    }
+  };
+
+  const getFormatIcon = (format: string) => {
+    switch (format) {
+      case 'pdf': return <FileText className="h-5 w-5 text-red-500" />;
+      case 'excel': return <FileSpreadsheet className="h-5 w-5 text-green-500" />;
+      case 'csv': return <FileText className="h-5 w-5 text-blue-500" />;
+      default: return <FileText className="h-5 w-5 text-gray-500" />;
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* Verificación de permisos */}
+      {!permissions.canViewReports && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            No tienes permisos para generar reportes.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Configuración del reporte */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+            <Download className="h-5 w-5" />
             Generador de Reportes
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Tipo de reporte */}
-            <div>
-              <Label htmlFor="report-type">Tipo de Reporte</Label>
-              <Select
-                value={reportConfig.type}
-                onValueChange={(value: any) => setReportConfig(prev => ({ ...prev, type: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sales">Ventas e Ingresos</SelectItem>
-                  <SelectItem value="attendance">Asistencia</SelectItem>
-                  <SelectItem value="events">Eventos</SelectItem>
-                  <SelectItem value="registrations">Inscripciones</SelectItem>
-                  <SelectItem value="revenue">Ingresos por Categoría</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <CardContent className="space-y-6">
+          {/* Tipo de reporte */}
+          <div>
+            <Label className="text-base font-medium">Tipo de Reporte</Label>
+            <Select
+              value={exportOptions.reportType}
+              onValueChange={(value: any) => handleExportOptionChange('reportType', value)}
+            >
+              <SelectTrigger className="mt-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="summary">Resumen Ejecutivo</SelectItem>
+                <SelectItem value="detailed">Reporte Detallado</SelectItem>
+                <SelectItem value="financial">Análisis Financiero</SelectItem>
+                <SelectItem value="attendance">Reporte de Asistencia</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-gray-600 mt-1">
+              {getReportTypeDescription(exportOptions.reportType)}
+            </p>
+          </div>
 
-            {/* Formato */}
-            <div>
-              <Label htmlFor="report-format">Formato</Label>
-              <Select
-                value={reportConfig.format}
-                onValueChange={(value: any) => setReportConfig(prev => ({ ...prev, format: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pdf">PDF</SelectItem>
-                  <SelectItem value="excel">Excel</SelectItem>
-                  <SelectItem value="csv">CSV</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Formato de exportación */}
+          <div>
+            <Label className="text-base font-medium">Formato de Exportación</Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+              {[
+                { value: 'pdf', label: 'PDF', description: 'Documento profesional con gráficos' },
+                { value: 'excel', label: 'Excel', description: 'Hoja de cálculo editable' },
+                { value: 'csv', label: 'CSV', description: 'Datos crudos para análisis' }
+              ].map((format) => (
+                <div
+                  key={format.value}
+                  className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    exportOptions.format === format.value
+                      ? 'border-primary bg-primary/5'
+                      : 'border-gray-200 hover:border-primary'
+                  }`}
+                  onClick={() => handleExportOptionChange('format', format.value)}
+                >
+                  <div className="flex items-center gap-3">
+                    {getFormatIcon(format.value)}
+                    <div>
+                      <h3 className="font-medium">{format.label}</h3>
+                      <p className="text-sm text-gray-600">{format.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Opciones adicionales */}
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="include-charts"
-                  checked={reportConfig.includeCharts}
-                  onCheckedChange={(checked) =>
-                    setReportConfig(prev => ({ ...prev, includeCharts: checked as boolean }))
-                  }
-                />
-                <Label htmlFor="include-charts">Incluir gráficos</Label>
+          {/* Opciones de contenido */}
+          <div>
+            <Label className="text-base font-medium">Contenido del Reporte</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-charts"
+                    checked={exportOptions.includeCharts}
+                    onCheckedChange={(checked) => handleExportOptionChange('includeCharts', checked)}
+                  />
+                  <Label htmlFor="include-charts" className="text-sm">
+                    Incluir gráficos y visualizaciones
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-details"
+                    checked={exportOptions.includeDetails}
+                    onCheckedChange={(checked) => handleExportOptionChange('includeDetails', checked)}
+                  />
+                  <Label htmlFor="include-details" className="text-sm">
+                    Detalles de eventos individuales
+                  </Label>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="include-details"
-                  checked={reportConfig.includeDetails}
-                  onCheckedChange={(checked) =>
-                    setReportConfig(prev => ({ ...prev, includeDetails: checked as boolean }))
-                  }
-                />
-                <Label htmlFor="include-details">Incluir detalles</Label>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-financial"
+                    checked={exportOptions.includeFinancial}
+                    onCheckedChange={(checked) => handleExportOptionChange('includeFinancial', checked)}
+                  />
+                  <Label htmlFor="include-financial" className="text-sm">
+                    Información financiera
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="include-attendance"
+                    checked={exportOptions.includeAttendance}
+                    onCheckedChange={(checked) => handleExportOptionChange('includeAttendance', checked)}
+                  />
+                  <Label htmlFor="include-attendance" className="text-sm">
+                    Datos de asistencia
+                  </Label>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Título y descripción personalizados */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            <div>
-              <Label htmlFor="custom-title">Título Personalizado (opcional)</Label>
-              <Textarea
-                id="custom-title"
-                placeholder="Ingrese un título personalizado para el reporte"
-                value={reportConfig.customTitle || ''}
-                onChange={(e) => setReportConfig(prev => ({ ...prev, customTitle: e.target.value }))}
-                rows={2}
-              />
+          {/* Información del período */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h4 className="font-medium mb-2">Período del Reporte</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-gray-600">Fecha inicio:</span>
+                <span className="ml-2 font-medium">
+                  {new Date(filters.dateRange.startDate).toLocaleDateString('es-GT')}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-600">Fecha fin:</span>
+                <span className="ml-2 font-medium">
+                  {new Date(filters.dateRange.endDate).toLocaleDateString('es-GT')}
+                </span>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="custom-description">Descripción (opcional)</Label>
-              <Textarea
-                id="custom-description"
-                placeholder="Ingrese una descripción para el reporte"
-                value={reportConfig.customDescription || ''}
-                onChange={(e) => setReportConfig(prev => ({ ...prev, customDescription: e.target.value }))}
-                rows={2}
-              />
-            </div>
+            {filters.eventId && (
+              <div className="mt-2 text-sm">
+                <span className="text-gray-600">Evento específico:</span>
+                <span className="ml-2 font-medium">ID {filters.eventId}</span>
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Vista previa */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            Vista Previa del Reporte
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {renderPreviewTable()}
-          {previewData.length > 10 && (
-            <div className="text-center mt-4 text-sm text-gray-500">
-              Mostrando los primeros 10 registros. El reporte completo incluirá todos los datos.
-            </div>
+          {/* Estado de exportación */}
+          {exporting && (
+            <Alert className="border-blue-200 bg-blue-50">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              <AlertDescription>
+                Generando reporte... Esto puede tomar unos momentos.
+              </AlertDescription>
+            </Alert>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Acciones de exportación */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Exportar Reporte</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-3">
+          {/* Botón de generación */}
+          <div className="flex justify-end pt-4 border-t">
             <Button
-              onClick={() => exportReport('pdf')}
-              disabled={generating}
-              className="flex items-center gap-2"
+              onClick={generateReport}
+              disabled={exporting || !permissions.canViewReports}
+              size="lg"
             >
-              <FileText className="h-4 w-4" />
-              {generating ? 'Generando...' : 'Exportar PDF'}
-            </Button>
-            <Button
-              onClick={() => exportReport('excel')}
-              disabled={generating}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <FileSpreadsheet className="h-4 w-4" />
-              {generating ? 'Generando...' : 'Exportar Excel'}
-            </Button>
-            <Button
-              onClick={() => exportReport('csv')}
-              disabled={generating}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <FileSpreadsheet className="h-4 w-4" />
-              {generating ? 'Generando...' : 'Exportar CSV'}
-            </Button>
-            <Button
-              onClick={sendReportByEmail}
-              disabled={generating}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Mail className="h-4 w-4" />
-              {generating ? 'Enviando...' : 'Enviar por Email'}
-            </Button>
-            <Button
-              onClick={printReport}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Printer className="h-4 w-4" />
-              Imprimir
+              {exporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Generando Reporte...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Generar Reporte {exportOptions.format.toUpperCase()}
+                </>
+              )}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Información adicional */}
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          Los reportes se generan basados en los filtros aplicados. Asegúrese de que los filtros estén configurados correctamente antes de exportar.
-        </AlertDescription>
-      </Alert>
+      {/* Instrucciones de uso */}
+      <Card>
+        <CardHeader>
+          <CardTitle>¿Cómo usar el generador de reportes?</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium">1. Selecciona el tipo de reporte</h4>
+                <p className="text-sm text-gray-600">
+                  Elige entre resumen ejecutivo, reporte detallado, análisis financiero o reporte de asistencia.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium">2. Elige el formato de salida</h4>
+                <p className="text-sm text-gray-600">
+                  PDF para documentos profesionales, Excel para análisis o CSV para procesamiento de datos.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium">3. Personaliza el contenido</h4>
+                <p className="text-sm text-gray-600">
+                  Selecciona qué elementos incluir: gráficos, detalles, información financiera, datos de asistencia.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium">4. Genera y descarga</h4>
+                <p className="text-sm text-gray-600">
+                  El sistema procesará los datos y generará el archivo para descarga automática.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

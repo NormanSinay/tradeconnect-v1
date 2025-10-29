@@ -665,9 +665,25 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las categorías</SelectItem>
-              <SelectItem value="1">Conferencia</SelectItem>
-              <SelectItem value="2">Taller</SelectItem>
-              <SelectItem value="3">Seminario</SelectItem>
+              <SelectItem value="1">Negocios</SelectItem>
+              <SelectItem value="2">Tecnología</SelectItem>
+              <SelectItem value="3">Marketing</SelectItem>
+              <SelectItem value="4">Finanzas</SelectItem>
+              <SelectItem value="5">Salud</SelectItem>
+              <SelectItem value="6">Educación</SelectItem>
+              <SelectItem value="7">Legal</SelectItem>
+              <SelectItem value="8">Construcción</SelectItem>
+              <SelectItem value="9">Manufactura</SelectItem>
+              <SelectItem value="10">Retail</SelectItem>
+              <SelectItem value="11">Turismo</SelectItem>
+              <SelectItem value="12">Agricultura</SelectItem>
+              <SelectItem value="13">Energía</SelectItem>
+              <SelectItem value="14">Medio Ambiente</SelectItem>
+              <SelectItem value="15">Deportes</SelectItem>
+              <SelectItem value="16">Entretenimiento</SelectItem>
+              <SelectItem value="17">Gobierno</SelectItem>
+              <SelectItem value="18">ONG</SelectItem>
+              <SelectItem value="19">Otro</SelectItem>
             </SelectContent>
           </Select>
           <Select value={virtualFilter} onValueChange={setVirtualFilter}>
@@ -827,6 +843,15 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
                             <SelectItem value="1">Conferencia</SelectItem>
                             <SelectItem value="2">Taller</SelectItem>
                             <SelectItem value="3">Seminario</SelectItem>
+                            <SelectItem value="4">Webinar</SelectItem>
+                            <SelectItem value="5">Networking</SelectItem>
+                            <SelectItem value="6">Feria Comercial</SelectItem>
+                            <SelectItem value="7">Panel de Discusión</SelectItem>
+                            <SelectItem value="8">Capacitación</SelectItem>
+                            <SelectItem value="9">Evento de Lanzamiento</SelectItem>
+                            <SelectItem value="10">Evento Social</SelectItem>
+                            <SelectItem value="11">Evento Híbrido</SelectItem>
+                            <SelectItem value="12">Otro</SelectItem>
                           </SelectContent>
                         </Select>
                         {formErrors.eventTypeId && <p className="text-sm text-red-500 mt-1">{formErrors.eventTypeId}</p>}
@@ -838,10 +863,26 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
                             <SelectValue placeholder="Seleccionar categoría" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="1">Tecnología</SelectItem>
-                            <SelectItem value="2">Negocios</SelectItem>
-                            <SelectItem value="3">Educación</SelectItem>
-                          </SelectContent>
+                              <SelectItem value="1">Negocios</SelectItem>
+                              <SelectItem value="2">Tecnología</SelectItem>
+                              <SelectItem value="3">Marketing</SelectItem>
+                              <SelectItem value="4">Finanzas</SelectItem>
+                              <SelectItem value="5">Salud</SelectItem>
+                              <SelectItem value="6">Educación</SelectItem>
+                              <SelectItem value="7">Legal</SelectItem>
+                              <SelectItem value="8">Construcción</SelectItem>
+                              <SelectItem value="9">Manufactura</SelectItem>
+                              <SelectItem value="10">Retail</SelectItem>
+                              <SelectItem value="11">Turismo</SelectItem>
+                              <SelectItem value="12">Agricultura</SelectItem>
+                              <SelectItem value="13">Energía</SelectItem>
+                              <SelectItem value="14">Medio Ambiente</SelectItem>
+                              <SelectItem value="15">Deportes</SelectItem>
+                              <SelectItem value="16">Entretenimiento</SelectItem>
+                              <SelectItem value="17">Gobierno</SelectItem>
+                              <SelectItem value="18">ONG</SelectItem>
+                              <SelectItem value="19">Otro</SelectItem>
+                            </SelectContent>
                         </Select>
                         {formErrors.eventCategoryId && <p className="text-sm text-red-500 mt-1">{formErrors.eventCategoryId}</p>}
                       </div>

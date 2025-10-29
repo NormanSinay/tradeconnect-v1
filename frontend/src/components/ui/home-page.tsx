@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FaCalendarAlt, FaGraduationCap, FaHandshake, FaLaptop, FaChartLine, FaUsers, FaLightbulb, FaGlobe, FaMoneyBillWave, FaRocket } from 'react-icons/fa'
+import { FaCalendarAlt, FaGraduationCap, FaHandshake, FaLaptop, FaChartLine, FaUsers, FaHeartbeat, FaGavel, FaBuilding, FaPlane, FaBolt, FaMoneyBillWave } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import Navigation from './navigation'
 import Footer from './footer'
@@ -266,16 +266,16 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
               {
-                title: 'Tecnología',
-                description: 'Innovación y tendencias tecnológicas',
-                icon: FaLaptop,
-                color: 'bg-blue-500'
-              },
-              {
                 title: 'Negocios',
                 description: 'Estrategias empresariales',
                 icon: FaChartLine,
                 color: 'bg-green-500'
+              },
+              {
+                title: 'Tecnología',
+                description: 'Innovación y tendencias tecnológicas',
+                icon: FaLaptop,
+                color: 'bg-blue-500'
               },
               {
                 title: 'Marketing',
@@ -284,46 +284,46 @@ const HomePage: React.FC = () => {
                 color: 'bg-purple-500'
               },
               {
-                title: 'Innovación',
-                description: 'Ideas disruptivas y creativas',
-                icon: FaLightbulb,
-                color: 'bg-yellow-500'
-              },
-              {
-                title: 'Global',
-                description: 'Perspectivas internacionales',
-                icon: FaGlobe,
-                color: 'bg-indigo-500'
-              },
-              {
                 title: 'Finanzas',
                 description: 'Gestión financiera y contable',
                 icon: FaMoneyBillWave,
                 color: 'bg-emerald-500'
               },
               {
-                title: 'Emprendimiento',
-                description: 'Iniciar y crecer negocios',
-                icon: FaRocket,
-                color: 'bg-orange-500'
+                title: 'Salud',
+                description: 'Medicina, bienestar y salud pública',
+                icon: FaHeartbeat,
+                color: 'bg-red-500'
               },
               {
-                title: 'Networking',
-                description: 'Conexiones profesionales',
-                icon: FaHandshake,
-                color: 'bg-pink-500'
-              },
-              {
-                title: 'Liderazgo',
-                description: 'Desarrollo de liderazgo',
+                title: 'Educación',
+                description: 'Formación y desarrollo profesional',
                 icon: FaGraduationCap,
                 color: 'bg-teal-500'
               },
               {
-                title: 'Sostenibilidad',
-                description: 'Negocios responsables',
-                icon: FaCalendarAlt,
-                color: 'bg-cyan-500'
+                title: 'Legal',
+                description: 'Derecho, legislación y compliance',
+                icon: FaGavel,
+                color: 'bg-gray-600'
+              },
+              {
+                title: 'Construcción',
+                description: 'Arquitectura e ingeniería civil',
+                icon: FaBuilding,
+                color: 'bg-yellow-600'
+              },
+              {
+                title: 'Turismo',
+                description: 'Turismo y hospitalidad',
+                icon: FaPlane,
+                color: 'bg-indigo-500'
+              },
+              {
+                title: 'Energía',
+                description: 'Energía, petróleo y renovables',
+                icon: FaBolt,
+                color: 'bg-orange-500'
               }
             ].map((category, index) => {
               const IconComponent = category.icon

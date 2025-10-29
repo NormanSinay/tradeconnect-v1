@@ -1,15 +1,14 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { DashboardService, EventMedia } from '@/services/dashboardService';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, X, File, Image, Video, FileText, Music, AlertTriangle, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -33,6 +32,7 @@ const EventMediaUploadModal: React.FC<EventMediaUploadModalProps> = ({
   onClose
 }) => {
   const { withErrorHandling } = useErrorHandler();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [files, setFiles] = useState<FileWithMetadata[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -44,62 +44,30 @@ const EventMediaUploadModal: React.FC<EventMediaUploadModalProps> = ({
   const ALLOWED_TYPES = {
     image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
     video: ['video/mp4', 'video/avi', 'video/mov', 'video/wmv'],
-    document: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'],
-    audio: ['audio/mpeg', 'audio/wav', 'audio/ogg']
+    audio: ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/flac'],
+    document: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']
   };
 
   const getFileType = (file: File): 'image' | 'video' | 'document' | 'audio' | 'other' => {
     if (ALLOWED_TYPES.image.includes(file.type)) return 'image';
     if (ALLOWED_TYPES.video.includes(file.type)) return 'video';
-    if (ALLOWED_TYPES.document.includes(file.type)) return 'document';
     if (ALLOWED_TYPES.audio.includes(file.type)) return 'audio';
+    if (ALLOWED_TYPES.document.includes(file.type)) return 'document';
     return 'other';
   };
 
-  const validateFile = (file: File): { isValid: boolean; error?: string } => {
+  const validateFile = (file: File): string | null => {
     if (file.size > MAX_FILE_SIZE) {
-      return { isValid: false, error: `El archivo es demasiado grande. Máximo ${MAX_FILE_SIZE / (1024 * 1024)}MB` };
+      return `El archivo ${file.name} excede el límite de 50MB`;
     }
 
     const fileType = getFileType(file);
     if (fileType === 'other') {
-      return { isValid: false, error: 'Tipo de archivo no permitido' };
+      return `Tipo de archivo no soportado: ${file.name}`;
     }
 
-    return { isValid: true };
+    return null;
   };
-
-  const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
-    if (!selectedFiles) return;
-
-    const newFiles: FileWithMetadata[] = [];
-    const errors: string[] = [];
-
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const file = selectedFiles[i];
-      const validation = validateFile(file);
-
-      if (validation.isValid) {
-        newFiles.push({
-          file,
-          type: getFileType(file),
-          altText: '',
-          description: '',
-          isFeatured: false
-        });
-      } else {
-        errors.push(`${file.name}: ${validation.error}`);
-      }
-    }
-
-    if (errors.length > 0) {
-      toast.error(`Errores en algunos archivos:\n${errors.join('\n')}`);
-    }
-
-    if (newFiles.length > 0) {
-      setFiles(prev => [...prev, ...newFiles]);
-    }
-  }, []);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -117,9 +85,43 @@ const EventMediaUploadModal: React.FC<EventMediaUploadModalProps> = ({
     setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileSelect(e.dataTransfer.files);
+      handleFiles(Array.from(e.dataTransfer.files));
     }
-  }, [handleFileSelect]);
+  }, []);
+
+  const handleFiles = (selectedFiles: File[]) => {
+    const validFiles: FileWithMetadata[] = [];
+    const errors: string[] = [];
+
+    selectedFiles.forEach(file => {
+      const validationError = validateFile(file);
+      if (validationError) {
+        errors.push(validationError);
+      } else {
+        validFiles.push({
+          file,
+          type: getFileType(file),
+          altText: '',
+          description: '',
+          isFeatured: false
+        });
+      }
+    });
+
+    if (errors.length > 0) {
+      toast.error(`Errores de validación: ${errors.join(', ')}`);
+    }
+
+    if (validFiles.length > 0) {
+      setFiles(prev => [...prev, ...validFiles]);
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFiles(Array.from(e.target.files));
+    }
+  };
 
   const removeFile = (index: number) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
@@ -131,47 +133,13 @@ const EventMediaUploadModal: React.FC<EventMediaUploadModalProps> = ({
     ));
   };
 
-  const handleUpload = async () => {
-    if (files.length === 0) {
-      toast.error('Selecciona al menos un archivo');
-      return;
-    }
-
-    try {
-      setUploading(true);
-      setUploadProgress(0);
-
-      const uploadData = withErrorHandling(async () => {
-        // Preparar archivos y metadatos
-        const fileList = files.map(f => f.file);
-        const mediaData = files.map(f => ({
-          type: f.type,
-          altText: f.altText,
-          description: f.description,
-          isFeatured: f.isFeatured
-        }));
-
-        // Simular progreso
-        const progressInterval = setInterval(() => {
-          setUploadProgress(prev => Math.min(prev + 10, 90));
-        }, 200);
-
-        const uploadedMedia = await DashboardService.uploadEventMedia(eventId, fileList, mediaData);
-
-        clearInterval(progressInterval);
-        setUploadProgress(100);
-
-        onSuccess(uploadedMedia);
-        setFiles([]);
-        toast.success('Archivos subidos exitosamente');
-      }, 'Error al subir archivos multimedia');
-
-      await uploadData();
-    } catch (error) {
-      console.error('Error in handleUpload:', error);
-      setUploadProgress(0);
-    } finally {
-      setUploading(false);
+  const getFileIcon = (type: string) => {
+    switch (type) {
+      case 'image': return <Image className="h-8 w-8 text-blue-500" />;
+      case 'video': return <Video className="h-8 w-8 text-red-500" />;
+      case 'document': return <FileText className="h-8 w-8 text-green-500" />;
+      case 'audio': return <Music className="h-8 w-8 text-purple-500" />;
+      default: return <File className="h-8 w-8 text-gray-500" />;
     }
   };
 
@@ -183,175 +151,221 @@ const EventMediaUploadModal: React.FC<EventMediaUploadModalProps> = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const getFileIcon = (type: string) => {
-    switch (type) {
-      case 'image': return <Image className="h-5 w-5 text-blue-500" />;
-      case 'video': return <Video className="h-5 w-5 text-red-500" />;
-      case 'document': return <FileText className="h-5 w-5 text-green-500" />;
-      case 'audio': return <Music className="h-5 w-5 text-purple-500" />;
-      default: return <File className="h-5 w-5 text-gray-500" />;
+  const handleUpload = async () => {
+    if (files.length === 0) {
+      toast.error('Selecciona al menos un archivo para subir');
+      return;
     }
-  };
 
-  const getTypeBadgeVariant = (type: string) => {
-    switch (type) {
-      case 'image': return 'default';
-      case 'video': return 'secondary';
-      case 'document': return 'outline';
-      case 'audio': return 'secondary';
-      default: return 'outline';
+    try {
+      setUploading(true);
+      setUploadProgress(0);
+
+      const uploadData = withErrorHandling(async () => {
+        // Simular progreso
+        const progressInterval = setInterval(() => {
+          setUploadProgress(prev => Math.min(prev + 10, 90));
+        }, 200);
+
+        try {
+          const fileList = files.map(f => f.file);
+          const mediaData = files.map(f => ({
+            type: f.type,
+            altText: f.altText,
+            description: f.description,
+            isFeatured: f.isFeatured
+          }));
+
+          const uploadedMedia = await DashboardService.uploadEventMedia(eventId, fileList, mediaData);
+
+          setUploadProgress(100);
+          clearInterval(progressInterval);
+
+          onSuccess(uploadedMedia);
+          toast.success(`${uploadedMedia.length} archivo(s) subido(s) exitosamente`);
+          onClose();
+        } catch (error) {
+          clearInterval(progressInterval);
+          throw error;
+        }
+      }, 'Error subiendo archivos multimedia');
+
+      await uploadData();
+    } catch (error) {
+      console.error('Error in handleUpload:', error);
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
     }
   };
 
   return (
-    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle>Subir Archivos Multimedia</DialogTitle>
-        <DialogDescription>
-          Selecciona y configura los archivos que deseas subir al evento.
-        </DialogDescription>
-      </DialogHeader>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Subir Archivos Multimedia
+          </DialogTitle>
+          <DialogDescription>
+            Sube imágenes, videos, documentos y archivos de audio para enriquecer tu evento.
+            Máximo 50MB por archivo.
+          </DialogDescription>
+        </DialogHeader>
 
-      <div className="space-y-6">
-        {/* Zona de drop de archivos */}
-        <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            dragActive
-              ? 'border-primary bg-primary/5'
-              : 'border-gray-300 hover:border-primary/50'
-          }`}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-        >
-          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <div className="space-y-2">
-            <p className="text-lg font-medium">
-              Arrastra y suelta archivos aquí, o{' '}
-              <label className="text-primary cursor-pointer hover:underline">
-                selecciona archivos
+        <div className="space-y-6">
+          {/* Área de drop */}
+          <Card>
+            <CardContent className="p-6">
+              <div
+                className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                  dragActive
+                    ? 'border-primary bg-primary/5'
+                    : 'border-gray-300 hover:border-primary'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Arrastra y suelta archivos aquí
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  o <button
+                    type="button"
+                    className="text-primary hover:underline"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    selecciona archivos
+                  </button>
+                </p>
+                <p className="text-sm text-gray-500">
+                  Tipos soportados: Imágenes, Videos, Documentos, Audio (máx. 50MB)
+                </p>
                 <input
+                  ref={fileInputRef}
                   type="file"
                   multiple
                   accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
-                  onChange={(e) => handleFileSelect(e.target.files)}
+                  onChange={handleFileInput}
                   className="hidden"
                 />
-              </label>
-            </p>
-            <p className="text-sm text-gray-600">
-              Máximo 50MB por archivo. Tipos permitidos: imágenes, videos, documentos, audio.
-            </p>
-          </div>
-        </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Lista de archivos seleccionados */}
-        {files.length > 0 && (
-          <div className="space-y-4">
-            <h3 className="font-medium">Archivos seleccionados ({files.length})</h3>
+          {/* Lista de archivos seleccionados */}
+          {files.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Archivos Seleccionados ({files.length})</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {files.map((fileData, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        {getFileIcon(fileData.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium truncate" title={fileData.file.name}>
+                            {fileData.file.name}
+                          </h4>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFile(index)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">
+                          {formatFileSize(fileData.file.size)} • {fileData.type}
+                        </p>
 
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {files.map((fileData, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3 flex-1">
-                      {getFileIcon(fileData.type)}
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{fileData.file.name}</p>
-                        <p className="text-xs text-gray-600">{formatFileSize(fileData.file.size)}</p>
-                        <Badge variant={getTypeBadgeVariant(fileData.type)} className="mt-1">
-                          {fileData.type}
-                        </Badge>
+                        {/* Metadatos */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor={`alt-text-${index}`} className="text-sm">
+                              Texto alternativo (opcional)
+                            </Label>
+                            <Input
+                              id={`alt-text-${index}`}
+                              value={fileData.altText}
+                              onChange={(e) => updateFileMetadata(index, 'altText', e.target.value)}
+                              placeholder="Descripción para accesibilidad"
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`description-${index}`} className="text-sm">
+                              Descripción (opcional)
+                            </Label>
+                            <Textarea
+                              id={`description-${index}`}
+                              value={fileData.description}
+                              onChange={(e) => updateFileMetadata(index, 'description', e.target.value)}
+                              placeholder="Descripción del archivo"
+                              className="mt-1"
+                              rows={2}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeFile(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
                   </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
-                  {/* Metadatos del archivo */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor={`alt-${index}`}>Texto alternativo</Label>
-                      <Input
-                        id={`alt-${index}`}
-                        value={fileData.altText}
-                        onChange={(e) => updateFileMetadata(index, 'altText', e.target.value)}
-                        placeholder="Descripción accesible"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`desc-${index}`}>Descripción</Label>
-                      <Textarea
-                        id={`desc-${index}`}
-                        value={fileData.description}
-                        onChange={(e) => updateFileMetadata(index, 'description', e.target.value)}
-                        placeholder="Descripción del archivo"
-                        rows={2}
-                        className="mt-1"
-                      />
-                    </div>
+          {/* Barra de progreso durante subida */}
+          {uploading && (
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    <span className="font-medium">Subiendo archivos...</span>
                   </div>
-
-                  <div className="flex items-center gap-2 mt-3">
-                    <input
-                      type="checkbox"
-                      id={`featured-${index}`}
-                      checked={fileData.isFeatured}
-                      onChange={(e) => updateFileMetadata(index, 'isFeatured', e.target.checked)}
-                    />
-                    <Label htmlFor={`featured-${index}`} className="text-sm">
-                      Archivo destacado
-                    </Label>
-                  </div>
+                  <Progress value={uploadProgress} className="w-full" />
+                  <p className="text-sm text-gray-600 text-center">
+                    {uploadProgress}% completado
+                  </p>
                 </div>
-              ))}
-            </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Acciones */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={onClose} disabled={uploading}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleUpload}
+              disabled={files.length === 0 || uploading}
+            >
+              {uploading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Subiendo...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Subir {files.length} archivo{files.length !== 1 ? 's' : ''}
+                </>
+              )}
+            </Button>
           </div>
-        )}
-
-        {/* Barra de progreso durante subida */}
-        {uploading && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Subiendo archivos...</span>
-              <span>{uploadProgress}%</span>
-            </div>
-            <Progress value={uploadProgress} className="w-full" />
-          </div>
-        )}
-
-        {/* Alertas de validación */}
-        {files.some(f => f.type === 'other') && (
-          <Alert className="border-red-200 bg-red-50">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Algunos archivos tienen tipos no permitidos y serán ignorados.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Acciones */}
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={onClose} disabled={uploading}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleUpload}
-            disabled={files.length === 0 || uploading}
-          >
-            {uploading ? 'Subiendo...' : `Subir ${files.length} archivo(s)`}
-          </Button>
         </div>
-      </div>
-    </DialogContent>
+      </DialogContent>
+    </Dialog>
   );
 };
 

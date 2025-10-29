@@ -141,16 +141,25 @@ app.use(basicSecurity);
 // ====================================================================
 // MIDDLEWARES DE PARSING
 // ====================================================================
-app.use(express.json({ 
+
+// Middleware para verificar JSON solo en métodos que requieren body JSON
+const jsonParserMiddleware = express.json({
   limit: '10mb',
   verify: (req, res, buf) => {
-    try {
-      JSON.parse(buf.toString());
-    } catch (error) {
-      throw new Error('Invalid JSON');
+    // Solo validar JSON para métodos que típicamente envían body JSON
+    const methodsWithJsonBody = ['POST', 'PUT', 'PATCH'];
+    if (methodsWithJsonBody.includes(req.method || '')) {
+      try {
+        JSON.parse(buf.toString());
+      } catch (error) {
+        throw new Error('Invalid JSON');
+      }
     }
   }
-}));
+});
+
+// Aplicar middleware de JSON parsing
+app.use(jsonParserMiddleware);
 
 app.use(express.urlencoded({ 
   extended: true, 
