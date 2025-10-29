@@ -961,11 +961,16 @@ export class UserController {
   async getUserAudit(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       // Verificar permisos administrativos
+      const userRoles = req.user?.roles || [];
       const userPermissions = req.user?.permissions || [];
-      if (!userPermissions.includes('view_user_audit')) {
+
+      const isSuperAdmin = userRoles.includes('super_admin');
+      const hasAuditPermission = userPermissions.includes('view_user_audit');
+
+      if (!isSuperAdmin && !hasAuditPermission) {
         res.status(HTTP_STATUS.FORBIDDEN).json({
           success: false,
-          message: 'Permisos insuficientes',
+          message: 'Permisos insuficientes para ver auditoría',
           error: 'FORBIDDEN',
           timestamp: new Date().toISOString()
         });
@@ -973,10 +978,20 @@ export class UserController {
       }
 
       const userId = parseInt(req.params.id);
-      const { page = 1, limit = 20 } = req.query;
+      if (isNaN(userId)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'ID de usuario inválido',
+          error: 'INVALID_USER_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
 
+      const { page = 1, limit = 20 } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
+      // Obtener logs de auditoría para este usuario específico
       const { rows: auditLogs, count: total } = await AuditLog.findAndCountAll({
         where: {
           resource: 'user',
@@ -994,11 +1009,14 @@ export class UserController {
         ]
       });
 
+      // Si no hay logs específicos del usuario, devolver array vacío
+      const logs = auditLogs || [];
+
       res.status(HTTP_STATUS.OK).json({
         success: true,
         message: 'Auditoría obtenida exitosamente',
         data: {
-          logs: auditLogs,
+          logs: logs,
           pagination: {
             page: Number(page),
             limit: Number(limit),
