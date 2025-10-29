@@ -55,6 +55,7 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userAudit, setUserAudit] = useState<AuditLog[]>([]);
   const [loadingAudit, setLoadingAudit] = useState(false);
@@ -126,20 +127,30 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
     }
   };
 
-  const handleDeleteUser = async (userId: number) => {
-    if (!confirm('¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.')) return;
+  const handleDeleteUserClick = (user: User) => {
+    setSelectedUser(user);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteUserConfirm = async () => {
+    if (!selectedUser) return;
 
     try {
+      setSubmitting(true);
       const deleteData = withErrorHandling(async () => {
-        await DashboardService.deleteUser(userId);
+        await DashboardService.deleteUser(selectedUser.id);
       }, 'Error al eliminar usuario');
 
       await deleteData();
       toast.success('Usuario eliminado exitosamente');
+      setShowDeleteModal(false);
+      setSelectedUser(null);
       loadUsers();
     } catch (error) {
       // Error ya manejado por withErrorHandling
-      console.error('Error in handleDeleteUser:', error);
+      console.error('Error in handleDeleteUserConfirm:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -209,9 +220,14 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
     try {
       setSubmitting(true);
       const updateData = withErrorHandling(async () => {
-        // Aquí iría la llamada a la API de actualización cuando esté implementada
-        // await DashboardService.updateUser(selectedUser.id, formData);
-        toast.success('Funcionalidad de edición de usuario en desarrollo');
+        const updatePayload = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          role: formData.role
+        };
+        await DashboardService.updateUser(selectedUser.id, updatePayload);
+        toast.success('Usuario actualizado exitosamente');
       }, 'Error al actualizar usuario');
 
       await updateData();
@@ -644,11 +660,11 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
                           {user.isActive ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                         </Button>
                       )}
-                      {permissions.isSuperAdmin && (
+                      {permissions.canDeleteUsers && (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeleteUser(user.id)}
+                          onClick={() => handleDeleteUserClick(user)}
                           className="text-red-600 hover:text-red-700"
                           title="Eliminar usuario"
                         >
@@ -854,6 +870,67 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
               </Tabs>
             )}
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de confirmación de eliminación */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              Confirmar Eliminación
+            </DialogTitle>
+            <DialogDescription>
+              ¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedUser && (
+            <div className="py-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">
+                    {selectedUser.firstName[0]}{selectedUser.lastName[0]}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{selectedUser.firstName} {selectedUser.lastName}</h3>
+                    <p className="text-sm text-gray-600">{selectedUser.email}</p>
+                    <Badge variant={getRoleBadgeVariant(selectedUser.role)} className="mt-1">
+                      {selectedUser.role === 'super_admin' ? 'Super Admin' :
+                       selectedUser.role === 'admin' ? 'Admin' :
+                       selectedUser.role === 'organizer' ? 'Organizador' :
+                       selectedUser.role === 'speaker' ? 'Speaker' : 'Usuario'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800">
+                  <strong>Advertencia:</strong> Al eliminar este usuario, se perderá toda su información,
+                  incluyendo registros de eventos, auditoría y estadísticas. Esta acción es irreversible.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteModal(false)}
+              disabled={submitting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteUserConfirm}
+              disabled={submitting}
+            >
+              {submitting ? 'Eliminando...' : 'Eliminar Usuario'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

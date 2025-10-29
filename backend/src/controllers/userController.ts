@@ -801,13 +801,30 @@ export class UserController {
    */
   async deleteUser(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-      // TODO: Verificar permisos de administrador
+      // Verificar permisos de administrador - Super Admin tiene acceso total
+      const userRoles = req.user?.roles || [];
       const userPermissions = req.user?.permissions || [];
-      if (!userPermissions.includes('delete_user')) {
+
+      const isSuperAdmin = userRoles.includes('super_admin');
+      const hasDeletePermission = userPermissions.includes('delete_user');
+
+      if (!isSuperAdmin && !hasDeletePermission) {
         res.status(HTTP_STATUS.FORBIDDEN).json({
           success: false,
           message: 'Permisos insuficientes para eliminar usuarios',
           error: 'INSUFFICIENT_PERMISSIONS',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          error: 'VALIDATION_ERROR',
+          details: errors.array(),
           timestamp: new Date().toISOString()
         });
         return;

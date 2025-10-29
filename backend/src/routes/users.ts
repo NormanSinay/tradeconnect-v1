@@ -1391,7 +1391,7 @@ router.put('/:id', authenticated, userLimiter, userIdValidation, updateUserValid
  *                   type: string
  *                   example: "RATE_LIMIT_EXCEEDED"
  */
-router.delete('/:id', authenticated, userLimiter, userIdValidation, userController.deleteUser);
+router.delete('/:id', authenticated, userLimiter, userController.deleteUser);
 
 /**
  * @swagger

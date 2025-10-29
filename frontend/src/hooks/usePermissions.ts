@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/authStore';
+import { EVENT_PERMISSIONS, EVENT_PERMISSION_GROUPS, type EventPermission } from '@/utils/eventPermissions';
 
 interface PermissionCheck {
   hasPermission: boolean;
@@ -21,7 +22,29 @@ interface UsePermissionsReturn {
   canManageFinance: boolean;
   canViewAuditLogs: boolean;
   canManageSystem: boolean;
+  canDeleteUsers: boolean;
   checkPermission: (permission: string) => PermissionCheck;
+  // Permisos específicos de eventos
+  canViewEvents: boolean;
+  canCreateEvents: boolean;
+  canUpdateEvents: boolean;
+  canDeleteEvents: boolean;
+  canPublishEvents: boolean;
+  canCancelEvents: boolean;
+  canDuplicateEvents: boolean;
+  canChangeEventStatus: boolean;
+  canManageEventMedia: boolean;
+  canViewEventReports: boolean;
+  canExportEventData: boolean;
+  canManageEventAnalytics: boolean;
+  canApproveEvents: boolean;
+  canArchiveEvents: boolean;
+  canManageEventCategories: boolean;
+  canManageEventTypes: boolean;
+  canConfigureEventNotifications: boolean;
+  canManageEventTemplates: boolean;
+  checkEventPermission: (permission: EventPermission) => PermissionCheck;
+  hasAnyEventPermission: (permissions: EventPermission[]) => boolean;
 }
 
 /**
@@ -54,6 +77,44 @@ export const usePermissions = (): UsePermissionsReturn => {
   const canViewAuditLogs = isSuperAdmin || isAdmin;
   const canManageSystem = isSuperAdmin;
 
+  // Permisos específicos de eventos basados en roles
+  const getEventPermissionsForRole = (role: string): readonly EventPermission[] => {
+    switch (role) {
+      case 'super_admin':
+        return EVENT_PERMISSION_GROUPS.SUPER_ADMIN;
+      case 'admin':
+        return EVENT_PERMISSION_GROUPS.ADMIN;
+      case 'manager':
+        return EVENT_PERMISSION_GROUPS.ADVANCED_MANAGER;
+      case 'operator':
+        return EVENT_PERMISSION_GROUPS.BASIC_MANAGER;
+      default:
+        return [EVENT_PERMISSIONS.VIEW_EVENTS]; // Permisos mínimos para otros roles
+    }
+  };
+
+  const userEventPermissions = getEventPermissionsForRole(user?.role || '');
+
+  // Permisos específicos de eventos
+  const canViewEvents = userEventPermissions.includes(EVENT_PERMISSIONS.VIEW_EVENTS);
+  const canCreateEvents = userEventPermissions.includes(EVENT_PERMISSIONS.CREATE_EVENTS);
+  const canUpdateEvents = userEventPermissions.includes(EVENT_PERMISSIONS.UPDATE_EVENTS);
+  const canDeleteEvents = userEventPermissions.includes(EVENT_PERMISSIONS.DELETE_EVENTS);
+  const canPublishEvents = userEventPermissions.includes(EVENT_PERMISSIONS.PUBLISH_EVENTS);
+  const canCancelEvents = userEventPermissions.includes(EVENT_PERMISSIONS.CANCEL_EVENTS);
+  const canDuplicateEvents = userEventPermissions.includes(EVENT_PERMISSIONS.DUPLICATE_EVENTS);
+  const canChangeEventStatus = userEventPermissions.includes(EVENT_PERMISSIONS.CHANGE_EVENT_STATUS);
+  const canManageEventMedia = userEventPermissions.includes(EVENT_PERMISSIONS.MANAGE_EVENT_MEDIA);
+  const canViewEventReports = userEventPermissions.includes(EVENT_PERMISSIONS.VIEW_EVENT_REPORTS);
+  const canExportEventData = userEventPermissions.includes(EVENT_PERMISSIONS.EXPORT_EVENT_DATA);
+  const canManageEventAnalytics = userEventPermissions.includes(EVENT_PERMISSIONS.MANAGE_EVENT_ANALYTICS);
+  const canApproveEvents = userEventPermissions.includes(EVENT_PERMISSIONS.APPROVE_EVENTS);
+  const canArchiveEvents = userEventPermissions.includes(EVENT_PERMISSIONS.ARCHIVE_EVENTS);
+  const canManageEventCategories = userEventPermissions.includes(EVENT_PERMISSIONS.MANAGE_EVENT_CATEGORIES);
+  const canManageEventTypes = userEventPermissions.includes(EVENT_PERMISSIONS.MANAGE_EVENT_TYPES);
+  const canConfigureEventNotifications = userEventPermissions.includes(EVENT_PERMISSIONS.CONFIGURE_EVENT_NOTIFICATIONS);
+  const canManageEventTemplates = userEventPermissions.includes(EVENT_PERMISSIONS.MANAGE_EVENT_TEMPLATES);
+
   const checkPermission = (permission: string): PermissionCheck => {
     const permissions: { [key: string]: boolean } = {
       'access_admin_panel': canAccessAdminPanel,
@@ -83,6 +144,18 @@ export const usePermissions = (): UsePermissionsReturn => {
     };
   };
 
+  const checkEventPermission = (permission: EventPermission): PermissionCheck => {
+    return {
+      hasPermission: userEventPermissions.includes(permission),
+      isLoading: false,
+      error: null
+    };
+  };
+
+  const hasAnyEventPermission = (permissions: EventPermission[]): boolean => {
+    return permissions.some(permission => userEventPermissions.includes(permission));
+  };
+
   return {
     isSuperAdmin,
     isAdmin,
@@ -98,6 +171,28 @@ export const usePermissions = (): UsePermissionsReturn => {
     canManageFinance,
     canViewAuditLogs,
     canManageSystem,
-    checkPermission
+    canDeleteUsers: isSuperAdmin || checkPermission('delete_users').hasPermission,
+    checkPermission,
+    // Permisos específicos de eventos
+    canViewEvents,
+    canCreateEvents,
+    canUpdateEvents,
+    canDeleteEvents,
+    canPublishEvents,
+    canCancelEvents,
+    canDuplicateEvents,
+    canChangeEventStatus,
+    canManageEventMedia,
+    canViewEventReports,
+    canExportEventData,
+    canManageEventAnalytics,
+    canApproveEvents,
+    canArchiveEvents,
+    canManageEventCategories,
+    canManageEventTypes,
+    canConfigureEventNotifications,
+    canManageEventTemplates,
+    checkEventPermission,
+    hasAnyEventPermission
   };
 };
