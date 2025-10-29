@@ -65,7 +65,7 @@ export class AccessTypeService {
           userId,
           resourceId: accessType.id.toString(),
           newValues: accessTypeData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -150,7 +150,7 @@ export class AccessTypeService {
           resourceId: accessTypeId.toString(),
           oldValues,
           newValues: data,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -224,7 +224,7 @@ export class AccessTypeService {
             displayName: accessType.displayName,
             category: accessType.category
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

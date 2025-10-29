@@ -164,7 +164,7 @@ export class VirtualParticipantService {
             roomId: request.roomId,
             accessToken: accessToken.substring(0, 8) + '...' // Solo loggear parte del token
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: request.userAgent || 'unknown'
         }
       );
@@ -280,7 +280,7 @@ export class VirtualParticipantService {
             sessionTime,
             totalTimeConnected: participant.totalTimeConnected
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -484,7 +484,7 @@ export class VirtualParticipantService {
           resourceId: participantId.toString(),
           oldValues: { isMuted: false },
           newValues: { isMuted: true, reason },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -550,7 +550,7 @@ export class VirtualParticipantService {
           resourceId: participantId.toString(),
           oldValues: { isMuted: true },
           newValues: { isMuted: false },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -618,7 +618,7 @@ export class VirtualParticipantService {
           resourceId: participantId.toString(),
           oldValues: { isBlocked: false, status: participant.status },
           newValues: { isBlocked: true, status: VirtualParticipantStatus.BLOCKED, reason },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -687,7 +687,7 @@ export class VirtualParticipantService {
           resourceId: participantId.toString(),
           oldValues: { role: oldRole, isModerator: participant.isModerator },
           newValues: { role: newRole, isModerator: newRole === 'moderator' || newRole === 'organizer' },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -912,7 +912,7 @@ export class VirtualParticipantService {
             status: VirtualParticipantStatus.REMOVED,
             reason: reason || 'Removed by moderator'
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

@@ -110,7 +110,7 @@ export class SpeakerService {
           userId: createdBy,
           resourceId: speaker.id.toString(),
           newValues: speakerData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -230,7 +230,7 @@ export class SpeakerService {
           resourceId: speakerId.toString(),
           oldValues,
           newValues: updateData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -327,7 +327,7 @@ export class SpeakerService {
             lastName: speaker.lastName,
             email: speaker.email
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -414,7 +414,7 @@ export class SpeakerService {
             verifiedAt: speaker.verifiedAt,
             verifiedBy
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

@@ -69,7 +69,7 @@ export class EventListenersService {
             eventTitle: data.eventData.title,
             eventType: data.eventData.eventType?.name
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'event-listener'
         }
       );
@@ -110,7 +110,7 @@ export class EventListenersService {
             eventTitle: data.eventData.title,
             notifySubscribers: data.notifySubscribers
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'event-listener'
         }
       );
@@ -159,7 +159,7 @@ export class EventListenersService {
               oldData: data.oldData,
               newData: data.newData
             },
-            ipAddress: 'system',
+            ipAddress: '127.0.0.1',
             userAgent: 'event-listener'
           }
         );
@@ -199,7 +199,7 @@ export class EventListenersService {
             eventId: data.eventId,
             eventTitle: data.eventData.title
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'event-listener'
         }
       );
@@ -240,7 +240,7 @@ export class EventListenersService {
             eventTitle: data.eventData.title,
             cancellationReason: data.reason
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'event-listener'
         }
       );

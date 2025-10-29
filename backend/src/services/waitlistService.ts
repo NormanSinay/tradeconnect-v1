@@ -106,7 +106,7 @@ export class WaitlistService {
           userId,
           resourceId: waitlistEntry.id.toString(),
           newValues: { ...data, position: nextPosition },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -203,7 +203,7 @@ export class WaitlistService {
           resourceId: waitlistId.toString(),
           oldValues: { position: removedPosition, status: 'ACTIVE' },
           newValues: { status: 'CANCELLED' },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -295,7 +295,7 @@ export class WaitlistService {
           userId: nextEntry.userId,
           resourceId: nextEntry.id.toString(),
           newValues: { status: 'NOTIFIED', notifiedAt: new Date(), expiresAt },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -413,7 +413,7 @@ export class WaitlistService {
           userId,
           resourceId: waitlistId.toString(),
           newValues: { status: 'CONFIRMED', confirmedAt: new Date() },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -586,7 +586,7 @@ export class WaitlistService {
               resourceId: entry.id.toString(),
               oldValues: { status: 'NOTIFIED' },
               newValues: { status: 'EXPIRED' },
-              ipAddress: 'system',
+              ipAddress: '127.0.0.1',
               userAgent: 'system'
             }
           );

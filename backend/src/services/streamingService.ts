@@ -155,7 +155,7 @@ export class StreamingService {
             platform: hybridEvent.streamingPlatform,
             roomId
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -268,7 +268,7 @@ export class StreamingService {
             endTime: streamingConfig.endTime,
             duration: streamingConfig.duration
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

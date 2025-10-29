@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, Plus, Eye, Edit, Trash2, Download, Calendar, MapPin, Users, DollarSign, AlertTriangle, Copy, Upload, X } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import EventDuplicateModal from './EventDuplicateModal';
 import toast from 'react-hot-toast';
 
@@ -452,6 +453,15 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
     if (!formData.eventTypeId) errors.eventTypeId = 'Tipo de evento es requerido';
     if (!formData.eventCategoryId) errors.eventCategoryId = 'Categoría de evento es requerida';
 
+    // Validación específica para eventos virtuales/híbridos
+    if (formData.virtualLocation.trim()) {
+      try {
+        new URL(formData.virtualLocation);
+      } catch {
+        errors.virtualLocation = 'El enlace virtual debe ser una URL válida';
+      }
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -494,6 +504,8 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
       const createData = withErrorHandling(async () => {
         const eventData: CreateEventData = {
           ...formData,
+          // No enviar virtualLocation si el evento no es virtual o está vacío
+          virtualLocation: formData.isVirtual && formData.virtualLocation.trim() ? formData.virtualLocation.trim() : undefined,
           tags: formData.tags.filter(tag => tag.trim() !== '')
         };
         await DashboardService.createEvent(eventData);
@@ -525,6 +537,8 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
       const updateData = withErrorHandling(async () => {
         const eventData: UpdateEventData = {
           ...formData,
+          // No enviar virtualLocation si el evento no es virtual o está vacío
+          virtualLocation: formData.isVirtual && formData.virtualLocation.trim() ? formData.virtualLocation.trim() : undefined,
           tags: formData.tags.filter(tag => tag.trim() !== '')
         };
         await DashboardService.updateEvent(selectedEvent.id, eventData);
@@ -762,14 +776,15 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
                         {formErrors.endDate && <p className="text-sm text-red-500 mt-1">{formErrors.endDate}</p>}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="isVirtual" className="text-sm font-medium">
+                        Evento virtual
+                      </Label>
+                      <Switch
                         id="isVirtual"
                         checked={formData.isVirtual}
-                        onChange={(e) => setFormData({ ...formData, isVirtual: e.target.checked })}
+                        onCheckedChange={(checked) => setFormData({ ...formData, isVirtual: checked })}
                       />
-                      <Label htmlFor="isVirtual">Evento virtual</Label>
                     </div>
                     {!formData.isVirtual && (
                       <div>
@@ -787,10 +802,13 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
                         <Label htmlFor="virtualLocation">Enlace virtual</Label>
                         <Input
                           id="virtualLocation"
+                          type="url"
                           value={formData.virtualLocation}
                           onChange={(e) => setFormData({ ...formData, virtualLocation: e.target.value })}
-                          placeholder="URL de Zoom, Meet, etc."
+                          placeholder="https://zoom.us/j/123456789"
+                          className={formErrors.virtualLocation ? 'border-red-500' : ''}
                         />
+                        {formErrors.virtualLocation && <p className="text-sm text-red-500 mt-1">{formErrors.virtualLocation}</p>}
                       </div>
                     )}
                     <div className="grid grid-cols-3 gap-4">

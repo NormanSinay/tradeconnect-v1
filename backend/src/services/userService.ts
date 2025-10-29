@@ -356,7 +356,7 @@ export class UserService {
             lastName: newUser.lastName,
             role: roleName
           },
-          ipAddress: 'system', // TODO: Obtener de request
+          ipAddress: '127.0.0.1', // TODO: Obtener de request
           userAgent: 'system'
         }
       );
@@ -446,7 +446,7 @@ export class UserService {
           resourceId: userId.toString(),
           oldValues,
           newValues: updateData,
-          ipAddress: 'system', // TODO: Obtener de request
+          ipAddress: '127.0.0.1', // TODO: Obtener de request
           userAgent: 'system'
         }
       );
@@ -510,7 +510,7 @@ export class UserService {
             firstName: user.firstName,
             lastName: user.lastName
           },
-          ipAddress: 'system', // TODO: Obtener de request
+          ipAddress: '127.0.0.1', // TODO: Obtener de request
           userAgent: 'system'
         }
       );

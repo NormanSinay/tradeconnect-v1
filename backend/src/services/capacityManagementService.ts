@@ -106,7 +106,7 @@ export class CapacityManagementService {
           userId,
           resourceId: capacity.id.toString(),
           newValues: configData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

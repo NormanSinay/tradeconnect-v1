@@ -367,7 +367,7 @@ export class StreamSecurityService {
         {
           ...data,
           timestamp: new Date().toISOString(),
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'stream-security-service'
         }
       );

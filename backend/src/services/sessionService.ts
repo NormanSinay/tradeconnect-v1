@@ -434,7 +434,7 @@ export class SessionService {
             resourceId: 'system',
             oldValues: { expiredSessions: cleanedCount },
             newValues: { action: 'cleanup' },
-            ipAddress: 'system',
+            ipAddress: '127.0.0.1',
             userAgent: 'system'
           }
         );
@@ -494,7 +494,7 @@ export class SessionService {
             isActive: false,
             reason
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -549,7 +549,7 @@ export class SessionService {
             additionalHours,
             newExpiresAt: session.expiresAt
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

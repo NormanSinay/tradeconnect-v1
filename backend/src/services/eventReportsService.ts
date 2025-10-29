@@ -29,12 +29,20 @@ export class EventReportsService {
         return JSON.parse(cached);
       }
 
-      // Obtener métricas existentes
+      // Obtener métricas existentes - solo contar eventos activos y vigentes
       const totalEvents = await Event.count();
+
+      // Contar eventos publicados (activos) que no han terminado aún
       const activeEvents = await Event.count({
+        where: {
+          endDate: {
+            [Op.gte]: new Date() // Solo eventos que no han terminado
+          }
+        },
         include: [{
           model: EventStatus,
-          where: { name: 'published' }
+          where: { name: 'published' },
+          required: true
         }]
       });
 

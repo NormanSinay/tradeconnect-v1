@@ -287,7 +287,7 @@ const queryValidation = [
  *     security:
  *       - bearerAuth: []
  */
-router.get('/', authenticated, eventLimiter, queryValidation, eventController.getUserEvents);
+router.get('/', authenticated, eventLimiter, queryValidation, eventController.getUserEvents.bind(eventController));
 
 /**
  * @swagger
@@ -299,7 +299,7 @@ router.get('/', authenticated, eventLimiter, queryValidation, eventController.ge
  *     security:
  *       - bearerAuth: []
  */
-router.post('/', authenticated, createEditLimiter, createEventValidation, eventController.createEvent);
+router.post('/', authenticated, createEditLimiter, createEventValidation, eventController.createEvent.bind(eventController));
 
 /**
  * @swagger
@@ -317,7 +317,7 @@ router.post('/', authenticated, createEditLimiter, createEventValidation, eventC
  *         schema:
  *           type: integer
  */
-router.get('/:id', authenticated, eventLimiter, eventIdValidation, eventController.getEvent);
+router.get('/:id', authenticated, eventLimiter, eventIdValidation, eventController.getEvent.bind(eventController));
 
 /**
  * @swagger
@@ -335,7 +335,7 @@ router.get('/:id', authenticated, eventLimiter, eventIdValidation, eventControll
  *         schema:
  *           type: integer
  */
-router.put('/:id', authenticated, createEditLimiter, eventIdValidation, updateEventValidation, eventController.updateEvent);
+router.put('/:id', authenticated, createEditLimiter, eventIdValidation, updateEventValidation, eventController.updateEvent.bind(eventController));
 
 /**
  * @swagger
@@ -353,7 +353,7 @@ router.put('/:id', authenticated, createEditLimiter, eventIdValidation, updateEv
  *         schema:
  *           type: integer
  */
-router.delete('/:id', authenticated, eventLimiter, eventIdValidation, eventController.deleteEvent);
+router.delete('/:id', authenticated, eventLimiter, eventIdValidation, eventController.deleteEvent.bind(eventController));
 
 /**
  * @swagger
@@ -371,7 +371,7 @@ router.delete('/:id', authenticated, eventLimiter, eventIdValidation, eventContr
  *         schema:
  *           type: integer
  */
-router.post('/:id/publish', authenticated, eventLimiter, eventIdValidation, publishEventValidation, eventController.publishEvent);
+router.post('/:id/publish', authenticated, eventLimiter, eventIdValidation, publishEventValidation, eventController.publishEvent.bind(eventController));
 
 /**
  * @swagger
@@ -402,7 +402,7 @@ router.put('/:id/status', authenticated, eventLimiter, eventIdValidation, [
   body('reason')
     .isLength({ min: 10, max: 500 })
     .withMessage('La razón debe tener entre 10 y 500 caracteres')
-], eventController.updateEventStatus);
+], eventController.updateEventStatus.bind(eventController));
 
 /**
  * @swagger
@@ -660,7 +660,7 @@ router.post('/:id/duplicate', authenticated, createEditLimiter, eventIdValidatio
     .optional()
     .isFloat({ min: 0 })
     .withMessage('El precio debe ser un número positivo')
-], eventController.duplicateEvent);
+], eventController.duplicateEvent.bind(eventController));
 
 /**
  * @swagger
@@ -678,7 +678,7 @@ router.post('/:id/duplicate', authenticated, createEditLimiter, eventIdValidatio
  *         schema:
  *           type: integer
  */
-router.post('/:id/upload-media', authenticated, createEditLimiter, eventIdValidation, uploadService.uploadMultiple('files', 10), eventController.uploadMedia);
+router.post('/:id/upload-media', authenticated, createEditLimiter, eventIdValidation, uploadService.uploadMultiple('files', 10), eventController.uploadMedia.bind(eventController));
 
 /**
  * @swagger
@@ -696,7 +696,7 @@ router.post('/:id/upload-media', authenticated, createEditLimiter, eventIdValida
  *         schema:
  *           type: integer
  */
-router.get('/:id/media', authenticated, eventLimiter, eventIdValidation, eventController.getEventMedia);
+router.get('/:id/media', authenticated, eventLimiter, eventIdValidation, eventController.getEventMedia.bind(eventController));
 
 /**
  * @swagger
@@ -724,6 +724,6 @@ router.delete('/:id/media/:mediaId', authenticated, eventLimiter, [
   param('mediaId')
     .isInt({ min: 1 })
     .withMessage('El ID del archivo multimedia debe ser un número entero positivo')
-], eventController.deleteMedia);
+], eventController.deleteMedia.bind(eventController));
 
 export default router;

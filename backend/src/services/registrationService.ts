@@ -141,7 +141,7 @@ export class RegistrationService {
             eventId: data.eventId,
             status: 'PENDIENTE_PAGO'
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -250,7 +250,7 @@ export class RegistrationService {
           resourceId: registration.id.toString(),
           oldValues: registration.previous(),
           newValues: updates,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -336,7 +336,7 @@ export class RegistrationService {
             reason,
             refundAmount
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -492,7 +492,7 @@ export class RegistrationService {
             participantCount: data.participants.length,
             status: 'PENDIENTE_PAGO'
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

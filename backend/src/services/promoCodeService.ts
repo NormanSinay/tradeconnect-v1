@@ -108,7 +108,7 @@ export class PromoCodeService {
           userId: createdBy,
           resourceId: promoCode.id.toString(),
           newValues: promoCodeData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -235,7 +235,7 @@ export class PromoCodeService {
           resourceId: promoCodeId.toString(),
           oldValues,
           newValues: updateData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -319,7 +319,7 @@ export class PromoCodeService {
             name: promoCode.name,
             isActive: promoCode.isActive
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

@@ -343,7 +343,7 @@ export class CartService {
         userId || 0, // Asegurar que no sea undefined
         {
           userAgent: 'cart-service',
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           cartSessionId: sessionId
         }
       );

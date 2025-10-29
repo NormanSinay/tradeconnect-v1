@@ -534,7 +534,7 @@ export class TwoFactorService {
             reason,
             adminId
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

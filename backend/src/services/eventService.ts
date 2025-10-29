@@ -104,7 +104,7 @@ export class EventService {
           userId: createdBy,
           resourceId: event.id.toString(),
           newValues: eventData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -213,7 +213,7 @@ export class EventService {
           resourceId: eventId.toString(),
           oldValues,
           newValues: updateData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -294,8 +294,13 @@ export class EventService {
         };
       }
 
-      // Soft delete
-      await event.destroy();
+      // Si no tiene inscripciones activas, hacer eliminación permanente (hard delete)
+      if (activeRegistrations === 0) {
+        await event.destroy({ force: true });
+      } else {
+        // Soft delete para eventos con inscripciones (aunque esto nunca debería suceder por la validación anterior)
+        await event.destroy();
+      }
 
       // Registrar en auditoría
       await AuditLog.log(
@@ -309,7 +314,7 @@ export class EventService {
             startDate: event.startDate,
             endDate: event.endDate
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -426,7 +431,7 @@ export class EventService {
             eventStatusId: publishedStatusId,
             publishedAt: event.publishedAt
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -539,7 +544,7 @@ export class EventService {
             cancelledAt: event.cancelledAt,
             cancellationReason: reason
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -887,7 +892,7 @@ export class EventService {
           id: event.creator.id,
           firstName: event.creator.firstName,
           lastName: event.creator.lastName,
-          fullName: event.creator.fullName,
+          fullName: `${event.creator.firstName} ${event.creator.lastName}`,
           avatar: event.creator.avatar || undefined
         } : undefined as any,
         publishedAt: event.publishedAt,
@@ -972,7 +977,7 @@ export class EventService {
         { model: EventType, as: 'eventType' },
         { model: EventCategory, as: 'eventCategory' },
         { model: EventStatus, as: 'eventStatus' },
-        { model: User, as: 'creator', attributes: ['id', 'firstName', 'lastName', 'fullName', 'avatar'] }
+        { model: User, as: 'creator', attributes: ['id', 'firstName', 'lastName', 'avatar'] }
       ]
     });
 

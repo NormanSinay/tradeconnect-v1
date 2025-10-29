@@ -83,7 +83,7 @@ export class PromotionService {
           userId: createdBy,
           resourceId: promotion.id.toString(),
           newValues: promotionData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -187,7 +187,7 @@ export class PromotionService {
           resourceId: promotionId.toString(),
           oldValues,
           newValues: updateData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -271,7 +271,7 @@ export class PromotionService {
             type: promotion.type,
             isActive: promotion.isActive
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -354,7 +354,7 @@ export class PromotionService {
           userId: activatedBy,
           resourceId: promotionId.toString(),
           newValues: { isActive: true },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -438,7 +438,7 @@ export class PromotionService {
           userId: deactivatedBy,
           resourceId: promotionId.toString(),
           newValues: { isActive: false },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

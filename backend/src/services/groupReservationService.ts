@@ -178,7 +178,7 @@ export class GroupReservationService {
               accessTypeId: slot.accessTypeId
             }))
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -244,7 +244,7 @@ export class GroupReservationService {
           resourceId: reservationId,
           oldValues: { status: 'ACTIVE' },
           newValues: { status: 'CANCELLED' },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

@@ -169,7 +169,7 @@ export class HybridEventService {
           userId: createdBy,
           resourceId: hybridEvent.id.toString(),
           newValues: hybridData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -321,7 +321,7 @@ export class HybridEventService {
           resourceId: hybridEventId.toString(),
           oldValues,
           newValues: updateData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

@@ -102,7 +102,7 @@ export class DiscountService {
           userId: createdBy,
           resourceId: discount.id.toString(),
           newValues: discountData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -200,7 +200,7 @@ export class DiscountService {
           resourceId: discountId.toString(),
           oldValues,
           newValues: updateData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -267,7 +267,7 @@ export class DiscountService {
             minQuantity: discount.minQuantity,
             discountPercentage: discount.discountPercentage
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -432,7 +432,7 @@ export class DiscountService {
           userId: createdBy,
           resourceId: discount.id.toString(),
           newValues: discountData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );

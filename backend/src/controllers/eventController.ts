@@ -89,7 +89,7 @@ export class EventController {
       // Validaciones adicionales del negocio
       try {
         this.validateEventData(eventData);
-      } catch (validationError) {
+      } catch (validationError: any) {
         logger.warn('Error de validación de negocio en createEvent:', validationError);
         res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,

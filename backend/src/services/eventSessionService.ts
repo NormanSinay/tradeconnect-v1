@@ -104,7 +104,7 @@ export class EventSessionService {
           userId: createdBy,
           resourceId: session.id.toString(),
           newValues: sessionData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -201,7 +201,7 @@ export class EventSessionService {
           resourceId: sessionId.toString(),
           oldValues,
           newValues: updateData,
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
@@ -272,7 +272,7 @@ export class EventSessionService {
             eventId: session.eventId,
             startDate: session.startDate
           },
-          ipAddress: 'system',
+          ipAddress: '127.0.0.1',
           userAgent: 'system'
         }
       );
