@@ -369,6 +369,45 @@ export class DashboardService {
   }
 
   /**
+   * Crear nuevo usuario
+   */
+  static async createUser(userData: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    phone?: string;
+    role?: string;
+  }): Promise<{
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    createdAt: string;
+  }> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/users`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(userData),
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error creando usuario');
+    }
+
+    return data.data!;
+  }
+
+  /**
    * Eliminar usuario
    */
   static async deleteUser(userId: number): Promise<void> {

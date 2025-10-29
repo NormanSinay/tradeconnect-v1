@@ -187,9 +187,8 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
     try {
       setSubmitting(true);
       const createData = withErrorHandling(async () => {
-        // Aquí iría la llamada a la API de creación cuando esté implementada
-        // await DashboardService.createUser(formData);
-        toast.success('Funcionalidad de creación de usuario en desarrollo');
+        await DashboardService.createUser(formData);
+        toast.success('Usuario creado exitosamente');
       }, 'Error al crear usuario');
 
       await createData();
@@ -374,11 +373,15 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
                   Nuevo Usuario
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-md" aria-describedby="create-user-description">
                 <DialogHeader>
                   <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                  <DialogDescription id="create-user-description">
+                    Complete la información requerida para crear un nuevo usuario en el sistema.
+                  </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4">
+                <form onSubmit={(e) => { e.preventDefault(); handleCreateUser(); }}>
+                  <div className="space-y-4">
                   <div>
                     <Label htmlFor="email">Email *</Label>
                     <Input
@@ -395,6 +398,7 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
                     <Input
                       id="password"
                       type="password"
+                      autoComplete="new-password"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       className={formErrors.password ? 'border-red-500' : ''}
@@ -453,11 +457,12 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
                     <Button variant="outline" onClick={() => setShowCreateModal(false)}>
                       Cancelar
                     </Button>
-                    <Button onClick={handleCreateUser} disabled={submitting}>
+                    <Button type="submit" disabled={submitting}>
                       {submitting ? 'Creando...' : 'Crear Usuario'}
                     </Button>
                   </div>
-                </div>
+                  </div>
+                </form>
               </DialogContent>
             </Dialog>
           )}
@@ -550,6 +555,9 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
                           <DialogContent className="max-w-md">
                             <DialogHeader>
                               <DialogTitle>Editar Usuario</DialogTitle>
+                              <DialogDescription>
+                                Modifique la información del usuario seleccionado.
+                              </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
@@ -665,13 +673,15 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
               Información completa del usuario seleccionado, incluyendo perfil, estadísticas y auditoría.
             </DialogDescription>
           </DialogHeader>
-          {selectedUser && (
-            <Tabs defaultValue="info" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="info">Información</TabsTrigger>
-                <TabsTrigger value="stats">Estadísticas</TabsTrigger>
-                <TabsTrigger value="audit">Auditoría</TabsTrigger>
-              </TabsList>
+          <form onSubmit={(e) => e.preventDefault()}>
+            {selectedUser && (
+              <Tabs defaultValue="info" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="info">Información</TabsTrigger>
+                  <TabsTrigger value="stats">Estadísticas</TabsTrigger>
+                  <TabsTrigger value="audit">Auditoría</TabsTrigger>
+                </TabsList>
+                <div className="mt-4" id="user-detail-content">
 
               <TabsContent value="info" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -840,8 +850,10 @@ const UserManagementTab: React.FC<UserManagementTabProps> = ({ activeTab }) => {
                   </CardContent>
                 </Card>
               </TabsContent>
-            </Tabs>
-          )}
+                </div>
+              </Tabs>
+            )}
+          </form>
         </DialogContent>
       </Dialog>
 
