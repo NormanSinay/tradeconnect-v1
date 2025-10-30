@@ -13,7 +13,7 @@ import { successResponse, errorResponse } from '../utils/common.utils';
 import { logger } from '../utils/logger';
 import { PaymentGateway } from '../utils/constants';
 import { Op } from 'sequelize';
-import { Payment, EventRegistration, Event } from '../models';
+import { Payment, Registration, Event } from '../models';
 
 export class FinanceController {
   // ====================================================================
@@ -341,6 +341,10 @@ export class FinanceController {
    */
   static async getTransactions(req: Request, res: Response): Promise<void> {
     try {
+      console.log('🔍 [DEBUG] getTransactions called');
+      console.log('🔍 [DEBUG] Query params:', req.query);
+      console.log('🔍 [DEBUG] User:', req.user);
+
       const {
         page = 1,
         limit = 50,
@@ -389,11 +393,14 @@ export class FinanceController {
       const { rows: transactions, count: total } = await Payment.findAndCountAll({
         where: filters,
         include: [{
-          model: EventRegistration,
+          model: Registration,
+          as: 'registration',
           required: false,
           include: [{
             model: Event,
-            required: false
+            as: 'event',
+            required: false,
+            attributes: ['id', 'title']
           }]
         }],
         order: [[sortBy as string, sortOrder as string]],
@@ -446,8 +453,10 @@ export class FinanceController {
         }
       };
 
+      console.log('✅ [DEBUG] Transactions retrieved successfully:', { total, transactionCount: transformedTransactions.length });
       res.json(successResponse(result, 'Transacciones obtenidas exitosamente'));
     } catch (error) {
+      console.error('❌ [DEBUG] Error in getTransactions:', error);
       logger.error('Error getting transactions', { error, query: req.query });
       res.status(500).json(errorResponse('Error al obtener transacciones'));
     }
@@ -462,10 +471,14 @@ export class FinanceController {
    */
   static async getFinancialStats(req: Request, res: Response): Promise<void> {
     try {
+      console.log('🔍 [DEBUG] getFinancialStats called');
+      console.log('🔍 [DEBUG] User:', req.user);
       const stats = await FinanceService.getFinancialStats();
+      console.log('✅ [DEBUG] Stats retrieved successfully:', stats);
 
       res.json(successResponse(stats, 'Estadísticas financieras obtenidas exitosamente'));
     } catch (error) {
+      console.error('❌ [DEBUG] Error in getFinancialStats:', error);
       logger.error('Error getting financial stats', { error });
       res.status(500).json(errorResponse('Error al obtener estadísticas financieras'));
     }

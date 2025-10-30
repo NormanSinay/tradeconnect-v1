@@ -9,13 +9,13 @@ module.exports = {
         autoIncrement: true,
         allowNull: false
       },
-      registrationCode: {
+      registration_code: {
         type: Sequelize.STRING(20),
         allowNull: false,
         unique: true,
         comment: 'Código único de inscripción (INS-YYYYMMDD-XXXXX)'
       },
-      eventId: {
+      event_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -25,7 +25,7 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       },
-      userId: {
+      user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
@@ -35,16 +35,16 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       },
-      participantType: {
+      participant_type: {
         type: Sequelize.ENUM('individual', 'empresa'),
         allowNull: false,
         defaultValue: 'individual'
       },
-      firstName: {
+      first_name: {
         type: Sequelize.STRING(100),
         allowNull: false
       },
-      lastName: {
+      last_name: {
         type: Sequelize.STRING(100),
         allowNull: false
       },
@@ -70,7 +70,7 @@ module.exports = {
         allowNull: true,
         comment: 'CUI guatemalteco: 13 dígitos'
       },
-      companyName: {
+      company_name: {
         type: Sequelize.STRING(255),
         allowNull: true
       },
@@ -91,36 +91,36 @@ module.exports = {
         allowNull: false,
         defaultValue: 'BORRADOR'
       },
-      basePrice: {
+      base_price: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0
       },
-      discountAmount: {
+      discount_amount: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0
       },
-      finalPrice: {
+      final_price: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0
       },
-      paymentReference: {
+      payment_reference: {
         type: Sequelize.STRING(100),
         allowNull: true
       },
-      reservationExpiresAt: {
+      reservation_expires_at: {
         type: Sequelize.DATE,
         allowNull: true,
         comment: 'Fecha de expiración de reserva temporal (15 min)'
       },
-      customFields: {
+      custom_fields: {
         type: Sequelize.JSON,
         allowNull: true,
         comment: 'Campos personalizados del evento'
       },
-      groupRegistrationId: {
+      group_registration_id: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
@@ -130,15 +130,15 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL'
       },
-      createdAt: {
+      created_at: {
         type: Sequelize.DATE,
         allowNull: false
       },
-      updatedAt: {
+      updated_at: {
         type: Sequelize.DATE,
         allowNull: false
       },
-      createdBy: {
+      created_by: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
@@ -146,7 +146,7 @@ module.exports = {
           key: 'id'
         }
       },
-      updatedBy: {
+      updated_by: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {
@@ -157,14 +157,14 @@ module.exports = {
     });
 
     // Índices para optimización
-    await queryInterface.addIndex('registrations', ['registrationCode'], {
+    await queryInterface.addIndex('registrations', ['registration_code'], {
       unique: true,
       name: 'idx_registrations_code'
     });
-    await queryInterface.addIndex('registrations', ['eventId'], {
+    await queryInterface.addIndex('registrations', ['event_id'], {
       name: 'idx_registrations_event'
     });
-    await queryInterface.addIndex('registrations', ['userId'], {
+    await queryInterface.addIndex('registrations', ['user_id'], {
       name: 'idx_registrations_user'
     });
     await queryInterface.addIndex('registrations', ['status'], {
@@ -173,7 +173,7 @@ module.exports = {
     await queryInterface.addIndex('registrations', ['email'], {
       name: 'idx_registrations_email'
     });
-    await queryInterface.addIndex('registrations', ['reservationExpiresAt'], {
+    await queryInterface.addIndex('registrations', ['reservation_expires_at'], {
       name: 'idx_registrations_expires'
     });
   },

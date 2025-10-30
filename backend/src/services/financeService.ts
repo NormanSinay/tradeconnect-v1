@@ -8,7 +8,7 @@
 import { Op, fn, col, literal } from 'sequelize';
 import { cacheRedis } from '../config/redis';
 import { logger } from '../utils/logger';
-import { Payment, Refund, EventRegistration, Event, PaymentReconciliation } from '../models';
+import { Payment, Refund, Registration, Event, PaymentReconciliation } from '../models';
 import { PaymentGateway, PaymentStatus } from '../utils/constants';
 import { ApiResponse } from '../types/global.types';
 
@@ -151,7 +151,8 @@ export class FinanceService {
           status: 'completed'
         },
         include: [{
-          model: EventRegistration,
+          model: Registration,
+          as: 'registration',
           where: { eventId },
           required: true
         }]
@@ -226,8 +227,12 @@ export class FinanceService {
       const payments = await Payment.findAll({
         where: whereClause,
         include: [{
-          model: EventRegistration,
-          include: [Event]
+          model: Registration,
+          as: 'registration',
+          include: [{
+            model: Event,
+            as: 'event'
+          }]
         }]
       });
 
@@ -306,8 +311,12 @@ export class FinanceService {
           }
         },
         include: [{
-          model: EventRegistration,
-          include: [Event]
+          model: Registration,
+          as: 'registration',
+          include: [{
+            model: Event,
+            as: 'event'
+          }]
         }],
         group: ['gateway', 'currency', 'registration.event.id'],
         raw: true
@@ -459,7 +468,10 @@ export class FinanceService {
             [Op.lte]: endDate
           }
         },
-        include: [EventRegistration]
+        include: [{
+          model: Registration,
+          as: 'registration'
+        }]
       });
 
       const refunds = await Refund.findAll({
@@ -487,7 +499,7 @@ export class FinanceService {
       const profitMargin = totalRevenue > 0 ? (netRevenue / totalRevenue) * 100 : 0;
 
       // Tasa de conversión (pagos completados vs total de registros)
-      const totalRegistrations = await EventRegistration.count({
+      const totalRegistrations = await Registration.count({
         where: {
           createdAt: {
             [Op.gte]: startDate,
@@ -657,7 +669,7 @@ export class FinanceService {
   ): Promise<ApiResponse<any>> {
     try {
       // Obtener registro e información del evento
-      const registration = await EventRegistration.findByPk(registrationId, {
+      const registration = await Registration.findByPk(registrationId, {
         include: [Event]
       });
 
@@ -728,9 +740,7 @@ export class FinanceService {
       if (refundResult.success) {
         // Actualizar estado del registro
         await registration.update({
-          status: 'cancelled',
-          cancelledAt: new Date(),
-          cancellationReason: policy.reason
+          status: 'CANCELADO'
         });
 
         return {
@@ -909,8 +919,14 @@ export class FinanceService {
           }
         },
         include: [{
-          model: EventRegistration,
-          include: [Event]
+          model: Registration,
+          as: 'registration',
+          attributes: ['id', 'eventId'],
+          include: [{
+            model: Event,
+            as: 'event',
+            attributes: ['id', 'title']
+          }]
         }]
       });
 
