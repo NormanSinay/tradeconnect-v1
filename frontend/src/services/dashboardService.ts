@@ -200,6 +200,97 @@ export interface Transaction {
   status: string;
 }
 
+export interface FinancialStats {
+  totalRevenue: number;
+  totalCommissions: number;
+  totalRefunds: number;
+  netProfit: number;
+  transactionCount: number;
+  averageTransactionValue: number;
+  topGateways: Array<{
+    gateway: string;
+    revenue: number;
+    percentage: number;
+  }>;
+  topEvents: Array<{
+    eventId: number;
+    eventTitle: string;
+    revenue: number;
+  }>;
+  monthlyGrowth: number;
+}
+
+export interface CommissionData {
+  gateway: string;
+  amount: number;
+  fee: number;
+  netAmount: number;
+  commissionRate: number;
+  fixedFee: number;
+}
+
+export interface FinancialReport {
+  period: {
+    startDate: string;
+    endDate: string;
+  };
+  revenue: {
+    total: number;
+    byGateway: Record<string, number>;
+    byEvent: Record<string, number>;
+    byCurrency: Record<string, number>;
+  };
+  expenses: {
+    total: number;
+    commissions: number;
+    refunds: number;
+    byGateway: Record<string, number>;
+  };
+  netProfit: number;
+  transactionCount: number;
+  averageTransactionValue: number;
+}
+
+export interface FinancialKPIs {
+  roi: number;
+  profitMargin: number;
+  customerAcquisitionCost: number;
+  lifetimeValue: number;
+  churnRate: number;
+  conversionRate: number;
+  averageOrderValue: number;
+  monthlyRecurringRevenue: number;
+}
+
+export interface TrendData {
+  period: string;
+  revenue: number;
+  expenses: number;
+  netProfit: number;
+  transactionCount: number;
+  growthRate: number;
+}
+
+export interface RefundRequest {
+  registrationId: number;
+  daysBeforeEvent: number;
+  refundPercentage: number;
+  reason: string;
+  conditions?: string[];
+}
+
+export interface BulkRefundRequest {
+  payments: string[];
+  reason: string;
+  description?: string;
+  policy?: {
+    daysBeforeEvent: number;
+    refundPercentage: number;
+    reason: string;
+    conditions: string[];
+  };
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -1646,33 +1737,442 @@ export class DashboardService {
   }
 
   /**
-   * Obtener auditoría de un usuario específico
-   */
-  static async getUserAudit(userId: number, params: {
-    page?: number;
-    limit?: number;
-  } = {}): Promise<{ logs: any[]; pagination: any }> {
-    const { token } = useAuthStore.getState();
+    * Obtener auditoría de un usuario específico
+    */
+   static async getUserAudit(userId: number, params: {
+     page?: number;
+     limit?: number;
+   } = {}): Promise<{ logs: any[]; pagination: any }> {
+     const { token } = useAuthStore.getState();
 
-    const queryParams = new URLSearchParams();
-    if (params.page) queryParams.append('page', params.page.toString());
-    if (params.limit) queryParams.append('limit', params.limit.toString());
+     const queryParams = new URLSearchParams();
+     if (params.page) queryParams.append('page', params.page.toString());
+     if (params.limit) queryParams.append('limit', params.limit.toString());
 
-    const response = await fetch(`${this.BASE_URL}/users/${userId}/audit?${queryParams}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
+     const response = await fetch(`${this.BASE_URL}/users/${userId}/audit?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
 
-    const data: ApiResponse<{ logs: any[]; pagination: any }> = await response.json();
+     const data: ApiResponse<{ logs: any[]; pagination: any }> = await response.json();
 
-    if (!response.ok || !data.success) {
-      throw new Error(data.message || 'Error obteniendo auditoría del usuario');
-    }
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error obteniendo auditoría del usuario');
+     }
 
-    return data.data!;
-  }
+     return data.data!;
+   }
+
+   // ====================================================================
+   // MÉTODOS DE GESTIÓN FINANCIERA
+   // ====================================================================
+
+   /**
+    * Calcular comisiones por pasarela de pago
+    */
+   static async calculateGatewayCommissions(
+     gateway: string,
+     amount: number,
+     currency: string = 'GTQ'
+   ): Promise<CommissionData> {
+     const { token } = useAuthStore.getState();
+
+     const queryParams = new URLSearchParams({
+       gateway,
+       amount: amount.toString(),
+       currency
+     });
+
+     const response = await fetch(`${this.BASE_URL}/finance/commissions?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+
+     const data: ApiResponse<CommissionData> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error calculando comisiones');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Obtener comisiones por evento
+    */
+   static async getEventCommissions(eventId: number): Promise<{
+     totalRevenue: number;
+     totalCommissions: number;
+     netRevenue: number;
+     commissionByGateway: Record<string, number>;
+   }> {
+     const { token } = useAuthStore.getState();
+
+     const response = await fetch(`${this.BASE_URL}/finance/commissions/event/${eventId}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+
+     const data: ApiResponse<any> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error obteniendo comisiones del evento');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Obtener comisiones por período
+    */
+   static async getPeriodCommissions(params: {
+     startDate: string;
+     endDate: string;
+     gateway?: string;
+   }): Promise<{
+     totalRevenue: number;
+     totalCommissions: number;
+     netRevenue: number;
+     commissionByGateway: Record<string, number>;
+     commissionByEvent: Record<string, number>;
+   }> {
+     const { token } = useAuthStore.getState();
+
+     const queryParams = new URLSearchParams({
+       startDate: params.startDate,
+       endDate: params.endDate
+     });
+     if (params.gateway) queryParams.append('gateway', params.gateway);
+
+     const response = await fetch(`${this.BASE_URL}/finance/commissions/period?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+
+     const data: ApiResponse<any> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error obteniendo comisiones del período');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Generar reporte financiero completo
+    */
+   static async getFinancialReport(params: {
+     startDate: string;
+     endDate: string;
+   }): Promise<FinancialReport> {
+     const { token } = useAuthStore.getState();
+
+     const queryParams = new URLSearchParams({
+       startDate: params.startDate,
+       endDate: params.endDate
+     });
+
+     const response = await fetch(`${this.BASE_URL}/finance/reports?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+
+     const data: ApiResponse<FinancialReport> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error generando reporte financiero');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Calcular KPIs financieros
+    */
+   static async getFinancialKPIs(params: {
+     startDate: string;
+     endDate: string;
+   }): Promise<FinancialKPIs> {
+     const { token } = useAuthStore.getState();
+
+     const queryParams = new URLSearchParams({
+       startDate: params.startDate,
+       endDate: params.endDate
+     });
+
+     const response = await fetch(`${this.BASE_URL}/finance/kpis?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+
+     const data: ApiResponse<FinancialKPIs> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error calculando KPIs financieros');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Analizar tendencias financieras
+    */
+   static async getFinancialTrends(params: {
+     periods?: number;
+     periodType?: 'month' | 'week' | 'day';
+   } = {}): Promise<TrendData[]> {
+     const { token } = useAuthStore.getState();
+
+     const queryParams = new URLSearchParams();
+     if (params.periods) queryParams.append('periods', params.periods.toString());
+     if (params.periodType) queryParams.append('periodType', params.periodType);
+
+     const response = await fetch(`${this.BASE_URL}/finance/trends?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+
+     const data: ApiResponse<TrendData[]> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error analizando tendencias financieras');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Procesar reembolso automático
+    */
+   static async processAutomaticRefund(refundData: RefundRequest): Promise<any> {
+     const { token } = useAuthStore.getState();
+
+     const response = await fetch(`${this.BASE_URL}/finance/refunds/automatic/${refundData.registrationId}`, {
+       method: 'POST',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+       body: JSON.stringify({
+         daysBeforeEvent: refundData.daysBeforeEvent,
+         refundPercentage: refundData.refundPercentage,
+         reason: refundData.reason,
+         conditions: refundData.conditions
+       }),
+     });
+
+     const data: ApiResponse<any> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error procesando reembolso automático');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Procesar reembolsos masivos
+    */
+   static async processBulkRefunds(refundData: BulkRefundRequest): Promise<{
+     successful: string[];
+     failed: { transactionId: string; error: string }[];
+     summary: {
+       totalRequested: number;
+       successfulCount: number;
+       failedCount: number;
+       totalRefunded: number;
+     };
+   }> {
+     const { token } = useAuthStore.getState();
+
+     const response = await fetch(`${this.BASE_URL}/finance/refunds/bulk`, {
+       method: 'POST',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+       body: JSON.stringify(refundData),
+     });
+
+     const data: ApiResponse<any> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error procesando reembolsos masivos');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Listar transacciones con filtros y paginación
+    */
+   static async getFinancialTransactions(params: {
+     page?: number;
+     limit?: number;
+     startDate?: string;
+     endDate?: string;
+     gateway?: string;
+     status?: string;
+     eventId?: number;
+     sortBy?: 'createdAt' | 'amount' | 'gateway' | 'status';
+     sortOrder?: 'ASC' | 'DESC';
+   } = {}): Promise<{
+     transactions: Array<{
+       id: string;
+       transactionId: string;
+       amount: number;
+       fee: number;
+       netAmount: number;
+       currency: string;
+       gateway: string;
+       status: string;
+       createdAt: string;
+       updatedAt: string;
+       registration?: {
+         id: number;
+         event?: {
+           id: number;
+           title: string;
+         };
+         user?: {
+           id: number;
+           firstName: string;
+           lastName: string;
+         };
+       };
+     }>;
+     pagination: {
+       page: number;
+       limit: number;
+       total: number;
+       totalPages: number;
+       hasNext: boolean;
+       hasPrev: boolean;
+     };
+     filters: {
+       startDate?: string;
+       endDate?: string;
+       gateway?: string;
+       status?: string;
+       eventId?: number;
+     };
+   }> {
+     const { token } = useAuthStore.getState();
+
+     const queryParams = new URLSearchParams();
+     if (params.page) queryParams.append('page', params.page.toString());
+     if (params.limit) queryParams.append('limit', params.limit.toString());
+     if (params.startDate) queryParams.append('startDate', params.startDate);
+     if (params.endDate) queryParams.append('endDate', params.endDate);
+     if (params.gateway) queryParams.append('gateway', params.gateway);
+     if (params.status) queryParams.append('status', params.status);
+     if (params.eventId) queryParams.append('eventId', params.eventId.toString());
+     if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+     if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+
+     const response = await fetch(`${this.BASE_URL}/finance/transactions?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+
+     const data: ApiResponse<any> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error obteniendo transacciones financieras');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Obtener estadísticas financieras generales
+    */
+   static async getFinancialStats(): Promise<FinancialStats> {
+     const { token } = useAuthStore.getState();
+
+     const response = await fetch(`${this.BASE_URL}/finance/stats`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+
+     const data: ApiResponse<FinancialStats> = await response.json();
+
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error obteniendo estadísticas financieras');
+     }
+
+     return data.data!;
+   }
+
+   /**
+    * Exportar datos financieros
+    */
+   static async exportFinancialData(params: {
+     type: 'transactions' | 'report' | 'commissions';
+     startDate?: string;
+     endDate?: string;
+     format: 'csv' | 'excel' | 'pdf';
+   }): Promise<Blob> {
+     const { token } = useAuthStore.getState();
+
+     const queryParams = new URLSearchParams({
+       type: params.type,
+       format: params.format
+     });
+     if (params.startDate) queryParams.append('startDate', params.startDate);
+     if (params.endDate) queryParams.append('endDate', params.endDate);
+
+     const response = await fetch(`${this.BASE_URL}/finance/export?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+       },
+       credentials: 'include',
+     });
+
+     if (!response.ok) {
+       const errorData: ApiResponse<any> = await response.json().catch(() => ({}));
+       throw new Error(errorData.message || 'Error exportando datos financieros');
+     }
+
+     return await response.blob();
+   }
 }

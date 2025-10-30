@@ -48,6 +48,9 @@ import publicRoutes from './routes/public';
 import promotionRoutes from './routes/promotions';
 import discountRoutes from './routes/discounts';
 
+// Importar rutas de finanzas
+import financeRoutes from './routes/finance';
+
 // Importar rutas del módulo de aforos
 import capacityRoutes from './routes/capacity';
 import accessTypesRoutes from './routes/access-types';
@@ -2780,6 +2783,11 @@ app.use(`${API_VERSION}/invoices`, invoicesRoutes);
 // Rutas de promociones y descuentos
 app.use(`${API_VERSION}/promotions`, promotionRoutes);
 app.use(`${API_VERSION}/discounts`, discountRoutes);
+
+// Rutas de finanzas
+console.log('🔍 [DEBUG] Registering finance routes...', { financeRoutes: typeof financeRoutes, API_VERSION });
+app.use(`${API_VERSION}/finance`, financeRoutes);
+console.log('✅ [DEBUG] Finance routes registered');
 
 // Rutas del módulo de aforos
 app.use(`${API_VERSION}/capacity`, capacityRoutes);
