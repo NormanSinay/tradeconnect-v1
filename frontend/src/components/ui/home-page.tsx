@@ -16,13 +16,13 @@ const HomePage: React.FC = () => {
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([])
   const { searchQuery } = useUIStore()
 
-  // Fetch featured events from backend API (most recent events)
+  // Fetch active events from backend API (most recent active events)
   const { data: featuredEvents, isLoading: eventsLoading } = useQuery({
-    queryKey: ['featured-events'],
+    queryKey: ['active-events'],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/public/events?limit=3&sortBy=createdAt&sortOrder=DESC&featured=true`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/public/events?limit=3&sortBy=createdAt&sortOrder=DESC`)
       if (!response.ok) {
-        throw new Error('Failed to fetch featured events')
+        throw new Error('Failed to fetch active events')
       }
       const result = await response.json()
       return result.data?.events || []

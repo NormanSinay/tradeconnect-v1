@@ -15,18 +15,29 @@ interface EventGridProps {
 }
 
 interface BackendEvent {
-  id: number
-  title: string
-  description: string
-  startDate: string
-  endDate: string
-  price: number
-  modality: string
-  eventType?: { name: string }
-  eventCategory?: { name: string }
-  image?: string
-  featured?: boolean
-}
+   id: number
+   title: string
+   description?: string
+   shortDescription?: string
+   startDate: string
+   endDate: string
+   price: number
+   currency: string
+   modality: string
+   isVirtual: boolean
+   location?: string
+   virtualLocation?: string
+   capacity?: number
+   registeredCount: number
+   eventType?: { name: string; id: number }
+   eventCategory?: { name: string; id: number }
+   eventStatus?: { name: string; id: number }
+   image?: string
+   featured?: boolean
+   publishedAt?: string
+   createdAt: string
+   updatedAt: string
+ }
 
 const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
   const { addToCart } = useCartStore()
@@ -36,11 +47,11 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
     const eventToAdd: Event = 'eventType' in event ? {
       id: event.id,
       title: event.title,
-      description: event.description,
+      description: event.description || event.shortDescription || 'Sin descripción',
       date: event.startDate,
       time: `${event.startDate} - ${event.endDate}`,
-      location: event.modality === 'virtual' ? 'Virtual' : 'Presencial',
-      modality: (event.modality as 'presencial' | 'virtual' | 'hibrido') || 'presencial',
+      location: event.isVirtual ? (event.virtualLocation || 'Virtual') : (event.location || 'Presencial'),
+      modality: event.isVirtual ? 'virtual' : 'presencial',
       type: (event.eventType?.name as 'conferencia' | 'taller' | 'networking' | 'seminario' | 'curso') || 'conferencia',
       price: event.price,
       image: event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -49,7 +60,15 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
     } : (event as Event)
 
     addToCart(eventToAdd)
-    toast.success(`"${eventToAdd.title}" agregado al carrito`)
+    toast.success(`"${eventToAdd.title}" agregado al carrito`, {
+      duration: 3000,
+      position: 'top-right',
+      style: {
+        background: '#6B1E22',
+        color: '#fff',
+        fontFamily: 'Roboto, Arial, sans-serif'
+      }
+    })
   }
 
   if (loading) {
@@ -109,6 +128,7 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
         const eventDate = isBackendEvent ? event.startDate : (event as Event).date;
         const eventTime = isBackendEvent ? `${event.startDate} - ${event.endDate}` : (event as Event).time;
         const eventImage = isBackendEvent ? (event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80') : (event as Event).image;
+        const eventDescription = isBackendEvent ? (event.description || event.shortDescription || 'Sin descripción disponible') : (event as Event).description;
 
         // Check if image exists and is valid
         const hasValidImage = eventImage && eventImage !== 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
@@ -156,16 +176,16 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 group bg-white border border-gray-200 hover:border-[#6B1E22]/20 max-w-sm mx-auto">
+            <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 group bg-white border border-gray-200 hover:border-[#6B1E22]/20 max-w-xs mx-auto" style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', height: '320px' }}>
               <div className="relative overflow-hidden">
                 {hasValidImage ? (
                   <img
                     src={eventImage}
                     alt={event.title}
-                    className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-40 bg-gradient-to-br from-[#6B1E22]/10 to-[#2c5aa0]/10 flex items-center justify-center">
+                  <div className="w-full h-32 bg-gradient-to-br from-[#6B1E22]/10 to-[#2c5aa0]/10 flex items-center justify-center">
                     <FallbackIcon
                       size={48}
                       className="text-[#6B1E22] opacity-70"
@@ -179,41 +199,43 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                 <div className="absolute top-3 left-3 flex flex-col gap-1">
                   <Badge
                     variant="secondary"
-                    className="bg-[#6B1E22] text-white hover:bg-[#5a191e] shadow-lg text-xs px-2 py-1"
+                    className="bg-[#6B1E22] text-white hover:bg-[#5a191e] shadow-lg text-xs px-2 py-1 font-medium"
+                    style={{ fontFamily: 'Roboto, Arial, sans-serif' }}
                   >
                     {getTypeText(eventType)}
                   </Badge>
                   {isBackendEvent && event.featured && (
                     <Badge
-                      variant="secondary"
-                      className="bg-[#28a745] text-white hover:bg-[#218838] shadow-lg text-xs px-2 py-1"
-                    >
-                      <FaStar className="mr-1" size={8} />
-                      Destacado
-                    </Badge>
+                        variant="secondary"
+                        className="bg-[#28a745] text-white hover:bg-[#218838] shadow-lg text-xs px-2 py-1 font-medium"
+                        style={{ fontFamily: 'Roboto, Arial, sans-serif' }}
+                      >
+                        <FaStar className="mr-1" size={8} />
+                        Destacado
+                      </Badge>
                   )}
                 </div>
 
                 {/* Price badge */}
                 <div className="absolute top-3 right-3">
-                  <div className="bg-white/95 backdrop-blur-sm rounded-lg px-2 py-1 shadow-lg">
-                    <span className="text-sm font-bold text-[#6B1E22]">
+                  <div className="bg-white/95 backdrop-blur-sm rounded-lg px-2 py-1 shadow-lg" style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                    <span className="text-sm font-bold text-[#6B1E22]" style={{ fontFamily: 'Roboto, Arial, sans-serif' }}>
                       {formatCurrency(event.price)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <CardContent className="p-4 flex flex-col h-full">
+              <CardContent className="p-3 flex flex-col h-full">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold mb-2 text-gray-900 line-clamp-2 group-hover:text-[#6B1E22] transition-colors duration-300 leading-tight">
+                  <h3 className="text-base font-bold mb-1 text-gray-900 line-clamp-2 group-hover:text-[#6B1E22] transition-colors duration-300 leading-tight" style={{ fontFamily: 'Roboto, Arial, sans-serif', fontSize: '16px' }}>
                     {event.title}
                   </h3>
-                  <p className="text-gray-600 text-xs mb-3 line-clamp-2 leading-relaxed">
-                    {event.description}
+                  <p className="text-gray-600 text-xs mb-2 line-clamp-2 leading-relaxed" style={{ fontFamily: 'Roboto, Arial, sans-serif', fontSize: '14px' }}>
+                    {eventDescription}
                   </p>
 
-                  <div className="space-y-2 text-xs text-gray-600">
+                  <div className="space-y-1 text-xs text-gray-600" style={{ fontFamily: 'Roboto, Arial, sans-serif', fontSize: '12px' }}>
                     <div className="flex items-center">
                       <FaCalendarAlt className="mr-2 text-[#6B1E22] flex-shrink-0" size={12} />
                       <span className="font-medium">{formatDate(eventDate)}</span>
@@ -229,16 +251,18 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
                   <div className="flex items-center text-xs text-gray-500">
                     <FaUser className="mr-1" size={10} />
-                    <span>Disponible</span>
+                    <span>{isBackendEvent ? `${event.registeredCount}/${event.capacity || '∞'}` : 'Disponible'}</span>
                   </div>
                   <Button
                     onClick={() => handleAddToCart(event)}
-                    className="bg-[#6B1E22] hover:bg-[#5a191e] text-white px-4 py-1.5 rounded-md shadow-md hover:shadow-lg transition-all duration-300 font-medium text-sm"
+                    className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white px-3 py-1 rounded-md shadow-md hover:shadow-lg transition-all duration-300 font-medium text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ fontFamily: 'Roboto, Arial, sans-serif' }}
+                    disabled={isBackendEvent && event.capacity ? event.registeredCount >= event.capacity : false}
                   >
-                    Inscribirse
+                    {isBackendEvent && event.capacity && event.registeredCount >= event.capacity ? 'Agotado' : 'Inscribirse'}
                   </Button>
                 </div>
               </CardContent>
