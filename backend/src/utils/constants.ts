@@ -156,6 +156,7 @@ export const PERMISSIONS = {
   
   // === CONFIGURACIÓN SISTEMA ===
   MANAGE_SYSTEM_CONFIG: 'manage_system_config',
+  VIEW_SYSTEM_CONFIG: 'view_system_config',
   VIEW_AUDIT_LOGS: 'view_audit_logs',
   MANAGE_INTEGRATIONS: 'manage_integrations',
   

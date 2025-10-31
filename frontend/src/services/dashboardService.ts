@@ -1527,6 +1527,27 @@ export class DashboardService {
   }
 
   /**
+   * Obtener configuración pública del sistema (sin autenticación)
+   */
+  static async getPublicSystemConfig(): Promise<any> {
+    const response = await fetch(`${this.BASE_URL}/system/config/public`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo configuración pública del sistema');
+    }
+
+    return data.data!;
+  }
+
+  /**
    * Actualizar configuración del sistema
    */
   static async updateSystemConfig(config: any): Promise<void> {
@@ -1547,6 +1568,289 @@ export class DashboardService {
     if (!response.ok || !data.success) {
       throw new Error(data.message || 'Error actualizando configuración del sistema');
     }
+  }
+
+  /**
+   * Crear nueva configuración del sistema
+   */
+  static async createSystemConfig(configData: {
+    key: string;
+    value: any;
+    category: string;
+    description?: string;
+    isPublic?: boolean;
+  }): Promise<any> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/system/config`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(configData),
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error creando configuración del sistema');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Obtener configuración por clave
+   */
+  static async getSystemConfigByKey(key: string): Promise<any> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/system/config/${key}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo configuración por clave');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Actualizar configuración específica por clave
+   */
+  static async updateSystemConfigByKey(key: string, updateData: {
+    value?: any;
+    description?: string;
+    isPublic?: boolean;
+    isActive?: boolean;
+  }): Promise<any> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/system/config/${key}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(updateData),
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error actualizando configuración por clave');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Eliminar configuración por clave
+   */
+  static async deleteSystemConfig(key: string): Promise<void> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/system/config/${key}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData: ApiResponse<any> = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Error eliminando configuración');
+    }
+  }
+
+  /**
+   * Obtener configuraciones por categoría
+   */
+  static async getSystemConfigsByCategory(category: string, params: {
+    page?: number;
+    limit?: number;
+  } = {}): Promise<{
+    configs: any[];
+    pagination: any;
+  }> {
+    const { token } = useAuthStore.getState();
+
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+
+    const response = await fetch(`${this.BASE_URL}/system/config/category/${category}?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo configuraciones por categoría');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Obtener todas las configuraciones con filtros
+   */
+  static async getAllSystemConfigs(params: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    isPublic?: boolean;
+    isActive?: boolean;
+    search?: string;
+  } = {}): Promise<{
+    configs: any[];
+    pagination: any;
+  }> {
+    const { token } = useAuthStore.getState();
+
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.category) queryParams.append('category', params.category);
+    if (params.isPublic !== undefined) queryParams.append('isPublic', params.isPublic.toString());
+    if (params.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
+    if (params.search) queryParams.append('search', params.search);
+
+    const response = await fetch(`${this.BASE_URL}/system/config/all?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo todas las configuraciones');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Obtener configuración completa del sistema
+   */
+  static async getFullSystemConfig(): Promise<any> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/system/config/full`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo configuración completa del sistema');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Obtener estadísticas de configuración
+   */
+  static async getSystemConfigStats(): Promise<any> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/system/config/stats`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo estadísticas de configuración');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Inicializar configuración por defecto
+   */
+  static async initializeDefaultSystemConfig(): Promise<void> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/system/config/initialize`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error inicializando configuración por defecto');
+    }
+  }
+
+  /**
+   * Crear configuraciones de forma masiva
+   */
+  static async bulkCreateSystemConfigs(configs: Array<{
+    key: string;
+    value: any;
+    category: string;
+    description?: string;
+    isPublic?: boolean;
+  }>): Promise<any> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/system/config/bulk`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ configs }),
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error creando configuraciones masivamente');
+    }
+
+    return data.data!;
   }
 
   /**

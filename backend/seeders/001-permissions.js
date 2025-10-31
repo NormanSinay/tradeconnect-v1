@@ -623,6 +623,17 @@ module.exports = {
         updated_at: new Date()
       },
       {
+        name: 'view_system_config',
+        display_name: 'Ver Configuración del Sistema',
+        description: 'Permite ver configuraciones del sistema',
+        resource: 'system',
+        action: 'view_config',
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
         name: 'view_audit_logs',
         display_name: 'Ver Logs de Auditoría',
         description: 'Permite ver logs de auditoría del sistema',

@@ -226,12 +226,12 @@ const DashboardSuperAdminPage: React.FC = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-600">Eventos y Cursos</p>
-                          <p className="text-2xl font-bold text-primary">{stats.activeEvents + stats.totalCourses}</p>
-                          {(stats.activeEvents > 0 || stats.totalCourses > 0) && (
+                          <p className="text-sm font-medium text-gray-600">Eventos Activos</p>
+                          <p className="text-2xl font-bold text-primary">{stats.activeEvents}</p>
+                          {stats.activeEvents > 0 && (
                             <p className="text-xs text-green-600 flex items-center mt-1">
                               <TrendingUp className="w-3 h-3 mr-1" />
-                              {stats.activeEvents} eventos, {stats.totalCourses} cursos
+                              Eventos vigentes
                             </p>
                           )}
                         </div>

@@ -28,7 +28,7 @@ const SystemManagementTab: React.FC<SystemManagementTabProps> = ({ activeTab }) 
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (activeTab === 'configuracion') {
+    if (activeTab === 'settings') {
       loadSystemConfig();
     }
   }, [activeTab]);
@@ -36,15 +36,16 @@ const SystemManagementTab: React.FC<SystemManagementTabProps> = ({ activeTab }) 
   const loadSystemConfig = async () => {
     try {
       setLoading(true);
-      const config = await DashboardService.getSystemConfig();
+      const config = await DashboardService.getFullSystemConfig();
+      console.log('System config loaded:', config);
       setSystemConfig({
-        siteName: config.siteName || 'TradeConnect',
-        siteDescription: config.siteDescription || 'Plataforma e-commerce para la gestión de eventos y cursos de la Cámara de Comercio de Guatemala.',
-        currency: config.currency || 'GTQ',
-        timezone: config.timezone || 'America/Guatemala',
-        language: config.language || 'es',
-        maintenanceMode: config.maintenanceMode || false,
-        userRegistration: config.userRegistration || true
+        siteName: config?.general?.site_name || config?.general?.siteName || 'TradeConnect',
+        siteDescription: config?.general?.site_description || config?.general?.siteDescription || 'Plataforma e-commerce para la gestión de eventos y cursos de la Cámara de Comercio de Guatemala.',
+        currency: config?.general?.currency || 'GTQ',
+        timezone: config?.general?.timezone || 'America/Guatemala',
+        language: config?.general?.language || 'es',
+        maintenanceMode: config?.general?.maintenance_mode || config?.general?.maintenanceMode || false,
+        userRegistration: config?.general?.user_registration || config?.general?.userRegistration || true
       });
     } catch (error) {
       console.error('Error loading system config:', error);
@@ -57,7 +58,34 @@ const SystemManagementTab: React.FC<SystemManagementTabProps> = ({ activeTab }) 
   const handleSaveConfig = async () => {
     try {
       setSaving(true);
-      await DashboardService.updateSystemConfig(systemConfig);
+
+      // Actualizar cada configuración por separado
+      const updates = [
+        { key: 'site_name', value: systemConfig.siteName, category: 'general' },
+        { key: 'site_description', value: systemConfig.siteDescription, category: 'general' },
+        { key: 'currency', value: systemConfig.currency, category: 'general' },
+        { key: 'timezone', value: systemConfig.timezone, category: 'general' },
+        { key: 'language', value: systemConfig.language, category: 'general' },
+        { key: 'maintenance_mode', value: systemConfig.maintenanceMode, category: 'general' },
+        { key: 'user_registration', value: systemConfig.userRegistration, category: 'general' }
+      ];
+
+      console.log('Updating system config with:', updates);
+
+      // Actualizar cada configuración
+      for (const update of updates) {
+        try {
+          await DashboardService.updateSystemConfigByKey(update.key, {
+            value: update.value,
+            isActive: true
+          });
+          console.log(`Updated config ${update.key}:`, update.value);
+        } catch (updateError) {
+          console.error(`Error updating ${update.key}:`, updateError);
+          // Continuar con las demás actualizaciones
+        }
+      }
+
       toast.success('Configuración del sistema guardada exitosamente');
     } catch (error) {
       console.error('Error saving system config:', error);
@@ -74,7 +102,7 @@ const SystemManagementTab: React.FC<SystemManagementTabProps> = ({ activeTab }) 
     }));
   };
 
-  if (activeTab !== 'configuracion') return null;
+  if (activeTab !== 'settings') return null;
 
   return (
     <div className="space-y-6">
@@ -93,16 +121,16 @@ const SystemManagementTab: React.FC<SystemManagementTabProps> = ({ activeTab }) 
           <button className="border-b-2 border-primary py-2 px-1 text-sm font-medium">
             General
           </button>
-          <button className="py-2 px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
+          <button className="py-2 px-1 text-sm font-medium text-muted-foreground hover:text-foreground cursor-not-allowed opacity-50">
             Pasarelas de Pago
           </button>
-          <button className="py-2 px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
+          <button className="py-2 px-1 text-sm font-medium text-muted-foreground hover:text-foreground cursor-not-allowed opacity-50">
             Configuración de Correo
           </button>
-          <button className="py-2 px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
+          <button className="py-2 px-1 text-sm font-medium text-muted-foreground hover:text-foreground cursor-not-allowed opacity-50">
             Seguridad
           </button>
-          <button className="py-2 px-1 text-sm font-medium text-muted-foreground hover:text-foreground">
+          <button className="py-2 px-1 text-sm font-medium text-muted-foreground hover:text-foreground cursor-not-allowed opacity-50">
             Avanzada
           </button>
         </nav>
@@ -118,7 +146,10 @@ const SystemManagementTab: React.FC<SystemManagementTabProps> = ({ activeTab }) 
         </CardHeader>
         <CardContent className="space-y-6">
           {loading ? (
-            <div className="text-center py-8">Cargando configuración...</div>
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              Cargando configuración del sistema...
+            </div>
           ) : (
             <>
               {/* Nombre del sitio */}
@@ -229,11 +260,6 @@ const SystemManagementTab: React.FC<SystemManagementTabProps> = ({ activeTab }) 
                 </p>
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="userRegistration"
-                    checked={systemConfig.userRegistration}
-                    onCheckedChange={(checked) => handleInputChange('userRegistration', checked)}
-                  />
                   <Checkbox
                     id="userRegistration"
                     checked={systemConfig.userRegistration}

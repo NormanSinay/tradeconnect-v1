@@ -196,6 +196,7 @@ export interface EventFilters {
   location?: string;
   creatorId?: number;
   publishedOnly?: boolean;
+  featured?: boolean;
 }
 
 /**

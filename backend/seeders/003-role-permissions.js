@@ -66,7 +66,7 @@ module.exports = {
       // Reportes
       'view_reports', 'export_reports', 'view_analytics', 'manage_dashboards',
       // Configuración sistema
-      'manage_system_config', 'view_audit_logs', 'manage_integrations',
+      'manage_system_config', 'view_system_config', 'view_audit_logs', 'manage_integrations',
       // Workflows
       'create_workflow', 'execute_workflow', 'view_workflow_history'
     ];

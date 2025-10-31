@@ -656,6 +656,12 @@ export class EventService {
       if (filters.startDateFrom) where.startDate[Op.gte] = filters.startDateFrom;
       if (filters.startDateTo) where.startDate[Op.lte] = filters.startDateTo;
     }
+    // Handle featured filter for home page
+    // Featured events are simply the newest events (no registration count filter)
+    // This is handled by sorting by createdAt DESC in the frontend query
+    // if (filters.featured) {
+    //   // Future enhancement: could add a dedicated is_featured field in database
+    // }
 
     // Búsqueda por texto
     if (search) {
@@ -687,6 +693,10 @@ export class EventService {
       default:
         order.push(['startDate', 'ASC']);
     }
+
+    // DEBUG LOG
+    console.log('🔍 DEBUG WHERE CLAUSE:', JSON.stringify(where, null, 2));
+    console.log('🔍 DEBUG FEATURED PARAM:', filters.featured);
 
     const { rows: events, count: total } = await Event.findAndCountAll({
       where,

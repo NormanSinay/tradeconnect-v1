@@ -94,6 +94,9 @@ import { EmailTemplate } from './EmailTemplate';
 import { NotificationRule } from './NotificationRule';
 import { UserNotificationPreferences } from './UserNotificationPreferences';
 
+// Importar modelo de configuración del sistema
+import { SystemConfig } from './SystemConfig';
+
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
   Permission,
@@ -170,7 +173,9 @@ sequelize.addModels([
   NotificationLog,
   EmailTemplate,
   NotificationRule,
-  UserNotificationPreferences
+  UserNotificationPreferences,
+  // Modelo de configuración del sistema
+  SystemConfig
 ]);
 
 // Exportar modelos y sequelize
@@ -250,7 +255,9 @@ export {
   NotificationLog,
   EmailTemplate,
   NotificationRule,
-  UserNotificationPreferences
+  UserNotificationPreferences,
+  // Modelo de configuración del sistema
+  SystemConfig
 };
 
 // Exportar por defecto

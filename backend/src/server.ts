@@ -2808,6 +2808,10 @@ app.use(`${API_VERSION}/hybrid-events`, hybridEventRoutes);
 app.use(`${API_VERSION}/streaming`, streamingRoutes);
 app.use(`${API_VERSION}/virtual-participants`, virtualParticipantRoutes);
 
+// Rutas de configuración del sistema
+import systemRoutes from './routes/system';
+app.use(`${API_VERSION}/system`, systemRoutes);
+
 // Rutas de administración
 import adminRoutes from './routes/admin';
 app.use(`${API_VERSION}/admin`, adminRoutes);

@@ -15,6 +15,7 @@ import { EventQueryParams } from '../types/event.types';
 import { CertificateValidationMethod } from '../types/certificate.types';
 import { HTTP_STATUS } from '../utils/constants';
 import { logger } from '../utils/logger';
+import { EventCategory } from '../models';
 
 /**
  * Controlador para manejo de operaciones públicas de eventos
@@ -102,6 +103,11 @@ export class PublicController {
           publishedOnly: true
         }
       };
+
+      // Handle featured parameter for home page
+      if (req.query.featured === 'true') {
+        params.filters!.featured = true;
+      }
 
       const result = await eventService.getPublishedEvents(params);
 
@@ -412,12 +418,18 @@ export class PublicController {
    */
   async getEventCategories(req: Request, res: Response): Promise<void> {
     try {
-      // TODO: Implementar servicio para obtener categorías activas
-      // Por ahora retornamos una respuesta básica
+      const categories = await EventCategory.findAll({
+        where: {
+          isActive: true
+        },
+        attributes: ['id', 'name', 'displayName', 'description', 'color', 'icon'],
+        order: [['displayName', 'ASC']]
+      });
+
       res.status(HTTP_STATUS.OK).json({
         success: true,
         message: 'Categorías obtenidas exitosamente',
-        data: [],
+        data: categories,
         timestamp: new Date().toISOString()
       });
 

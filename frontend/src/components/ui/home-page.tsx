@@ -20,7 +20,7 @@ const HomePage: React.FC = () => {
   const { data: featuredEvents, isLoading: eventsLoading } = useQuery({
     queryKey: ['featured-events'],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/public/events?limit=3&sortBy=createdAt&sortOrder=DESC`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/public/events?limit=3&sortBy=createdAt&sortOrder=DESC&featured=true`)
       if (!response.ok) {
         throw new Error('Failed to fetch featured events')
       }

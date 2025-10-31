@@ -66,8 +66,8 @@ const eventsQueryValidation = [
     .withMessage('La página debe ser un número entero positivo'),
   query('limit')
     .optional()
-    .isInt({ min: 1, max: 50 })
-    .withMessage('El límite debe estar entre 1 y 50'),
+    .isInt({ min: 1, max: 100 })
+    .withMessage('El límite debe estar entre 1 y 100'),
   query('search')
     .optional()
     .isLength({ min: 2, max: 100 })
@@ -99,7 +99,19 @@ const eventsQueryValidation = [
   query('priceMax')
     .optional()
     .isFloat({ min: 0 })
-    .withMessage('priceMax debe ser un número positivo')
+    .withMessage('priceMax debe ser un número positivo'),
+  query('sortBy')
+    .optional()
+    .isIn(['createdAt', 'startDate', 'endDate', 'title', 'price'])
+    .withMessage('sortBy debe ser uno de: createdAt, startDate, endDate, title, price'),
+  query('sortOrder')
+    .optional()
+    .isIn(['ASC', 'DESC'])
+    .withMessage('sortOrder debe ser ASC o DESC'),
+  query('featured')
+    .optional()
+    .isIn(['true', 'false'])
+    .withMessage('featured debe ser true o false')
 ];
 
 // Validación para búsqueda de eventos
