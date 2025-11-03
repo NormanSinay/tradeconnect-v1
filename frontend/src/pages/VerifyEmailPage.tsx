@@ -6,7 +6,7 @@ const VerifyEmailPage: React.FC = () => {
   return (
     <AuthLayout
       title="Verifica tu Email"
-      subtitle="Hemos enviado un código de verificación a tu correo electrónico"
+      subtitle="Hemos enviado un link verificación a tu correo electrónico"
     >
       <VerifyEmailForm />
     </AuthLayout>

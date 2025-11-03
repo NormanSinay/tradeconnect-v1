@@ -117,13 +117,9 @@ export const useAuthStore = create<AuthState>()(
       register: async (userData: RegisterData) => {
         set({ isLoading: true })
         try {
-          // Encriptar las contraseñas antes de enviar
-          const encryptedPassword = encryptPassword(userData.password)
-          const encryptedConfirmPassword = encryptPassword(userData.confirmPassword)
-
-          // Logs de encriptación solo en desarrollo
+          // Logs de registro solo en desarrollo
           if (import.meta.env.DEV) {
-            console.log('Contraseñas encriptadas correctamente para registro')
+            console.log('Procesando registro de usuario...')
           }
 
           const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
@@ -133,8 +129,8 @@ export const useAuthStore = create<AuthState>()(
             },
             body: JSON.stringify({
               email: userData.email,
-              password: encryptedPassword, // Enviar contraseña encriptada
-              confirmPassword: encryptedConfirmPassword, // Enviar confirmación encriptada
+              password: userData.password, // Enviar contraseña sin encriptar - el backend la encripta
+              confirmPassword: userData.confirmPassword, // Enviar confirmación sin encriptar
               firstName: userData.firstName,
               lastName: userData.lastName,
               phone: userData.phone,

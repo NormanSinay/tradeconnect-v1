@@ -62,11 +62,47 @@ export const useDashboardState = () => {
   ].filter(item => item.enabled !== false), [permissions]);
 
   const quickActions = useMemo<QuickAction[]>(() => [
-    { icon: Users, title: 'Crear Usuario', desc: 'Agregar nuevo usuario', action: () => setActiveTab('usuarios'), enabled: permissions.canManageUsers },
-    { icon: Calendar, title: 'Crear Evento', desc: 'Publicar nuevo evento', action: () => toast.success('Funcionalidad en desarrollo'), enabled: permissions.canManageEvents },
-    { icon: TrendingUp, title: 'Ver Analítica', desc: 'Revisar métricas detalladas', action: () => setActiveTab('analytics'), enabled: true },
-    { icon: FileText, title: 'Gestionar Contenido', desc: 'Administrar páginas y artículos', action: () => setActiveTab('content'), enabled: permissions.canManageContent }
-  ].filter(item => item.enabled !== false), [permissions]);
+    {
+      icon: Users,
+      title: 'Crear Usuario',
+      desc: 'Agregar nuevo usuario',
+      action: () => {
+        setActiveTab('usuarios');
+        toast.success('Redirigiendo a gestión de usuarios');
+      },
+      enabled: permissions.canManageUsers
+    },
+    {
+      icon: Calendar,
+      title: 'Crear Evento',
+      desc: 'Publicar nuevo evento',
+      action: () => {
+        setActiveTab('events');
+        toast.success('Redirigiendo a gestión de eventos');
+      },
+      enabled: permissions.canManageEvents
+    },
+    {
+      icon: TrendingUp,
+      title: 'Ver Analítica',
+      desc: 'Revisar métricas detalladas',
+      action: () => {
+        setActiveTab('analytics');
+        toast.success('Cargando analítica del sistema');
+      },
+      enabled: true
+    },
+    {
+      icon: FileText,
+      title: 'Gestionar Contenido',
+      desc: 'Administrar páginas y artículos',
+      action: () => {
+        setActiveTab('content');
+        toast.success('Redirigiendo a gestión de contenido');
+      },
+      enabled: permissions.canManageContent
+    }
+  ].filter(item => item.enabled !== false), [permissions, setActiveTab]);
 
   // Funciones de carga de datos
   const loadDashboardData = useCallback(async () => {

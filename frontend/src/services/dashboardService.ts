@@ -1403,10 +1403,11 @@ export class DashboardService {
    * Actualizar usuario existente
    */
   static async updateUser(userId: number, userData: {
-    firstName: string;
-    lastName: string;
+    firstName?: string;
+    lastName?: string;
     phone?: string;
     role?: string;
+    isActive?: boolean;
   }): Promise<{
     id: number;
     email: string;
@@ -1414,6 +1415,7 @@ export class DashboardService {
     lastName: string;
     phone?: string;
     role: string;
+    isActive: boolean;
     updatedAt: string;
   }> {
     const { token } = useAuthStore.getState();
@@ -1431,6 +1433,9 @@ export class DashboardService {
     const data: ApiResponse<any> = await response.json();
 
     if (!response.ok || !data.success) {
+      if (response.status === 400) {
+        throw new Error('Datos de entrada inválidos. Verifica la información proporcionada.');
+      }
       throw new Error(data.message || 'Error actualizando usuario');
     }
 
@@ -2659,7 +2664,7 @@ export class DashboardService {
      if (params.search) queryParams.append('search', params.search);
      if (params.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
  
-     const response = await fetch(`${this.BASE_URL}/advanced-users/roles?${queryParams}`, {
+     const response = await fetch(`${this.BASE_URL}/roles?${queryParams}`, {
        method: 'GET',
        headers: {
          'Authorization': `Bearer ${token}`,
@@ -2667,13 +2672,13 @@ export class DashboardService {
        },
        credentials: 'include',
      });
- 
+
      const data: ApiResponse<any> = await response.json();
- 
+
      if (!response.ok || !data.success) {
        throw new Error(data.message || 'Error obteniendo roles');
      }
- 
+
      return data.data!;
    }
  

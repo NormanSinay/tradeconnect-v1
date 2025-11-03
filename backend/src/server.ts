@@ -2799,6 +2799,10 @@ app.use(`${API_VERSION}/advanced-coupons`, advancedCouponRoutes);
 import advancedUserRoutes from './routes/advanced-users';
 app.use(`${API_VERSION}/advanced-users`, advancedUserRoutes);
 
+// Rutas de roles del sistema
+import rolesRoutes from './routes/roles';
+app.use(`${API_VERSION}/roles`, rolesRoutes);
+
 // Rutas de auditoría y logs
 import auditRoutes from './routes/audit';
 app.use(`${API_VERSION}/audit`, auditRoutes);

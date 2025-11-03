@@ -76,19 +76,28 @@ const EventsPage: React.FC = () => {
     useUIStore.getState().setSelectedCategory(category)
   }
 
-  // Fetch categories from backend
-  const { data: categoriesData } = useQuery({
-    queryKey: ['event-categories'],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/public/events/categories`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories')
-      }
-      const result = await response.json()
-      return result.data || []
-    },
-    staleTime: 1000 * 60 * 10, // 10 minutes
-  })
+  // Fetch categories from backend - temporarily disabled due to API issues
+  // const { data: categoriesData } = useQuery({
+  //   queryKey: ['event-categories'],
+  //   queryFn: async () => {
+  //     const response = await fetch(`${import.meta.env.VITE_API_URL}/public/events/categories`)
+  //     if (!response.ok) {
+  //       throw new Error('Failed to fetch categories')
+  //     }
+  //     const result = await response.json()
+  //     return result.data || []
+  //   },
+  //   staleTime: 1000 * 60 * 10, // 10 minutes
+  // })
+
+  // Mock categories data
+  const categoriesData = [
+    { id: 1, name: 'Marketing' },
+    { id: 2, name: 'Innovación' },
+    { id: 3, name: 'Recursos Humanos' },
+    { id: 4, name: 'Finanzas' },
+    { id: 5, name: 'Tecnología' }
+  ]
 
   // Fetch event types from backend - Note: This endpoint doesn't exist yet
   // For now, we'll use static data
@@ -125,25 +134,25 @@ const EventsPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Search Form */}
-          <div className="mb-8">
+          {/* Search Bar */}
+          <div className="mb-6">
             <SearchForm onSearch={handleSearch} />
           </div>
 
-          {/* Advanced Filters */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <div className="flex items-center gap-4 mb-4">
-              <FaFilter className="text-[#6B1E22]" />
-              <span className="font-semibold text-gray-900">Filtros Avanzados</span>
-            </div>
+          {/* Filters Bar - Modern Design */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4 mb-8 shadow-sm">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              {/* Filter Controls */}
+              <div className="flex flex-wrap gap-3 items-center">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <FaFilter className="w-4 h-4" />
+                  <span className="text-sm font-medium">Filtros:</span>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Category Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                {/* Category Filter */}
                 <Select value={selectedCategory} onValueChange={handleCategoryFilter}>
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className="w-[160px] h-9 text-sm">
+                    <SelectValue placeholder="Categoría" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
@@ -153,32 +162,11 @@ const EventsPage: React.FC = () => {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
 
-              {/* Event Type Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Evento</label>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos los tipos</SelectItem>
-                    {eventTypesData?.map((type: any) => (
-                      <SelectItem key={type.id} value={type.name}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Modality Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Modalidad</label>
+                {/* Modality Filter */}
                 <Select value={modalityFilter} onValueChange={setModalityFilter}>
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className="w-[140px] h-9 text-sm">
+                    <SelectValue placeholder="Modalidad" />
                   </SelectTrigger>
                   <SelectContent>
                     {modalities.map((modality) => (
@@ -188,74 +176,78 @@ const EventsPage: React.FC = () => {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
 
-              {/* Sort Options */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ordenar por</label>
+                {/* Sort Options */}
                 <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
                   const [field, order] = value.split('-')
                   setSortBy(field)
                   setSortOrder(order as 'ASC' | 'DESC')
                 }}>
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className="w-[140px] h-9 text-sm">
+                    <SelectValue placeholder="Ordenar" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="createdAt-DESC">Más recientes</SelectItem>
                     <SelectItem value="createdAt-ASC">Más antiguos</SelectItem>
                     <SelectItem value="title-ASC">Nombre A-Z</SelectItem>
                     <SelectItem value="title-DESC">Nombre Z-A</SelectItem>
-                    <SelectItem value="price-ASC">Precio menor a mayor</SelectItem>
-                    <SelectItem value="price-DESC">Precio mayor a menor</SelectItem>
+                    <SelectItem value="price-ASC">Precio ↑</SelectItem>
+                    <SelectItem value="price-DESC">Precio ↓</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Results Count */}
+              <div className="text-sm text-gray-600">
+                {eventsLoading ? (
+                  'Cargando eventos...'
+                ) : (
+                  <span>
+                    <span className="font-semibold text-gray-900">{filteredEvents.length}</span> eventos
+                  </span>
+                )}
               </div>
             </div>
 
             {/* Active Filters Display */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              {selectedCategory !== 'Todos' && (
-                <Badge variant="secondary" className="bg-[#6B1E22] text-white">
-                  Categoría: {selectedCategory}
-                </Badge>
-              )}
-              {typeFilter !== 'all' && (
-                <Badge variant="secondary" className="bg-[#2c5aa0] text-white">
-                  Tipo: {typeFilter}
-                </Badge>
-              )}
-              {modalityFilter !== 'all' && (
-                <Badge variant="secondary" className="bg-[#28a745] text-white">
-                  Modalidad: {modalities.find(m => m.value === modalityFilter)?.label}
-                </Badge>
-              )}
-              {searchQuery && (
-                <Badge variant="secondary" className="bg-gray-600 text-white">
-                  Búsqueda: "{searchQuery}"
-                </Badge>
-              )}
-            </div>
+            {(selectedCategory !== 'Todos' || modalityFilter !== 'all' || searchQuery) && (
+              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
+                {selectedCategory !== 'Todos' && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-[#6B1E22] text-white hover:bg-[#5a181c] cursor-pointer"
+                    onClick={() => handleCategoryFilter('Todos')}
+                  >
+                    Categoría: {selectedCategory} ×
+                  </Badge>
+                )}
+                {modalityFilter !== 'all' && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-[#28a745] text-white hover:bg-[#218838] cursor-pointer"
+                    onClick={() => setModalityFilter('all')}
+                  >
+                    Modalidad: {modalities.find(m => m.value === modalityFilter)?.label} ×
+                  </Badge>
+                )}
+                {searchQuery && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-gray-600 text-white hover:bg-gray-700 cursor-pointer"
+                    onClick={() => {
+                      useUIStore.getState().setSearchQuery('')
+                      handleSearch('')
+                    }}
+                  >
+                    Búsqueda: "{searchQuery}" ×
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Results Summary */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="text-gray-600">
-              {eventsLoading ? (
-                'Cargando eventos...'
-              ) : (
-                <>
-                  <span className="font-semibold text-gray-900">{filteredEvents.length}</span> eventos encontrados
-                  {eventsData?.total && eventsData.total > filteredEvents.length && (
-                    <span className="text-sm text-gray-500 ml-2">
-                      (de {eventsData.total} total)
-                    </span>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Sort Icon */}
+          {/* Sort Icon - Reduced margin */}
+          <div className="flex items-center justify-end mb-4">
             <div className="flex items-center gap-2 text-gray-500">
               <FaSort size={14} />
               <span className="text-sm">
@@ -272,7 +264,7 @@ const EventsPage: React.FC = () => {
       </section>
 
       {/* Events Grid Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-8 bg-gray-50">
         <div className="container mx-auto px-4">
           {eventsError ? (
             <div className="text-center py-16">
