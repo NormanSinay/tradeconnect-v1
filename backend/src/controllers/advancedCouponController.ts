@@ -1,0 +1,763 @@
+/**
+ * @fileoverview Controlador de Cupones Avanzados para TradeConnect
+ * @version 1.0.0
+ * @author TradeConnect Team
+ * @description Controladores HTTP para gestión de cupones avanzados
+ *
+ * Archivo: backend/src/controllers/advancedCouponController.ts
+ */
+
+import { Request, Response } from 'express';
+import { validationResult } from 'express-validator';
+import { advancedCouponService } from '../services/advancedCouponService';
+import {
+  CouponApplicationRequest,
+  CouponApplicationResponse,
+  CouponValidationResponse,
+  CouponFilters,
+  CouponSortOptions,
+  CouponStatus,
+  CouponApplicationType,
+  AdvancedDiscountType
+} from '../types/advanced-coupon.types';
+import { AuthenticatedRequest } from '../types/auth.types';
+import { HTTP_STATUS } from '../utils/constants';
+import { logger } from '../utils/logger';
+
+/**
+ * Controlador para manejo de operaciones de cupones avanzados
+ */
+export class AdvancedCouponController {
+
+  // ====================================================================
+  // GESTIÓN DE CUPONES AVANZADOS
+  // ====================================================================
+
+  /**
+   * @swagger
+   * /api/advanced-coupons:
+   *   post:
+   *     tags: [Advanced Coupons]
+   *     summary: Crear cupón avanzado
+   *     description: Crea un nuevo cupón avanzado con reglas complejas
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/AdvancedCouponCreationAttributes'
+   *     responses:
+   *       201:
+   *         description: Cupón creado exitosamente
+   *       400:
+   *         description: Datos inválidos
+   *       401:
+   *         description: No autorizado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async createCoupon(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          error: 'VALIDATION_ERROR',
+          details: errors.array(),
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const couponData = req.body;
+      couponData.createdBy = userId;
+
+      const result = await advancedCouponService.createCoupon(couponData);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.CREATED).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error creando cupón avanzado:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/advanced-coupons/{id}:
+   *   get:
+   *     tags: [Advanced Coupons]
+   *     summary: Obtener cupón avanzado por ID
+   *     description: Obtiene un cupón avanzado específico por su ID
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *     responses:
+   *       200:
+   *         description: Cupón obtenido exitosamente
+   *       401:
+   *         description: No autorizado
+   *       404:
+   *         description: Cupón no encontrado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async getCouponById(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const couponId = parseInt(id);
+
+      if (isNaN(couponId)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'ID de cupón inválido',
+          error: 'INVALID_COUPON_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await advancedCouponService.getCouponById(couponId);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error obteniendo cupón avanzado:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/advanced-coupons:
+   *   get:
+   *     tags: [Advanced Coupons]
+   *     summary: Listar cupones avanzados
+   *     description: Obtiene una lista paginada de cupones avanzados con filtros opcionales
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           default: 1
+   *       - in: query
+   *         name: limit
+   *         schema:
+   *           type: integer
+   *           default: 10
+   *       - in: query
+   *         name: status
+   *         schema:
+   *           type: array
+   *           items:
+   *             type: string
+   *       - in: query
+   *         name: applicationType
+   *         schema:
+   *           type: array
+   *           items:
+   *             type: string
+   *       - in: query
+   *         name: discountType
+   *         schema:
+   *           type: array
+   *           items:
+   *             type: string
+   *       - in: query
+   *         name: sortBy
+   *         schema:
+   *           type: string
+   *           default: createdAt
+   *       - in: query
+   *         name: sortOrder
+   *         schema:
+   *           type: string
+   *           enum: [ASC, DESC]
+   *           default: DESC
+   *     responses:
+   *       200:
+   *         description: Cupones obtenidos exitosamente
+   *       401:
+   *         description: No autorizado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async getCoupons(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        status,
+        applicationType,
+        discountType,
+        sortBy = 'createdAt',
+        sortOrder = 'DESC'
+      } = req.query;
+
+      const filters: CouponFilters = {};
+      if (status) filters.status = Array.isArray(status) ? status as CouponStatus[] : [status as CouponStatus];
+      if (applicationType) filters.applicationType = Array.isArray(applicationType) ? applicationType as CouponApplicationType[] : [applicationType as CouponApplicationType];
+      if (discountType) filters.discountType = Array.isArray(discountType) ? discountType as AdvancedDiscountType[] : [discountType as AdvancedDiscountType];
+
+      const sortOptions: CouponSortOptions = {
+        field: sortBy as any,
+        order: sortOrder as 'ASC' | 'DESC'
+      };
+
+      const result = await advancedCouponService.getCoupons({
+        page: parseInt(page as string),
+        limit: parseInt(limit as string),
+        filters,
+        sortOptions
+      });
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error || 'INTERNAL_SERVER_ERROR')).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error obteniendo cupones avanzados:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/advanced-coupons/{id}:
+   *   put:
+   *     tags: [Advanced Coupons]
+   *     summary: Actualizar cupón avanzado
+   *     description: Actualiza un cupón avanzado existente
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/AdvancedCouponAttributes'
+   *     responses:
+   *       200:
+   *         description: Cupón actualizado exitosamente
+   *       400:
+   *         description: Datos inválidos
+   *       401:
+   *         description: No autorizado
+   *       404:
+   *         description: Cupón no encontrado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async updateCoupon(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          error: 'VALIDATION_ERROR',
+          details: errors.array(),
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      const couponId = parseInt(id);
+
+      if (isNaN(couponId)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'ID de cupón inválido',
+          error: 'INVALID_COUPON_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const updateData = req.body;
+      updateData.updatedBy = userId;
+
+      const result = await advancedCouponService.updateCoupon(couponId, updateData);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error || 'INTERNAL_SERVER_ERROR')).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error actualizando cupón avanzado:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/advanced-coupons/{id}:
+   *   delete:
+   *     tags: [Advanced Coupons]
+   *     summary: Eliminar cupón avanzado
+   *     description: Elimina un cupón avanzado (soft delete)
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *     responses:
+   *       200:
+   *         description: Cupón eliminado exitosamente
+   *       401:
+   *         description: No autorizado
+   *       404:
+   *         description: Cupón no encontrado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async deleteCoupon(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const couponId = parseInt(id);
+
+      if (isNaN(couponId)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'ID de cupón inválido',
+          error: 'INVALID_COUPON_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await advancedCouponService.deleteCoupon(couponId);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error eliminando cupón avanzado:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // ====================================================================
+  // VALIDACIÓN Y APLICACIÓN DE CUPONES
+  // ====================================================================
+
+  /**
+   * @swagger
+   * /api/advanced-coupons/validate:
+   *   post:
+   *     tags: [Advanced Coupons]
+   *     summary: Validar cupón avanzado
+   *     description: Valida si un cupón avanzado puede aplicarse a una compra
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/CouponApplicationRequest'
+   *     responses:
+   *       200:
+   *         description: Cupón validado exitosamente
+   *       400:
+   *         description: Cupón inválido o no aplicable
+   *       401:
+   *         description: No autorizado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async validateCoupon(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          error: 'VALIDATION_ERROR',
+          details: errors.array(),
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const validationData: CouponApplicationRequest = req.body;
+
+      const result = await advancedCouponService.validateCoupon(validationData, userId);
+
+      // La validación siempre retorna success: true, pero con valid: true/false
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: result,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error validando cupón avanzado:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/advanced-coupons/apply:
+   *   post:
+   *     tags: [Advanced Coupons]
+   *     summary: Aplicar cupón avanzado
+   *     description: Aplica un cupón avanzado a una compra
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/CouponApplicationRequest'
+   *     responses:
+   *       200:
+   *         description: Cupón aplicado exitosamente
+   *       400:
+   *         description: Cupón inválido o no aplicable
+   *       401:
+   *         description: No autorizado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async applyCoupon(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          error: 'VALIDATION_ERROR',
+          details: errors.array(),
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const applicationData: CouponApplicationRequest = req.body;
+
+      const result = await advancedCouponService.applyCoupon(applicationData, userId);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError((result.errors?.[0] || 'COUPON_ERROR'))).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error aplicando cupón avanzado:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // ====================================================================
+  // ESTADÍSTICAS Y REPORTES
+  // ====================================================================
+
+  /**
+   * @swagger
+   * /api/advanced-coupons/{id}/stats:
+   *   get:
+   *     tags: [Advanced Coupons]
+   *     summary: Obtener estadísticas de cupón
+   *     description: Obtiene estadísticas de uso de un cupón específico
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *     responses:
+   *       200:
+   *         description: Estadísticas obtenidas exitosamente
+   *       401:
+   *         description: No autorizado
+   *       404:
+   *         description: Cupón no encontrado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async getCouponStats(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const couponId = parseInt(id);
+
+      if (isNaN(couponId)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'ID de cupón inválido',
+          error: 'INVALID_COUPON_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await advancedCouponService.getCouponStats(couponId);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error obteniendo estadísticas de cupón:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * @swagger
+   * /api/advanced-coupons/stats:
+   *   get:
+   *     tags: [Advanced Coupons]
+   *     summary: Obtener estadísticas generales
+   *     description: Obtiene estadísticas generales de todos los cupones avanzados
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Estadísticas obtenidas exitosamente
+   *       401:
+   *         description: No autorizado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async getGeneralStats(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const result = await advancedCouponService.getGeneralStats();
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error obteniendo estadísticas generales:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // ====================================================================
+  // CUPONES AUTOMÁTICOS
+  // ====================================================================
+
+  /**
+   * @swagger
+   * /api/advanced-coupons/auto-applicable:
+   *   post:
+   *     tags: [Advanced Coupons]
+   *     summary: Obtener cupones aplicables automáticamente
+   *     description: Obtiene cupones que pueden aplicarse automáticamente según el contexto
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               userId:
+   *                 type: integer
+   *               eventId:
+   *                 type: integer
+   *               purchaseAmount:
+   *                 type: number
+   *               itemQuantity:
+   *                 type: integer
+   *               userType:
+   *                 type: string
+   *               userSegment:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Cupones automáticos obtenidos exitosamente
+   *       401:
+   *         description: No autorizado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async getAutoApplicableCoupons(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const context = req.body;
+
+      const result = await advancedCouponService.getAutoApplicableCoupons(context, userId);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error obteniendo cupones automáticos:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Método auxiliar para obtener código de estado HTTP desde el tipo de error
+   */
+  private getStatusCodeFromError(errorType?: string): number {
+    switch (errorType) {
+      case 'VALIDATION_ERROR':
+        return HTTP_STATUS.BAD_REQUEST;
+      case 'UNAUTHORIZED':
+        return HTTP_STATUS.UNAUTHORIZED;
+      case 'INSUFFICIENT_PERMISSIONS':
+        return HTTP_STATUS.FORBIDDEN;
+      case 'COUPON_NOT_FOUND':
+        return HTTP_STATUS.NOT_FOUND;
+      default:
+        return HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    }
+  }
+}
+
+export const advancedCouponController = new AdvancedCouponController();

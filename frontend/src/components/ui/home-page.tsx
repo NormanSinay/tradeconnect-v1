@@ -96,7 +96,7 @@ const HomePage: React.FC = () => {
                 Conecta, Aprende y Crece con TradeConnect
               </h1>
               <p className="text-xl mb-8 text-gray-200 leading-relaxed">
-                La plataforma e-commerce líder para la gestión y comercialización de eventos y cursos de la Cámara de Comercio de Guatemala
+                La plataforma líder para la gestión y comercialización de eventos y cursos empresariales con la mejor tecnología y experiencia de Cámara de Comercio de Guatemala.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button

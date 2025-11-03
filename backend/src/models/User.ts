@@ -36,6 +36,10 @@ import { UserRole as UserRoleModel } from './UserRole';
 import { Session } from './Session';
 import { TwoFactorAuth } from './TwoFactorAuth';
 import { AuditLog } from './AuditLog';
+import { ReferralCode } from './ReferralCode';
+import { Referral } from './Referral';
+import { LoyaltyPoint } from './LoyaltyPoint';
+import { UserBadge } from './UserBadge';
 
 /**
  * Atributos del modelo Usuario
@@ -493,6 +497,21 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
 
   @HasMany(() => AuditLog, 'userId')
   declare auditLogs: AuditLog[];
+
+  @HasMany(() => ReferralCode)
+  declare referralCodes: ReferralCode[];
+
+  @HasMany(() => Referral, 'referrerId')
+  declare referralsGiven: Referral[];
+
+  @HasMany(() => Referral, 'referredId')
+  declare referralsReceived: Referral[];
+
+  @HasMany(() => LoyaltyPoint)
+  declare loyaltyPoints: LoyaltyPoint[];
+
+  @HasMany(() => UserBadge)
+  declare userBadges: UserBadge[];
 
   // ====================================================================
   // HOOKS DE SEQUELIZE

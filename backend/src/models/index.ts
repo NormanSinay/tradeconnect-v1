@@ -67,6 +67,8 @@ import { PromoCode } from './PromoCode';
 import { VolumeDiscount } from './VolumeDiscount';
 import { EarlyBirdDiscount } from './EarlyBirdDiscount';
 import { PromoCodeUsage } from './PromoCodeUsage';
+import { AdvancedCoupon } from './AdvancedCoupon';
+import { AdvancedCouponUsage } from './AdvancedCouponUsage';
 
 // Importar modelos de gestión de aforos
 import { Capacity } from './Capacity';
@@ -96,6 +98,49 @@ import { UserNotificationPreferences } from './UserNotificationPreferences';
 
 // Importar modelo de configuración del sistema
 import { SystemConfig } from './SystemConfig';
+
+// Importar modelos de banners y anuncios promocionales
+import { Banner } from './Banner';
+import { PromotionalAd } from './PromotionalAd';
+
+// Importar modelos de blog/artículos
+import { Article } from './Article';
+import { ArticleCategory } from './ArticleCategory';
+import { Tag } from './Tag';
+import { ArticleTag } from './ArticleTag';
+import { Comment } from './Comment';
+
+// Importar modelos de CMS
+import { StaticPage } from './StaticPage';
+import { Term } from './Term';
+import { Policy } from './Policy';
+import { Faq } from './Faq';
+
+// Importar modelos de referidos
+import { ReferralCode } from './ReferralCode';
+import { Referral } from './Referral';
+import { ReferralTracking } from './ReferralTracking';
+import { ReferralReward } from './ReferralReward';
+
+// Importar modelos de gamificación
+import { LoyaltyPoint } from './LoyaltyPoint';
+import { Badge } from './Badge';
+import { UserBadge } from './UserBadge';
+
+// Importar modelos avanzados de RBAC
+import { PermissionGroup } from './PermissionGroup';
+import { PermissionContext } from './PermissionContext';
+import { PermissionPolicy } from './PermissionPolicy';
+
+// Importar modelos avanzados de gamificación
+import { Quest } from './Quest';
+import { Achievement } from './Achievement';
+import { Level } from './Level';
+import { Reward } from './Reward';
+
+// Importar modelos de importación masiva de usuarios
+import { UserImport } from './UserImport';
+import { UserImportError } from './UserImportError';
 
 // Agregar modelos a la instancia de Sequelize
 sequelize.addModels([
@@ -152,6 +197,8 @@ sequelize.addModels([
   VolumeDiscount,
   EarlyBirdDiscount,
   PromoCodeUsage,
+  AdvancedCoupon,
+  AdvancedCouponUsage,
   // Modelos de gestión de aforos
   Capacity,
   AccessType,
@@ -175,8 +222,43 @@ sequelize.addModels([
   NotificationRule,
   UserNotificationPreferences,
   // Modelo de configuración del sistema
-  SystemConfig
-]);
+  SystemConfig,
+  // Modelos de banners y anuncios promocionales
+  Banner,
+  PromotionalAd,
+  // Modelos de blog/artículos
+  Article,
+  ArticleCategory,
+  Tag,
+  ArticleTag,
+  Comment,
+  // Modelos de CMS
+  StaticPage,
+  Term,
+  Policy,
+  Faq,
+  // Modelos de referidos
+  ReferralCode,
+  Referral,
+  ReferralTracking,
+  ReferralReward,
+  // Modelos de gamificación
+  LoyaltyPoint,
+  Badge,
+  UserBadge,
+  // Modelos avanzados de RBAC
+  PermissionGroup,
+  PermissionContext,
+  PermissionPolicy,
+  // Modelos avanzados de gamificación
+  Quest,
+  Achievement,
+  Level,
+  Reward,
+  // Modelos de importación masiva de usuarios
+  UserImport,
+  UserImportError
+  ]);
 
 // Exportar modelos y sequelize
 export {
@@ -234,6 +316,8 @@ export {
   VolumeDiscount,
   EarlyBirdDiscount,
   PromoCodeUsage,
+  AdvancedCoupon,
+  AdvancedCouponUsage,
   // Modelos de gestión de aforos
   Capacity,
   AccessType,
@@ -257,8 +341,43 @@ export {
   NotificationRule,
   UserNotificationPreferences,
   // Modelo de configuración del sistema
-  SystemConfig
-};
+  SystemConfig,
+  // Modelos de banners y anuncios promocionales
+  Banner,
+  PromotionalAd,
+  // Modelos de blog/artículos
+  Article,
+  ArticleCategory,
+  Tag,
+  ArticleTag,
+  Comment,
+  // Modelos de CMS
+  StaticPage,
+  Term,
+  Policy,
+  Faq,
+  // Modelos de referidos
+  ReferralCode,
+  Referral,
+  ReferralTracking,
+  ReferralReward,
+  // Modelos de gamificación
+  LoyaltyPoint,
+  Badge,
+  UserBadge,
+  // Modelos avanzados de RBAC
+  PermissionGroup,
+  PermissionContext,
+  PermissionPolicy,
+  // Modelos avanzados de gamificación
+  Quest,
+  Achievement,
+  Level,
+  Reward,
+  // Modelos de importación masiva de usuarios
+  UserImport,
+  UserImportError
+  };
 
 // Exportar por defecto
 export default sequelize;

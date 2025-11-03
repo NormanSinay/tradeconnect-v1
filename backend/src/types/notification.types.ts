@@ -37,7 +37,8 @@ export enum NotificationPriority {
 export enum EmailTemplateType {
   TRANSACTIONAL = 'TRANSACTIONAL',
   PROMOTIONAL = 'PROMOTIONAL',
-  OPERATIONAL = 'OPERATIONAL'
+  OPERATIONAL = 'OPERATIONAL',
+  CAMPAIGN = 'CAMPAIGN'
 }
 
 export enum PopupType {

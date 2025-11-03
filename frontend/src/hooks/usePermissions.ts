@@ -22,6 +22,8 @@ interface UsePermissionsReturn {
   canManageFinance: boolean;
   canViewAuditLogs: boolean;
   canManageSystem: boolean;
+  canManageContent: boolean;
+  canManageMarketing: boolean;
   canDeleteUsers: boolean;
   checkPermission: (permission: string) => PermissionCheck;
   // Permisos específicos de eventos
@@ -76,6 +78,8 @@ export const usePermissions = (): UsePermissionsReturn => {
   const canManageFinance = isSuperAdmin || isAdmin;
   const canViewAuditLogs = isSuperAdmin || isAdmin;
   const canManageSystem = isSuperAdmin;
+  const canManageContent = isSuperAdmin || isAdmin;
+  const canManageMarketing = isSuperAdmin || isAdmin;
 
   // Permisos específicos de eventos basados en roles
   const getEventPermissionsForRole = (role: string): readonly EventPermission[] => {
@@ -171,6 +175,8 @@ export const usePermissions = (): UsePermissionsReturn => {
     canManageFinance,
     canViewAuditLogs,
     canManageSystem,
+    canManageContent,
+    canManageMarketing,
     canDeleteUsers: isSuperAdmin || checkPermission('delete_users').hasPermission,
     checkPermission,
     // Permisos específicos de eventos

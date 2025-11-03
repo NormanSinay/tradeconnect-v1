@@ -1861,6 +1861,14 @@ export class DashboardService {
     limit?: number;
     action?: string;
     userId?: string;
+    startDate?: string;
+    endDate?: string;
+    resource?: string;
+    resourceId?: string;
+    ipAddress?: string;
+    location?: string;
+    sortBy?: 'createdAt' | 'action' | 'userId' | 'resource';
+    sortOrder?: 'ASC' | 'DESC';
   } = {}): Promise<{ auditLogs: AuditLog[]; pagination: any }> {
     const { token } = useAuthStore.getState();
 
@@ -1869,8 +1877,16 @@ export class DashboardService {
     if (params.limit) queryParams.append('limit', params.limit.toString());
     if (params.action) queryParams.append('action', params.action);
     if (params.userId) queryParams.append('userId', params.userId);
+    if (params.startDate) queryParams.append('startDate', params.startDate);
+    if (params.endDate) queryParams.append('endDate', params.endDate);
+    if (params.resource) queryParams.append('resource', params.resource);
+    if (params.resourceId) queryParams.append('resourceId', params.resourceId);
+    if (params.ipAddress) queryParams.append('ipAddress', params.ipAddress);
+    if (params.location) queryParams.append('location', params.location);
+    if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
-    const response = await fetch(`${this.BASE_URL}/admin/audit?${queryParams}`, {
+    const response = await fetch(`${this.BASE_URL}/audit?${queryParams}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1883,6 +1899,115 @@ export class DashboardService {
 
     if (!response.ok || !data.success) {
       throw new Error(data.message || 'Error obteniendo logs de auditoría');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Obtener estadísticas de auditoría
+   */
+  static async getAuditStats(params: {
+    startDate?: string;
+    endDate?: string;
+    userId?: string;
+  } = {}): Promise<{
+    totalLogs: number;
+    logsByAction: Record<string, number>;
+    logsByUser: Record<string, number>;
+    logsByResource: Record<string, number>;
+    logsByDate: Record<string, number>;
+    topUsers: Array<{ userId: string; count: number; user?: any }>;
+    topActions: Array<{ action: string; count: number }>;
+    topResources: Array<{ resource: string; count: number }>;
+    recentActivity: AuditLog[];
+  }> {
+    const { token } = useAuthStore.getState();
+
+    const queryParams = new URLSearchParams();
+    if (params.startDate) queryParams.append('startDate', params.startDate);
+    if (params.endDate) queryParams.append('endDate', params.endDate);
+    if (params.userId) queryParams.append('userId', params.userId);
+
+    const response = await fetch(`${this.BASE_URL}/audit/stats?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo estadísticas de auditoría');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Exportar logs de auditoría
+   */
+  static async exportAuditLogs(params: {
+    format: 'csv' | 'excel' | 'json';
+    startDate?: string;
+    endDate?: string;
+    action?: string;
+    userId?: string;
+    resource?: string;
+  }): Promise<Blob> {
+    const { token } = useAuthStore.getState();
+
+    const queryParams = new URLSearchParams({
+      format: params.format
+    });
+    if (params.startDate) queryParams.append('startDate', params.startDate);
+    if (params.endDate) queryParams.append('endDate', params.endDate);
+    if (params.action) queryParams.append('action', params.action);
+    if (params.userId) queryParams.append('userId', params.userId);
+    if (params.resource) queryParams.append('resource', params.resource);
+
+    const response = await fetch(`${this.BASE_URL}/audit/export?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData: ApiResponse<any> = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Error exportando logs de auditoría');
+    }
+
+    return await response.blob();
+  }
+
+  /**
+   * Limpiar logs de auditoría antiguos
+   */
+  static async cleanupAuditLogs(olderThanDays: number): Promise<{
+    deletedCount: number;
+    message: string;
+  }> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/audit/cleanup`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ olderThanDays }),
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error limpiando logs de auditoría');
     }
 
     return data.data!;
@@ -2456,14 +2581,14 @@ export class DashboardService {
      format: 'csv' | 'excel' | 'pdf';
    }): Promise<Blob> {
      const { token } = useAuthStore.getState();
-
+ 
      const queryParams = new URLSearchParams({
        type: params.type,
        format: params.format
      });
      if (params.startDate) queryParams.append('startDate', params.startDate);
      if (params.endDate) queryParams.append('endDate', params.endDate);
-
+ 
      const response = await fetch(`${this.BASE_URL}/finance/export?${queryParams}`, {
        method: 'GET',
        headers: {
@@ -2471,12 +2596,425 @@ export class DashboardService {
        },
        credentials: 'include',
      });
-
+ 
      if (!response.ok) {
        const errorData: ApiResponse<any> = await response.json().catch(() => ({}));
        throw new Error(errorData.message || 'Error exportando datos financieros');
      }
-
+ 
      return await response.blob();
    }
-}
+ 
+   // ====================================================================
+   // MÉTODOS DE GESTIÓN AVANZADA DE USUARIOS
+   // ====================================================================
+ 
+   /**
+    * Obtener lista de roles del sistema
+    */
+   static async getRoles(params: {
+     page?: number;
+     limit?: number;
+     search?: string;
+     isActive?: boolean;
+   } = {}): Promise<{
+     roles: Array<{
+       id: number;
+       name: string;
+       displayName: string;
+       description: string;
+       isActive: boolean;
+       isSystem: boolean;
+       level: number;
+       color?: string;
+       icon?: string;
+       userCount: number;
+       permissions: Array<{
+         id: number;
+         name: string;
+         displayName: string;
+         description: string;
+         resource: string;
+         action: string;
+         isActive: boolean;
+         isSystem: boolean;
+       }>;
+       createdAt: string;
+       updatedAt: string;
+     }>;
+     pagination: {
+       page: number;
+       limit: number;
+       total: number;
+       totalPages: number;
+       hasNext: boolean;
+       hasPrev: boolean;
+     };
+   }> {
+     const { token } = useAuthStore.getState();
+ 
+     const queryParams = new URLSearchParams();
+     if (params.page) queryParams.append('page', params.page.toString());
+     if (params.limit) queryParams.append('limit', params.limit.toString());
+     if (params.search) queryParams.append('search', params.search);
+     if (params.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
+ 
+     const response = await fetch(`${this.BASE_URL}/advanced-users/roles?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+ 
+     const data: ApiResponse<any> = await response.json();
+ 
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error obteniendo roles');
+     }
+ 
+     return data.data!;
+   }
+ 
+   /**
+    * Obtener lista de grupos de usuarios
+    */
+   static async getUserGroups(params: {
+     page?: number;
+     limit?: number;
+     search?: string;
+     isActive?: boolean;
+   } = {}): Promise<{
+     groups: Array<{
+       id: number;
+       name: string;
+       description?: string;
+       memberCount: number;
+       isActive: boolean;
+       createdAt: string;
+       updatedAt: string;
+       createdBy?: {
+         id: number;
+         firstName: string;
+         lastName: string;
+       };
+     }>;
+     pagination: {
+       page: number;
+       limit: number;
+       total: number;
+       totalPages: number;
+       hasNext: boolean;
+       hasPrev: boolean;
+     };
+   }> {
+     const { token } = useAuthStore.getState();
+ 
+     const queryParams = new URLSearchParams();
+     if (params.page) queryParams.append('page', params.page.toString());
+     if (params.limit) queryParams.append('limit', params.limit.toString());
+     if (params.search) queryParams.append('search', params.search);
+     if (params.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
+ 
+     const response = await fetch(`${this.BASE_URL}/advanced-users/groups?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+ 
+     const data: ApiResponse<any> = await response.json();
+ 
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error obteniendo grupos de usuarios');
+     }
+ 
+     return data.data!;
+   }
+ 
+   /**
+    * Obtener sesiones activas de usuarios
+    */
+   static async getUserSessions(params: {
+     page?: number;
+     limit?: number;
+     userId?: number;
+     isActive?: boolean;
+     search?: string;
+   } = {}): Promise<{
+     sessions: Array<{
+       id: number;
+       userId: number;
+       sessionId: string;
+       ipAddress: string;
+       userAgent: string;
+       deviceType?: string;
+       deviceOS?: string;
+       deviceBrowser?: string;
+       locationCountry?: string;
+       locationCity?: string;
+       locationRegion?: string;
+       isActive: boolean;
+       isCurrent: boolean;
+       lastActivity: string;
+       expiresAt: string;
+       refreshToken?: string;
+       refreshTokenExpires?: string;
+       loginMethod?: string;
+       createdAt: string;
+       updatedAt: string;
+       user?: {
+         id: number;
+         email: string;
+         firstName: string;
+         lastName: string;
+         isActive: boolean;
+       };
+     }>;
+     pagination: {
+       page: number;
+       limit: number;
+       total: number;
+       totalPages: number;
+       hasNext: boolean;
+       hasPrev: boolean;
+     };
+   }> {
+     const { token } = useAuthStore.getState();
+ 
+     const queryParams = new URLSearchParams();
+     if (params.page) queryParams.append('page', params.page.toString());
+     if (params.limit) queryParams.append('limit', params.limit.toString());
+     if (params.userId) queryParams.append('userId', params.userId.toString());
+     if (params.isActive !== undefined) queryParams.append('isActive', params.isActive.toString());
+     if (params.search) queryParams.append('search', params.search);
+ 
+     const response = await fetch(`${this.BASE_URL}/advanced-users/sessions?${queryParams}`, {
+       method: 'GET',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+     });
+ 
+     const data: ApiResponse<any> = await response.json();
+ 
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error obteniendo sesiones de usuarios');
+     }
+ 
+     return data.data!;
+   }
+ 
+   /**
+    * Crear nuevo rol
+    */
+   static async createRole(roleData: {
+     name: string;
+     displayName?: string;
+     description?: string;
+     permissions?: number[];
+     color?: string;
+     icon?: string;
+   }): Promise<{
+     id: number;
+     name: string;
+     displayName: string;
+     description: string;
+     isActive: boolean;
+     isSystem: boolean;
+     level: number;
+     color?: string;
+     icon?: string;
+     createdAt: string;
+     updatedAt: string;
+   }> {
+     const { token } = useAuthStore.getState();
+ 
+     const response = await fetch(`${this.BASE_URL}/advanced-users/roles`, {
+       method: 'POST',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+       body: JSON.stringify(roleData),
+     });
+ 
+     const data: ApiResponse<any> = await response.json();
+ 
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error creando rol');
+     }
+ 
+     return data.data!;
+   }
+ 
+   /**
+    * Actualizar permisos de un rol
+    */
+   static async updateRolePermissions(roleId: number, permissions: number[]): Promise<void> {
+     const { token } = useAuthStore.getState();
+ 
+     const response = await fetch(`${this.BASE_URL}/advanced-users/roles/${roleId}/permissions`, {
+       method: 'PUT',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+       body: JSON.stringify({ permissions }),
+     });
+ 
+     const data: ApiResponse<any> = await response.json();
+ 
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error actualizando permisos del rol');
+     }
+   }
+ 
+   /**
+    * Crear nuevo grupo de usuarios
+    */
+   static async createUserGroup(groupData: {
+     name: string;
+     description?: string;
+     userIds?: number[];
+   }): Promise<{
+     id: number;
+     name: string;
+     description?: string;
+     memberCount: number;
+     isActive: boolean;
+     createdAt: string;
+     updatedAt: string;
+   }> {
+     const { token } = useAuthStore.getState();
+ 
+     const response = await fetch(`${this.BASE_URL}/advanced-users/groups`, {
+       method: 'POST',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+       body: JSON.stringify(groupData),
+     });
+ 
+     const data: ApiResponse<any> = await response.json();
+ 
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error creando grupo de usuarios');
+     }
+ 
+     return data.data!;
+   }
+ 
+   /**
+    * Acción masiva sobre usuarios
+    */
+   static async bulkUserAction(action: string, userIds: number[], options?: any): Promise<{
+     successful: number[];
+     failed: Array<{ userId: number; error: string }>;
+     summary: {
+       totalRequested: number;
+       successfulCount: number;
+       failedCount: number;
+     };
+   }> {
+     const { token } = useAuthStore.getState();
+ 
+     const response = await fetch(`${this.BASE_URL}/advanced-users/bulk-action`, {
+       method: 'POST',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+       body: JSON.stringify({
+         action,
+         userIds,
+         options
+       }),
+     });
+ 
+     const data: ApiResponse<any> = await response.json();
+ 
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || `Error ejecutando acción masiva: ${action}`);
+     }
+ 
+     return data.data!;
+   }
+ 
+   /**
+    * Exportar usuarios
+    */
+   static async exportUsers(params: {
+     format: 'csv' | 'excel' | 'json';
+     filters?: {
+       role?: string;
+       isActive?: boolean;
+       groupId?: string;
+       startDate?: string;
+       endDate?: string;
+     };
+   }): Promise<{
+     data: string;
+     filename: string;
+     mimeType: string;
+   }> {
+     const { token } = useAuthStore.getState();
+ 
+     const response = await fetch(`${this.BASE_URL}/advanced-users/export`, {
+       method: 'POST',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+         'Content-Type': 'application/json',
+       },
+       credentials: 'include',
+       body: JSON.stringify(params),
+     });
+ 
+     const data: ApiResponse<any> = await response.json();
+ 
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error exportando usuarios');
+     }
+ 
+     return data.data!;
+   }
+ 
+   /**
+    * Importar usuarios
+    */
+   static async importUsers(file: FormData, onProgress?: (progress: number) => void): Promise<{
+     successful: number;
+     failed: number;
+     errors: Array<{ row: number; error: string }>;
+     preview?: any[];
+   }> {
+     const { token } = useAuthStore.getState();
+ 
+     const response = await fetch(`${this.BASE_URL}/advanced-users/import`, {
+       method: 'POST',
+       headers: {
+         'Authorization': `Bearer ${token}`,
+       },
+       credentials: 'include',
+       body: file,
+     });
+ 
+     const data: ApiResponse<any> = await response.json();
+ 
+     if (!response.ok || !data.success) {
+       throw new Error(data.message || 'Error importando usuarios');
+     }
+ 
+     return data.data!;
+   }
+ }

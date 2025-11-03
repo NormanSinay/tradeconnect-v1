@@ -1,3 +1,16 @@
+
+
+
+
+
+
+ROLES DEL SISTEMA (8 Roles)
+
+  1. SUPER_ADMIN (Super Administrador) 👑
+
+  Nivel: 10 | Color: Rojo (#D32F2F) | Icono: shield-crown
+
+  Descripción: Acceso total al sistema, incluyendo configuración de infraestructura
 React (componentes, routing con React Router)
 ↓
 shadcn/ui (UI moderna)
@@ -37,19 +50,6 @@ Estructura de Maquetación
 1.	Header con navegación responsive
 2.	Contenido principal con container máximo 1200px
 3.	Sidebar en dashboards (colapsable en móvil)
-
-
-
-
-
-ROLES DEL SISTEMA (8 Roles)
-
-  1. SUPER_ADMIN (Super Administrador) 👑
-
-  Nivel: 10 | Color: Rojo (#D32F2F) | Icono: shield-crown
-
-  Descripción: Acceso total al sistema, incluyendo configuración de infraestructura
-
   Permisos: ✅ TODOS LOS PERMISOS (100% acceso completo)
 
   ---
@@ -316,3 +316,9 @@ Chatbots para soporte
 Recomendaciones personalizadas
 Detección automática de anomalías
 Optimización automática de precios
+
+
+
+
+info: NIT validation service initialized {"cacheDurationHours":24,"cacheEnabled":true,"satUrl":"https://consulta-nits.sat.gob.gt","service":"tradeconnect-backend","timestamp":"2025-11-03T14:16:05.622Z"}
+info: CUI validation service initialized {"cacheDurationHours":24,"cacheEnabled":true,"renapUrl":"https://consulta-cui.renap.gob.gt","service":"tradeconnect-backend","timestamp":"2025-11-03T14:16:05.642Z"}

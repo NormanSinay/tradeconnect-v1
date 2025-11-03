@@ -4,6 +4,10 @@ import { logger } from '../utils/logger';
 import { EmailTemplate } from '../models/EmailTemplate';
 import { Notification } from '../models/Notification';
 import { NotificationLog } from '../models/NotificationLog';
+import { EmailCampaign } from '../models/EmailCampaign';
+import { CampaignRecipient } from '../models/CampaignRecipient';
+import { CampaignEmail } from '../models/CampaignEmail';
+import { CampaignSchedule } from '../models/CampaignSchedule';
 import {
   EmailTemplateAttributes,
   NotificationAttachment,
@@ -49,6 +53,22 @@ interface BulkEmailData {
   commonVariables?: Record<string, any>;
   attachments?: NotificationAttachment[];
   priority?: 'HIGH' | 'NORMAL' | 'LOW';
+}
+
+interface CampaignEmailData {
+  campaignId: number;
+  recipientId: number;
+  to: string;
+  templateCode: string;
+  variables: Record<string, any>;
+  attachments?: NotificationAttachment[];
+  priority?: 'HIGH' | 'NORMAL' | 'LOW';
+}
+
+interface SendCampaignData {
+  campaignId: number;
+  batchSize?: number;
+  delayBetweenBatches?: number;
 }
 
 interface SMTPConfig {
@@ -575,6 +595,444 @@ class EmailService {
     }
 
     logger.info(`Test email sent to ${to}`);
+  }
+
+  // ====================================================================
+  // MÉTODOS PARA CAMPAÑAS DE EMAIL MARKETING
+  // ====================================================================
+
+  /**
+   * Envía un email de campaña con tracking completo
+   */
+  async sendCampaignEmail(data: CampaignEmailData): Promise<string> {
+    try {
+      // Obtener campaña y destinatario
+      const campaign = await EmailCampaign.findByPk(data.campaignId);
+      if (!campaign) {
+        throw new Error(`Campaign ${data.campaignId} not found`);
+      }
+
+      const recipient = await CampaignRecipient.findByPk(data.recipientId);
+      if (!recipient) {
+        throw new Error(`Recipient ${data.recipientId} not found`);
+      }
+
+      // Obtener plantilla
+      const template = await EmailTemplate.findActiveByCode(data.templateCode);
+      if (!template) {
+        throw new Error(`Template ${data.templateCode} not found or inactive`);
+      }
+
+      // Renderizar contenido
+      const rendered = template.render(data.variables);
+
+      // Generar messageId único para tracking
+      const messageId = this.generateMessageId(data.campaignId, data.recipientId);
+
+      // Preparar contenido con tracking
+      let htmlContent = rendered.html;
+      let trackingPixel = '';
+      let unsubscribeLink = '';
+
+      // Agregar tracking de apertura si está habilitado
+      if (campaign.trackOpens) {
+        const trackingToken = this.generateCampaignTrackingToken(
+          data.campaignId,
+          data.recipientId,
+          'open'
+        );
+        trackingPixel = `<img src="${process.env.BASE_URL}/api/campaigns/track/open/${trackingToken}" width="1" height="1" style="display:none;" alt="" />`;
+      }
+
+      // Agregar tracking a enlaces si está habilitado
+      if (campaign.trackClicks) {
+        htmlContent = this.addCampaignLinkTracking(htmlContent, data.campaignId, data.recipientId);
+      }
+
+      // Agregar link de unsubscribe para emails promocionales
+      if (template.type === EmailTemplateType.PROMOTIONAL) {
+        const unsubscribeToken = this.generateCampaignUnsubscribeToken(data.to);
+        unsubscribeLink = `<p style="font-size: 12px; color: #666;">
+          <a href="${process.env.BASE_URL}/api/campaigns/unsubscribe/${unsubscribeToken}">Darse de baja</a>
+        </p>`;
+      }
+
+      // Preparar opciones de email
+      const mailOptions: any = {
+        from: `"${campaign.fromName}" <${campaign.fromEmail}>`,
+        to: data.to,
+        subject: rendered.subject,
+        html: htmlContent + trackingPixel + unsubscribeLink,
+        messageId: `<${messageId}@${process.env.SMTP_DOMAIN || 'tradeconnect.gt'}>`,
+        priority: data.priority || 'normal',
+      };
+
+      // Agregar reply-to si está configurado
+      if (campaign.replyToEmail) {
+        mailOptions.replyTo = campaign.replyToEmail;
+      }
+
+      // Agregar attachments si existen
+      if (data.attachments && data.attachments.length > 0) {
+        mailOptions.attachments = data.attachments.map(att => ({
+          filename: att.filename,
+          path: att.path,
+          contentType: att.contentType,
+        }));
+      }
+
+      // Crear registro de email de campaña
+      const campaignEmail = await CampaignEmail.create({
+        campaignId: data.campaignId,
+        recipientId: data.recipientId,
+        messageId,
+        status: require('../models/CampaignEmail').CampaignEmailStatus.QUEUED,
+        openCount: 0,
+        clickCount: 0,
+        retryCount: 0,
+        maxRetries: 3
+      });
+
+      // Enviar email
+      const info = await this.transporter.sendMail(mailOptions);
+
+      // Actualizar estado del email de campaña
+      await campaignEmail.markAsSent(messageId);
+
+      // Actualizar estadísticas de campaña
+      await campaign.incrementSentCount();
+
+      // Actualizar estado del destinatario
+      await recipient.markAsSent();
+
+      logger.info(
+        `Campaign email sent: campaign=${data.campaignId}, recipient=${data.recipientId}, messageId=${messageId}`
+      );
+
+      return messageId;
+    } catch (error) {
+      logger.error('Error sending campaign email:', error);
+
+      // Marcar como fallido si existe el registro
+      if (data.campaignId && data.recipientId) {
+        try {
+          const campaignEmail = await CampaignEmail.findOne({
+            where: {
+              campaignId: data.campaignId,
+              recipientId: data.recipientId
+            }
+          });
+
+          if (campaignEmail) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            await campaignEmail.markAsFailed(errorMessage);
+          }
+        } catch (updateError) {
+          logger.error('Error updating campaign email status:', updateError);
+        }
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Envía una campaña completa
+   */
+  async sendCampaign(data: SendCampaignData): Promise<{
+    totalSent: number;
+    totalFailed: number;
+    campaignId: number;
+  }> {
+    try {
+      const campaign = await EmailCampaign.findByPk(data.campaignId);
+      if (!campaign) {
+        throw new Error(`Campaign ${data.campaignId} not found`);
+      }
+
+      if (!campaign.canSend) {
+        throw new Error(`Campaign ${data.campaignId} cannot be sent (status: ${campaign.status})`);
+      }
+
+      // Marcar campaña como enviando
+      await campaign.markAsSending();
+
+      // Obtener destinatarios pendientes
+      const batchSize = data.batchSize || campaign.batchSize || 50;
+      const delayBetweenBatches = data.delayBetweenBatches || 1000;
+
+      let totalSent = 0;
+      let totalFailed = 0;
+
+      let hasMoreRecipients = true;
+
+      while (hasMoreRecipients) {
+        // Obtener lote de destinatarios pendientes
+        const recipients = await CampaignRecipient.findPendingByCampaign(
+          data.campaignId,
+          batchSize
+        );
+
+        if (recipients.length === 0) {
+          hasMoreRecipients = false;
+          break;
+        }
+
+        // Procesar lote
+        const promises = recipients.map(async (recipient) => {
+          try {
+            // Combinar variables globales con variables del destinatario
+            const variables = {
+              ...campaign.variables,
+              ...recipient.variables,
+              recipient_email: recipient.email,
+              recipient_first_name: recipient.firstName,
+              recipient_last_name: recipient.lastName,
+              recipient_full_name: recipient.fullName,
+              campaign_name: campaign.name,
+              campaign_id: campaign.id,
+              unsubscribe_url: `${process.env.BASE_URL}/api/campaigns/unsubscribe/${this.generateCampaignUnsubscribeToken(recipient.email)}`
+            };
+
+            await this.sendCampaignEmail({
+              campaignId: data.campaignId,
+              recipientId: recipient.id,
+              to: recipient.email,
+              templateCode: campaign.templateCode || 'DEFAULT_CAMPAIGN',
+              variables,
+              priority: campaign.priority >= 8 ? 'HIGH' : campaign.priority >= 5 ? 'NORMAL' : 'LOW'
+            });
+
+            totalSent++;
+          } catch (error) {
+            logger.error(`Failed to send email to ${recipient.email}:`, error);
+            totalFailed++;
+
+            // Marcar destinatario como fallido
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            await recipient.markAsBounced(errorMessage);
+          }
+        });
+
+        // Esperar a que termine el lote
+        await Promise.allSettled(promises);
+
+        // Pausa entre lotes para no sobrecargar
+        if (hasMoreRecipients) {
+          await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+        }
+      }
+
+      // Marcar campaña como completada
+      await campaign.markAsCompleted();
+
+      logger.info(
+        `Campaign ${data.campaignId} completed: sent=${totalSent}, failed=${totalFailed}`
+      );
+
+      return {
+        totalSent,
+        totalFailed,
+        campaignId: data.campaignId
+      };
+    } catch (error) {
+      logger.error('Error sending campaign:', error);
+
+      // Marcar campaña como fallida
+      try {
+        const campaign = await EmailCampaign.findByPk(data.campaignId);
+        if (campaign) {
+          await campaign.markAsFailed();
+        }
+      } catch (updateError) {
+        logger.error('Error updating campaign status:', updateError);
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Procesa programaciones de campañas pendientes
+   */
+  async processScheduledCampaigns(): Promise<{
+    processed: number;
+    sent: number;
+    failed: number;
+  }> {
+    try {
+      const schedules = await CampaignSchedule.findDueSchedules();
+
+      let processed = 0;
+      let sent = 0;
+      let failed = 0;
+
+      for (const schedule of schedules) {
+        try {
+          processed++;
+
+          // Enviar campaña
+          const result = await this.sendCampaign({
+            campaignId: schedule.campaignId,
+            batchSize: 100,
+            delayBetweenBatches: 2000
+          });
+
+          sent += result.totalSent;
+
+          // Registrar ejecución de programación
+          await schedule.recordExecution();
+
+          logger.info(`Scheduled campaign ${schedule.campaignId} processed successfully`);
+        } catch (error) {
+          failed++;
+          logger.error(`Failed to process scheduled campaign ${schedule.campaignId}:`, error);
+
+          // Podríamos implementar lógica de reintentos aquí
+        }
+      }
+
+      return { processed, sent, failed };
+    } catch (error) {
+      logger.error('Error processing scheduled campaigns:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Genera ID único para mensaje
+   */
+  private generateMessageId(campaignId: number, recipientId: number): string {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 15);
+    return `campaign-${campaignId}-recipient-${recipientId}-${timestamp}-${random}`;
+  }
+
+  /**
+   * Genera token de tracking para campañas
+   */
+  private generateCampaignTrackingToken(
+    campaignId: number,
+    recipientId: number,
+    action: string
+  ): string {
+    const payload = `${campaignId}:${recipientId}:${action}:${Date.now()}`;
+    return crypto
+      .createHash('sha256')
+      .update(payload)
+      .digest('hex')
+      .substring(0, 16);
+  }
+
+  /**
+   * Genera token de unsubscribe para campañas
+   */
+  private generateCampaignUnsubscribeToken(email: string): string {
+    const payload = `campaign:${email}:${Date.now()}`;
+    return crypto
+      .createHash('sha256')
+      .update(payload)
+      .digest('hex')
+      .substring(0, 16);
+  }
+
+  /**
+   * Agrega tracking a enlaces en campañas
+   */
+  private addCampaignLinkTracking(
+    html: string,
+    campaignId: number,
+    recipientId: number
+  ): string {
+    return html.replace(/href="([^"]+)"/g, (match, url) => {
+      const trackingToken = this.generateCampaignTrackingToken(campaignId, recipientId, 'click');
+      const trackingUrl = `${process.env.BASE_URL}/api/campaigns/track/click/${trackingToken}/${encodeURIComponent(url)}`;
+      return `href="${trackingUrl}"`;
+    });
+  }
+
+  /**
+   * Registra evento de tracking de campaña
+   */
+  async trackCampaignEvent(
+    token: string,
+    eventType: 'open' | 'click',
+    metadata?: Record<string, any>
+  ): Promise<void> {
+    try {
+      // Decodificar token (simplificado - en producción usar JWT o similar)
+      const [campaignIdStr, recipientIdStr, action, timestamp] = token.split(':');
+
+      if (!campaignIdStr || !recipientIdStr || action !== eventType) {
+        throw new Error('Invalid tracking token');
+      }
+
+      const campaignId = parseInt(campaignIdStr);
+      const recipientId = parseInt(recipientIdStr);
+
+      // Buscar email de campaña
+      const campaignEmail = await CampaignEmail.findOne({
+        where: { campaignId, recipientId }
+      });
+
+      if (!campaignEmail) {
+        throw new Error('Campaign email not found');
+      }
+
+      // Registrar evento según tipo
+      if (eventType === 'open') {
+        await campaignEmail.recordOpen(metadata?.ipAddress, metadata?.userAgent);
+
+        // Actualizar estadísticas de campaña
+        const campaign = await EmailCampaign.findByPk(campaignId);
+        if (campaign) {
+          await campaign.incrementOpenedCount();
+        }
+
+      } else if (eventType === 'click') {
+        await campaignEmail.recordClick(
+          metadata?.linkId || 'unknown',
+          metadata?.linkUrl || 'unknown',
+          metadata?.ipAddress,
+          metadata?.userAgent
+        );
+
+        // Actualizar estadísticas de campaña
+        const campaign = await EmailCampaign.findByPk(campaignId);
+        if (campaign) {
+          await campaign.incrementClickedCount();
+        }
+      }
+
+      logger.info(`Campaign event tracked: ${eventType} for campaign ${campaignId}, recipient ${recipientId}`);
+    } catch (error) {
+      logger.error('Error tracking campaign event:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Procesa unsubscribe de campaña
+   */
+  async processCampaignUnsubscribe(token: string): Promise<void> {
+    try {
+      // Decodificar token (simplificado)
+      const decoded = Buffer.from(token, 'hex').toString('utf8');
+      const [prefix, email, timestamp] = decoded.split(':');
+
+      if (prefix !== 'campaign') {
+        throw new Error('Invalid unsubscribe token');
+      }
+
+      // Aquí implementar lógica de unsubscribe
+      // Por ejemplo, agregar email a lista de suprimidos
+      // o marcar preferencias del usuario
+
+      logger.info(`Campaign unsubscribe processed for ${email}`);
+    } catch (error) {
+      logger.error('Error processing campaign unsubscribe:', error);
+      throw error;
+    }
   }
 }
 

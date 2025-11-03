@@ -54,12 +54,6 @@ export class CuiValidationService {
       cacheEnabled: process.env.RENAP_CACHE_ENABLED !== 'false',
       cacheDurationHours: parseInt(process.env.RENAP_CACHE_DURATION_HOURS || '24')
     };
-
-    logger.info('CUI validation service initialized', {
-      renapUrl: this.config.renapUrl,
-      cacheEnabled: this.config.cacheEnabled,
-      cacheDurationHours: this.config.cacheDurationHours
-    });
   }
 
   /**

@@ -50,12 +50,6 @@ export class NitValidationService {
       cacheEnabled: process.env.SAT_CACHE_ENABLED !== 'false',
       cacheDurationHours: parseInt(process.env.SAT_CACHE_DURATION_HOURS || '24')
     };
-
-    logger.info('NIT validation service initialized', {
-      satUrl: this.config.satUrl,
-      cacheEnabled: this.config.cacheEnabled,
-      cacheDurationHours: this.config.cacheDurationHours
-    });
   }
 
   /**

@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "dev:ssr": "node server.js",
     "build:ssr": "vite build --ssr",
-    "preview:ssr": "node server.js"
+    "preview:ssr": "node server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -60,7 +63,15 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/crypto-js": "^4.2.2",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.7.4",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
@@ -68,11 +79,16 @@
     "@typescript-eslint/parser": "^8.8.0",
     "@vitejs/plugin-react": "^4.3.2",
     "autoprefixer": "^10.4.20",
+    "babel-jest": "^30.2.0",
+    "babel-plugin-transform-import-meta": "^2.3.3",
     "eslint": "^9.12.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.14",
+    "identity-obj-proxy": "^3.0.0",
+    "jest-environment-jsdom": "^30.2.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
+    "ts-jest": "^29.4.5",
     "typescript": "^5.6.2",
     "vite": "^5.4.8"
   }

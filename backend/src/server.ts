@@ -65,6 +65,9 @@ import emailTemplateRoutes from './routes/email-templates';
 import notificationRuleRoutes from './routes/notification-rules';
 import userPreferencesRoutes from './routes/user-preferences';
 
+// Importar rutas de campañas de email
+import campaignRoutes from './routes/campaigns';
+
 // Importar rutas del módulo de eventos híbridos
 import hybridEventRoutes from './routes/hybrid-events';
 import streamingRoutes from './routes/streaming';
@@ -2762,6 +2765,10 @@ app.use(`${API_VERSION}/cart`, cartRoutes);
 // Rutas públicas
 app.use(`${API_VERSION}/public`, publicRoutes);
 
+// Rutas CMS (gestión de contenido)
+import cmsRoutes from './routes/cms';
+app.use(`${API_VERSION}/cms`, cmsRoutes);
+
 // Rutas de pagos
 import paymentsRoutes from './routes/payments';
 import refundsRoutes from './routes/refunds';
@@ -2784,6 +2791,18 @@ app.use(`${API_VERSION}/invoices`, invoicesRoutes);
 app.use(`${API_VERSION}/promotions`, promotionRoutes);
 app.use(`${API_VERSION}/discounts`, discountRoutes);
 
+// Rutas de cupones avanzados
+import advancedCouponRoutes from './routes/advanced-coupons';
+app.use(`${API_VERSION}/advanced-coupons`, advancedCouponRoutes);
+
+// Rutas de usuarios avanzados
+import advancedUserRoutes from './routes/advanced-users';
+app.use(`${API_VERSION}/advanced-users`, advancedUserRoutes);
+
+// Rutas de auditoría y logs
+import auditRoutes from './routes/audit';
+app.use(`${API_VERSION}/audit`, auditRoutes);
+
 // Rutas de finanzas
 console.log('🔍 [DEBUG] Registering finance routes...', { financeRoutes: typeof financeRoutes, API_VERSION });
 app.use(`${API_VERSION}/finance`, financeRoutes);
@@ -2802,6 +2821,9 @@ app.use(`${API_VERSION}/notifications`, notificationRoutes);
 app.use(`${API_VERSION}/email-templates`, emailTemplateRoutes);
 app.use(`${API_VERSION}/notification-rules`, notificationRuleRoutes);
 app.use(`${API_VERSION}/user/preferences`, userPreferencesRoutes);
+
+// Rutas de campañas de email
+app.use(`${API_VERSION}/campaigns`, campaignRoutes);
 
 // Rutas del módulo de eventos híbridos
 app.use(`${API_VERSION}/hybrid-events`, hybridEventRoutes);
@@ -2831,6 +2853,7 @@ app.use('/api/speaker-contracts', (req, res) => res.redirect(301, `${API_VERSION
 app.use('/api/registrations', (req, res) => res.redirect(301, `${API_VERSION}/registrations${req.path}`));
 app.use('/api/cart', (req, res) => res.redirect(301, `${API_VERSION}/cart${req.path}`));
 app.use('/api/public', (req, res) => res.redirect(301, `${API_VERSION}/public${req.path}`));
+app.use('/api/cms', (req, res) => res.redirect(301, `${API_VERSION}/cms${req.path}`));
 app.use('/api/payments', (req, res) => res.redirect(301, `${API_VERSION}/payments${req.path}`));
 app.use('/api/refunds', (req, res) => res.redirect(301, `${API_VERSION}/refunds${req.path}`));
 app.use('/api/webhooks', (req, res) => res.redirect(301, `${API_VERSION}/webhooks${req.path}`));

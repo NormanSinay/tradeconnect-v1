@@ -16,10 +16,10 @@ interface AuthState {
   token: string | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string, recaptchaToken?: string) => Promise<void>
+  login: (email: string, password: string, turnstileToken?: string) => Promise<void>
   register: (userData: RegisterData) => Promise<void>
   logout: () => void
-  forgotPassword: (email: string, recaptchaToken?: string) => Promise<void>
+  forgotPassword: (email: string, turnstileToken?: string) => Promise<void>
   verifyEmail: (token: string) => Promise<void>
   setLoading: (loading: boolean) => void
 }
@@ -35,18 +35,18 @@ interface RegisterData {
   cui?: string
   termsAccepted: boolean
   marketingAccepted?: boolean
-  recaptchaToken?: string
+  turnstileToken?: string
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
       isLoading: false,
 
-      login: async (email: string, password: string, recaptchaToken?: string) => {
+      login: async (email: string, password: string, turnstileToken?: string) => {
         set({ isLoading: true })
         try {
           // La contraseña se envía en texto plano - el backend la compara con bcrypt
@@ -61,7 +61,7 @@ export const useAuthStore = create<AuthState>()(
             body: JSON.stringify({
               email,
               password, // Enviar contraseña en texto plano
-              recaptchaToken
+              turnstileToken
             }),
           })
     
@@ -142,7 +142,7 @@ export const useAuthStore = create<AuthState>()(
               cui: userData.cui,
               termsAccepted: userData.termsAccepted,
               marketingAccepted: userData.marketingAccepted,
-              recaptchaToken: userData.recaptchaToken,
+              turnstileToken: userData.turnstileToken,
             }),
           })
     
@@ -159,14 +159,25 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        // Limpiar localStorage explícitamente
+        localStorage.removeItem('auth-storage');
+    
+        // Limpiar cualquier otro dato de autenticación
+        localStorage.removeItem('persist:root');
+    
         set({
           user: null,
           token: null,
           isAuthenticated: false,
-        })
+        });
+    
+        // Pequeño delay para asegurar que el estado se actualice
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 100);
       },
 
-      forgotPassword: async (email: string, recaptchaToken?: string) => {
+      forgotPassword: async (email: string, turnstileToken?: string) => {
         set({ isLoading: true })
         try {
           const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, {
@@ -174,7 +185,7 @@ export const useAuthStore = create<AuthState>()(
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email, recaptchaToken }),
+            body: JSON.stringify({ email, turnstileToken }),
           })
     
           if (!response.ok) {

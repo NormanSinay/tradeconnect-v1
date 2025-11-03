@@ -3,19 +3,22 @@ import { useAuthStore } from '@/stores/authStore';
 import { DashboardService } from '@/services/dashboardService';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
-import UserManagementTab from '@/components/dashboard/UserManagementTab';
+import AdvancedUserManagementTab from '@/components/dashboard/AdvancedUserManagementTab';
 import EventManagementTab from '@/components/dashboard/EventManagementTab';
 import FinanceManagementTab from '@/components/dashboard/FinanceManagementTab';
 import SystemManagementTab from '@/components/dashboard/SystemManagementTab';
 import AuditLogsTab from '@/components/dashboard/AuditLogsTab';
 import AnalyticsTab from '@/components/dashboard/AnalyticsTab';
+import AdvancedCouponsTab from '@/components/dashboard/AdvancedCouponsTab';
+import ContentManagementTab from '@/components/dashboard/ContentManagementTab';
+import MarketingManagementTab from '@/components/dashboard/MarketingManagementTab';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { motion } from 'framer-motion';
-import { Users, Calendar, BookOpen, DollarSign, TrendingUp, AlertTriangle, Settings, Search, Plus, BarChart3 } from 'lucide-react';
+import { Users, Calendar, BookOpen, DollarSign, TrendingUp, AlertTriangle, Settings, Search, Plus, BarChart3, FileText, Megaphone, UserCheck, Ticket } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface DashboardStats {
@@ -151,12 +154,25 @@ const DashboardSuperAdminPage: React.FC = () => {
             <nav className="flex-1 p-4 overflow-y-auto">
               <ul className="space-y-2">
                 {[
+// Dashboard Principal
                   { id: 'dashboard', icon: BarChart3, label: 'Dashboard Principal', enabled: true },
-                  { id: 'analytics', icon: TrendingUp, label: 'Analítica', enabled: true },
+// Gestión de Usuarios Básica
                   { id: 'usuarios', icon: Users, label: 'Gestión de Usuarios', enabled: permissions.canManageUsers },
+// Gestión de Eventos
                   { id: 'events', icon: Calendar, label: 'Gestión de Eventos', enabled: permissions.canManageEvents },
+// Gestión Financiera
                   { id: 'finance', icon: DollarSign, label: 'Gestión Financiera', enabled: permissions.canManageFinance },
+// Gestión de Contenido
+                  { id: 'content', icon: FileText, label: 'Gestión de Contenido', enabled: permissions.canManageContent },
+// Gestión de Marketing
+                  { id: 'marketing', icon: Megaphone, label: 'Gestión de Marketing', enabled: permissions.canManageMarketing },
+// Gestión de Cupones Avanzados
+                   { id: 'advanced-coupons', icon: Ticket, label: 'Gestión de Cupones', enabled: permissions.canManageMarketing },
+// Analítica
+                  { id: 'analytics', icon: TrendingUp, label: 'Analítica', enabled: true },
+// Configuración del Sistema
                   { id: 'settings', icon: Settings, label: 'Configuración', enabled: permissions.canManageSystem },
+// Auditoría y Logs
                   { id: 'auditoria', icon: Search, label: 'Auditoría y Logs', enabled: permissions.canViewAuditLogs }
                 ].filter(item => item.enabled !== false).map((item) => (
                   <li key={item.id}>
@@ -330,7 +346,7 @@ const DashboardSuperAdminPage: React.FC = () => {
                   <h1 className="text-3xl font-bold text-primary mb-2">Gestión de Usuarios</h1>
                   <p className="text-gray-600">Administrar todos los usuarios del sistema</p>
                 </div>
-                <UserManagementTab activeTab={activeTab} />
+                <AdvancedUserManagementTab activeTab={activeTab} />
               </motion.div>
             )}
 
@@ -387,6 +403,57 @@ const DashboardSuperAdminPage: React.FC = () => {
                   <p className="text-gray-600">Gráficos y estadísticas detalladas de la plataforma</p>
                 </div>
                 <AnalyticsTab activeTab={activeTab} />
+              </motion.div>
+            )}
+
+            {activeTab === 'content' && permissions.canManageContent && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <ContentManagementTab activeTab={activeTab} />
+              </motion.div>
+            )}
+
+            {activeTab === 'marketing' && permissions.canManageMarketing && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <MarketingManagementTab activeTab={activeTab} />
+              </motion.div>
+            )}
+
+            {/* Gestión de Usuarios Avanzada - REMOVIDA: Ya integrada en "Gestión de Usuarios" */}
+            {/* {activeTab === 'usuarios-avanzados' && permissions.canManageUsers && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="mb-8">
+                  <h1 className="text-3xl font-bold text-primary mb-2">Gestión de Usuarios Avanzada</h1>
+                  <p className="text-gray-600">Herramientas avanzadas para gestión de usuarios, roles y permisos</p>
+                </div>
+                <div className="bg-white rounded-lg shadow p-6">
+                  <p className="text-gray-600">Módulo de Gestión de Usuarios Avanzada - Próximamente</p>
+                </div>
+              </motion.div>
+            )} */}
+
+            {activeTab === 'advanced-coupons' && permissions.canManageMarketing && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="mb-8">
+                  <h1 className="text-3xl font-bold text-primary mb-2">Cupones Avanzados</h1>
+                  <p className="text-gray-600">Gestiona cupones con reglas complejas y condiciones avanzadas</p>
+                </div>
+                <AdvancedCouponsTab activeTab={activeTab} />
               </motion.div>
             )}
 
