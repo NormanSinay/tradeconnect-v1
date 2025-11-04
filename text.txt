@@ -1,16 +1,3 @@
-
-
-
-
-
-
-ROLES DEL SISTEMA (8 Roles)
-
-  1. SUPER_ADMIN (Super Administrador) 👑
-
-  Nivel: 10 | Color: Rojo (#D32F2F) | Icono: shield-crown
-
-  Descripción: Acceso total al sistema, incluyendo configuración de infraestructura
 React (componentes, routing con React Router)
 ↓
 shadcn/ui (UI moderna)
@@ -50,6 +37,19 @@ Estructura de Maquetación
 1.	Header con navegación responsive
 2.	Contenido principal con container máximo 1200px
 3.	Sidebar en dashboards (colapsable en móvil)
+
+
+
+
+
+ROLES DEL SISTEMA (8 Roles)
+
+  1. SUPER_ADMIN (Super Administrador) 👑
+
+  Nivel: 10 | Color: Rojo (#D32F2F) | Icono: shield-crown
+
+  Descripción: Acceso total al sistema, incluyendo configuración de infraestructura
+
   Permisos: ✅ TODOS LOS PERMISOS (100% acceso completo)
 
   ---
@@ -144,9 +144,9 @@ Estructura de Maquetación
   Permisos:
   - ✅ Usuarios: Leer y actualizar perfil propio
   - ✅ Inscripciones: Crear, leer, actualizar propias
-  - ✅ Pagos: Ver propios
-  - ✅ FEL: Ver facturas propias
-  - ✅ Certificados: Ver, verificar
+  - ✅ Ver eventos y cursos 
+  - ✅ Cargar Material al evento
+  - ✅ Ver el link si la reunion es virtual o hibrida
   - ✅ Notificaciones: Ver logs
 
   Total: ~8 permisos (similar a user + gestión propia)

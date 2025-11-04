@@ -47,6 +47,15 @@ interface UsePermissionsReturn {
   canManageEventTemplates: boolean;
   checkEventPermission: (permission: EventPermission) => PermissionCheck;
   hasAnyEventPermission: (permissions: EventPermission[]) => boolean;
+  // Permisos específicos de speaker
+  canAccessSpeakerDashboard: boolean;
+  canManageSpeakerProfile: boolean;
+  canViewAssignedEvents: boolean;
+  canManageSpeakerMaterials: boolean;
+  canViewSpeakerNotifications: boolean;
+  canUpdateSpeakerAvailability: boolean;
+  canViewSpeakerPayments: boolean;
+  canManageSpeakerEvaluations: boolean;
 }
 
 /**
@@ -199,6 +208,15 @@ export const usePermissions = (): UsePermissionsReturn => {
     canConfigureEventNotifications,
     canManageEventTemplates,
     checkEventPermission,
-    hasAnyEventPermission
+    hasAnyEventPermission,
+    // Permisos específicos de speaker
+    canAccessSpeakerDashboard: isSpeaker,
+    canManageSpeakerProfile: isSpeaker,
+    canViewAssignedEvents: isSpeaker,
+    canManageSpeakerMaterials: isSpeaker,
+    canViewSpeakerNotifications: isSpeaker,
+    canUpdateSpeakerAvailability: isSpeaker,
+    canViewSpeakerPayments: isSpeaker,
+    canManageSpeakerEvaluations: isSpeaker
   };
 };

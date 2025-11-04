@@ -389,6 +389,66 @@ export class DashboardService {
   }
 
   /**
+   * Obtener lista de speakers activos
+   */
+  static async getSpeakers(params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    category?: string;
+    minRating?: number;
+    modalities?: string[];
+    languages?: string[];
+    specialties?: number[];
+  } = {}): Promise<{
+    speakers: any[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }> {
+    const { token } = useAuthStore.getState();
+
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.limit) queryParams.append('limit', params.limit.toString());
+    if (params.search) queryParams.append('search', params.search);
+    if (params.category) queryParams.append('category', params.category);
+    if (params.minRating) queryParams.append('minRating', params.minRating.toString());
+    if (params.modalities && params.modalities.length > 0) {
+      params.modalities.forEach(m => queryParams.append('modalities', m));
+    }
+    if (params.languages && params.languages.length > 0) {
+      params.languages.forEach(l => queryParams.append('languages', l));
+    }
+    if (params.specialties && params.specialties.length > 0) {
+      params.specialties.forEach(s => queryParams.append('specialties', s.toString()));
+    }
+
+    const response = await fetch(`${this.BASE_URL}/speakers?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<{
+      speakers: any[];
+      pagination: any;
+    }> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo speakers');
+    }
+
+    return data.data!;
+  }
+
+  /**
    * Obtener lista de eventos con filtros avanzados
    */
   static async getEvents(params: {
@@ -739,7 +799,7 @@ export class DashboardService {
           case 404:
             throw new Error('Evento no encontrado. Es posible que haya sido eliminado.');
           case 409:
-            throw new Error('El evento ya está publicado o en un estado que no permite publicación.');
+            throw new Error('El evento ya está publicado o en un estado que no permite publicación. Si necesita republicarlo, contacte al administrador.');
           case 422:
             throw new Error('El evento no cumple con los requisitos para ser publicado.');
           case 500:
@@ -1048,30 +1108,6 @@ export class DashboardService {
       }
       throw new Error('Error desconocido al subir archivos multimedia');
     }
-  }
-
-  /**
-   * Obtener archivos multimedia del evento
-   */
-  static async getEventMedia(eventId: number): Promise<EventMedia[]> {
-    const { token } = useAuthStore.getState();
-
-    const response = await fetch(`${this.BASE_URL}/events/${eventId}/media`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
-
-    const data: ApiResponse<EventMedia[]> = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.message || 'Error obteniendo archivos multimedia');
-    }
-
-    return data.data!;
   }
 
   /**
@@ -1441,6 +1477,155 @@ export class DashboardService {
 
     return data.data!;
   }
+
+  /**
+   * Asignar speaker a evento
+   */
+  static async assignSpeakerToEvent(eventId: number, speakerData: {
+    speakerId: number;
+    role: 'keynote_speaker' | 'panelist' | 'facilitator' | 'moderator' | 'guest';
+    participationStart: string;
+    participationEnd: string;
+    modality?: 'presential' | 'virtual' | 'hybrid';
+    order?: number;
+    notes?: string;
+  }): Promise<any> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/events/${eventId}/speakers`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(speakerData),
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error asignando speaker al evento');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Actualizar asignación de speaker
+   */
+  static async updateSpeakerAssignment(eventId: number, speakerId: number, updateData: {
+    role?: 'keynote_speaker' | 'panelist' | 'facilitator' | 'moderator' | 'guest';
+    participationStart?: string;
+    participationEnd?: string;
+    modality?: 'presential' | 'virtual' | 'hybrid';
+    order?: number;
+    notes?: string;
+    status?: 'tentative' | 'confirmed' | 'cancelled' | 'completed';
+  }): Promise<any> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/events/${eventId}/speakers/${speakerId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(updateData),
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error actualizando asignación de speaker');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Eliminar asignación de speaker
+   */
+  static async removeSpeakerFromEvent(eventId: number, speakerId: number, reason?: string): Promise<void> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`${this.BASE_URL}/events/${eventId}/speakers/${speakerId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ reason }),
+    });
+
+    if (!response.ok) {
+      const errorData: ApiResponse<any> = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Error eliminando asignación de speaker');
+    }
+  }
+
+  /**
+   * Obtener speakers asignados a un evento
+   */
+  static async getEventSpeakers(eventId: number, status?: string[]): Promise<any[]> {
+    const { token } = useAuthStore.getState();
+
+    const queryParams = new URLSearchParams();
+    if (status && status.length > 0) {
+      status.forEach(s => queryParams.append('status', s));
+    }
+
+    const response = await fetch(`${this.BASE_URL}/events/${eventId}/speakers?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo speakers del evento');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Obtener archivos multimedia del evento
+   */
+  static async getEventMedia(eventId: number, filters?: {
+    type?: 'image' | 'video' | 'document' | 'audio' | 'other';
+    category?: 'presentation' | 'handout' | 'exercise' | 'resource' | 'other';
+  }): Promise<any[]> {
+    const { token } = useAuthStore.getState();
+
+    const queryParams = new URLSearchParams();
+    if (filters?.type) queryParams.append('type', filters.type);
+    if (filters?.category) queryParams.append('category', filters.category);
+
+    const response = await fetch(`${this.BASE_URL}/events/${eventId}/media?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo archivos multimedia del evento');
+    }
+
+    return data.data!;
+  }
+
 
   /**
    * Eliminar usuario

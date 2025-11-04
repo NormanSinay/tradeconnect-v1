@@ -13,6 +13,7 @@ import { speakerController } from '../controllers/speakerController';
 import { rateLimit } from 'express-rate-limit';
 import { RATE_LIMITS } from '../utils/constants';
 import { authenticated } from '../middleware/auth';
+import { speakerAuth, speakerDashboardAccess, speakerProfileManagement, speakerAssignedEvents, speakerMaterialsManagement, speakerNotifications, speakerAvailabilityUpdate } from '../middleware/speakerAuth';
 
 const router = Router();
 
@@ -2067,7 +2068,7 @@ router.post('/:id/verify', authenticated, speakerLimiter, speakerIdValidation, s
   *                   type: string
   *                   example: "RATE_LIMIT_EXCEEDED"
   */
-router.post('/:id/availability', authenticated, createEditLimiter, speakerIdValidation, createAvailabilityBlockValidation, speakerController.createAvailabilityBlock);
+router.post('/:id/availability', authenticated, speakerAvailabilityUpdate, createEditLimiter, speakerIdValidation, createAvailabilityBlockValidation, speakerController.createAvailabilityBlock);
 
 /**
   * @swagger

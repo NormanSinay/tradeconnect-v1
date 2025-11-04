@@ -13,8 +13,10 @@ import { SpeakerSpecialty } from '../models/SpeakerSpecialty';
 import { SpeakerAvailabilityBlock } from '../models/SpeakerAvailabilityBlock';
 import { SpeakerEvent } from '../models/SpeakerEvent';
 import { SpeakerEvaluation } from '../models/SpeakerEvaluation';
+import { SpeakerPayment } from '../models/SpeakerPayment';
 import { User } from '../models/User';
 import { AuditLog } from '../models/AuditLog';
+import { Event } from '../models/Event';
 import {
   CreateSpeakerData,
   UpdateSpeakerData,
@@ -790,6 +792,306 @@ export class SpeakerService {
   // ====================================================================
   // UTILIDADES Y HELPERS
   // ====================================================================
+
+  /**
+   * Obtiene estadísticas del dashboard para un speaker
+   */
+  async getSpeakerDashboardStats(speakerId: number): Promise<ApiResponse<SpeakerStats>> {
+    try {
+      const speaker = await Speaker.findByPk(speakerId);
+      if (!speaker) {
+        return {
+          success: false,
+          message: 'Speaker no encontrado',
+          error: 'SPEAKER_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      const stats = await this.calculateSpeakerDashboardStats(speakerId);
+
+      return {
+        success: true,
+        message: 'Estadísticas obtenidas exitosamente',
+        data: stats,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error obteniendo estadísticas del dashboard:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Calcula estadísticas del dashboard para un speaker
+   */
+  private async calculateSpeakerDashboardStats(speakerId: number): Promise<SpeakerStats> {
+    // Eventos asignados
+    const events = await SpeakerEvent.findAll({
+      where: { speakerId },
+      attributes: ['status', 'participationStart', 'participationEnd', 'role', 'modality']
+    });
+
+    const totalEvents = events.length;
+    const completedEvents = events.filter(e => e.status === 'completed').length;
+    const upcomingEvents = events.filter(e =>
+      e.status === 'confirmed' && e.participationStart && e.participationStart > new Date()
+    ).length;
+    const cancelledEvents = events.filter(e => e.status === 'cancelled').length;
+
+    // Pagos y ganancias
+    const payments = await SpeakerPayment.findAll({
+      where: { speakerId },
+      attributes: ['amount', 'status']
+    });
+
+    const totalEarnings = payments
+      .filter((p: any) => p.status === 'completed')
+      .reduce((sum: number, p: any) => sum + parseFloat(p.amount.toString()), 0);
+
+    // Evaluaciones
+    const evaluations = await SpeakerEvaluation.findAll({
+      where: { speakerId },
+      attributes: ['overallRating']
+    });
+
+    const averageRating = evaluations.length > 0
+      ? evaluations.reduce((sum, e) => sum + e.overallRating, 0) / evaluations.length
+      : 0;
+
+    const totalEvaluations = evaluations.length;
+
+    // Distribución de ratings
+    const ratingDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    evaluations.forEach(e => {
+      const rating = Math.floor(e.overallRating);
+      ratingDistribution[rating] = (ratingDistribution[rating] || 0) + 1;
+    });
+
+    // Modalidad más usada
+    const modalityCount: Record<string, number> = {};
+    events.forEach(e => {
+      modalityCount[e.modality] = (modalityCount[e.modality] || 0) + 1;
+    });
+    const mostUsedModality = Object.keys(modalityCount).length > 0
+      ? Object.keys(modalityCount).reduce((a, b) => modalityCount[a] > modalityCount[b] ? a : b)
+      : 'virtual';
+
+    // Rol más común
+    const roleCount: Record<string, number> = {};
+    events.forEach(e => {
+      roleCount[e.role] = (roleCount[e.role] || 0) + 1;
+    });
+    const mostCommonRole = Object.keys(roleCount).length > 0
+      ? Object.keys(roleCount).reduce((a, b) => roleCount[a] > roleCount[b] ? a : b)
+      : 'keynote_speaker';
+
+    // Especialidades
+    const speaker = await Speaker.findByPk(speakerId, {
+      include: [{ model: Specialty, through: { attributes: [] } }]
+    });
+    const specialtiesCount = speaker?.specialties?.length || 0;
+
+    // Próximos eventos
+    const nextEvent = await SpeakerEvent.findOne({
+      where: {
+        speakerId,
+        status: 'confirmed',
+        participationStart: { [Op.gt]: new Date() }
+      },
+      order: [['participationStart', 'ASC']]
+    });
+
+    // Último evento completado
+    const completedEventsList = events
+      .filter(e => e.status === 'completed' && e.participationEnd)
+      .sort((a, b) => (b.participationEnd!.getTime() - a.participationEnd!.getTime()));
+
+    return {
+      totalEvents,
+      completedEvents,
+      upcomingEvents,
+      cancelledEvents,
+      totalEarnings,
+      averageRating: Math.round(averageRating * 100) / 100,
+      totalEvaluations,
+      ratingDistribution,
+      mostUsedModality: mostUsedModality as any,
+      mostCommonRole: mostCommonRole as any,
+      specialtiesCount,
+      yearsOfExperience: 0, // TODO: Calcular basado en fecha de creación o eventos
+      lastEventDate: completedEventsList.length > 0 ? completedEventsList[0].participationEnd! : undefined,
+      nextEventDate: nextEvent?.participationStart || undefined
+    };
+  }
+
+  /**
+   * Obtiene eventos asignados al speaker con filtros
+   */
+  async getSpeakerAssignedEvents(
+    speakerId: number,
+    filters: {
+      status?: string;
+      upcoming?: boolean;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<ApiResponse<{ events: any[]; pagination: any }>> {
+    try {
+      const { status, upcoming, page = 1, limit = 20 } = filters;
+      const offset = (page - 1) * limit;
+
+      const where: any = { speakerId };
+
+      if (status) {
+        where.status = status;
+      }
+
+      if (upcoming) {
+        where.participationStart = { [Op.gt]: new Date() };
+        where.status = { [Op.in]: ['confirmed', 'tentative'] };
+      }
+
+      const { rows: speakerEvents, count: total } = await SpeakerEvent.findAndCountAll({
+        where,
+        include: [{
+          model: require('../models/Event').Event,
+          as: 'event',
+          attributes: ['id', 'title', 'startDate', 'endDate', 'modality', 'status', 'location']
+        }],
+        limit,
+        offset,
+        order: [['participationStart', 'ASC']]
+      });
+
+      const events: any[] = speakerEvents.map(se => ({
+        id: se.id,
+        speakerId: se.speakerId,
+        eventId: se.eventId,
+        eventTitle: se.event?.title || 'Evento sin título',
+        eventStartDate: se.event?.startDate,
+        eventEndDate: se.event?.endDate,
+        role: se.role,
+        participationStart: se.participationStart!,
+        participationEnd: se.participationEnd!,
+        durationMinutes: se.durationMinutes,
+        modality: se.modality,
+        order: se.order,
+        status: se.status,
+        notes: se.notes,
+        confirmedAt: se.confirmedAt,
+        cancelledAt: se.cancelledAt,
+        cancellationReason: se.cancellationReason,
+        createdBy: se.createdBy,
+        createdAt: se.createdAt
+      }));
+
+      return {
+        success: true,
+        message: 'Eventos obtenidos exitosamente',
+        data: {
+          events,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrevious: page > 1
+          }
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error obteniendo eventos asignados:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Actualiza el estado de un evento asignado
+   */
+  async updateSpeakerEventStatus(
+    speakerId: number,
+    eventId: number,
+    status: string,
+    notes?: string
+  ): Promise<ApiResponse<any>> {
+    try {
+      const speakerEvent = await SpeakerEvent.findOne({
+        where: { speakerId, eventId }
+      });
+
+      if (!speakerEvent) {
+        return {
+          success: false,
+          message: 'Evento asignado no encontrado',
+          error: 'SPEAKER_EVENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      const updateData: any = { status };
+      if (notes) updateData.notes = notes;
+
+      if (status === 'confirmed') {
+        updateData.confirmedAt = new Date();
+      } else if (status === 'cancelled') {
+        updateData.cancelledAt = new Date();
+      }
+
+      await speakerEvent.update(updateData);
+
+      // Invalidar caché
+      await cacheService.delete(`speaker:events:${speakerId}`);
+      await cacheService.delete(`speaker:stats:${speakerId}`);
+
+      return {
+        success: true,
+        message: 'Estado del evento actualizado exitosamente',
+        data: {
+          id: speakerEvent.id,
+          speakerId: speakerEvent.speakerId,
+          eventId: speakerEvent.eventId,
+          role: speakerEvent.role,
+          participationStart: speakerEvent.participationStart!,
+          participationEnd: speakerEvent.participationEnd!,
+          durationMinutes: speakerEvent.durationMinutes,
+          modality: speakerEvent.modality,
+          order: speakerEvent.order,
+          status: speakerEvent.status,
+          notes: speakerEvent.notes,
+          confirmedAt: speakerEvent.confirmedAt,
+          cancelledAt: speakerEvent.cancelledAt,
+          cancellationReason: speakerEvent.cancellationReason,
+          createdBy: speakerEvent.createdBy,
+          createdAt: speakerEvent.createdAt
+        } as any,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error actualizando estado del evento:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
 
   /**
    * Obtiene un speaker con todas sus relaciones cargadas

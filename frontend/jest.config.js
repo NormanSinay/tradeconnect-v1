@@ -29,6 +29,20 @@ export default {
       ]
     }],
   },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  testEnvironmentOptions: {
+    customExportConditions: [''],
+  },
+  globals: {
+    'ts-jest': {
+      useESM: false,
+      diagnostics: false,
+    },
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@testing-library|react-hot-toast|zustand|framer-motion|@radix-ui|@tanstack|@hookform|crypto-js|@babel|babel-plugin-transform-import-meta|identity-obj-proxy|lucide-react|react-icons|chart.js|react-chartjs-2|class-variance-authority|clsx|tailwind-merge|zod|react-router-dom|tailwindcss-animate|react-hook-form|@hookform|react-hot-toast|react-dom|react|axios|react-router|react-query|@tanstack|react-currency-format)/)',
+  ],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.(ts|tsx|js)',
     '<rootDir>/src/**/*.(test|spec).(ts|tsx|js)',
@@ -41,18 +55,4 @@ export default {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  transformIgnorePatterns: [
-    'node_modules/(?!(@testing-library|react-hot-toast|zustand|framer-motion|@radix-ui|@tanstack|@hookform|crypto-js|@babel|babel-plugin-transform-import-meta|identity-obj-proxy|lucide-react|react-icons|chart.js|react-chartjs-2|class-variance-authority|clsx|tailwind-merge|zod|react-router-dom|tailwindcss-animate|react-hook-form|@hookform|react-hot-toast|react-dom|react|axios|react-router|react-query|@tanstack|react-currency-format)/)',
-  ],
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-  testEnvironmentOptions: {
-    customExportConditions: [''],
-  },
-  globals: {
-    'ts-jest': {
-      useESM: false,
-      diagnostics: false,
-    },
-  },
 };

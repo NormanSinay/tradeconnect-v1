@@ -1094,13 +1094,29 @@ export class EventController {
         return;
       }
 
-      // TODO: Implementar método en servicio para obtener media del evento
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        message: 'Funcionalidad en desarrollo',
-        data: [],
-        timestamp: new Date().toISOString()
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const { type, category } = req.query;
+
+      const result = await eventService.getEventMedia(eventId, userId, {
+        type: type as string,
+        category: category as string
       });
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
 
     } catch (error) {
       logger.error('Error getting event media:', error);
@@ -1412,6 +1428,214 @@ export class EventController {
         }
         throw error;
       }
+    }
+  }
+
+  /**
+   * Asignar speaker a evento
+   */
+  async assignSpeakerToEvent(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const eventId = parseInt(id);
+
+      if (isNaN(eventId) || eventId <= 0) {
+        logger.warn(`ID de evento inválido para asignar speaker: ${id}`);
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'ID de evento inválido',
+          error: 'INVALID_EVENT_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = req.user?.id;
+      if (!userId) {
+        logger.warn('Intento de asignar speaker sin autenticación');
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const speakerData = req.body;
+
+      const result = await eventService.assignSpeakerToEvent(eventId, speakerData, userId);
+
+      if (result.success) {
+        logger.info(`Speaker asignado exitosamente al evento ${eventId} por usuario ${userId}`);
+        res.status(HTTP_STATUS.CREATED).json(result);
+      } else {
+        logger.error('Error del servicio al asignar speaker:', result.error);
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error interno asignando speaker:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor al asignar speaker',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Obtener speakers del evento
+   */
+  async getEventSpeakers(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const eventId = parseInt(id);
+
+      if (isNaN(eventId)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'ID de evento inválido',
+          error: 'INVALID_EVENT_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const { status } = req.query;
+
+      const result = await eventService.getEventSpeakers(eventId, userId, status as string[]);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error obteniendo speakers del evento:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Actualizar asignación de speaker
+   */
+  async updateSpeakerAssignment(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id, speakerId } = req.params;
+      const eventId = parseInt(id);
+      const speakerIdNum = parseInt(speakerId);
+
+      if (isNaN(eventId) || isNaN(speakerIdNum)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'IDs inválidos',
+          error: 'INVALID_IDS',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const updateData = req.body;
+
+      const result = await eventService.updateSpeakerAssignment(eventId, speakerIdNum, updateData, userId);
+
+      if (result.success) {
+        logger.info(`Asignación de speaker actualizada exitosamente: evento ${eventId}, speaker ${speakerIdNum} por usuario ${userId}`);
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error actualizando asignación de speaker:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor al actualizar asignación de speaker',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Eliminar asignación de speaker
+   */
+  async removeSpeakerFromEvent(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { id, speakerId } = req.params;
+      const eventId = parseInt(id);
+      const speakerIdNum = parseInt(speakerId);
+
+      if (isNaN(eventId) || isNaN(speakerIdNum)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'IDs inválidos',
+          error: 'INVALID_IDS',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(HTTP_STATUS.UNAUTHORIZED).json({
+          success: false,
+          message: 'Usuario no autenticado',
+          error: 'UNAUTHORIZED',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const { reason } = req.body;
+
+      const result = await eventService.removeSpeakerFromEvent(eventId, speakerIdNum, userId, reason);
+
+      if (result.success) {
+        logger.info(`Speaker eliminado del evento exitosamente: evento ${eventId}, speaker ${speakerIdNum} por usuario ${userId}`);
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error eliminando speaker del evento:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor al eliminar speaker del evento',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
     }
   }
 

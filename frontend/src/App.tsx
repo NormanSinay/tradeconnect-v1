@@ -60,6 +60,13 @@ const RoleBasedRedirect: React.FC = () => {
     return null
   }
 
+  // Si es speaker, redirigir al dashboard de speaker
+  if (user?.role === 'speaker') {
+    console.log('RoleBasedRedirect - Redirecting to speaker dashboard')
+    window.location.href = '/dashboard/speaker'
+    return null
+  }
+
   // Para otros roles no definidos, mantener en dashboard normal
   console.log('RoleBasedRedirect - Using normal dashboard')
   return <DashboardMainPage />
@@ -85,6 +92,7 @@ import DashboardAdminPage from './pages/DashboardAdminPage'
 import DashboardUserPage from './pages/DashboardUserPage'
 import DashboardParticipantPage from './pages/DashboardParticipantPage'
 import DashboardClientPage from './pages/DashboardClientPage'
+import DashboardSpeakerPage from './pages/DashboardSpeakerPage'
 import TermsPage from './pages/TermsPage'
 import VerificationPage from './pages/VerificationPage'
 import UserEventsPage from './pages/UserEventsPage'
@@ -116,6 +124,7 @@ function App() {
       <Route path="/dashboard/user" element={<RoleProtectedRoute allowedRoles={['user']}><DashboardUserPage /></RoleProtectedRoute>} />
       <Route path="/dashboard/participant" element={<RoleProtectedRoute allowedRoles={['participant']}><DashboardParticipantPage /></RoleProtectedRoute>} />
       <Route path="/dashboard/client" element={<RoleProtectedRoute allowedRoles={['client']}><DashboardClientPage /></RoleProtectedRoute>} />
+      <Route path="/dashboard/speaker" element={<RoleProtectedRoute allowedRoles={['speaker']}><DashboardSpeakerPage /></RoleProtectedRoute>} />
       <Route path="/events" element={<RoleProtectedRoute allowedRoles={['user', 'participant', 'client', 'admin', 'super_admin']}><UserEventsPage /></RoleProtectedRoute>} />
       <Route path="/certificates" element={<RoleProtectedRoute allowedRoles={['user', 'participant', 'client', 'admin', 'super_admin']}><UserCertificatesPage /></RoleProtectedRoute>} />
       <Route path="/profile" element={<RoleProtectedRoute allowedRoles={['user', 'participant', 'client', 'admin', 'super_admin']}><UserProfilePage /></RoleProtectedRoute>} />

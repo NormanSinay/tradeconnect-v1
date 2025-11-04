@@ -14,6 +14,8 @@ import { EventStatus } from '../models/EventStatus';
 import { EventDuplication } from '../models/EventDuplication';
 import { EventRegistration } from '../models/EventRegistration';
 import { EventMedia } from '../models/EventMedia';
+import { Speaker } from '../models/Speaker';
+import { SpeakerEvent } from '../models/SpeakerEvent';
 import { User } from '../models/User';
 import { AuditLog } from '../models/AuditLog';
 import {
@@ -384,6 +386,16 @@ export class EventService {
           success: false,
           message: 'No tiene permisos para publicar este evento',
           error: 'INSUFFICIENT_PERMISSIONS',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar que el evento no esté ya publicado
+      if (event.eventStatus?.name === 'published') {
+        return {
+          success: false,
+          message: 'El evento ya está publicado o en un estado que no permite publicación.',
+          error: 'EVENT_ALREADY_PUBLISHED',
           timestamp: new Date().toISOString()
         };
       }
@@ -1296,6 +1308,564 @@ export class EventService {
 
     } catch (error) {
       logger.error('Error duplicando evento:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Asignar speaker a evento
+   */
+  async assignSpeakerToEvent(
+    eventId: number,
+    speakerData: {
+      speakerId: number;
+      role: 'keynote_speaker' | 'panelist' | 'facilitator' | 'moderator' | 'guest';
+      participationStart: string | Date;
+      participationEnd: string | Date;
+      modality?: 'presential' | 'virtual' | 'hybrid';
+      order?: number;
+      notes?: string;
+    },
+    assignedBy: number
+  ): Promise<ApiResponse<any>> {
+    try {
+      // Verificar que el evento existe
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        return {
+          success: false,
+          message: 'Evento no encontrado',
+          error: 'EVENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar permisos (solo el creador del evento puede asignar speakers)
+      if (event.createdBy !== assignedBy) {
+        return {
+          success: false,
+          message: 'No tiene permisos para asignar speakers a este evento',
+          error: 'INSUFFICIENT_PERMISSIONS',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar que el speaker existe y está activo en la tabla speakers
+      const speaker = await Speaker.findByPk(speakerData.speakerId);
+      if (!speaker || !speaker.isActive) {
+        return {
+          success: false,
+          message: 'Speaker no encontrado o inactivo',
+          error: 'SPEAKER_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar si ya existe una asignación activa para este speaker y evento
+      const existingAssignment = await SpeakerEvent.findOne({
+        where: {
+          speakerId: speakerData.speakerId,
+          eventId
+        }
+      });
+
+      // Si existe una asignación activa (no soft deleted), no permitir crear nueva
+      if (existingAssignment) {
+        return {
+          success: false,
+          message: 'Este speaker ya está asignado a este evento',
+          error: 'SPEAKER_ALREADY_ASSIGNED',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Crear nueva asignación
+      const speakerEventData = {
+        speakerId: speakerData.speakerId,
+        eventId,
+        role: speakerData.role,
+        participationStart: speakerData.participationStart ? new Date(speakerData.participationStart) : null,
+        participationEnd: speakerData.participationEnd ? new Date(speakerData.participationEnd) : null,
+        modality: speakerData.modality || 'presential',
+        order: speakerData.order,
+        status: 'tentative' as const,
+        notes: speakerData.notes,
+        createdBy: assignedBy
+      };
+
+      const speakerEvent = await SpeakerEvent.create(speakerEventData);
+
+      // Registrar en auditoría - creación
+      await AuditLog.log(
+        'speaker_assigned_to_event',
+        'speaker_event',
+        {
+          userId: assignedBy,
+          resourceId: speakerEvent.id.toString(),
+          newValues: {
+            speakerId: speakerData.speakerId,
+            eventId,
+            role: speakerData.role
+          },
+          ipAddress: '127.0.0.1',
+          userAgent: 'system'
+        }
+      );
+
+      // Cargar la asignación completa con relaciones
+      const fullSpeakerEvent = await SpeakerEvent.findByPk(speakerEvent.id, {
+        include: [
+          {
+            model: Speaker,
+            as: 'speaker',
+            attributes: ['id', 'firstName', 'lastName', 'email']
+          },
+          {
+            model: Event,
+            as: 'event',
+            attributes: ['id', 'title', 'startDate', 'endDate']
+          }
+        ]
+      });
+
+      // Registrar en auditoría
+      await AuditLog.log(
+        'speaker_assigned_to_event',
+        'speaker_event',
+        {
+          userId: assignedBy,
+          resourceId: speakerEvent.id.toString(),
+          newValues: {
+            speakerId: speakerData.speakerId,
+            eventId,
+            role: speakerData.role
+          },
+          ipAddress: '127.0.0.1',
+          userAgent: 'system'
+        }
+      );
+
+      // Invalidar caché del evento
+      await cacheService.delete(`event:detail:${eventId}`);
+
+      // Emitir evento
+      this.eventEmitter.emit('SpeakerAssignedToEvent', {
+        speakerEventId: speakerEvent.id,
+        speakerId: speakerData.speakerId,
+        eventId,
+        assignedBy
+      });
+
+      return {
+        success: true,
+        message: 'Speaker asignado exitosamente al evento',
+        data: fullSpeakerEvent,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error asignando speaker a evento:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Obtener speakers asignados a un evento
+   */
+  async getEventSpeakers(
+    eventId: number,
+    userId: number,
+    status?: string[]
+  ): Promise<ApiResponse<any>> {
+    try {
+      // Verificar que el evento existe
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        return {
+          success: false,
+          message: 'Evento no encontrado',
+          error: 'EVENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar permisos (solo el creador del evento puede ver los speakers)
+      if (event.createdBy !== userId) {
+        return {
+          success: false,
+          message: 'No tiene permisos para ver los speakers de este evento',
+          error: 'INSUFFICIENT_PERMISSIONS',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      const where: any = { eventId };
+      if (status && status.length > 0) {
+        where.status = { [Op.in]: status };
+      }
+
+      const speakerEvents = await SpeakerEvent.findAll({
+        where,
+        include: [
+          {
+            model: Speaker,
+            as: 'speaker',
+            attributes: ['id', 'firstName', 'lastName', 'email', 'phone']
+          }
+        ],
+        order: [['order', 'ASC'], ['participationStart', 'ASC']]
+      });
+
+      return {
+        success: true,
+        message: 'Speakers del evento obtenidos exitosamente',
+        data: speakerEvents,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error obteniendo speakers del evento:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Actualizar asignación de speaker a evento
+   */
+  async updateSpeakerAssignment(
+    eventId: number,
+    speakerId: number,
+    updateData: {
+      role?: 'keynote_speaker' | 'panelist' | 'facilitator' | 'moderator' | 'guest';
+      participationStart?: string | Date;
+      participationEnd?: string | Date;
+      modality?: 'presential' | 'virtual' | 'hybrid';
+      order?: number;
+      notes?: string;
+      status?: 'tentative' | 'confirmed' | 'cancelled' | 'completed';
+    },
+    updatedBy: number
+  ): Promise<ApiResponse<any>> {
+    try {
+      // Verificar que el evento existe
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        return {
+          success: false,
+          message: 'Evento no encontrado',
+          error: 'EVENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar permisos (solo el creador del evento puede actualizar asignaciones)
+      if (event.createdBy !== updatedBy) {
+        return {
+          success: false,
+          message: 'No tiene permisos para actualizar asignaciones de speakers en este evento',
+          error: 'INSUFFICIENT_PERMISSIONS',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Buscar la asignación existente
+      const speakerEvent = await SpeakerEvent.findOne({
+        where: {
+          speakerId,
+          eventId
+        }
+      });
+
+      if (!speakerEvent) {
+        return {
+          success: false,
+          message: 'Asignación de speaker no encontrada',
+          error: 'SPEAKER_ASSIGNMENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Preparar datos de actualización
+      const updatePayload: any = {
+        updatedBy
+      };
+
+      if (updateData.role !== undefined) updatePayload.role = updateData.role;
+      if (updateData.participationStart !== undefined) {
+        updatePayload.participationStart = updateData.participationStart ? new Date(updateData.participationStart) : null;
+      }
+      if (updateData.participationEnd !== undefined) {
+        updatePayload.participationEnd = updateData.participationEnd ? new Date(updateData.participationEnd) : null;
+      }
+      if (updateData.modality !== undefined) updatePayload.modality = updateData.modality;
+      if (updateData.order !== undefined) updatePayload.order = updateData.order;
+      if (updateData.notes !== undefined) updatePayload.notes = updateData.notes;
+      if (updateData.status !== undefined) updatePayload.status = updateData.status;
+
+      // Guardar valores anteriores para auditoría
+      const oldValues = {
+        role: speakerEvent.role,
+        participationStart: speakerEvent.participationStart,
+        participationEnd: speakerEvent.participationEnd,
+        modality: speakerEvent.modality,
+        order: speakerEvent.order,
+        notes: speakerEvent.notes,
+        status: speakerEvent.status
+      };
+
+      // Actualizar asignación
+      await speakerEvent.update(updatePayload);
+
+      // Cargar asignación actualizada con relaciones
+      const updatedSpeakerEvent = await SpeakerEvent.findByPk(speakerEvent.id, {
+        include: [
+          {
+            model: Speaker,
+            as: 'speaker',
+            attributes: ['id', 'firstName', 'lastName', 'email']
+          },
+          {
+            model: Event,
+            as: 'event',
+            attributes: ['id', 'title', 'startDate', 'endDate']
+          }
+        ]
+      });
+
+      // Registrar en auditoría
+      await AuditLog.log(
+        'speaker_assignment_updated',
+        'speaker_event',
+        {
+          userId: updatedBy,
+          resourceId: speakerEvent.id.toString(),
+          oldValues,
+          newValues: updatePayload,
+          ipAddress: '127.0.0.1',
+          userAgent: 'system'
+        }
+      );
+
+      // Invalidar caché del evento
+      await cacheService.delete(`event:detail:${eventId}`);
+
+      return {
+        success: true,
+        message: 'Asignación de speaker actualizada exitosamente',
+        data: updatedSpeakerEvent,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error actualizando asignación de speaker:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Eliminar asignación de speaker de un evento
+   */
+  async removeSpeakerFromEvent(
+    eventId: number,
+    speakerId: number,
+    removedBy: number,
+    reason?: string
+  ): Promise<ApiResponse<void>> {
+    try {
+      // Verificar que el evento existe
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        return {
+          success: false,
+          message: 'Evento no encontrado',
+          error: 'EVENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar permisos (solo el creador del evento puede eliminar asignaciones)
+      if (event.createdBy !== removedBy) {
+        return {
+          success: false,
+          message: 'No tiene permisos para eliminar asignaciones de speakers de este evento',
+          error: 'INSUFFICIENT_PERMISSIONS',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Buscar la asignación existente
+      const speakerEvent = await SpeakerEvent.findOne({
+        where: {
+          speakerId,
+          eventId
+        }
+      });
+
+      if (!speakerEvent) {
+        return {
+          success: false,
+          message: 'Asignación de speaker no encontrada',
+          error: 'SPEAKER_ASSIGNMENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar si la asignación puede ser eliminada (no completada)
+      if (speakerEvent.status === 'completed') {
+        return {
+          success: false,
+          message: 'No se puede eliminar una asignación completada',
+          error: 'CANNOT_REMOVE_COMPLETED_ASSIGNMENT',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Guardar datos para auditoría antes de eliminar
+      const assignmentData = {
+        speakerId: speakerEvent.speakerId,
+        eventId: speakerEvent.eventId,
+        role: speakerEvent.role,
+        status: speakerEvent.status
+      };
+
+      // Eliminar asignación (soft delete)
+      await speakerEvent.destroy();
+
+      // Registrar en auditoría
+      await AuditLog.log(
+        'speaker_removed_from_event',
+        'speaker_event',
+        {
+          userId: removedBy,
+          resourceId: speakerEvent.id.toString(),
+          oldValues: assignmentData,
+          newValues: { reason },
+          ipAddress: '127.0.0.1',
+          userAgent: 'system'
+        }
+      );
+
+      // Invalidar caché del evento
+      await cacheService.delete(`event:detail:${eventId}`);
+
+      return {
+        success: true,
+        message: 'Speaker eliminado del evento exitosamente',
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error eliminando speaker del evento:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Obtener archivos multimedia del evento
+   */
+  async getEventMedia(
+    eventId: number,
+    userId: number,
+    filters: {
+      type?: string;
+      category?: string;
+    } = {}
+  ): Promise<ApiResponse<any[]>> {
+    try {
+      // Verificar que el evento existe
+      const event = await Event.findByPk(eventId);
+      if (!event) {
+        return {
+          success: false,
+          message: 'Evento no encontrado',
+          error: 'EVENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Verificar permisos (solo el creador del evento puede ver los archivos multimedia)
+      if (event.createdBy !== userId) {
+        return {
+          success: false,
+          message: 'No tiene permisos para ver los archivos multimedia de este evento',
+          error: 'INSUFFICIENT_PERMISSIONS',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      const where: any = { eventId };
+
+      // Aplicar filtros
+      if (filters.type) {
+        where.type = filters.type;
+      }
+
+      if (filters.category) {
+        where.category = filters.category;
+      }
+
+      const mediaFiles = await EventMedia.findAll({
+        where,
+        order: [
+          ['isFeatured', 'DESC'],
+          ['sortOrder', 'ASC'],
+          ['uploadedAt', 'DESC']
+        ]
+      });
+
+      // Formatear respuesta
+      const formattedMedia = mediaFiles.map(media => ({
+        id: media.id,
+        filename: media.filename,
+        originalName: media.originalName,
+        url: media.url,
+        type: media.type,
+        category: media.category,
+        isPublic: media.isPublic,
+        description: media.description,
+        altText: media.altText,
+        isFeatured: media.isFeatured,
+        sortOrder: media.sortOrder,
+        size: media.size,
+        formattedSize: media.formattedSize,
+        uploadedAt: media.uploadedAt,
+        createdAt: media.createdAt
+      }));
+
+      return {
+        success: true,
+        message: 'Archivos multimedia obtenidos exitosamente',
+        data: formattedMedia,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error obteniendo archivos multimedia del evento:', error);
       return {
         success: false,
         message: 'Error interno del servidor',

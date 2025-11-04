@@ -24,6 +24,7 @@ import {
 } from 'sequelize-typescript';
 import { User } from './User';
 import { Role } from './Role';
+import { Speaker } from './Speaker';
 
 /**
  * Atributos del modelo UserRole
@@ -307,6 +308,10 @@ export class UserRole extends Model<UserRoleAttributes, UserRoleCreationAttribut
         existingAssignment.assignedAt = new Date();
         existingAssignment.expiresAt = expiresAt;
         await existingAssignment.save();
+
+        // Si es rol de speaker, verificar/crear registro en tabla speakers
+        await this.ensureSpeakerProfile(userId, roleId, assignedBy);
+
         return existingAssignment;
       }
       // Si ya está activa, devolver la existente
@@ -314,7 +319,7 @@ export class UserRole extends Model<UserRoleAttributes, UserRoleCreationAttribut
     }
 
     // Crear nueva asignación
-    return this.create({
+    const userRole = await this.create({
       userId,
       roleId,
       assignedBy,
@@ -322,6 +327,65 @@ export class UserRole extends Model<UserRoleAttributes, UserRoleCreationAttribut
       expiresAt,
       isActive: true
     });
+
+    // Si es rol de speaker, crear automáticamente el registro en tabla speakers
+    await this.ensureSpeakerProfile(userId, roleId, assignedBy);
+
+    return userRole;
+  }
+
+  /**
+   * Asegura que un usuario con rol speaker tenga su perfil en la tabla speakers
+   */
+  private static async ensureSpeakerProfile(
+    userId: number,
+    roleId: number,
+    createdBy?: number
+  ): Promise<void> {
+    try {
+      // Obtener el rol para verificar si es "speaker"
+      const role = await Role.findByPk(roleId);
+      if (!role || role.name !== 'speaker') {
+        return; // No es rol de speaker, no hacer nada
+      }
+
+      // Obtener datos del usuario
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return;
+      }
+
+      // Verificar si ya existe un speaker con ese email
+      const existingSpeaker = await Speaker.findOne({
+        where: { email: user.email }
+      });
+
+      if (existingSpeaker) {
+        // Ya existe, no crear duplicado
+        return;
+      }
+
+      // Crear el perfil de speaker automáticamente
+      await Speaker.create({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone || undefined,
+        baseRate: 0,
+        rateType: 'event',
+        modalities: ['presential', 'virtual', 'hybrid'],
+        languages: ['spanish'],
+        category: 'national',
+        isActive: true,
+        totalEvents: 0,
+        createdBy: createdBy || userId
+      });
+
+      console.log(`✅ Perfil de speaker creado automáticamente para usuario ${userId} (${user.email})`);
+    } catch (error) {
+      // Log del error pero no fallar la asignación de rol
+      console.error('Error creando perfil de speaker automáticamente:', error);
+    }
   }
 
   /**

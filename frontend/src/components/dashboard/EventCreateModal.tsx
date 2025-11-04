@@ -34,6 +34,14 @@ interface EventFormData {
   maxAge: number;
   tags: string[];
   requirements: string;
+  agenda: Array<{
+    title: string;
+    description?: string;
+    startTime: string;
+    endTime: string;
+    speaker?: string;
+    location?: string;
+  }>;
   eventTypeId: number;
   eventCategoryId: number;
 }
@@ -81,6 +89,7 @@ const EventCreateModal: React.FC<EventCreateModalProps> = ({
     maxAge: 0,
     tags: [],
     requirements: '',
+    agenda: [],
     eventTypeId: 0,
     eventCategoryId: 0
   });
@@ -237,6 +246,7 @@ const EventCreateModal: React.FC<EventCreateModalProps> = ({
       maxAge: 0,
       tags: [],
       requirements: '',
+      agenda: [],
       eventTypeId: 0,
       eventCategoryId: 0
     });
@@ -260,7 +270,8 @@ const EventCreateModal: React.FC<EventCreateModalProps> = ({
       const createData = withErrorHandling(async () => {
         const eventData: CreateEventData = {
           ...formData,
-          tags: formData.tags.filter(tag => tag.trim() !== '')
+          tags: formData.tags.filter(tag => tag.trim() !== ''),
+          agenda: formData.agenda
         };
         await DashboardService.createEvent(eventData);
         toast.success('Evento creado exitosamente');
@@ -466,6 +477,17 @@ const EventCreateModal: React.FC<EventCreateModalProps> = ({
               </Select>
               {formErrors.eventCategoryId && <p className="text-sm text-red-500 mt-1">{formErrors.eventCategoryId}</p>}
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="requirements">Requisitos para participar</Label>
+            <Textarea
+              id="requirements"
+              value={formData.requirements}
+              onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+              rows={3}
+              placeholder="Requisitos previos, materiales necesarios, etc."
+            />
           </div>
 
           <div>

@@ -370,8 +370,337 @@ router.delete('/:id', authenticated, eventLimiter, eventIdValidation, eventContr
  *         required: true
  *         schema:
  *           type: integer
+ *     responses:
+ *       200:
+ *         description: Evento publicado exitosamente
+ *       400:
+ *         description: Evento no listo para publicar
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Evento no encontrado
+ *       409:
+ *         description: Evento ya publicado
+ *       500:
+ *         description: Error interno del servidor
  */
 router.post('/:id/publish', authenticated, eventLimiter, eventIdValidation, publishEventValidation, eventController.publishEvent.bind(eventController));
+
+/**
+ * @swagger
+ * /api/events/{id}/speakers:
+ *   post:
+ *     tags: [Events]
+ *     summary: Asignar speaker a evento
+ *     description: Asigna un speaker existente a un evento con rol específico
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID del evento
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - speakerId
+ *               - role
+ *               - participationStart
+ *               - participationEnd
+ *             properties:
+ *               speakerId:
+ *                 type: integer
+ *                 description: ID del speaker a asignar
+ *               role:
+ *                 type: string
+ *                 enum: ["keynote_speaker", "panelist", "facilitator", "moderator", "guest"]
+ *                 description: Rol del speaker en el evento
+ *               participationStart:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Fecha y hora de inicio de participación
+ *               participationEnd:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Fecha y hora de fin de participación
+ *               modality:
+ *                 type: string
+ *                 enum: ["presential", "virtual", "hybrid"]
+ *                 description: Modalidad de participación
+ *               order:
+ *                 type: integer
+ *                 description: Orden de aparición
+ *               notes:
+ *                 type: string
+ *                 maxLength: 1000
+ *                 description: Notas internas sobre la participación
+ *     responses:
+ *       201:
+ *         description: Speaker asignado exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Evento o speaker no encontrado
+ *       409:
+ *         description: Conflicto de disponibilidad
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post('/:id/speakers', authenticated, createEditLimiter, eventIdValidation, [
+  body('speakerId')
+    .isInt({ min: 1 })
+    .withMessage('El ID del speaker debe ser un número entero positivo'),
+  body('role')
+    .isIn(['keynote_speaker', 'panelist', 'facilitator', 'moderator', 'guest'])
+    .withMessage('Rol inválido'),
+  body('participationStart')
+    .isISO8601()
+    .withMessage('La fecha de inicio debe ser una fecha válida'),
+  body('participationEnd')
+    .isISO8601()
+    .withMessage('La fecha de fin debe ser una fecha válida')
+    .custom((value, { req }) => {
+      if (new Date(value) <= new Date(req.body.participationStart)) {
+        throw new Error('La fecha de fin debe ser posterior a la fecha de inicio');
+      }
+      return true;
+    }),
+  body('modality')
+    .optional()
+    .isIn(['presential', 'virtual', 'hybrid'])
+    .withMessage('Modalidad inválida'),
+  body('order')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('El orden debe ser un número entero positivo'),
+  body('notes')
+    .optional()
+    .isLength({ max: 1000 })
+    .withMessage('Las notas no pueden exceder 1000 caracteres')
+], eventController.assignSpeakerToEvent.bind(eventController));
+
+/**
+ * @swagger
+ * /api/events/{id}/speakers:
+ *   get:
+ *     tags: [Events]
+ *     summary: Obtener speakers del evento
+ *     description: Obtiene la lista de speakers asignados a un evento
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID del evento
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *             enum: ["tentative", "confirmed", "cancelled", "completed"]
+ *           description: Filtrar por estado de asignación
+ *     responses:
+ *       200:
+ *         description: Speakers obtenidos exitosamente
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Evento no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/:id/speakers', authenticated, eventLimiter, eventIdValidation, [
+  query('status')
+    .optional()
+    .isArray()
+    .withMessage('El estado debe ser un arreglo'),
+  query('status.*')
+    .optional()
+    .isIn(['tentative', 'confirmed', 'cancelled', 'completed'])
+    .withMessage('Estado inválido')
+], eventController.getEventSpeakers.bind(eventController));
+
+/**
+ * @swagger
+ * /api/events/{id}/speakers/{speakerId}:
+ *   put:
+ *     tags: [Events]
+ *     summary: Actualizar asignación de speaker
+ *     description: Actualiza la información de asignación de un speaker a un evento
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID del evento
+ *       - in: path
+ *         name: speakerId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID del speaker
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: ["keynote_speaker", "panelist", "facilitator", "moderator", "guest"]
+ *               participationStart:
+ *                 type: string
+ *                 format: date-time
+ *               participationEnd:
+ *                 type: string
+ *                 format: date-time
+ *               modality:
+ *                 type: string
+ *                 enum: ["presential", "virtual", "hybrid"]
+ *               order:
+ *                 type: integer
+ *               notes:
+ *                 type: string
+ *                 maxLength: 1000
+ *               status:
+ *                 type: string
+ *                 enum: ["tentative", "confirmed", "cancelled", "completed"]
+ *     responses:
+ *       200:
+ *         description: Asignación actualizada exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Asignación no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/:id/speakers/:speakerId', authenticated, createEditLimiter, [
+  ...eventIdValidation,
+  param('speakerId')
+    .isInt({ min: 1 })
+    .withMessage('El ID del speaker debe ser un número entero positivo')
+], [
+  body('role')
+    .optional()
+    .isIn(['keynote_speaker', 'panelist', 'facilitator', 'moderator', 'guest'])
+    .withMessage('Rol inválido'),
+  body('participationStart')
+    .optional()
+    .isISO8601()
+    .withMessage('La fecha de inicio debe ser una fecha válida'),
+  body('participationEnd')
+    .optional()
+    .isISO8601()
+    .withMessage('La fecha de fin debe ser una fecha válida')
+    .custom((value, { req }) => {
+      if (value && req.body.participationStart && new Date(value) <= new Date(req.body.participationStart)) {
+        throw new Error('La fecha de fin debe ser posterior a la fecha de inicio');
+      }
+      return true;
+    }),
+  body('modality')
+    .optional()
+    .isIn(['presential', 'virtual', 'hybrid'])
+    .withMessage('Modalidad inválida'),
+  body('order')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('El orden debe ser un número entero positivo'),
+  body('notes')
+    .optional()
+    .isLength({ max: 1000 })
+    .withMessage('Las notas no pueden exceder 1000 caracteres'),
+  body('status')
+    .optional()
+    .isIn(['tentative', 'confirmed', 'cancelled', 'completed'])
+    .withMessage('Estado inválido')
+], eventController.updateSpeakerAssignment.bind(eventController));
+
+/**
+ * @swagger
+ * /api/events/{id}/speakers/{speakerId}:
+ *   delete:
+ *     tags: [Events]
+ *     summary: Eliminar asignación de speaker
+ *     description: Elimina la asignación de un speaker de un evento
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID del evento
+ *       - in: path
+ *         name: speakerId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           description: ID del speaker
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 maxLength: 500
+ *                 description: Razón de la eliminación
+ *     responses:
+ *       200:
+ *         description: Asignación eliminada exitosamente
+ *       400:
+ *         description: Datos inválidos
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Asignación no encontrada
+ *       409:
+ *         description: No se puede eliminar asignación completada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete('/:id/speakers/:speakerId', authenticated, eventLimiter, [
+  ...eventIdValidation,
+  param('speakerId')
+    .isInt({ min: 1 })
+    .withMessage('El ID del speaker debe ser un número entero positivo')
+], [
+  body('reason')
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage('La razón no puede exceder 500 caracteres')
+], eventController.removeSpeakerFromEvent.bind(eventController));
 
 /**
  * @swagger
@@ -685,8 +1014,8 @@ router.post('/:id/upload-media', authenticated, createEditLimiter, eventIdValida
  * /api/events/{id}/media:
  *   get:
  *     tags: [Events]
- *     summary: Obtener archivos multimedia
- *     description: Obtiene la lista de archivos multimedia del evento
+ *     summary: Obtener archivos multimedia del evento
+ *     description: Obtiene la lista de archivos multimedia asociados al evento, incluyendo material didáctico
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -695,8 +1024,87 @@ router.post('/:id/upload-media', authenticated, createEditLimiter, eventIdValida
  *         required: true
  *         schema:
  *           type: integer
+ *           description: ID del evento
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: ["image", "video", "document", "audio", "other"]
+ *           description: Filtrar por tipo de medio
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *           enum: ["presentation", "handout", "exercise", "resource", "other"]
+ *           description: Filtrar por categoría de material didáctico
+ *     responses:
+ *       200:
+ *         description: Archivos multimedia obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Archivos multimedia obtenidos exitosamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       filename:
+ *                         type: string
+ *                         example: "presentation.pdf"
+ *                       originalName:
+ *                         type: string
+ *                         example: "Presentación del Taller.pdf"
+ *                       url:
+ *                         type: string
+ *                         example: "https://example.com/uploads/presentation.pdf"
+ *                       type:
+ *                         type: string
+ *                         enum: ["image", "video", "document", "audio", "other"]
+ *                         example: "document"
+ *                       category:
+ *                         type: string
+ *                         enum: ["presentation", "handout", "exercise", "resource", "other"]
+ *                         example: "presentation"
+ *                       description:
+ *                         type: string
+ *                         example: "Presentación principal del taller"
+ *                       isPublic:
+ *                         type: boolean
+ *                         example: true
+ *                       uploadedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2023-10-01T10:00:00.000Z"
+ *       401:
+ *         description: No autorizado
+ *       403:
+ *         description: Permisos insuficientes
+ *       404:
+ *         description: Evento no encontrado
+ *       500:
+ *         description: Error interno del servidor
  */
-router.get('/:id/media', authenticated, eventLimiter, eventIdValidation, eventController.getEventMedia.bind(eventController));
+router.get('/:id/media', authenticated, eventLimiter, eventIdValidation, [
+  query('type')
+    .optional()
+    .isIn(['image', 'video', 'document', 'audio', 'other'])
+    .withMessage('Tipo de medio inválido'),
+  query('category')
+    .optional()
+    .isIn(['presentation', 'handout', 'exercise', 'resource', 'other'])
+    .withMessage('Categoría inválida')
+], eventController.getEventMedia.bind(eventController));
 
 /**
  * @swagger

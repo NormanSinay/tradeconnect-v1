@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { useUserStore } from '@/stores/userStore'
+import { usePermissions } from '@/hooks/usePermissions'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -26,6 +27,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const location = useLocation()
   const { user, logout } = useAuthStore()
   const { profile, fetchProfile } = useUserStore()
+  const { canAccessAdminPanel, canManageEvents, canAccessSpeakerDashboard } = usePermissions()
 
   useEffect(() => {
     if (!profile) {
@@ -33,7 +35,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   }, [profile, fetchProfile])
 
-  // Función para determinar qué navegación mostrar según el rol
+  // Función para determinar qué navegación mostrar según el rol y permisos
   const getNavigationByRole = (userRole: string) => {
     const baseNavigation = [
       { name: 'Dashboard', href: '/dashboard', icon: FaTachometerAlt, current: location.pathname === '/dashboard', roles: ['user', 'participant', 'speaker', 'admin', 'super_admin', 'manager', 'operator', 'client'] },
@@ -43,7 +45,42 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       { name: 'Configuración', href: '/dashboard/settings', icon: FaCog, current: location.pathname === '/dashboard/settings', roles: ['user', 'participant', 'speaker', 'admin', 'super_admin', 'manager', 'operator', 'client'] },
     ]
 
-    return baseNavigation.filter(item => item.roles.includes(userRole))
+    // Agregar navegación específica para speaker solo si tiene permisos
+    if (userRole === 'speaker' && canAccessSpeakerDashboard) {
+      baseNavigation.splice(1, 0, { name: 'Dashboard Speaker', href: '/dashboard/speaker', icon: FaTachometerAlt, current: location.pathname === '/dashboard/speaker', roles: ['speaker'] })
+    }
+
+    // Filtrar navegación basada en roles y permisos específicos
+    return baseNavigation.filter(item => {
+      // Verificar rol básico
+      if (!item.roles.includes(userRole)) {
+        return false
+      }
+
+      // Verificaciones adicionales de permisos para elementos sensibles
+      // Asegurar compatibilidad con otros roles y ocultar opciones de admin sin permisos
+      if ((item.name === 'Mis Eventos y Cursos' || item.name === 'Mis Certificados') &&
+          userRole !== 'admin' && userRole !== 'super_admin' && userRole !== 'manager') {
+        // Solo permitir si tienen permisos específicos de gestión de eventos o son speakers/participants
+        if (!canManageEvents && userRole !== 'speaker' && userRole !== 'participant') {
+          return false
+        }
+      }
+
+      // Verificar permisos de administración para elementos críticos
+      if (item.name === 'Dashboard' && userRole === 'admin' && !canAccessAdminPanel) {
+        return false
+      }
+
+      // Para roles que no son admin, asegurar que no vean opciones administrativas
+      if ((userRole === 'user' || userRole === 'client' || userRole === 'operator') &&
+          (item.name === 'Mis Eventos y Cursos' || item.name === 'Mis Certificados') &&
+          !canManageEvents) {
+        return false
+      }
+
+      return true
+    })
   }
 
   const navigation = getNavigationByRole(user?.role || 'user')

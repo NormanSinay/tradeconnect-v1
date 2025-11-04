@@ -2753,8 +2753,10 @@ app.use(`${API_VERSION}/certificates`, certificateRoutes);
 // Rutas de speakers
 import speakersRoutes from './routes/speakers';
 import speakerContractRoutes from './routes/speaker-contracts';
+import speakerDashboardRoutes from './routes/speakerDashboard';
 app.use(`${API_VERSION}/speakers`, speakersRoutes);
 app.use(`${API_VERSION}/speaker-contracts`, speakerContractRoutes);
+app.use(`${API_VERSION}/speakers/dashboard`, speakerDashboardRoutes);
 
 // Rutas de inscripciones y carrito
 import registrationRoutes from './routes/registrations';
@@ -2853,6 +2855,7 @@ app.use('/api/event-registrations', (req, res) => res.redirect(301, `${API_VERSI
 app.use('/api/event-reports', (req, res) => res.redirect(301, `${API_VERSION}/event-reports${req.path}`));
 app.use('/api/certificates', (req, res) => res.redirect(301, `${API_VERSION}/certificates${req.path}`));
 app.use('/api/speakers', (req, res) => res.redirect(301, `${API_VERSION}/speakers${req.path}`));
+app.use('/api/speakers/dashboard', (req, res) => res.redirect(301, `${API_VERSION}/speakers/dashboard${req.path}`));
 app.use('/api/speaker-contracts', (req, res) => res.redirect(301, `${API_VERSION}/speaker-contracts${req.path}`));
 app.use('/api/registrations', (req, res) => res.redirect(301, `${API_VERSION}/registrations${req.path}`));
 app.use('/api/cart', (req, res) => res.redirect(301, `${API_VERSION}/cart${req.path}`));

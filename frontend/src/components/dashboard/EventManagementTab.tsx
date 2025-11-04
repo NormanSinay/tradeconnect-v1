@@ -12,9 +12,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, Plus, Eye, Edit, Trash2, Download, Calendar, MapPin, Users, DollarSign, AlertTriangle, Copy, Upload, X } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Search, Plus, Eye, Edit, Trash2, Download, Calendar, MapPin, Users, DollarSign, AlertTriangle, Copy, Upload, X, MoreVertical, FileText, Mic } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import EventDuplicateModal from './EventDuplicateModal';
+import EventSpeakerManager from './EventSpeakerManager';
 import toast from 'react-hot-toast';
 
 interface EventManagementTabProps {
@@ -37,6 +39,14 @@ interface EventFormData {
   maxAge: number;
   tags: string[];
   requirements: string;
+  agenda: Array<{
+    title: string;
+    description?: string;
+    startTime: string;
+    endTime: string;
+    speaker?: string;
+    location?: string;
+  }>;
   eventTypeId: number;
   eventCategoryId: number;
   eventStatusId: number;
@@ -85,6 +95,8 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showSpeakerManager, setShowSpeakerManager] = useState(false);
+  const [showMediaManager, setShowMediaManager] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [newStatus, setNewStatus] = useState<string>('');
   const [statusChangeReason, setStatusChangeReason] = useState<string>('');
@@ -106,6 +118,7 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
     maxAge: 0,
     tags: [],
     requirements: '',
+    agenda: [],
     eventTypeId: 0,
     eventCategoryId: 0,
     eventStatusId: 1
@@ -483,6 +496,7 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
       maxAge: 0,
       tags: [],
       requirements: '',
+      agenda: [],
       eventTypeId: 0,
       eventCategoryId: 0,
       eventStatusId: 1
@@ -539,7 +553,8 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
           ...formData,
           // No enviar virtualLocation si el evento no es virtual o está vacío
           virtualLocation: formData.isVirtual && formData.virtualLocation.trim() ? formData.virtualLocation.trim() : undefined,
-          tags: formData.tags.filter(tag => tag.trim() !== '')
+          tags: formData.tags.filter(tag => tag.trim() !== ''),
+          agenda: formData.agenda
         };
         await DashboardService.updateEvent(selectedEvent.id, eventData);
         toast.success('Evento actualizado exitosamente');
@@ -563,12 +578,30 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
 
   const handleEditEventClick = (event: Event) => {
     setSelectedEvent(event);
+
+    // Formatear fechas correctamente para datetime-local inputs
+    const formatDateForInput = (dateString: string) => {
+      try {
+        const date = new Date(dateString);
+        // Convertir a formato local y luego a string compatible con datetime-local
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+      } catch (error) {
+        console.error('Error formateando fecha:', error);
+        return '';
+      }
+    };
+
     setFormData({
       title: event.title,
       description: event.description || '',
       shortDescription: event.shortDescription || '',
-      startDate: event.startDate.split('T')[0],
-      endDate: event.endDate.split('T')[0],
+      startDate: formatDateForInput(event.startDate),
+      endDate: formatDateForInput(event.endDate),
       location: event.location || '',
       virtualLocation: event.virtualLocation || '',
       isVirtual: event.isVirtual,
@@ -579,6 +612,7 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
       maxAge: event.maxAge || 0,
       tags: event.tags || [],
       requirements: event.requirements || '',
+      agenda: event.agenda || [],
       eventTypeId: event.eventType.id,
       eventCategoryId: event.eventCategory.id,
       eventStatusId: event.eventStatus.id
@@ -595,6 +629,28 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
 
     setSelectedEvent(event);
     setShowDuplicateModal(true);
+  };
+
+  const handleManageSpeakers = (event: Event) => {
+    // Verificar permisos antes de proceder
+    if (!permissions.canUpdateEvents) {
+      toast.error('No tienes permisos para gestionar speakers');
+      return;
+    }
+
+    setSelectedEvent(event);
+    setShowSpeakerManager(true);
+  };
+
+  const handleManageMedia = (event: Event) => {
+    // Verificar permisos antes de proceder
+    if (!permissions.canUpdateEvents) {
+      toast.error('No tienes permisos para gestionar material didáctico');
+      return;
+    }
+
+    setSelectedEvent(event);
+    setShowMediaManager(true);
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -1020,7 +1076,12 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
                       {permissions.canUpdateEvents && (
                         <>
                           <Dialog open={showEditModal && selectedEvent?.id === event.id} onOpenChange={(open: boolean) => {
-                            if (!open) setShowEditModal(false);
+                            if (!open) {
+                              // Solo cerrar el modal principal si no hay modales internos abiertos
+                              if (!showSpeakerManager && !showMediaManager) {
+                                setShowEditModal(false);
+                              }
+                            }
                           }}>
                             <DialogTrigger asChild>
                               <Button
@@ -1032,177 +1093,358 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                               <DialogHeader>
-                                <DialogTitle>Editar Evento</DialogTitle>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <Edit className="h-5 w-5" />
+                                  Gestionar Evento - {selectedEvent?.title}
+                                </DialogTitle>
                                 <DialogDescription>
-                                  Modifique la información del evento seleccionado.
+                                  Edite la información del evento y gestione speakers y material didáctico.
                                 </DialogDescription>
                               </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <Label htmlFor="edit-title">Título *</Label>
-                                  <Input
-                                    id="edit-title"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className={formErrors.title ? 'border-red-500' : ''}
-                                  />
-                                  {formErrors.title && <p className="text-sm text-red-500 mt-1">{formErrors.title}</p>}
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label htmlFor="edit-startDate">Fecha de inicio *</Label>
-                                    <Input
-                                      id="edit-startDate"
-                                      type="datetime-local"
-                                      value={formData.startDate}
-                                      onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                      className={formErrors.startDate ? 'border-red-500' : ''}
-                                    />
-                                    {formErrors.startDate && <p className="text-sm text-red-500 mt-1">{formErrors.startDate}</p>}
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-endDate">Fecha de fin *</Label>
-                                    <Input
-                                      id="edit-endDate"
-                                      type="datetime-local"
-                                      value={formData.endDate}
-                                      onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                      className={formErrors.endDate ? 'border-red-500' : ''}
-                                    />
-                                    {formErrors.endDate && <p className="text-sm text-red-500 mt-1">{formErrors.endDate}</p>}
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-3 gap-4">
-                                  <div>
-                                    <Label htmlFor="edit-price">Precio</Label>
-                                    <Input
-                                      id="edit-price"
-                                      type="number"
-                                      min="0"
-                                      step="0.01"
-                                      value={formData.price}
-                                      onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                                      className={formErrors.price ? 'border-red-500' : ''}
-                                    />
-                                    {formErrors.price && <p className="text-sm text-red-500 mt-1">{formErrors.price}</p>}
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-capacity">Capacidad</Label>
-                                    <Input
-                                      id="edit-capacity"
-                                      type="number"
-                                      min="0"
-                                      value={formData.capacity}
-                                      onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })}
-                                      className={formErrors.capacity ? 'border-red-500' : ''}
-                                    />
-                                    {formErrors.capacity && <p className="text-sm text-red-500 mt-1">{formErrors.capacity}</p>}
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="edit-status">Estado</Label>
-                                    <Select value={formData.eventStatusId.toString()} onValueChange={(value) => setFormData({ ...formData, eventStatusId: parseInt(value) })}>
-                                      <SelectTrigger>
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                          <SelectItem value="1">Borrador</SelectItem>
-                                          <SelectItem value="2">En Revisión</SelectItem>
-                                          <SelectItem value="3">Aprobado</SelectItem>
-                                          <SelectItem value="4">Publicado</SelectItem>
-                                          <SelectItem value="5">En Progreso</SelectItem>
-                                          <SelectItem value="6">Completado</SelectItem>
-                                          <SelectItem value="7">Cancelado</SelectItem>
-                                          <SelectItem value="8">Pospuesto</SelectItem>
-                                          <SelectItem value="9">Archivado</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                                <div className="flex justify-end gap-2 pt-4">
-                                  <Button variant="outline" onClick={() => setShowEditModal(false)}>
-                                    Cancelar
-                                  </Button>
-                                  <Button onClick={handleEditEvent} disabled={submitting}>
-                                    {submitting ? 'Actualizando...' : 'Actualizar Evento'}
-                                  </Button>
+
+                              {/* Tabs para navegación dentro del modal */}
+                              <div className="border-b mb-6">
+                                <div className="flex space-x-8">
+                                  <button
+                                    className={`pb-2 px-1 border-b-2 font-medium text-sm ${
+                                      !showSpeakerManager && !showMediaManager
+                                        ? 'border-primary text-primary'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    }`}
+                                    onClick={() => {
+                                      setShowSpeakerManager(false);
+                                      setShowMediaManager(false);
+                                    }}
+                                  >
+                                    Información General
+                                  </button>
+                                  <button
+                                    className={`pb-2 px-1 border-b-2 font-medium text-sm ${
+                                      showSpeakerManager
+                                        ? 'border-primary text-primary'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    }`}
+                                    onClick={() => {
+                                      setShowSpeakerManager(true);
+                                      setShowMediaManager(false);
+                                    }}
+                                  >
+                                    <Users className="h-4 w-4 inline mr-1" />
+                                    Speakers
+                                  </button>
+                                  <button
+                                    className={`pb-2 px-1 border-b-2 font-medium text-sm ${
+                                      showMediaManager
+                                        ? 'border-primary text-primary'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    }`}
+                                    onClick={() => {
+                                      setShowMediaManager(true);
+                                      setShowSpeakerManager(false);
+                                    }}
+                                  >
+                                    <FileText className="h-4 w-4 inline mr-1" />
+                                    Material Didáctico
+                                  </button>
                                 </div>
                               </div>
+
+                              {/* Contenido del modal basado en la pestaña seleccionada */}
+                              {!showSpeakerManager && !showMediaManager ? (
+                                // Pestaña de Información General
+                                <div className="space-y-6">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Columna izquierda - Información básica */}
+                                    <div className="space-y-4">
+                                      <div>
+                                        <Label htmlFor="edit-title">Título *</Label>
+                                        <Input
+                                          id="edit-title"
+                                          value={formData.title}
+                                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                          className={formErrors.title ? 'border-red-500' : ''}
+                                        />
+                                        {formErrors.title && <p className="text-sm text-red-500 mt-1">{formErrors.title}</p>}
+                                      </div>
+
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                          <Label htmlFor="edit-startDate">Fecha de inicio *</Label>
+                                          <Input
+                                            id="edit-startDate"
+                                            type="datetime-local"
+                                            value={formData.startDate}
+                                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                                            className={formErrors.startDate ? 'border-red-500' : ''}
+                                          />
+                                          {formErrors.startDate && <p className="text-sm text-red-500 mt-1">{formErrors.startDate}</p>}
+                                        </div>
+                                        <div>
+                                          <Label htmlFor="edit-endDate">Fecha de fin *</Label>
+                                          <Input
+                                            id="edit-endDate"
+                                            type="datetime-local"
+                                            value={formData.endDate}
+                                            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                                            className={formErrors.endDate ? 'border-red-500' : ''}
+                                          />
+                                          {formErrors.endDate && <p className="text-sm text-red-500 mt-1">{formErrors.endDate}</p>}
+                                        </div>
+                                      </div>
+
+                                      <div className="flex items-center justify-between">
+                                        <Label htmlFor="isVirtual" className="text-sm font-medium">
+                                          Evento virtual
+                                        </Label>
+                                        <Switch
+                                          id="isVirtual"
+                                          checked={formData.isVirtual}
+                                          onCheckedChange={(checked) => setFormData({ ...formData, isVirtual: checked })}
+                                        />
+                                      </div>
+
+                                      {!formData.isVirtual && (
+                                        <div>
+                                          <Label htmlFor="location">Ubicación</Label>
+                                          <Input
+                                            id="location"
+                                            value={formData.location}
+                                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                            placeholder="Dirección del evento"
+                                          />
+                                        </div>
+                                      )}
+
+                                      {formData.isVirtual && (
+                                        <div>
+                                          <Label htmlFor="virtualLocation">Enlace virtual</Label>
+                                          <Input
+                                            id="virtualLocation"
+                                            type="url"
+                                            value={formData.virtualLocation}
+                                            onChange={(e) => setFormData({ ...formData, virtualLocation: e.target.value })}
+                                            placeholder="https://zoom.us/j/123456789"
+                                            className={formErrors.virtualLocation ? 'border-red-500' : ''}
+                                          />
+                                          {formErrors.virtualLocation && <p className="text-sm text-red-500 mt-1">{formErrors.virtualLocation}</p>}
+                                        </div>
+                                      )}
+
+                                      <div className="grid grid-cols-3 gap-4">
+                                        <div>
+                                          <Label htmlFor="edit-price">Precio</Label>
+                                          <Input
+                                            id="edit-price"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value={formData.price}
+                                            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                                            className={formErrors.price ? 'border-red-500' : ''}
+                                          />
+                                          {formErrors.price && <p className="text-sm text-red-500 mt-1">{formErrors.price}</p>}
+                                        </div>
+                                        <div>
+                                          <Label htmlFor="edit-capacity">Capacidad</Label>
+                                          <Input
+                                            id="edit-capacity"
+                                            type="number"
+                                            min="0"
+                                            value={formData.capacity}
+                                            onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })}
+                                            className={formErrors.capacity ? 'border-red-500' : ''}
+                                          />
+                                          {formErrors.capacity && <p className="text-sm text-red-500 mt-1">{formErrors.capacity}</p>}
+                                        </div>
+                                        <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                                          <Label htmlFor="edit-status" className="text-blue-800 font-semibold flex items-center gap-2">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                            Estado del Evento
+                                          </Label>
+                                          <Select value={formData.eventStatusId.toString()} onValueChange={(value) => setFormData({ ...formData, eventStatusId: parseInt(value) })}>
+                                            <SelectTrigger className="mt-2 border-blue-300 focus:border-blue-500 bg-white">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                  <SelectItem value="1">Borrador</SelectItem>
+                                                  <SelectItem value="2">En Revisión</SelectItem>
+                                                  <SelectItem value="3">Aprobado</SelectItem>
+                                                  <SelectItem value="4" className="text-green-600 font-medium">Publicado</SelectItem>
+                                                  <SelectItem value="5">En Progreso</SelectItem>
+                                                  <SelectItem value="6" className="text-blue-600 font-medium">Completado</SelectItem>
+                                                  <SelectItem value="7" className="text-red-600 font-medium">Cancelado</SelectItem>
+                                                  <SelectItem value="8" className="text-orange-600 font-medium">Pospuesto</SelectItem>
+                                                  <SelectItem value="9" className="text-gray-600 font-medium">Archivado</SelectItem>
+                                                </SelectContent>
+                                          </Select>
+                                          <p className="text-xs text-blue-600 mt-2">
+                                            Cambia el estado para publicar o gestionar el evento
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Columna derecha - Información adicional */}
+                                    <div className="space-y-4">
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                          <Label htmlFor="eventTypeId">Tipo de evento *</Label>
+                                          <Select value={formData.eventTypeId.toString()} onValueChange={(value) => setFormData({ ...formData, eventTypeId: parseInt(value) })}>
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Seleccionar tipo" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="1">Conferencia</SelectItem>
+                                              <SelectItem value="2">Taller</SelectItem>
+                                              <SelectItem value="3">Seminario</SelectItem>
+                                              <SelectItem value="4">Webinar</SelectItem>
+                                              <SelectItem value="5">Networking</SelectItem>
+                                              <SelectItem value="6">Feria Comercial</SelectItem>
+                                              <SelectItem value="7">Panel de Discusión</SelectItem>
+                                              <SelectItem value="8">Capacitación</SelectItem>
+                                              <SelectItem value="9">Evento de Lanzamiento</SelectItem>
+                                              <SelectItem value="10">Evento Social</SelectItem>
+                                              <SelectItem value="11">Evento Híbrido</SelectItem>
+                                              <SelectItem value="12">Otro</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                          {formErrors.eventTypeId && <p className="text-sm text-red-500 mt-1">{formErrors.eventTypeId}</p>}
+                                        </div>
+                                        <div>
+                                          <Label htmlFor="eventCategoryId">Categoría *</Label>
+                                          <Select value={formData.eventCategoryId.toString()} onValueChange={(value) => setFormData({ ...formData, eventCategoryId: parseInt(value) })}>
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Seleccionar categoría" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="1">Negocios</SelectItem>
+                                                <SelectItem value="2">Tecnología</SelectItem>
+                                                <SelectItem value="3">Marketing</SelectItem>
+                                                <SelectItem value="4">Finanzas</SelectItem>
+                                                <SelectItem value="5">Salud</SelectItem>
+                                                <SelectItem value="6">Educación</SelectItem>
+                                                <SelectItem value="7">Legal</SelectItem>
+                                                <SelectItem value="8">Construcción</SelectItem>
+                                                <SelectItem value="9">Manufactura</SelectItem>
+                                                <SelectItem value="10">Retail</SelectItem>
+                                                <SelectItem value="11">Turismo</SelectItem>
+                                                <SelectItem value="12">Agricultura</SelectItem>
+                                                <SelectItem value="13">Energía</SelectItem>
+                                                <SelectItem value="14">Medio Ambiente</SelectItem>
+                                                <SelectItem value="15">Deportes</SelectItem>
+                                                <SelectItem value="16">Entretenimiento</SelectItem>
+                                                <SelectItem value="17">Gobierno</SelectItem>
+                                                <SelectItem value="18">ONG</SelectItem>
+                                                <SelectItem value="19">Otro</SelectItem>
+                                              </SelectContent>
+                                          </Select>
+                                          {formErrors.eventCategoryId && <p className="text-sm text-red-500 mt-1">{formErrors.eventCategoryId}</p>}
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <Label htmlFor="edit-requirements">Requisitos para participar</Label>
+                                        <Textarea
+                                          id="edit-requirements"
+                                          value={formData.requirements}
+                                          onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                                          rows={3}
+                                          placeholder="Requisitos previos, materiales necesarios, etc."
+                                        />
+                                      </div>
+
+                                      <div>
+                                        <Label htmlFor="description">Descripción completa</Label>
+                                        <Textarea
+                                          id="description"
+                                          value={formData.description || ''}
+                                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                          rows={4}
+                                          placeholder="Descripción detallada del evento"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex justify-end gap-2 pt-4 border-t">
+                                    <Button variant="outline" onClick={() => setShowEditModal(false)}>
+                                      Cancelar
+                                    </Button>
+                                    <Button onClick={handleEditEvent} disabled={submitting}>
+                                      {submitting ? 'Actualizando...' : 'Actualizar Evento'}
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : showSpeakerManager ? (
+                                // Pestaña de Speakers
+                                <div className="space-y-4">
+                                  {selectedEvent && (
+                                    <EventSpeakerManager
+                                      eventId={selectedEvent.id}
+                                      eventTitle={selectedEvent.title}
+                                      isOpen={true}
+                                      onClose={() => {}}
+                                    />
+                                  )}
+                                </div>
+                              ) : (
+                                // Pestaña de Material Didáctico
+                                <div className="space-y-4">
+                                  <Alert>
+                                    <FileText className="h-4 w-4" />
+                                    <AlertDescription>
+                                      Funcionalidad de gestión de material didáctico en desarrollo.
+                                      Pronto podrás subir presentaciones, handouts, ejercicios y otros recursos.
+                                    </AlertDescription>
+                                  </Alert>
+
+                                  <div className="text-center py-8">
+                                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                      Próximamente
+                                    </h3>
+                                    <p className="text-gray-600">
+                                      Esta funcionalidad estará disponible en la próxima actualización
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
                             </DialogContent>
                           </Dialog>
 
-                          {event.eventStatus.name === 'draft' && permissions.canPublishEvents && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedEvent(event);
-                                setShowPublishModal(true);
-                              }}
-                              title="Publicar evento"
-                              className="text-green-600 hover:text-green-700"
-                            >
-                              <Upload className="h-4 w-4" />
-                            </Button>
-                          )}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                title="Más acciones"
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {permissions.canDuplicateEvents && (
+                                <DropdownMenuItem
+                                  onClick={() => handleDuplicateEventClick(event)}
+                                >
+                                  <Copy className="h-4 w-4 mr-2" />
+                                  Duplicar evento
+                                </DropdownMenuItem>
+                              )}
 
-                          {event.eventStatus.name === 'published' && permissions.canCancelEvents && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedEvent(event);
-                                setShowCancelModal(true);
-                              }}
-                              title="Cancelar evento"
-                              className="text-orange-600 hover:text-orange-700"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-
-                          {/* Botón para cambiar estado adicional */}
-                          {permissions.canChangeEventStatus && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedEvent(event);
-                                setNewStatus('');
-                                setStatusChangeReason('');
-                                setShowStatusModal(true);
-                              }}
-                              title="Cambiar estado"
-                              className="text-purple-600 hover:text-purple-700"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          )}
-
-                          {permissions.canDuplicateEvents && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDuplicateEventClick(event)}
-                              title="Duplicar evento"
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          )}
-
-                          {permissions.canDeleteEvents && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteEventClick(event)}
-                              className="text-red-600 hover:text-red-700"
-                              title="Eliminar evento"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
+                              {permissions.canDeleteEvents && (
+                                <DropdownMenuItem
+                                  onClick={() => handleDeleteEventClick(event)}
+                                  className="text-red-600"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Eliminar evento
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </>
                       )}
                     </div>
@@ -1243,9 +1485,23 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
                         <span>{formatDate(selectedEvent.startDate)} - {formatDate(selectedEvent.endDate)}</span>
                       </div>
                       {selectedEvent.isVirtual ? (
-                        <div className="flex items-center gap-2">
-                          <Upload className="h-4 w-4 text-gray-500" />
-                          <span>Virtual: {selectedEvent.virtualLocation || 'Enlace no disponible'}</span>
+                        <div className="flex items-start gap-2">
+                          <Upload className="h-4 w-4 text-gray-500 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <span className="text-sm font-medium text-gray-700">Virtual:</span>
+                            {selectedEvent.virtualLocation ? (
+                              <a
+                                href={selectedEvent.virtualLocation}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block text-blue-600 hover:text-blue-800 underline break-all text-sm mt-1"
+                              >
+                                {selectedEvent.virtualLocation}
+                              </a>
+                            ) : (
+                              <span className="text-gray-500 text-sm">Enlace no disponible</span>
+                            )}
+                          </div>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
@@ -1617,6 +1873,62 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
         }}
         event={selectedEvent}
       />
+
+      {/* Modal de gestión de speakers */}
+      {selectedEvent && (
+        <EventSpeakerManager
+          eventId={selectedEvent.id}
+          eventTitle={selectedEvent.title}
+          isOpen={showSpeakerManager}
+          onClose={() => {
+            setShowSpeakerManager(false);
+            setSelectedEvent(null);
+          }}
+        />
+      )}
+
+      {/* Modal de gestión de material didáctico */}
+      {selectedEvent && (
+        <Dialog open={showMediaManager} onOpenChange={setShowMediaManager}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Gestionar Material Didáctico - {selectedEvent.title}
+              </DialogTitle>
+              <DialogDescription>
+                Sube y gestiona archivos multimedia para este evento
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <Alert>
+                <FileText className="h-4 w-4" />
+                <AlertDescription>
+                  Funcionalidad de gestión de material didáctico en desarrollo.
+                  Pronto podrás subir presentaciones, handouts, ejercicios y otros recursos.
+                </AlertDescription>
+              </Alert>
+
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Próximamente
+                </h3>
+                <p className="text-gray-600">
+                  Esta funcionalidad estará disponible en la próxima actualización
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowMediaManager(false)}>
+                Cerrar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Paginación */}
       {totalPages > 1 && (

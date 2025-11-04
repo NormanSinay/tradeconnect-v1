@@ -198,7 +198,16 @@ module.exports = {
       // Certificados
       'view_certificate', 'verify_certificate',
       // Notificaciones
-      'view_notification_logs'
+      'view_notification_logs',
+      // Permisos específicos de speaker
+      'can_access_speaker_dashboard',
+      'can_manage_speaker_profile',
+      'can_view_assigned_events',
+      'can_manage_speaker_materials',
+      'can_view_speaker_notifications',
+      'can_update_speaker_availability',
+      'can_view_speaker_payments',
+      'can_manage_speaker_evaluations'
     ];
 
     speakerPermissions.forEach(permName => {

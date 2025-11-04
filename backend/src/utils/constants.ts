@@ -98,6 +98,16 @@ export const PERMISSIONS = {
   UPDATE_SPEAKER: 'update_speaker',
   DELETE_SPEAKER: 'delete_speaker',
   MANAGE_SPEAKER_CONTRACTS: 'manage_speaker_contracts',
+
+  // === PERMISOS ESPECÍFICOS DE SPEAKER ===
+  CAN_ACCESS_SPEAKER_DASHBOARD: 'can_access_speaker_dashboard',
+  CAN_MANAGE_SPEAKER_PROFILE: 'can_manage_speaker_profile',
+  CAN_VIEW_ASSIGNED_EVENTS: 'can_view_assigned_events',
+  CAN_MANAGE_SPEAKER_MATERIALS: 'can_manage_speaker_materials',
+  CAN_VIEW_SPEAKER_NOTIFICATIONS: 'can_view_speaker_notifications',
+  CAN_UPDATE_SPEAKER_AVAILABILITY: 'can_update_speaker_availability',
+  CAN_VIEW_SPEAKER_PAYMENTS: 'can_view_speaker_payments',
+  CAN_MANAGE_SPEAKER_EVALUATIONS: 'can_manage_speaker_evaluations',
   
   // === SISTEMA DE INSCRIPCIONES ===
   CREATE_REGISTRATION: 'create_registration',

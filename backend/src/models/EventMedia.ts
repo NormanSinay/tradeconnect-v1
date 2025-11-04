@@ -40,6 +40,8 @@ export interface EventMediaAttributes {
   path: string;
   url: string;
   type: 'image' | 'video' | 'document' | 'audio' | 'other';
+  category: 'presentation' | 'handout' | 'exercise' | 'resource' | 'other';
+  isPublic: boolean;
   altText?: string;
   description?: string;
   isFeatured: boolean;
@@ -258,6 +260,26 @@ export class EventMedia extends Model<EventMediaAttributes, EventMediaCreationAt
   })
   declare type: 'image' | 'video' | 'document' | 'audio' | 'other';
 
+  @Default('other')
+  @Validate({
+    isIn: {
+      args: [['presentation', 'handout', 'exercise', 'resource', 'other']],
+      msg: 'Categoría inválida'
+    }
+  })
+  @Column({
+    type: DataType.ENUM('presentation', 'handout', 'exercise', 'resource', 'other'),
+    comment: 'Categoría del material didáctico'
+  })
+  declare category: 'presentation' | 'handout' | 'exercise' | 'resource' | 'other';
+
+  @Default(true)
+  @Column({
+    type: DataType.BOOLEAN,
+    comment: 'Indica si el material es público para los participantes'
+  })
+  declare isPublic: boolean;
+
   @Validate({
     len: {
       args: [0, 255],
@@ -406,6 +428,8 @@ export class EventMedia extends Model<EventMediaAttributes, EventMediaCreationAt
       formattedSize: this.formattedSize,
       url: this.url,
       type: this.type,
+      category: this.category,
+      isPublic: this.isPublic,
       altText: this.altText,
       description: this.description,
       isFeatured: this.isFeatured,

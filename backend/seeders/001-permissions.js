@@ -209,6 +209,96 @@ module.exports = {
         updated_at: new Date()
       },
 
+      // === PERMISOS ESPECÍFICOS DE SPEAKER ===
+      {
+        name: 'can_access_speaker_dashboard',
+        display_name: 'Acceder al Dashboard de Speaker',
+        description: 'Permite acceder al panel de control específico para speakers',
+        resource: 'speaker_dashboard',
+        action: 'access',
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        name: 'can_manage_speaker_profile',
+        display_name: 'Gestionar Perfil de Speaker',
+        description: 'Permite gestionar el perfil personal como speaker',
+        resource: 'speaker_profile',
+        action: 'manage',
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        name: 'can_view_assigned_events',
+        display_name: 'Ver Eventos Asignados',
+        description: 'Permite ver los eventos en los que está asignado como speaker',
+        resource: 'assigned_events',
+        action: 'view',
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        name: 'can_manage_speaker_materials',
+        display_name: 'Gestionar Materiales de Speaker',
+        description: 'Permite gestionar materiales y presentaciones para eventos',
+        resource: 'speaker_materials',
+        action: 'manage',
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        name: 'can_view_speaker_notifications',
+        display_name: 'Ver Notificaciones de Speaker',
+        description: 'Permite ver notificaciones específicas para speakers',
+        resource: 'speaker_notifications',
+        action: 'view',
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        name: 'can_update_speaker_availability',
+        display_name: 'Actualizar Disponibilidad de Speaker',
+        description: 'Permite actualizar la disponibilidad para eventos',
+        resource: 'speaker_availability',
+        action: 'update',
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        name: 'can_view_speaker_payments',
+        display_name: 'Ver Pagos de Speaker',
+        description: 'Permite ver información de pagos relacionados con actividades de speaker',
+        resource: 'speaker_payments',
+        action: 'view',
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+      {
+        name: 'can_manage_speaker_evaluations',
+        display_name: 'Gestionar Evaluaciones de Speaker',
+        description: 'Permite gestionar evaluaciones y feedback de presentaciones',
+        resource: 'speaker_evaluations',
+        action: 'manage',
+        is_active: true,
+        is_system: true,
+        created_at: new Date(),
+        updated_at: new Date()
+      },
+
       // === SISTEMA DE INSCRIPCIONES ===
       {
         name: 'create_registration',

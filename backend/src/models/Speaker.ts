@@ -508,8 +508,8 @@ export class Speaker extends Model<SpeakerAttributes, SpeakerCreationAttributes>
   @HasMany(() => SpeakerAvailabilityBlock)
   declare availabilityBlocks: SpeakerAvailabilityBlock[];
 
-  @HasMany(() => SpeakerEvent)
-  declare speakerEvents: SpeakerEvent[];
+  // @HasMany(() => SpeakerEvent)
+  // declare speakerEvents: SpeakerEvent[];
 
   @HasMany(() => Contract)
   declare contracts: Contract[];
