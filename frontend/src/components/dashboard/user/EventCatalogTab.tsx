@@ -5,35 +5,48 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, MapPin, Users, Clock, DollarSign, Search, Filter } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, DollarSign, Search } from 'lucide-react';
 import { UserDashboardService, UserEvent } from '@/services/userDashboardService';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
+import EventRegistrationFlow from '@/components/ui/event-registration-flow';
 import toast from 'react-hot-toast';
+import { useLocation } from 'react-router-dom';
 
-const EventCatalogTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
+const EventCatalogTab: React.FC<{ activeTab: string }> = ({ }) => {
   const [events, setEvents] = useState<UserEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [modalityFilter, setModalityFilter] = useState('');
+  const [modalityFilter, setModalityFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [registrationFlowOpen, setRegistrationFlowOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<UserEvent | null>(null);
   const { withErrorHandling } = useErrorHandler();
+  const location = useLocation();
 
   // Cargar eventos disponibles
   const loadEvents = async (page = 1, filters: any = {}) => {
     try {
       setLoading(true);
       const eventsData = await withErrorHandling(async () => {
+        // Filtrar valores vacíos y "all"
+        const apiFilters = Object.entries(filters).reduce((acc: any, [key, value]) => {
+          if (value && value !== 'all' && value !== '') {
+            acc[key] = value;
+          }
+          return acc;
+        }, {});
+
         return UserDashboardService.getAvailableEvents({
-          ...filters,
+          ...apiFilters,
           page,
           limit: 12
         });
       }, 'Error cargando eventos disponibles');
 
       setEvents(Array.isArray(eventsData) ? eventsData : []);
-      // Asumir paginación básica por ahora
+      // La API debería devolver información de paginación, pero por ahora mantenemos la lógica básica
       setTotalPages(Math.ceil((Array.isArray(eventsData) ? eventsData : []).length / 12));
     } catch (error) {
       console.error('Error loading events:', error);
@@ -52,25 +65,28 @@ const EventCatalogTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
     });
   }, [currentPage, categoryFilter, modalityFilter, searchTerm]);
 
-  // Función para inscribirse a un evento
-  const handleRegister = async (eventId: number) => {
-    try {
-      const register = withErrorHandling(async () => {
-        await UserDashboardService.registerForEvent(eventId);
-      }, 'Error inscribiéndose al evento');
-
-      await register();
-      toast.success('Inscripción realizada exitosamente');
-      // Recargar eventos para actualizar estados
-      loadEvents(currentPage, {
-        category: categoryFilter,
-        modality: modalityFilter,
-        search: searchTerm
-      });
-    } catch (error) {
-      console.error('Error registering for event:', error);
+  // Check for return URL with event registration hash
+  useEffect(() => {
+    if (location.hash.startsWith('#register-event-')) {
+      const eventId = parseInt(location.hash.replace('#register-event-', ''));
+      if (eventId && events.length > 0) {
+        const event = events.find(e => e.id === eventId);
+        if (event) {
+          setSelectedEvent(event);
+          setRegistrationFlowOpen(true);
+          // Clear the hash
+          window.history.replaceState(null, '', location.pathname + location.search);
+        }
+      }
     }
+  }, [location, events]);
+
+  // Función para abrir el flujo de registro
+  const handleRegister = (event: UserEvent) => {
+    setSelectedEvent(event);
+    setRegistrationFlowOpen(true);
   };
+
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -157,7 +173,7 @@ const EventCatalogTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
               <SelectValue placeholder="Modalidad" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas</SelectItem>
+              <SelectItem value="all">Todas</SelectItem>
               <SelectItem value="virtual">Virtual</SelectItem>
               <SelectItem value="presencial">Presencial</SelectItem>
               <SelectItem value="hibrido">Híbrido</SelectItem>
@@ -248,7 +264,7 @@ const EventCatalogTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
                       <Button
                         size="sm"
                         className="bg-[#4CAF50] hover:bg-[#45a049]"
-                        onClick={() => handleRegister(event.id)}
+                        onClick={() => handleRegister(event)}
                         disabled={event.status === 'full' || event.status === 'cancelled'}
                       >
                         {event.status === 'full' ? 'Agotado' : 'Inscribirme'}
@@ -295,6 +311,18 @@ const EventCatalogTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Event Registration Flow */}
+      {selectedEvent && (
+        <EventRegistrationFlow
+          isOpen={registrationFlowOpen}
+          onClose={() => {
+            setRegistrationFlowOpen(false);
+            setSelectedEvent(null);
+          }}
+          event={selectedEvent}
+        />
       )}
     </div>
   );

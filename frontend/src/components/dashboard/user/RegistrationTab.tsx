@@ -33,7 +33,8 @@ const RegistrationTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
         return UserDashboardService.getUserRegistrations();
       }, 'Error cargando inscripciones');
 
-      setRegistrations(registrationsData || []);
+      // Asegurar que siempre sea un array
+      setRegistrations(Array.isArray(registrationsData) ? registrationsData : []);
     } catch (error) {
       console.error('Error loading registrations:', error);
       setRegistrations([]);
@@ -102,7 +103,7 @@ const RegistrationTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
     }
   };
 
-  const filteredRegistrations = registrations.filter(registration => {
+  const filteredRegistrations = Array.isArray(registrations) ? registrations.filter(registration => {
     const now = new Date();
     const eventDate = new Date(registration.eventDate);
 
@@ -116,7 +117,7 @@ const RegistrationTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
       default:
         return true;
     }
-  });
+  }) : [];
 
   if (loading) {
     return (

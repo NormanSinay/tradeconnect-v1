@@ -505,11 +505,13 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
       </AnimatePresence>
 
       {/* Event Registration Flow */}
-      <EventRegistrationFlow
-        isOpen={showRegistrationFlow}
-        onClose={() => setShowRegistrationFlow(false)}
-        event={selectedEvent}
-      />
+      {selectedEvent && (
+        <EventRegistrationFlow
+          isOpen={showRegistrationFlow}
+          onClose={() => setShowRegistrationFlow(false)}
+          event={selectedEvent}
+        />
+      )}
     </>
   )
 }

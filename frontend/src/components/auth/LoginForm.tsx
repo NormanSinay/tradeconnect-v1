@@ -51,7 +51,18 @@ const LoginForm: React.FC = () => {
       }
 
       await login(data.email, data.password, turnstileToken)
-      navigate('/dashboard')
+
+      // Check for return URL in query params
+      const urlParams = new URLSearchParams(window.location.search)
+      const returnUrl = urlParams.get('returnUrl')
+
+      if (returnUrl) {
+        // If there's a return URL, navigate there
+        navigate(returnUrl)
+      } else {
+        // Default navigation to dashboard
+        navigate('/dashboard')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
       // Reset Turnstile on error

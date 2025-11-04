@@ -94,6 +94,9 @@ export class UserDashboardService {
     modality?: string;
     dateFrom?: string;
     dateTo?: string;
+    page?: number;
+    limit?: number;
+    search?: string;
   }): Promise<UserEvent[]> {
     const { token } = useAuthStore.getState();
 
@@ -102,6 +105,9 @@ export class UserDashboardService {
     if (filters?.modality) queryParams.append('modality', filters.modality);
     if (filters?.dateFrom) queryParams.append('dateFrom', filters.dateFrom);
     if (filters?.dateTo) queryParams.append('dateTo', filters.dateTo);
+    if (filters?.page) queryParams.append('page', filters.page.toString());
+    if (filters?.limit) queryParams.append('limit', filters.limit.toString());
+    if (filters?.search) queryParams.append('search', filters.search);
 
     const response = await fetch(`${this.BASE_URL}/events?${queryParams}`, {
       method: 'GET',

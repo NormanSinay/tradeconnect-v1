@@ -15,12 +15,13 @@ const redisConfig = {
   port: config.redis.port,
   password: config.redis.password,
   retryDelayOnFailover: 100,
-  maxRetriesPerRequest: 3,
-  lazyConnect: true,
+  maxRetriesPerRequest: null, // Disable retries completely
+  lazyConnect: false, // Connect immediately
   keepAlive: 30000,
   family: 4, // IPv4
   keyPrefix: 'tradeconnect:',
-  db: 0
+  db: 0,
+  enableOfflineQueue: true // Enable offline queue to allow commands during connection
 };
 
 /**

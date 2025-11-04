@@ -27,6 +27,7 @@ import './models';
 // Importar rutas
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
+import userDashboardRoutes from './routes/user-dashboard';
 import sessionRoutes from './routes/sessions';
 
 // Importar servicios para inicializar listeners
@@ -2725,6 +2726,9 @@ app.use(`${API_VERSION}/auth`, authRoutes);
 
 // Rutas de usuarios
 app.use(`${API_VERSION}/users`, userRoutes);
+
+// Rutas del dashboard de usuario
+app.use(`${API_VERSION}/user`, userDashboardRoutes);
 
 // Rutas de sesiones
 app.use(`${API_VERSION}/sessions`, sessionRoutes);

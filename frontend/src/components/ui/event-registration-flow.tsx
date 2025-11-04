@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FaTimes, FaUser, FaCreditCard, FaCheck, FaArrowLeft, FaArrowRight } from 'react-icons/fa'
+import { FaTimes, FaCheck, FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +18,7 @@ interface EventRegistrationFlowProps {
   onClose: () => void
   event: any // BackendEvent or Event
 }
+
 
 interface AccessType {
   id: number
@@ -37,7 +38,6 @@ interface RegistrationStep {
 }
 
 const steps: RegistrationStep[] = [
-  { id: 'auth', title: 'Autenticación', description: 'Inicia sesión o regístrate' },
   { id: 'access', title: 'Tipo de Acceso', description: 'Selecciona tu tipo de acceso' },
   { id: 'payment', title: 'Pago', description: 'Completa el proceso de pago' },
   { id: 'confirmation', title: 'Confirmación', description: '¡Listo! Revisa tu confirmación' }
@@ -48,22 +48,13 @@ const EventRegistrationFlow: React.FC<EventRegistrationFlowProps> = ({
   onClose,
   event
 }) => {
-  const { user, login, register } = useAuthStore()
+  const { user } = useAuthStore()
   const { addToCart } = useCartStore()
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState(0)
   const [accessTypes, setAccessTypes] = useState<AccessType[]>([])
   const [selectedAccessType, setSelectedAccessType] = useState<AccessType | null>(null)
   const [loading, setLoading] = useState(false)
-
-  // Form states
-  const [authForm, setAuthForm] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    isLogin: true
-  })
 
   const [billingInfo, setBillingInfo] = useState({
     firstName: '',
@@ -76,26 +67,33 @@ const EventRegistrationFlow: React.FC<EventRegistrationFlowProps> = ({
   })
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && event) {
+      // Check if user is authenticated
+      if (!user) {
+        // Redirect to login with return URL
+        const returnUrl = `${window.location.pathname}${window.location.search}#register-event-${event.id}`
+        navigate(`/login?returnUrl=${encodeURIComponent(returnUrl)}`)
+        onClose()
+        return
+      }
+
       setCurrentStep(0)
       loadAccessTypes()
-      if (user) {
-        // If user is already authenticated, skip to access type selection
-        setCurrentStep(1)
-        setBillingInfo({
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          email: user.email || '',
-          phone: (user as any).phone || '',
-          address: '',
-          city: '',
-          country: 'Guatemala'
-        })
-      }
+      setBillingInfo({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: (user as any).phone || '',
+        address: '',
+        city: '',
+        country: 'Guatemala'
+      })
     }
-  }, [isOpen, user])
+  }, [isOpen, user, navigate, event?.id, onClose])
 
   const loadAccessTypes = async () => {
+    if (!event) return
+
     try {
       // TODO: Load access types from API
       // For now, mock data
@@ -127,39 +125,10 @@ const EventRegistrationFlow: React.FC<EventRegistrationFlowProps> = ({
     }
   }
 
-  const handleAuth = async () => {
-    setLoading(true)
-    try {
-      if (authForm.isLogin) {
-        await login(authForm.email, authForm.password)
-        toast.success('¡Bienvenido de vuelta!')
-        setCurrentStep(1)
-      } else {
-        await register({
-          email: authForm.email,
-          password: authForm.password,
-          confirmPassword: authForm.password,
-          firstName: authForm.firstName,
-          lastName: authForm.lastName,
-          termsAccepted: true
-        })
-        toast.success('¡Cuenta creada exitosamente!')
-        setCurrentStep(1)
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Error en la autenticación')
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  const handleAccessTypeSelection = (accessType: AccessType) => {
-    setSelectedAccessType(accessType)
-    setCurrentStep(2)
-  }
 
   const handlePayment = async () => {
-    if (!selectedAccessType) return
+    if (!selectedAccessType || !event) return
 
     setLoading(true)
     try {
@@ -205,101 +174,6 @@ const EventRegistrationFlow: React.FC<EventRegistrationFlowProps> = ({
     </div>
   )
 
-  const renderAuthStep = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="space-y-6"
-    >
-      <div className="text-center">
-        <h3 className="text-xl font-bold text-gray-900 mb-2">
-          {authForm.isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
-        </h3>
-        <p className="text-gray-600">
-          {authForm.isLogin
-            ? 'Ingresa tus credenciales para continuar'
-            : 'Regístrate rápidamente para inscribirte al evento'
-          }
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        {!authForm.isLogin && (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">Nombre</Label>
-                <Input
-                  id="firstName"
-                  value={authForm.firstName}
-                  onChange={(e) => setAuthForm({...authForm, firstName: e.target.value})}
-                  placeholder="Tu nombre"
-                />
-              </div>
-              <div>
-                <Label htmlFor="lastName">Apellido</Label>
-                <Input
-                  id="lastName"
-                  value={authForm.lastName}
-                  onChange={(e) => setAuthForm({...authForm, lastName: e.target.value})}
-                  placeholder="Tu apellido"
-                />
-              </div>
-            </div>
-          </>
-        )}
-
-        <div>
-          <Label htmlFor="email">Correo Electrónico</Label>
-          <Input
-            id="email"
-            type="email"
-            value={authForm.email}
-            onChange={(e) => setAuthForm({...authForm, email: e.target.value})}
-            placeholder="tu@email.com"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="password">Contraseña</Label>
-          <Input
-            id="password"
-            type="password"
-            value={authForm.password}
-            onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
-            placeholder="Tu contraseña"
-          />
-        </div>
-
-        <div className="flex items-center justify-center">
-          <Button
-            variant="link"
-            onClick={() => setAuthForm({...authForm, isLogin: !authForm.isLogin})}
-            className="text-[#6B1E22] hover:text-[#8a2b30]"
-          >
-            {authForm.isLogin
-              ? '¿No tienes cuenta? Regístrate'
-              : '¿Ya tienes cuenta? Inicia sesión'
-            }
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button
-          onClick={handleAuth}
-          disabled={loading || !authForm.email || !authForm.password || (!authForm.isLogin && (!authForm.firstName || !authForm.lastName))}
-          className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white"
-        >
-          {loading ? 'Procesando...' : (authForm.isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
-        </Button>
-      </div>
-    </motion.div>
-  )
 
   const renderAccessTypeStep = () => (
     <motion.div
@@ -425,7 +299,7 @@ const EventRegistrationFlow: React.FC<EventRegistrationFlowProps> = ({
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className="font-medium">Evento:</span>
-              <span>{event.title}</span>
+              <span>{event?.title || 'Evento'}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Tipo de Acceso:</span>
@@ -567,7 +441,7 @@ const EventRegistrationFlow: React.FC<EventRegistrationFlowProps> = ({
             Inscripción al Evento
           </DialogTitle>
           <DialogDescription className="text-center">
-            Completa los pasos para inscribirte a {event?.title}
+            Completa los pasos para inscribirte a {event?.title || 'este evento'}
           </DialogDescription>
         </DialogHeader>
 
@@ -575,10 +449,9 @@ const EventRegistrationFlow: React.FC<EventRegistrationFlowProps> = ({
 
         <div className="min-h-[400px]">
           <AnimatePresence mode="wait">
-            {currentStep === 0 && renderAuthStep()}
-            {currentStep === 1 && renderAccessTypeStep()}
-            {currentStep === 2 && renderPaymentStep()}
-            {currentStep === 3 && renderConfirmationStep()}
+            {currentStep === 0 && renderAccessTypeStep()}
+            {currentStep === 1 && renderPaymentStep()}
+            {currentStep === 2 && renderConfirmationStep()}
           </AnimatePresence>
         </div>
       </DialogContent>
