@@ -319,6 +319,69 @@ Optimización automática de precios
 
 
 
+Flujo de Inscripción - Usuario NO Registrado
+1. Descubrimiento del Evento
+•	Usuario navega en el catálogo de eventos
+•	Aplica filtros (fecha, modalidad, sector, precio)
+•	Selecciona evento de interés
+•	Ve detalles del evento (descripción, agenda, speakers, precios)
+2. Proceso de Registro
+•	Usuario hace clic en "Inscribirse al evento"
+•	Sistema detecta que no está autenticado
+•	Redirige a formulario de registro: 
+•	Validación de email automática
+•	Creación de cuenta con JWT tokens
+3. Selección de Tipo de Acceso
+•	Usuario autenticado ve opciones disponibles: 
+o	General, VIP, Expositor (según configuración)
+o	Precios diferenciados para afiliados
+o	Descuentos early bird (si aplica)
+•	Selecciona tipo de acceso deseado
+•	Agrega al carrito
+4. Proceso de Pago
+•	Revisión en carrito de compras
+•	Aplicación de códigos promocionales (opcional)
+•	Selección automática de pasarela de pago óptima
+•	Procesamiento de pago con validación 3D Secure
+•	Manejo de reintentos automáticos si falla
+5. Confirmación
+•	Generación automática de código QR dinámico
+•	Envío de email de confirmación con: 
+o	Resumen del evento
+o	Código QR (PDF, PNG, Apple/Google Wallet)
+o	Instrucciones de acceso
+•	Actualización de inventario de cupos
+Flujo de Inscripción - Usuario YA Registrado
+1. Descubrimiento del Evento
+•	Usuario autenticado navega el catálogo desde el dashboard del rol usuario
+•	Utiliza filtros personalizados
+•	Ve eventos recomendados basados en historial
+•	Accede a detalles del evento
+2. Inscripción Directa
+•	Sistema reconoce usuario autenticado
+•	Usuario hace clic en "Inscribirse"
+•	Omite proceso de registro
+•	Ve información pre-cargada (nombre, email, telefono)
+3. Selección de Tipo de Acceso
+•	Visualiza opciones disponibles
+•	Descuentos de afiliado aplicados automáticamente
+•	Precios especiales si es usuario frecuente
+•	Selecciona tipo de acceso
+•	Agrega al carrito directamente
+4. Checkout Simplificado
+•	Datos de facturación pre-cargados
+•	Métodos de pago guardados (opcional)
+•	Aplicación de códigos promocionales
+•	Proceso de pago más rápido (datos guardados)
+•	Confirmación en menos de 2 clics
+5. Confirmación Inmediata
+•	Generación instantánea de código QR
+•	Email de confirmación automático
+•	Sincronización con "Mis Eventos" en dashboard personal
+•	Opción de agregar a calendario personal
+Estados de la Inscripción
+Ambos flujos manejan los siguientes estados:
+1.	Pendiente → En Carrito → Pago Procesando → Confirmada
+2.	Confirmada → Asistió / No Asistió (post-evento)
+3.	Cancelada / Reembolsada (si aplica)
 
-info: NIT validation service initialized {"cacheDurationHours":24,"cacheEnabled":true,"satUrl":"https://consulta-nits.sat.gob.gt","service":"tradeconnect-backend","timestamp":"2025-11-03T14:16:05.622Z"}
-info: CUI validation service initialized {"cacheDurationHours":24,"cacheEnabled":true,"renapUrl":"https://consulta-cui.renap.gob.gt","service":"tradeconnect-backend","timestamp":"2025-11-03T14:16:05.642Z"}

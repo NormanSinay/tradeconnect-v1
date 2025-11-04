@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,48 +13,68 @@ import {
   Send,
   MessageSquare
 } from 'lucide-react';
+import { UserDashboardService, EvaluationData } from '@/services/userDashboardService';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import toast from 'react-hot-toast';
 
-interface Evaluation {
-  id: number;
-  eventTitle: string;
-  eventDate: string;
-  status: 'pending' | 'completed';
-  submittedAt?: string;
-  rating?: number;
-  comments?: string;
-}
-
 const PostEventEvaluationTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
-  const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(null);
+  const [selectedEvaluation, setSelectedEvaluation] = useState<EvaluationData | null>(null);
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [evaluations, setEvaluations] = useState<EvaluationData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { withErrorHandling } = useErrorHandler();
 
-  // Mock data - será reemplazado con datos reales de la API
-  const evaluations: Evaluation[] = [
-    {
-      id: 1,
-      eventTitle: 'Taller de Marketing Digital Avanzado',
-      eventDate: '2024-09-15',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      eventTitle: 'Conferencia Innovación Empresarial 2024',
-      eventDate: '2024-10-20',
-      status: 'completed',
-      submittedAt: '2024-10-21',
-      rating: 5,
-      comments: 'Excelente evento, muy bien organizado y con contenido de calidad.'
-    },
-    {
-      id: 3,
-      eventTitle: 'Seminario Gestión del Talento Humano',
-      eventDate: '2024-11-10',
-      status: 'pending'
+  // Cargar evaluaciones del usuario
+  const loadEvaluations = async () => {
+    try {
+      setLoading(true);
+      const evaluationsData = await withErrorHandling(async () => {
+        return UserDashboardService.getUserEvaluations();
+      }, 'Error cargando evaluaciones');
+
+      setEvaluations(evaluationsData || []);
+    } catch (error) {
+      console.error('Error loading evaluations:', error);
+      setEvaluations([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // Función para enviar evaluación
+  const handleSubmitEvaluation = async () => {
+    if (!selectedEvaluation || rating === 0) {
+      toast.error('Por favor selecciona una calificación');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const submit = withErrorHandling(async () => {
+        await UserDashboardService.submitEvaluation(selectedEvaluation.id, rating, comments);
+      }, 'Error enviando evaluación');
+
+      await submit();
+      toast.success('Evaluación enviada exitosamente');
+
+      // Recargar evaluaciones
+      await loadEvaluations();
+
+      setSelectedEvaluation(null);
+      setRating(0);
+      setComments('');
+    } catch (error) {
+      console.error('Error submitting evaluation:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    loadEvaluations();
+  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -81,27 +101,15 @@ const PostEventEvaluationTab: React.FC<{ activeTab: string }> = ({ activeTab }) 
     }
   };
 
-  const handleSubmitEvaluation = async () => {
-    if (!selectedEvaluation || rating === 0) {
-      toast.error('Por favor selecciona una calificación');
-      return;
-    }
 
-    setIsSubmitting(true);
-    try {
-      // Mock API call - será reemplazado con llamada real
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast.success('Evaluación enviada exitosamente');
-      setSelectedEvaluation(null);
-      setRating(0);
-      setComments('');
-    } catch (error) {
-      toast.error('Error al enviar la evaluación');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4CAF50]"></div>
+        <span className="ml-3 text-gray-600">Cargando evaluaciones...</span>
+      </div>
+    );
+  }
 
   const pendingEvaluations = evaluations.filter(e => e.status === 'pending').length;
 
@@ -119,83 +127,93 @@ const PostEventEvaluationTab: React.FC<{ activeTab: string }> = ({ activeTab }) 
       )}
 
       {/* Lista de evaluaciones */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {evaluations.map((evaluation, index) => (
-          <motion.div
-            key={evaluation.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card className={`h-full ${evaluation.status === 'pending' ? 'border-yellow-200 bg-yellow-50/30' : ''}`}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg line-clamp-2">{evaluation.eventTitle}</CardTitle>
-                  <Badge className={getStatusColor(evaluation.status)}>
-                    {getStatusText(evaluation.status)}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="w-4 h-4" />
-                  {formatDate(evaluation.eventDate)}
-                </div>
-              </CardHeader>
-
-              <CardContent>
-                {evaluation.status === 'completed' ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">Calificación:</span>
-                      <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`w-4 h-4 ${
-                              star <= (evaluation.rating || 0)
-                                ? 'text-yellow-400 fill-current'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-600">({evaluation.rating}/5)</span>
-                    </div>
-
-                    {evaluation.comments && (
-                      <div>
-                        <span className="text-sm font-medium">Comentarios:</span>
-                        <p className="text-sm text-gray-600 mt-1 bg-gray-50 p-3 rounded-md">
-                          {evaluation.comments}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="text-xs text-gray-500">
-                      Enviada el {evaluation.submittedAt ? formatDate(evaluation.submittedAt) : 'N/A'}
-                    </div>
+      {evaluations.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-600 mb-2">No tienes evaluaciones pendientes</h3>
+            <p className="text-gray-500">Completa eventos para poder evaluarlos</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {evaluations.map((evaluation, index) => (
+            <motion.div
+              key={evaluation.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className={`h-full ${evaluation.status === 'pending' ? 'border-yellow-200 bg-yellow-50/30' : ''}`}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg line-clamp-2">{evaluation.eventTitle}</CardTitle>
+                    <Badge className={getStatusColor(evaluation.status)}>
+                      {getStatusText(evaluation.status)}
+                    </Badge>
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <Alert>
-                      <MessageSquare className="h-4 w-4" />
-                      <AlertDescription className="text-sm">
-                        Tu opinión es muy importante. Ayúdanos a mejorar completando esta evaluación.
-                      </AlertDescription>
-                    </Alert>
-
-                    <Button
-                      className="w-full bg-[#4CAF50] hover:bg-[#45a049]"
-                      onClick={() => setSelectedEvaluation(evaluation)}
-                    >
-                      Completar Evaluación
-                    </Button>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar className="w-4 h-4" />
+                    {formatDate(evaluation.eventDate)}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+                </CardHeader>
+
+                <CardContent>
+                  {evaluation.status === 'completed' ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Calificación:</span>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${
+                                star <= (evaluation.rating || 0)
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-gray-600">({evaluation.rating}/5)</span>
+                      </div>
+
+                      {evaluation.comments && (
+                        <div>
+                          <span className="text-sm font-medium">Comentarios:</span>
+                          <p className="text-sm text-gray-600 mt-1 bg-gray-50 p-3 rounded-md">
+                            {evaluation.comments}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="text-xs text-gray-500">
+                        Enviada el {evaluation.submittedAt ? formatDate(evaluation.submittedAt) : 'N/A'}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Alert>
+                        <MessageSquare className="h-4 w-4" />
+                        <AlertDescription className="text-sm">
+                          Tu opinión es muy importante. Ayúdanos a mejorar completando esta evaluación.
+                        </AlertDescription>
+                      </Alert>
+
+                      <Button
+                        className="w-full bg-[#4CAF50] hover:bg-[#45a049]"
+                        onClick={() => setSelectedEvaluation(evaluation)}
+                      >
+                        Completar Evaluación
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Modal de evaluación */}
       {selectedEvaluation && (

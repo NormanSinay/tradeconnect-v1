@@ -17,6 +17,7 @@ import { Search, Plus, Eye, Edit, Trash2, Download, Calendar, MapPin, Users, Dol
 import { Switch } from '@/components/ui/switch';
 import EventDuplicateModal from './EventDuplicateModal';
 import EventSpeakerManager from './EventSpeakerManager';
+import EventDetailsModal from './EventDetailsModal';
 import toast from 'react-hot-toast';
 
 interface EventManagementTabProps {
@@ -1457,135 +1458,11 @@ const EventManagementTab: React.FC<EventManagementTabProps> = ({ activeTab }) =>
       </div>
 
       {/* Modal de detalles de evento */}
-      <Dialog open={showDetailModal} onOpenChange={setShowDetailModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Detalles del Evento</DialogTitle>
-            <DialogDescription>
-              Información completa del evento seleccionado.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedEvent && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Información General</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <h3 className="font-semibold text-lg">{selectedEvent.title}</h3>
-                      <Badge variant={getStatusBadgeVariant(selectedEvent.eventStatus.name)} className="mt-2">
-                        {selectedEvent.eventStatus.displayName}
-                      </Badge>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                        <span>{formatDate(selectedEvent.startDate)} - {formatDate(selectedEvent.endDate)}</span>
-                      </div>
-                      {selectedEvent.isVirtual ? (
-                        <div className="flex items-start gap-2">
-                          <Upload className="h-4 w-4 text-gray-500 mt-0.5" />
-                          <div className="flex-1 min-w-0">
-                            <span className="text-sm font-medium text-gray-700">Virtual:</span>
-                            {selectedEvent.virtualLocation ? (
-                              <a
-                                href={selectedEvent.virtualLocation}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block text-blue-600 hover:text-blue-800 underline break-all text-sm mt-1"
-                              >
-                                {selectedEvent.virtualLocation}
-                              </a>
-                            ) : (
-                              <span className="text-gray-500 text-sm">Enlace no disponible</span>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-gray-500" />
-                          <span>{selectedEvent.location || 'Ubicación no especificada'}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-gray-500" />
-                        <span>{selectedEvent.price > 0 ? formatCurrency(selectedEvent.price, selectedEvent.currency) : 'Gratuito'}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-gray-500" />
-                        <span>{selectedEvent.registeredCount} inscritos</span>
-                        {selectedEvent.capacity && <span> de {selectedEvent.capacity}</span>}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Clasificación</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <span className="font-medium">Tipo:</span> {selectedEvent.eventType.displayName}
-                    </div>
-                    <div>
-                      <span className="font-medium">Categoría:</span> {selectedEvent.eventCategory.displayName}
-                    </div>
-                    {selectedEvent.creator && (
-                      <div>
-                        <span className="font-medium">Creado por:</span> {selectedEvent.creator.fullName}
-                      </div>
-                    )}
-                    <div>
-                      <span className="font-medium">Fecha de creación:</span> {formatDate(selectedEvent.createdAt)}
-                    </div>
-                    {selectedEvent.publishedAt && (
-                      <div>
-                        <span className="font-medium">Publicado:</span> {formatDate(selectedEvent.publishedAt)}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {selectedEvent.description && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Descripción</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">{selectedEvent.description}</p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {selectedEvent.agenda && selectedEvent.agenda.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Agenda</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {selectedEvent.agenda.map((item, index) => (
-                        <div key={index} className="border-l-4 border-primary pl-4 py-2">
-                          <div className="font-medium">{item.title}</div>
-                          <div className="text-sm text-gray-600">
-                            {item.startTime} - {item.endTime}
-                            {item.location && ` • ${item.location}`}
-                          </div>
-                          {item.description && <div className="text-sm mt-1">{item.description}</div>}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <EventDetailsModal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        event={selectedEvent}
+      />
 
       {/* Modal de confirmación de eliminación */}
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>

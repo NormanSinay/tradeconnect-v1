@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,62 +14,58 @@ import {
   CheckCircle,
   AlertTriangle
 } from 'lucide-react';
-
-interface QrCodeItem {
-  id: number;
-  eventTitle: string;
-  eventDate: string;
-  eventTime: string;
-  location: string;
-  modality: 'virtual' | 'presencial' | 'hibrido';
-  qrCode: string;
-  status: 'active' | 'used' | 'expired';
-  generatedDate: string;
-  downloadCount: number;
-}
+import { UserDashboardService, QrCodeData } from '@/services/userDashboardService';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
+import toast from 'react-hot-toast';
 
 const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
-  const [selectedQr, setSelectedQr] = useState<QrCodeItem | null>(null);
+  const [selectedQr, setSelectedQr] = useState<QrCodeData | null>(null);
+  const [qrCodes, setQrCodes] = useState<QrCodeData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { withErrorHandling } = useErrorHandler();
 
-  // Mock data - será reemplazado con datos reales de la API
-  const qrCodes: QrCodeItem[] = [
-    {
-      id: 1,
-      eventTitle: 'Taller de Marketing Digital Avanzado',
-      eventDate: '2024-11-15',
-      eventTime: '09:00 - 17:00',
-      location: 'Centro de Convenciones, Guatemala',
-      modality: 'presencial',
-      qrCode: 'QR123456789',
-      status: 'active',
-      generatedDate: '2024-10-20',
-      downloadCount: 2
-    },
-    {
-      id: 2,
-      eventTitle: 'Conferencia Innovación Empresarial 2024',
-      eventDate: '2024-11-20',
-      eventTime: '14:00 - 18:00',
-      location: 'Online - Zoom',
-      modality: 'virtual',
-      qrCode: 'QR987654321',
-      status: 'active',
-      generatedDate: '2024-10-25',
-      downloadCount: 1
-    },
-    {
-      id: 3,
-      eventTitle: 'Seminario Gestión del Talento Humano',
-      eventDate: '2024-09-10',
-      eventTime: '08:00 - 12:00',
-      location: 'Hotel Marriott, Guatemala',
-      modality: 'hibrido',
-      qrCode: 'QR456789123',
-      status: 'used',
-      generatedDate: '2024-08-15',
-      downloadCount: 3
+  // Cargar códigos QR del usuario
+  const loadQrCodes = async () => {
+    try {
+      setLoading(true);
+      const qrCodesData = await withErrorHandling(async () => {
+        return UserDashboardService.getUserQrCodes();
+      }, 'Error cargando códigos QR');
+
+      setQrCodes(qrCodesData || []);
+    } catch (error) {
+      console.error('Error loading QR codes:', error);
+      setQrCodes([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // Función para descargar código QR
+  const handleDownloadQr = async (qrId: number) => {
+    try {
+      const download = withErrorHandling(async () => {
+        const blob = await UserDashboardService.downloadQrCode(qrId);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `codigo-qr-${qrId}.png`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 'Error descargando código QR');
+
+      await download();
+      toast.success('Código QR descargado exitosamente');
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadQrCodes();
+  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -107,27 +103,18 @@ const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
     }
   };
 
-  const handleDownload = (qrItem: QrCodeItem) => {
-    // Mock download functionality
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 200;
-    canvas.height = 200;
-
-    if (ctx) {
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, 200, 200);
-      ctx.fillStyle = 'black';
-      ctx.font = '16px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(qrItem.qrCode, 100, 100);
-
-      const link = document.createElement('a');
-      link.download = `qr-${qrItem.eventTitle.replace(/\s+/g, '-').toLowerCase()}.png`;
-      link.href = canvas.toDataURL();
-      link.click();
-    }
+  const handleDownload = (qrItem: QrCodeData) => {
+    handleDownloadQr(qrItem.id);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4CAF50]"></div>
+        <span className="ml-3 text-gray-600">Cargando códigos QR...</span>
+      </div>
+    );
+  }
 
   const activeQrs = qrCodes.filter(qr => qr.status === 'active').length;
   const usedQrs = qrCodes.filter(qr => qr.status === 'used').length;
@@ -183,90 +170,100 @@ const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
       </div>
 
       {/* Lista de códigos QR */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {qrCodes.map((qrItem, index) => (
-          <motion.div
-            key={qrItem.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card className="h-full">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg">{qrItem.eventTitle}</CardTitle>
-                  <Badge className={getStatusColor(qrItem.status)}>
-                    {getStatusText(qrItem.status)}
-                  </Badge>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {/* Información del evento */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span>{formatDate(qrItem.eventDate)} - {qrItem.eventTime}</span>
+      {qrCodes.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <QrCode className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-600 mb-2">No tienes códigos QR</h3>
+            <p className="text-gray-500">Inscríbete a eventos para obtener tus códigos de acceso</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {qrCodes.map((qrItem, index) => (
+            <motion.div
+              key={qrItem.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className="h-full">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg">{qrItem.eventTitle}</CardTitle>
+                    <Badge className={getStatusColor(qrItem.status)}>
+                      {getStatusText(qrItem.status)}
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    <span>{qrItem.location}</span>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  {/* Información del evento */}
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <span>{formatDate(qrItem.eventDate)} - {qrItem.eventTime}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span>{qrItem.location}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <QrCode className="w-4 h-4 text-gray-400" />
+                      <span className="font-mono text-xs">{qrItem.qrCode}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <QrCode className="w-4 h-4 text-gray-400" />
-                    <span className="font-mono text-xs">{qrItem.qrCode}</span>
+
+                  {/* Preview del QR (mock) */}
+                  <div className="flex justify-center">
+                    <div className="w-32 h-32 bg-gray-100 border-2 border-gray-300 rounded-lg flex items-center justify-center">
+                      <QrCode className="w-16 h-16 text-gray-400" />
+                    </div>
                   </div>
-                </div>
 
-                {/* Preview del QR (mock) */}
-                <div className="flex justify-center">
-                  <div className="w-32 h-32 bg-gray-100 border-2 border-gray-300 rounded-lg flex items-center justify-center">
-                    <QrCode className="w-16 h-16 text-gray-400" />
+                  {/* Información adicional */}
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>Generado: {formatDate(qrItem.generatedDate)}</p>
+                    <p>Descargas: {qrItem.downloadCount}</p>
+                    <p>Modalidad: {getModalityText(qrItem.modality)}</p>
                   </div>
-                </div>
 
-                {/* Información adicional */}
-                <div className="text-xs text-gray-500 space-y-1">
-                  <p>Generado: {formatDate(qrItem.generatedDate)}</p>
-                  <p>Descargas: {qrItem.downloadCount}</p>
-                  <p>Modalidad: {getModalityText(qrItem.modality)}</p>
-                </div>
+                  {/* Acciones */}
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setSelectedQr(qrItem)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Ver
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-[#4CAF50] hover:bg-[#45a049]"
+                      onClick={() => handleDownload(qrItem)}
+                      disabled={qrItem.status !== 'active'}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Descargar
+                    </Button>
+                  </div>
 
-                {/* Acciones */}
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => setSelectedQr(qrItem)}
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Ver
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-[#4CAF50] hover:bg-[#45a049]"
-                    onClick={() => handleDownload(qrItem)}
-                    disabled={qrItem.status !== 'active'}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Descargar
-                  </Button>
-                </div>
-
-                {qrItem.status === 'used' && (
-                  <Alert className="border-green-200 bg-green-50">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800 text-sm">
-                      Este código QR ya fue utilizado para el check-in del evento.
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+                  {qrItem.status === 'used' && (
+                    <Alert className="border-green-200 bg-green-50">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <AlertDescription className="text-green-800 text-sm">
+                        Este código QR ya fue utilizado para el check-in del evento.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Modal de vista previa (simulado) */}
       {selectedQr && (

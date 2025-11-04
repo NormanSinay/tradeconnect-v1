@@ -108,26 +108,27 @@ export const useUserDashboardState = () => {
     try {
       setLoading(true);
 
-      const loadData = withErrorHandling(async () => {
-        const [userStats, availableEvents, userRegistrations, userCertificates, userQrCodes, userEvaluations] = await Promise.all([
-          UserService.getUserStats(),
-          UserDashboardService.getAvailableEvents().catch(() => []),
-          UserDashboardService.getUserRegistrations().catch(() => []),
-          UserDashboardService.getUserCertificates().catch(() => []),
-          UserDashboardService.getUserQrCodes().catch(() => []),
-          UserDashboardService.getUserEvaluations().catch(() => [])
-        ]);
+      const [userStats, availableEvents, userRegistrations, userCertificates, userQrCodes, userEvaluations] = await Promise.all([
+        UserService.getUserStats().catch(() => ({
+          activeEvents: 0,
+          completedEvents: 0,
+          certificates: 0,
+          trainingHours: 0
+        })),
+        UserDashboardService.getAvailableEvents().catch(() => []),
+        UserDashboardService.getUserRegistrations().catch(() => []),
+        UserDashboardService.getUserCertificates().catch(() => []),
+        UserDashboardService.getUserQrCodes().catch(() => []),
+        UserDashboardService.getUserEvaluations().catch(() => [])
+      ]);
 
-        setStats({
-          ...userStats,
-          availableEvents: availableEvents.length,
-          pendingPayments: userRegistrations.filter(r => r.paymentStatus === 'pending').length,
-          qrCodesGenerated: userQrCodes.length,
-          completedEvaluations: userEvaluations.filter(e => e.status === 'completed').length
-        });
-      }, 'Error al cargar los datos del dashboard');
-
-      await loadData();
+      setStats({
+        ...userStats,
+        availableEvents: availableEvents.length,
+        pendingPayments: userRegistrations.filter(r => r.paymentStatus === 'pending').length,
+        qrCodesGenerated: userQrCodes.length,
+        completedEvaluations: userEvaluations.filter(e => e.status === 'completed').length
+      });
     } catch (error) {
       console.error('Error in loadDashboardData:', error);
       setStats({
@@ -143,7 +144,7 @@ export const useUserDashboardState = () => {
     } finally {
       setLoading(false);
     }
-  }, [withErrorHandling]);
+  }, []);
 
   // Funciones de formateo
   const formatCurrency = useCallback((amount: number) => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,66 +15,36 @@ import {
   Eye,
   MapPin
 } from 'lucide-react';
-
-interface Registration {
-  id: number;
-  eventTitle: string;
-  eventDate: string;
-  eventTime: string;
-  location: string;
-  modality: 'virtual' | 'presencial' | 'hibrido';
-  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
-  paymentStatus: 'paid' | 'pending' | 'refunded';
-  amount: number;
-  registrationDate: string;
-  qrCode?: string;
-}
+import { UserDashboardService, UserRegistration } from '@/services/userDashboardService';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
+import toast from 'react-hot-toast';
 
 const RegistrationTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'completed' | 'pending'>('all');
+  const [registrations, setRegistrations] = useState<UserRegistration[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { withErrorHandling } = useErrorHandler();
 
-  // Mock data - será reemplazado con datos reales de la API
-  const registrations: Registration[] = [
-    {
-      id: 1,
-      eventTitle: 'Taller de Marketing Digital Avanzado',
-      eventDate: '2024-11-15',
-      eventTime: '09:00 - 17:00',
-      location: 'Centro de Convenciones, Guatemala',
-      modality: 'presencial',
-      status: 'confirmed',
-      paymentStatus: 'paid',
-      amount: 150,
-      registrationDate: '2024-10-20',
-      qrCode: 'QR123456'
-    },
-    {
-      id: 2,
-      eventTitle: 'Conferencia Innovación Empresarial 2024',
-      eventDate: '2024-11-20',
-      eventTime: '14:00 - 18:00',
-      location: 'Online - Zoom',
-      modality: 'virtual',
-      status: 'confirmed',
-      paymentStatus: 'paid',
-      amount: 75,
-      registrationDate: '2024-10-25',
-      qrCode: 'QR789012'
-    },
-    {
-      id: 3,
-      eventTitle: 'Seminario Gestión del Talento Humano',
-      eventDate: '2024-09-10',
-      eventTime: '08:00 - 12:00',
-      location: 'Hotel Marriott, Guatemala',
-      modality: 'hibrido',
-      status: 'completed',
-      paymentStatus: 'paid',
-      amount: 120,
-      registrationDate: '2024-08-15',
-      qrCode: 'QR345678'
+  // Cargar inscripciones del usuario
+  const loadRegistrations = async () => {
+    try {
+      setLoading(true);
+      const registrationsData = await withErrorHandling(async () => {
+        return UserDashboardService.getUserRegistrations();
+      }, 'Error cargando inscripciones');
+
+      setRegistrations(registrationsData || []);
+    } catch (error) {
+      console.error('Error loading registrations:', error);
+      setRegistrations([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    loadRegistrations();
+  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -148,6 +118,15 @@ const RegistrationTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
     }
   });
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4CAF50]"></div>
+        <span className="ml-3 text-gray-600">Cargando inscripciones...</span>
+      </div>
+    );
+  }
+
   const pendingPayments = registrations.filter(r => r.paymentStatus === 'pending').length;
 
   return (
@@ -202,85 +181,98 @@ const RegistrationTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
       </div>
 
       {/* Tabla de inscripciones */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Mis Inscripciones</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Evento</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Modalidad</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Pago</TableHead>
-                  <TableHead>Monto</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRegistrations.map((registration) => (
-                  <TableRow key={registration.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{registration.eventTitle}</div>
-                        <div className="text-sm text-gray-500 flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {registration.location}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">
-                        <div>{formatDate(registration.eventDate)}</div>
-                        <div className="text-gray-500">{registration.eventTime}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {getModalityText(registration.modality)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(registration.status)}>
-                        {getStatusText(registration.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getPaymentStatusColor(registration.paymentStatus)}>
-                        {getPaymentStatusText(registration.paymentStatus)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      Q{registration.amount.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        {registration.qrCode && (
-                          <Button variant="outline" size="sm">
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        )}
-                        {registration.paymentStatus === 'pending' && (
-                          <Button size="sm" className="bg-[#4CAF50] hover:bg-[#45a049]">
-                            <CreditCard className="w-4 h-4 mr-1" />
-                            Pagar
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
+      {registrations.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-600 mb-2">No tienes inscripciones</h3>
+            <p className="text-gray-500 mb-4">Explora el catálogo de eventos y inscríbete a uno</p>
+            <Button className="bg-[#4CAF50] hover:bg-[#45a049]">
+              Ver Catálogo de Eventos
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Mis Inscripciones</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Evento</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Modalidad</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Pago</TableHead>
+                    <TableHead>Monto</TableHead>
+                    <TableHead>Acciones</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filteredRegistrations.map((registration) => (
+                    <TableRow key={registration.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{registration.eventTitle}</div>
+                          <div className="text-sm text-gray-500 flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {registration.location}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{formatDate(registration.eventDate)}</div>
+                          <div className="text-gray-500">{registration.eventTime}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {getModalityText(registration.modality)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(registration.status)}>
+                          {getStatusText(registration.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getPaymentStatusColor(registration.paymentStatus)}>
+                          {getPaymentStatusText(registration.paymentStatus)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        Q{registration.amount.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          {registration.qrCode && (
+                            <Button variant="outline" size="sm">
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {registration.paymentStatus === 'pending' && (
+                            <Button size="sm" className="bg-[#4CAF50] hover:bg-[#45a049]">
+                              <CreditCard className="w-4 h-4 mr-1" />
+                              Pagar
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Resumen de estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

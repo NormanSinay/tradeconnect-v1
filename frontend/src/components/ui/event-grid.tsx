@@ -4,11 +4,12 @@ import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaSearch, FaUser, FaStar, FaIma
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Event } from '@/types'
 import { formatCurrency, formatDate, getModalityText, getTypeText } from '@/utils/sampleData'
 import { useCartStore } from '@/stores/cartStore'
 import { useAuthStore } from '@/stores/authStore'
+import EventRegistrationFlow from './event-registration-flow'
 import toast from 'react-hot-toast'
 
 interface EventGridProps {
@@ -17,35 +18,44 @@ interface EventGridProps {
 }
 
 interface BackendEvent {
-   id: number
-   title: string
-   description?: string
-   shortDescription?: string
-   startDate: string
-   endDate: string
-   price: number
-   currency: string
-   modality: string
-   isVirtual: boolean
-   location?: string
-   virtualLocation?: string
-   capacity?: number
-   registeredCount: number
-   eventType?: { name: string; id: number }
-   eventCategory?: { name: string; id: number }
-   eventStatus?: { name: string; id: number }
-   image?: string
-   featured?: boolean
-   publishedAt?: string
-   createdAt: string
-   updatedAt: string
- }
+    id: number
+    title: string
+    description?: string
+    shortDescription?: string
+    startDate: string
+    endDate: string
+    price: number
+    currency: string
+    modality: string
+    isVirtual: boolean
+    location?: string
+    virtualLocation?: string
+    capacity?: number
+    registeredCount: number
+    eventType?: { name: string; id: number }
+    eventCategory?: { name: string; id: number }
+    eventStatus?: { name: string; id: number }
+    image?: string
+    featured?: boolean
+    publishedAt?: string
+    createdAt: string
+    updatedAt: string
+    agenda?: any[]
+    requirements?: string
+    speakers?: Array<{ id: number; fullName: string; role?: string }>
+   }
 
 const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
   const { addToCart } = useCartStore()
   const { user } = useAuthStore()
   const [selectedEvent, setSelectedEvent] = useState<Event | BackendEvent | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [showRegistrationFlow, setShowRegistrationFlow] = useState(false)
+
+  // Type guard to check if event is BackendEvent
+  const isBackendEvent = (event: Event | BackendEvent | null): event is BackendEvent => {
+    return event !== null && 'eventType' in event
+  }
 
   const handleAddToCart = (event: Event | BackendEvent) => {
     // Transform backend event to frontend format if needed
@@ -82,17 +92,8 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
   }
 
   const handleRegister = (event: Event | BackendEvent) => {
-    if (!user) {
-      // Redirect to login or show login modal
-      toast.error('Debes iniciar sesión para inscribirte', {
-        duration: 3000,
-        position: 'top-right'
-      })
-      return
-    }
-
-    // Add to cart and proceed to registration
-    handleAddToCart(event)
+    setSelectedEvent(event)
+    setShowRegistrationFlow(true)
   }
 
   if (loading) {
@@ -264,7 +265,7 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                     {event.title}
                   </h3>
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed" style={{ fontFamily: 'Roboto, Arial, sans-serif' }}>
-                    {isBackendEvent ? (event.shortDescription || event.description || 'Sin descripción disponible') : eventDescription}
+                    {isBackendEvent ? (event.shortDescription || 'Sin descripción disponible') : eventDescription}
                   </p>
 
                   <div className="space-y-2 text-sm text-gray-600" style={{ fontFamily: 'Roboto, Arial, sans-serif' }}>
@@ -296,17 +297,12 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-center mt-4 pt-3 border-t border-gray-100">
+                <div className="mt-4 pt-3 border-t border-gray-100">
                   <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRegister(event);
-                    }}
-                    className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white px-4 py-2 rounded-md shadow-md hover:shadow-lg transition-all duration-300 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                    className="bg-[#6B1E22] text-white px-4 py-2 rounded-md shadow-md font-medium text-sm w-full cursor-default"
                     style={{ fontFamily: 'Roboto, Arial, sans-serif' }}
-                    disabled={isBackendEvent && event.capacity ? event.registeredCount >= event.capacity : false}
                   >
-                    {isBackendEvent && event.capacity && event.registeredCount >= event.capacity ? 'Agotado' : 'Inscribirme'}
+                    Inscribirme
                   </Button>
                 </div>
               </CardContent>
@@ -329,40 +325,31 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                 style={{ transformStyle: "preserve-3d" }}
               >
                 <DialogHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <DialogTitle className="text-2xl font-bold text-gray-900 mb-2">
-                        {selectedEvent.title}
-                      </DialogTitle>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        <Badge className="bg-[#6B1E22] text-white">
-                          {'eventType' in selectedEvent ? (selectedEvent.eventType?.name || 'Evento') : getTypeText((selectedEvent as Event).type || 'conferencia')}
-                        </Badge>
-                        <Badge className="bg-[#2c5aa0] text-white">
-                          {'eventCategory' in selectedEvent ? (selectedEvent.eventCategory?.name || 'General') : (selectedEvent as Event).category}
-                        </Badge>
-                        {'featured' in selectedEvent && selectedEvent.featured && (
-                          <Badge className="bg-[#28a745] text-white">
-                            <FaStar className="mr-1" size={10} />
-                            Destacado
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowModal(false)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <FaTimes size={20} />
-                    </Button>
+                  <DialogTitle className="text-2xl font-bold text-gray-900">
+                    {selectedEvent.title}
+                  </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Información completa del evento
+                  </DialogDescription>
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <Badge className="bg-[#6B1E22] text-white">
+                      Tipo: {isBackendEvent(selectedEvent) ? (selectedEvent.eventType?.name || 'Evento') : getTypeText((selectedEvent as Event).type)}
+                    </Badge>
+                    <Badge className="bg-[#2c5aa0] text-white">
+                      Categoría: {isBackendEvent(selectedEvent) ? (selectedEvent.eventCategory?.name || 'General') : (selectedEvent as Event).category}
+                    </Badge>
+                    {isBackendEvent(selectedEvent) && selectedEvent.featured && (
+                      <Badge className="bg-[#28a745] text-white">
+                        <FaStar className="mr-1" size={10} />
+                        Destacado
+                      </Badge>
+                    )}
                   </div>
                 </DialogHeader>
 
                 <div className="space-y-6">
                   {/* Event Image */}
-                  {'image' in selectedEvent && selectedEvent.image && (
+                  {isBackendEvent(selectedEvent) && selectedEvent.image && (
                     <div className="relative h-64 rounded-lg overflow-hidden">
                       <img
                         src={selectedEvent.image}
@@ -375,20 +362,23 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                   {/* Event Description */}
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Descripción</h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {'description' in selectedEvent ? selectedEvent.description : (selectedEvent as Event).description}
+                    <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                      {isBackendEvent(selectedEvent) ?
+                        (selectedEvent.description || selectedEvent.shortDescription || 'No hay descripción disponible') :
+                        (selectedEvent as Event).description
+                      }
                     </p>
                   </div>
 
                   {/* Event Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-lg mx-auto">
                     <div className="space-y-4">
                       <div className="flex items-center">
                         <FaCalendarAlt className="text-[#6B1E22] mr-3" size={20} />
                         <div>
                           <p className="font-medium text-gray-900">Fecha</p>
                           <p className="text-gray-600">
-                            {formatDate('startDate' in selectedEvent ? selectedEvent.startDate : (selectedEvent as Event).date)}
+                            {isBackendEvent(selectedEvent) ? formatDate(selectedEvent.startDate) : formatDate((selectedEvent as Event).date)}
                           </p>
                         </div>
                       </div>
@@ -398,7 +388,7 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                         <div>
                           <p className="font-medium text-gray-900">Horario</p>
                           <p className="text-gray-600">
-                            {'startDate' in selectedEvent ?
+                            {isBackendEvent(selectedEvent) ?
                               `${new Date(selectedEvent.startDate).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })} - ${new Date(selectedEvent.endDate).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}` :
                               (selectedEvent as Event).time
                             }
@@ -406,13 +396,13 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                         </div>
                       </div>
 
-                      {!('isVirtual' in selectedEvent) || !selectedEvent.isVirtual ? (
+                      {isBackendEvent(selectedEvent) && !selectedEvent.isVirtual ? (
                         <div className="flex items-center">
                           <FaMapMarkerAlt className="text-[#28a745] mr-3" size={20} />
                           <div>
                             <p className="font-medium text-gray-900">Ubicación</p>
                             <p className="text-gray-600">
-                              {'location' in selectedEvent ? (selectedEvent.location || 'Ubicación por confirmar') : (selectedEvent as Event).location}
+                              {selectedEvent.location || 'Ubicación por confirmar'}
                             </p>
                           </div>
                         </div>
@@ -421,7 +411,7 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                           <FaInfoCircle className="text-[#6B1E22] mr-3" size={20} />
                           <div>
                             <p className="font-medium text-gray-900">Modalidad</p>
-                            <p className="text-gray-600">Virtual</p>
+                            <p className="text-gray-600">{isBackendEvent(selectedEvent) && selectedEvent.isVirtual ? 'Virtual' : 'Presencial'}</p>
                           </div>
                         </div>
                       )}
@@ -438,7 +428,7 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                         </div>
                       </div>
 
-                      {'capacity' in selectedEvent && selectedEvent.capacity && (
+                      {isBackendEvent(selectedEvent) && selectedEvent.capacity && (
                         <div className="flex items-center">
                           <FaUsers className="text-[#2c5aa0] mr-3" size={20} />
                           <div>
@@ -450,7 +440,7 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                         </div>
                       )}
 
-                      {'registeredCount' in selectedEvent && (
+                      {isBackendEvent(selectedEvent) && (
                         <div className="flex items-center">
                           <FaUser className="text-[#28a745] mr-3" size={20} />
                           <div>
@@ -465,7 +455,7 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                   </div>
 
                   {/* Agenda if available */}
-                  {'agenda' in selectedEvent && selectedEvent.agenda && Array.isArray(selectedEvent.agenda) && selectedEvent.agenda.length > 0 && (
+                  {isBackendEvent(selectedEvent) && selectedEvent.agenda && Array.isArray(selectedEvent.agenda) && selectedEvent.agenda.length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-3">Agenda</h3>
                       <div className="space-y-3">
@@ -490,21 +480,21 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                   )}
 
                   {/* Requirements if available */}
-                  {'requirements' in selectedEvent && selectedEvent.requirements && (
+                  {isBackendEvent(selectedEvent) && selectedEvent.requirements && (
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Requisitos</h3>
-                      <p className="text-gray-600">{selectedEvent.requirements}</p>
+                      <p className="text-gray-600">{String(selectedEvent.requirements)}</p>
                     </div>
                   )}
 
                   {/* Action Button */}
                   <div className="flex justify-center pt-6 border-t border-gray-200">
                     <Button
-                      onClick={() => handleRegister(selectedEvent)}
+                      onClick={() => handleRegister(selectedEvent!)}
                       className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg"
-                      disabled={'capacity' in selectedEvent && selectedEvent.capacity ? selectedEvent.registeredCount >= selectedEvent.capacity : false}
+                      disabled={isBackendEvent(selectedEvent) && selectedEvent.capacity ? selectedEvent.registeredCount >= selectedEvent.capacity : false}
                     >
-                      {'capacity' in selectedEvent && selectedEvent.capacity && selectedEvent.registeredCount >= selectedEvent.capacity ? 'Evento Agotado' : 'Inscribirme al Evento'}
+                      {isBackendEvent(selectedEvent) && selectedEvent.capacity && selectedEvent.registeredCount >= selectedEvent.capacity ? 'Evento Agotado' : 'Inscribirme al Evento'}
                     </Button>
                   </div>
                 </div>
@@ -513,208 +503,13 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
           </Dialog>
         )}
       </AnimatePresence>
-    </>
-  )
 
-  return (
-    <>
-      {/* Event Detail Modal with Flip Animation */}
-      <AnimatePresence>
-        {showModal && selectedEvent && (
-          <Dialog open={showModal} onOpenChange={setShowModal}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <motion.div
-                initial={{ rotateY: 90, opacity: 0 }}
-                animate={{ rotateY: 0, opacity: 1 }}
-                exit={{ rotateY: -90, opacity: 0 }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
-                style={{ transformStyle: "preserve-3d" }}
-              >
-                <DialogHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <DialogTitle className="text-2xl font-bold text-gray-900 mb-2">
-                        {selectedEvent.title}
-                      </DialogTitle>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        <Badge className="bg-[#6B1E22] text-white">
-                          {'eventType' in selectedEvent ? (selectedEvent.eventType?.name || 'Evento') : getTypeText('eventType' in selectedEvent ? selectedEvent.eventType?.name : (selectedEvent as Event).type)}
-                        </Badge>
-                        <Badge className="bg-[#2c5aa0] text-white">
-                          {'eventCategory' in selectedEvent ? (selectedEvent.eventCategory?.name || 'General') : (selectedEvent as Event).category}
-                        </Badge>
-                        {'featured' in selectedEvent && selectedEvent.featured && (
-                          <Badge className="bg-[#28a745] text-white">
-                            <FaStar className="mr-1" size={10} />
-                            Destacado
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowModal(false)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <FaTimes size={20} />
-                    </Button>
-                  </div>
-                </DialogHeader>
-
-                <div className="space-y-6">
-                  {/* Event Image */}
-                  {'image' in selectedEvent && selectedEvent.image && (
-                    <div className="relative h-64 rounded-lg overflow-hidden">
-                      <img
-                        src={selectedEvent.image}
-                        alt={selectedEvent.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-
-                  {/* Event Description */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Descripción</h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {'description' in selectedEvent ? selectedEvent.description : (selectedEvent as Event).description}
-                    </p>
-                  </div>
-
-                  {/* Event Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center">
-                        <FaCalendarAlt className="text-[#6B1E22] mr-3" size={20} />
-                        <div>
-                          <p className="font-medium text-gray-900">Fecha</p>
-                          <p className="text-gray-600">
-                            {formatDate('startDate' in selectedEvent ? selectedEvent.startDate : (selectedEvent as Event).date)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center">
-                        <FaClock className="text-[#2c5aa0] mr-3" size={20} />
-                        <div>
-                          <p className="font-medium text-gray-900">Horario</p>
-                          <p className="text-gray-600">
-                            {'startDate' in selectedEvent ?
-                              `${new Date(selectedEvent.startDate).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })} - ${new Date(selectedEvent.endDate).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}` :
-                              (selectedEvent as Event).time
-                            }
-                          </p>
-                        </div>
-                      </div>
-
-                      {!('isVirtual' in selectedEvent) || !selectedEvent.isVirtual ? (
-                        <div className="flex items-center">
-                          <FaMapMarkerAlt className="text-[#28a745] mr-3" size={20} />
-                          <div>
-                            <p className="font-medium text-gray-900">Ubicación</p>
-                            <p className="text-gray-600">
-                              {'location' in selectedEvent ? (selectedEvent.location || 'Ubicación por confirmar') : (selectedEvent as Event).location}
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center">
-                          <FaInfoCircle className="text-[#6B1E22] mr-3" size={20} />
-                          <div>
-                            <p className="font-medium text-gray-900">Modalidad</p>
-                            <p className="text-gray-600">Virtual</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center">
-                        <FaMoneyBillWave className="text-[#6B1E22] mr-3" size={20} />
-                        <div>
-                          <p className="font-medium text-gray-900">Costo</p>
-                          <p className="text-gray-600 text-xl font-bold">
-                            {formatCurrency(selectedEvent.price)}
-                          </p>
-                        </div>
-                      </div>
-
-                      {'capacity' in selectedEvent && selectedEvent.capacity && (
-                        <div className="flex items-center">
-                          <FaUsers className="text-[#2c5aa0] mr-3" size={20} />
-                          <div>
-                            <p className="font-medium text-gray-900">Capacidad</p>
-                            <p className="text-gray-600">
-                              {selectedEvent.capacity} personas
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {'registeredCount' in selectedEvent && (
-                        <div className="flex items-center">
-                          <FaUser className="text-[#28a745] mr-3" size={20} />
-                          <div>
-                            <p className="font-medium text-gray-900">Inscritos</p>
-                            <p className="text-gray-600">
-                              {selectedEvent.registeredCount} personas
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Agenda if available */}
-                  {'agenda' in selectedEvent && selectedEvent.agenda && selectedEvent.agenda.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Agenda</h3>
-                      <div className="space-y-3">
-                        {selectedEvent.agenda.map((item: any, index: number) => (
-                          <div key={index} className="flex items-start p-3 bg-gray-50 rounded-lg">
-                            <div className="flex-shrink-0 w-16 text-sm font-medium text-[#6B1E22]">
-                              {item.startTime} - {item.endTime}
-                            </div>
-                            <div className="flex-1 ml-4">
-                              <h4 className="font-medium text-gray-900">{item.title}</h4>
-                              {item.description && (
-                                <p className="text-gray-600 text-sm mt-1">{item.description}</p>
-                              )}
-                              {item.speaker && (
-                                <p className="text-[#2c5aa0] text-sm mt-1">Ponente: {item.speaker}</p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Requirements if available */}
-                  {'requirements' in selectedEvent && selectedEvent.requirements && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Requisitos</h3>
-                      <p className="text-gray-600">{selectedEvent.requirements}</p>
-                    </div>
-                  )}
-
-                  {/* Action Button */}
-                  <div className="flex justify-center pt-6 border-t border-gray-200">
-                    <Button
-                      onClick={() => handleRegister(selectedEvent)}
-                      className="bg-[#6B1E22] hover:bg-[#8a2b30] text-white px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg"
-                      disabled={'capacity' in selectedEvent && selectedEvent.capacity ? selectedEvent.registeredCount >= selectedEvent.capacity : false}
-                    >
-                      {'capacity' in selectedEvent && selectedEvent.capacity && selectedEvent.registeredCount >= selectedEvent.capacity ? 'Evento Agotado' : 'Inscribirme al Evento'}
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            </DialogContent>
-          </Dialog>
-        )}
-      </AnimatePresence>
+      {/* Event Registration Flow */}
+      <EventRegistrationFlow
+        isOpen={showRegistrationFlow}
+        onClose={() => setShowRegistrationFlow(false)}
+        event={selectedEvent}
+      />
     </>
   )
 }

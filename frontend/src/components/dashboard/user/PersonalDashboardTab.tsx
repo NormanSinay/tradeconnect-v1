@@ -1,56 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Award, Download, Eye, Calendar, Clock, CheckCircle } from 'lucide-react';
-
-interface Certificate {
-  id: number;
-  eventTitle: string;
-  eventDate: string;
-  issueDate: string;
-  certificateNumber: string;
-  status: 'issued' | 'pending' | 'expired';
-  downloadUrl?: string;
-  verificationUrl?: string;
-}
+import { UserDashboardService, UserCertificate } from '@/services/userDashboardService';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
+import toast from 'react-hot-toast';
 
 const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
-  // Mock data - será reemplazado con datos reales de la API
-  const certificates: Certificate[] = [
-    {
-      id: 1,
-      eventTitle: 'Taller de Marketing Digital Avanzado',
-      eventDate: '2024-09-15',
-      issueDate: '2024-09-16',
-      certificateNumber: 'CERT-2024-001',
-      status: 'issued',
-      downloadUrl: '#',
-      verificationUrl: '#'
-    },
-    {
-      id: 2,
-      eventTitle: 'Conferencia Innovación Empresarial 2024',
-      eventDate: '2024-10-20',
-      issueDate: '2024-10-21',
-      certificateNumber: 'CERT-2024-002',
-      status: 'issued',
-      downloadUrl: '#',
-      verificationUrl: '#'
-    },
-    {
-      id: 3,
-      eventTitle: 'Seminario Gestión del Talento Humano',
-      eventDate: '2024-11-10',
-      issueDate: '2024-11-11',
-      certificateNumber: 'CERT-2024-003',
-      status: 'pending',
-      downloadUrl: '#',
-      verificationUrl: '#'
+  const [certificates, setCertificates] = useState<UserCertificate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { withErrorHandling } = useErrorHandler();
+
+  // Cargar certificados del usuario
+  const loadCertificates = async () => {
+    try {
+      setLoading(true);
+      const certificatesData = await withErrorHandling(async () => {
+        return UserDashboardService.getUserCertificates();
+      }, 'Error cargando certificados');
+
+      setCertificates(certificatesData || []);
+    } catch (error) {
+      console.error('Error loading certificates:', error);
+      setCertificates([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // Función para descargar certificado
+  const handleDownloadCertificate = async (certificateId: number) => {
+    try {
+      const download = withErrorHandling(async () => {
+        const blob = await UserDashboardService.downloadCertificate(certificateId);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `certificado-${certificateId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 'Error descargando certificado');
+
+      await download();
+      toast.success('Certificado descargado exitosamente');
+    } catch (error) {
+      console.error('Error downloading certificate:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadCertificates();
+  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -80,11 +85,28 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
   };
 
   // Estadísticas del usuario
+  const userStats = {
+    totalCertificates: certificates.length,
+    issuedCertificates: certificates.filter(c => c.status === 'issued').length,
+    pendingCertificates: certificates.filter(c => c.status === 'pending').length,
+    totalHours: 24 // Mock data - debería venir de la API
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4CAF50]"></div>
+        <span className="ml-3 text-gray-600">Cargando certificados...</span>
+      </div>
+    );
+  }
+
+  // Estadísticas del usuario
   const stats = {
     totalCertificates: certificates.length,
     issuedCertificates: certificates.filter(c => c.status === 'issued').length,
     pendingCertificates: certificates.filter(c => c.status === 'pending').length,
-    totalHours: 24 // Mock data
+    totalHours: 24 // Mock data - debería venir de la API
   };
 
   return (
@@ -97,7 +119,7 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
               <Award className="w-8 h-8 text-[#4CAF50]" />
               <div>
                 <p className="text-sm text-gray-600">Total Certificados</p>
-                <p className="text-2xl font-bold">{stats.totalCertificates}</p>
+                <p className="text-2xl font-bold">{userStats.totalCertificates}</p>
               </div>
             </div>
           </CardContent>
@@ -109,7 +131,7 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
               <CheckCircle className="w-8 h-8 text-green-600" />
               <div>
                 <p className="text-sm text-gray-600">Emitidos</p>
-                <p className="text-2xl font-bold">{stats.issuedCertificates}</p>
+                <p className="text-2xl font-bold">{userStats.issuedCertificates}</p>
               </div>
             </div>
           </CardContent>
@@ -121,7 +143,7 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
               <Clock className="w-8 h-8 text-yellow-600" />
               <div>
                 <p className="text-sm text-gray-600">Pendientes</p>
-                <p className="text-2xl font-bold">{stats.pendingCertificates}</p>
+                <p className="text-2xl font-bold">{userStats.pendingCertificates}</p>
               </div>
             </div>
           </CardContent>
@@ -133,7 +155,7 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
               <Calendar className="w-8 h-8 text-blue-600" />
               <div>
                 <p className="text-sm text-gray-600">Horas Totales</p>
-                <p className="text-2xl font-bold">{stats.totalHours}h</p>
+                <p className="text-2xl font-bold">{userStats.totalHours}h</p>
               </div>
             </div>
           </CardContent>
@@ -141,83 +163,94 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
       </div>
 
       {/* Lista de certificados */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Mis Certificados</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {certificates.map((certificate, index) => (
-              <motion.div
-                key={certificate.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900">{certificate.eventTitle}</h3>
-                      <Badge className={getStatusColor(certificate.status)}>
-                        {getStatusText(certificate.status)}
-                      </Badge>
+      {certificates.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-600 mb-2">No tienes certificados</h3>
+            <p className="text-gray-500">Completa eventos para obtener tus certificados</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Mis Certificados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {certificates.map((certificate, index) => (
+                <motion.div
+                  key={certificate.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900">{certificate.eventTitle}</h3>
+                        <Badge className={getStatusColor(certificate.status)}>
+                          {getStatusText(certificate.status)}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                        <div>
+                          <span className="font-medium">Fecha del evento:</span>
+                          <br />
+                          {formatDate(certificate.eventDate)}
+                        </div>
+                        <div>
+                          <span className="font-medium">Fecha de emisión:</span>
+                          <br />
+                          {formatDate(certificate.issueDate)}
+                        </div>
+                        <div>
+                          <span className="font-medium">Número de certificado:</span>
+                          <br />
+                          {certificate.certificateNumber}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                      <div>
-                        <span className="font-medium">Fecha del evento:</span>
-                        <br />
-                        {formatDate(certificate.eventDate)}
-                      </div>
-                      <div>
-                        <span className="font-medium">Fecha de emisión:</span>
-                        <br />
-                        {formatDate(certificate.issueDate)}
-                      </div>
-                      <div>
-                        <span className="font-medium">Número de certificado:</span>
-                        <br />
-                        {certificate.certificateNumber}
-                      </div>
+                    <div className="flex gap-2 lg:flex-col lg:gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 lg:flex-none"
+                        disabled={certificate.status !== 'issued'}
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        Ver
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 lg:flex-none"
+                        onClick={() => handleDownloadCertificate(certificate.id)}
+                        disabled={certificate.status !== 'issued'}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Descargar
+                      </Button>
                     </div>
                   </div>
 
-                  <div className="flex gap-2 lg:flex-col lg:gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 lg:flex-none"
-                      disabled={certificate.status !== 'issued'}
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      Ver
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 lg:flex-none"
-                      disabled={certificate.status !== 'issued'}
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Descargar
-                    </Button>
-                  </div>
-                </div>
-
-                {certificate.status === 'pending' && (
-                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                    <p className="text-sm text-yellow-800">
-                      <Clock className="w-4 h-4 inline mr-2" />
-                      Tu certificado está siendo procesado. Recibirás una notificación cuando esté disponible.
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+                  {certificate.status === 'pending' && (
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-sm text-yellow-800">
+                        <Clock className="w-4 h-4 inline mr-2" />
+                        Tu certificado está siendo procesado. Recibirás una notificación cuando esté disponible.
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Progreso de formación */}
       <Card>
