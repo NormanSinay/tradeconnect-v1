@@ -11,6 +11,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { useAuthStore } from '@/stores/authStore'
 import EventRegistrationFlow from './event-registration-flow'
 import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 interface EventGridProps {
   events: (Event | BackendEvent)[]
@@ -48,6 +49,7 @@ interface BackendEvent {
 const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
   const { addToCart } = useCartStore()
   const { user } = useAuthStore()
+  const navigate = useNavigate()
   const [selectedEvent, setSelectedEvent] = useState<Event | BackendEvent | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [showRegistrationFlow, setShowRegistrationFlow] = useState(false)
@@ -92,6 +94,19 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
   }
 
   const handleRegister = (event: Event | BackendEvent) => {
+    // Verificar si el usuario está autenticado
+    if (!user) {
+      // Redirigir a login con returnUrl que incluya el evento
+      const returnUrl = `/dashboard/user#register-event-${event.id}`
+      navigate(`/login?returnUrl=${encodeURIComponent(returnUrl)}`)
+      toast.error('Debes iniciar sesión para inscribirte a un evento', {
+        duration: 4000,
+        position: 'top-center'
+      })
+      return
+    }
+
+    // Si está autenticado, abrir el modal de registro
     setSelectedEvent(event)
     setShowRegistrationFlow(true)
   }
@@ -202,7 +217,7 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <Card className="h-full overflow-hidden hover:shadow-lg transition-all duration-300 group bg-white border border-gray-200 hover:border-[#6B1E22]/20 max-w-xs mx-auto cursor-pointer" style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', height: '380px' }} onClick={() => handleViewDetails(event)}>
+            <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group bg-white border border-gray-200 hover:border-[#6B1E22]/20 w-full mx-auto flex flex-col" style={{ boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', height: '500px', maxWidth: '320px' }}>
               <div className="relative overflow-hidden">
                 {hasValidImage ? (
                   <img
@@ -259,48 +274,69 @@ const EventGrid: React.FC<EventGridProps> = ({ events, loading = false }) => {
                 </div>
               </div>
 
-              <CardContent className="p-4 flex flex-col h-full">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold mb-2 text-gray-900 line-clamp-2 group-hover:text-[#6B1E22] transition-colors duration-300 leading-tight" style={{ fontFamily: 'Roboto, Arial, sans-serif' }}>
+              <CardContent className="p-4 flex flex-col flex-1 overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                  <h3 className="text-base font-bold mb-2 text-gray-900 line-clamp-2 group-hover:text-[#6B1E22] transition-colors duration-300 leading-tight" style={{ fontFamily: 'Roboto, Arial, sans-serif' }}>
                     {event.title}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2 leading-relaxed" style={{ fontFamily: 'Roboto, Arial, sans-serif' }}>
+                  <p className="text-gray-600 text-xs mb-2 line-clamp-2 leading-relaxed" style={{ fontFamily: 'Roboto, Arial, sans-serif' }}>
                     {isBackendEvent ? (event.shortDescription || 'Sin descripción disponible') : eventDescription}
                   </p>
 
-                  <div className="space-y-2 text-sm text-gray-600" style={{ fontFamily: 'Roboto, Arial, sans-serif' }}>
+                  <div className="space-y-1.5 text-xs text-gray-600" style={{ fontFamily: 'Roboto, Arial, sans-serif' }}>
                     <div className="flex items-center">
-                      <FaCalendarAlt className="mr-2 text-[#6B1E22] flex-shrink-0" size={14} />
-                      <span className="font-medium">{formatDate(eventDate)}</span>
+                      <FaCalendarAlt className="mr-2 text-[#6B1E22] flex-shrink-0" size={12} />
+                      <span className="font-medium truncate">{formatDate(eventDate)}</span>
                     </div>
                     <div className="flex items-center">
-                      <FaClock className="mr-2 text-[#2c5aa0] flex-shrink-0" size={14} />
-                      <span className="font-medium">{startTime} - {endTime}</span>
+                      <FaClock className="mr-2 text-[#2c5aa0] flex-shrink-0" size={12} />
+                      <span className="font-medium truncate">{startTime} - {endTime}</span>
                     </div>
                     {!isBackendEvent || !event.isVirtual ? (
                       <div className="flex items-center">
-                        <FaMapMarkerAlt className="mr-2 text-[#28a745] flex-shrink-0" size={14} />
-                        <span className="capitalize font-medium">{isBackendEvent ? (event.location || 'Ubicación por confirmar') : getModalityText(event.modality)}</span>
+                        <FaMapMarkerAlt className="mr-2 text-[#28a745] flex-shrink-0" size={12} />
+                        <span className="capitalize font-medium truncate">{isBackendEvent ? (event.location || 'Ubicación por confirmar') : getModalityText(event.modality)}</span>
                       </div>
                     ) : (
                       <div className="flex items-center">
-                        <FaInfoCircle className="mr-2 text-[#6B1E22] flex-shrink-0" size={14} />
+                        <FaInfoCircle className="mr-2 text-[#6B1E22] flex-shrink-0" size={12} />
                         <span className="font-medium">Virtual</span>
                       </div>
                     )}
                     {isBackendEvent && event.capacity && (
                       <div className="flex items-center">
-                        <FaUsers className="mr-2 text-[#6B1E22] flex-shrink-0" size={14} />
+                        <FaUsers className="mr-2 text-[#6B1E22] flex-shrink-0" size={12} />
                         <span className="font-medium">Capacidad: {event.capacity}</span>
+                      </div>
+                    )}
+                    {isBackendEvent && event.speakers && event.speakers.length > 0 && (
+                      <div className="flex items-center">
+                        <FaChalkboardTeacher className="mr-2 text-[#6B1E22] flex-shrink-0" size={12} />
+                        <span className="font-medium truncate">{event.speakers.map(s => s.fullName).join(', ')}</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-gray-100">
+                <div className="mt-3 pt-3 border-t border-gray-100 flex gap-2 flex-shrink-0">
                   <Button
-                    className="bg-[#6B1E22] text-white px-4 py-2 rounded-md shadow-md font-medium text-sm w-full cursor-default"
+                    variant="outline"
+                    className="flex-1 px-3 py-2 text-sm font-medium border-[#6B1E22] text-[#6B1E22] hover:bg-[#6B1E22] hover:text-white transition-colors"
                     style={{ fontFamily: 'Roboto, Arial, sans-serif' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewDetails(event);
+                    }}
+                  >
+                    Ver Detalles
+                  </Button>
+                  <Button
+                    className="flex-1 bg-[#6B1E22] text-white px-3 py-2 rounded-md shadow-md font-medium text-sm hover:bg-[#5a191e] transition-colors"
+                    style={{ fontFamily: 'Roboto, Arial, sans-serif' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRegister(event);
+                    }}
                   >
                     Inscribirme
                   </Button>

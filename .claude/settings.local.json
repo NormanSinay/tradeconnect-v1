@@ -11,7 +11,13 @@
       "Bash(dir \"C:\\Users\\NSINAY\\Downloads\\tradeconnect-v1\\frontend\\src\\hooks\")",
       "Bash(npm uninstall:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(node check-events.js:*)",
+      "Bash(node publish-events.js:*)",
+      "Bash(node test-user-events.js:*)",
+      "Bash(curl -s http://localhost:3000/api/v1/user/events -H \"Authorization: Bearer test-token\")",
+      "Bash(node check-event-data.js:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

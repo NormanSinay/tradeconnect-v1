@@ -232,6 +232,39 @@ router.post(
 
 /**
  * @swagger
+ * /api/registrations/{id}/bank-transfer:
+ *   post:
+ *     tags: [Registrations]
+ *     summary: Notificar selección de transferencia bancaria
+ *     description: Notifica que se seleccionó transferencia bancaria y envía correo con instrucciones
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la inscripción
+ *     responses:
+ *       200:
+ *         description: Notificación enviada exitosamente
+ *       400:
+ *         description: ID inválido
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Inscripción no encontrada
+ */
+router.post(
+  '/:id/bank-transfer',
+  authenticateToken,
+  generalLimiter,
+  registrationController.notifyBankTransfer.bind(registrationController)
+);
+
+/**
+ * @swagger
  * /api/registrations/validate-affiliation:
  *   post:
  *     tags: [Registrations]

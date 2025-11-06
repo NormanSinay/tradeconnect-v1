@@ -32,6 +32,7 @@ import { affiliationValidationService } from './affiliationValidationService';
 import { cacheService } from './cacheService';
 import { discountService } from './discountService';
 import { capacityManagementService } from './capacityManagementService';
+import { emailService } from './emailService';
 
 /**
  * Servicio para manejo de operaciones de inscripciones
@@ -66,22 +67,72 @@ export class RegistrationService {
         };
       }
 
-      // Verificar y reservar capacidad temporalmente
-      const capacityReservation = await capacityManagementService.reserveCapacity(
-        data.eventId,
-        1, // Cantidad para inscripción individual
-        undefined, // Sin tipo de acceso específico
-        userId,
-        `registration-${Date.now()}` // Session ID único
-      );
+      // Verificar si ya existe una inscripción activa para este email y evento
+      const existingRegistration = await Registration.findOne({
+        where: {
+          email: data.email,
+          eventId: data.eventId,
+          status: {
+            [Op.in]: ['PENDIENTE_PAGO', 'PAGADO', 'CONFIRMADO']
+          }
+        }
+      });
 
-      if (!capacityReservation.success) {
-        return {
-          success: false,
-          message: capacityReservation.message,
-          error: capacityReservation.error,
-          timestamp: new Date().toISOString()
-        };
+      if (existingRegistration) {
+        // Si ya está pagado o confirmado, bloquear
+        if (existingRegistration.status === 'PAGADO' || existingRegistration.status === 'CONFIRMADO') {
+          return {
+            success: false,
+            message: 'Ya tienes una inscripción confirmada para este evento.',
+            error: 'DUPLICATE_REGISTRATION',
+            timestamp: new Date().toISOString()
+          };
+        }
+
+        // Si está pendiente de pago, verificar si expiró
+        if (existingRegistration.status === 'PENDIENTE_PAGO') {
+          const now = new Date();
+          const expiresAt = existingRegistration.reservationExpiresAt;
+
+          // Si no ha expirado, devolver los datos existentes para continuar el pago
+          if (expiresAt && expiresAt > now) {
+            return {
+              success: true,
+              message: 'Tienes una inscripción pendiente. Continúa con el pago.',
+              data: {
+                registration: existingRegistration,
+                isExisting: true
+              },
+              timestamp: new Date().toISOString()
+            };
+          }
+
+          // Si ya expiró, cancelarla automáticamente para permitir nueva inscripción
+          await existingRegistration.update({ status: 'CANCELADO' });
+        }
+      }
+
+      // Solo verificar y reservar capacidad para eventos presenciales o híbridos
+      // Los eventos virtuales no tienen capacidad limitada
+      let capacityReservation: any = null;
+
+      if (!event.isVirtual) {
+        capacityReservation = await capacityManagementService.reserveCapacity(
+          data.eventId,
+          1, // Cantidad para inscripción individual
+          undefined, // Sin tipo de acceso específico
+          userId,
+          `registration-${Date.now()}` // Session ID único
+        );
+
+        if (!capacityReservation.success) {
+          return {
+            success: false,
+            message: capacityReservation.message,
+            error: capacityReservation.error,
+            timestamp: new Date().toISOString()
+          };
+        }
       }
 
       // Validar datos fiscales si se proporcionan
@@ -107,6 +158,10 @@ export class RegistrationService {
       const reservationExpiresAt = new Date();
       reservationExpiresAt.setMinutes(reservationExpiresAt.getMinutes() + 15);
 
+      // Determinar estado inicial (CONFIRMADO para eventos gratuitos, PENDIENTE_PAGO para eventos de pago)
+      const isFreeEvent = priceCalculation.finalPrice === 0;
+      const initialStatus = isFreeEvent ? 'CONFIRMADO' : 'PENDIENTE_PAGO';
+
       // Crear inscripción
       const registration = await Registration.create({
         registrationCode,
@@ -121,13 +176,18 @@ export class RegistrationService {
         cui: data.cui,
         companyName: data.companyName,
         position: data.position,
-        status: 'PENDIENTE_PAGO',
+        status: initialStatus,
         basePrice: priceCalculation.basePrice,
         discountAmount: priceCalculation.discountAmount,
         finalPrice: priceCalculation.finalPrice,
-        reservationExpiresAt,
+        reservationExpiresAt: isFreeEvent ? null : reservationExpiresAt,
         customFields: data.customFields
       });
+
+      // Si es evento gratuito, incrementar contador de participantes inmediatamente
+      if (isFreeEvent) {
+        await event.increment('registeredCount', { by: 1 });
+      }
 
       // Registrar en auditoría
       await AuditLog.log(
@@ -139,7 +199,8 @@ export class RegistrationService {
           newValues: {
             registrationCode,
             eventId: data.eventId,
-            status: 'PENDIENTE_PAGO'
+            status: initialStatus,
+            isFreeEvent
           },
           ipAddress: '127.0.0.1',
           userAgent: 'system'
@@ -151,17 +212,54 @@ export class RegistrationService {
         registrationId: registration.id,
         eventId: data.eventId,
         userId,
-        status: 'PENDIENTE_PAGO'
+        status: initialStatus,
+        isFreeEvent
       });
+
+      // Enviar correo de confirmación
+      try {
+        const eventDate = event.startDate ? new Date(event.startDate).toLocaleDateString('es-GT', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }) : 'Por definir';
+
+        const eventTime = event.startDate ? new Date(event.startDate).toLocaleTimeString('es-GT', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }) : '00:00';
+
+        await emailService.sendRegistrationConfirmation(data.email, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          eventTitle: event.title,
+          eventDate,
+          eventTime,
+          eventLocation: event.location || 'Por definir',
+          registrationCode,
+          isPendingPayment: !isFreeEvent,
+          paymentMethod: isFreeEvent ? 'free' : 'pending',
+          amount: priceCalculation.finalPrice,
+          isVirtual: event.isVirtual,
+          virtualLink: event.virtualLocation
+        });
+      } catch (emailError) {
+        logger.error('Error enviando correo de confirmación:', emailError);
+        // No bloquear el flujo de inscripción si falla el envío del correo
+      }
 
       const response: RegistrationResponse = {
         registrationId: registration.id,
         registrationCode,
-        status: 'PENDIENTE_PAGO',
+        status: initialStatus,
         totalAmount: priceCalculation.finalPrice,
-        reservationExpiresAt,
-        capacityLockId: capacityReservation.data?.id,
-        message: 'Inscripción creada exitosamente. Complete el pago antes de que expire la reserva.'
+        reservationExpiresAt: isFreeEvent ? undefined : reservationExpiresAt,
+        capacityLockId: capacityReservation?.data?.id || undefined,
+        message: isFreeEvent
+          ? 'Inscripción confirmada exitosamente. Revisa tu correo para más detalles.'
+          : event.isVirtual
+          ? 'Inscripción creada exitosamente. Complete el pago para confirmar.'
+          : 'Inscripción creada exitosamente. Complete el pago antes de que expire la reserva.'
       };
 
       return {
@@ -171,8 +269,37 @@ export class RegistrationService {
         timestamp: new Date().toISOString()
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error creando inscripción individual:', error);
+
+      // Manejo de errores específicos
+      if (error.message?.includes('Ya existe una inscripción con este email')) {
+        return {
+          success: false,
+          message: 'Ya tienes una inscripción pendiente para este evento. Por favor, completa el pago o contacta con soporte.',
+          error: 'DUPLICATE_REGISTRATION',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      if (error.message?.includes('formato del NIT')) {
+        return {
+          success: false,
+          message: error.message,
+          error: 'INVALID_NIT_FORMAT',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      if (error.message?.includes('CUI debe tener')) {
+        return {
+          success: false,
+          message: error.message,
+          error: 'INVALID_CUI_FORMAT',
+          timestamp: new Date().toISOString()
+        };
+      }
+
       return {
         success: false,
         message: 'Error interno del servidor',
@@ -389,15 +516,18 @@ export class RegistrationService {
         };
       }
 
-      // Verificar disponibilidad para el grupo
-      const availabilityCheck = await this.checkEventAvailability(data.eventId, data.participants.length);
-      if (!availabilityCheck.canAccommodate) {
-        return {
-          success: false,
-          message: availabilityCheck.message,
-          error: 'INSUFFICIENT_AVAILABILITY',
-          timestamp: new Date().toISOString()
-        };
+      // Solo verificar disponibilidad para eventos presenciales o híbridos
+      // Los eventos virtuales no tienen capacidad limitada
+      if (!event.isVirtual) {
+        const availabilityCheck = await this.checkEventAvailability(data.eventId, data.participants.length);
+        if (!availabilityCheck.canAccommodate) {
+          return {
+            success: false,
+            message: availabilityCheck.message,
+            error: 'INSUFFICIENT_AVAILABILITY',
+            timestamp: new Date().toISOString()
+          };
+        }
       }
 
       // Validar NIT de la empresa si se proporciona
@@ -850,6 +980,85 @@ export class RegistrationService {
 
     } catch (error) {
       logger.error('Error procesando reservas expiradas:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * Notifica que se seleccionó transferencia bancaria y envía correo
+   */
+  async notifyBankTransferSelected(
+    registrationId: number
+  ): Promise<ApiResponse<void>> {
+    try {
+      const registration = await Registration.findByPk(registrationId, {
+        include: [
+          {
+            model: Event,
+            as: 'event',
+            required: true
+          }
+        ]
+      });
+
+      if (!registration) {
+        return {
+          success: false,
+          message: 'Inscripción no encontrada',
+          error: 'REGISTRATION_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      const event = (registration as any).event;
+
+      // Enviar correo con información de transferencia bancaria
+      try {
+        const eventDate = event.startDate ? new Date(event.startDate).toLocaleDateString('es-GT', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }) : 'Por definir';
+
+        const eventTime = event.startDate ? new Date(event.startDate).toLocaleTimeString('es-GT', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }) : '00:00';
+
+        await emailService.sendRegistrationConfirmation(registration.email, {
+          firstName: registration.firstName,
+          lastName: registration.lastName,
+          eventTitle: event.title,
+          eventDate,
+          eventTime,
+          eventLocation: event.location || 'Por definir',
+          registrationCode: registration.registrationCode,
+          isPendingPayment: true,
+          paymentMethod: 'bank_transfer',
+          amount: registration.finalPrice,
+          isVirtual: event.isVirtual,
+          virtualLink: event.virtualLocation
+        });
+
+        logger.info(`Bank transfer notification email sent for registration ${registrationId}`);
+      } catch (emailError) {
+        logger.error('Error enviando correo de transferencia bancaria:', emailError);
+        // No bloquear el flujo
+      }
+
+      return {
+        success: true,
+        message: 'Notificación enviada exitosamente',
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error notificando selección de transferencia bancaria:', error);
       return {
         success: false,
         message: 'Error interno del servidor',

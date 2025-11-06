@@ -1134,4 +1134,81 @@ router.delete('/:id/media/:mediaId', authenticated, eventLimiter, [
     .withMessage('El ID del archivo multimedia debe ser un número entero positivo')
 ], eventController.deleteMedia.bind(eventController));
 
+/**
+ * @swagger
+ * /api/events/{id}/access-types:
+ *   get:
+ *     tags: [Events]
+ *     summary: Obtener tipos de acceso del evento
+ *     description: |
+ *       Obtiene la lista de tipos de acceso disponibles para un evento específico.
+ *       NOTA: Los eventos virtuales (isVirtual=true) no tienen tipos de acceso y retornarán un array vacío.
+ *       Solo eventos presenciales o híbridos tienen tipos de acceso.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del evento
+ *     responses:
+ *       200:
+ *         description: Tipos de acceso obtenidos exitosamente (o array vacío si es evento virtual)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Tipos de acceso del evento obtenidos exitosamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       eventId:
+ *                         type: integer
+ *                       name:
+ *                         type: string
+ *                       displayName:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       price:
+ *                         type: number
+ *                       currency:
+ *                         type: string
+ *                       capacity:
+ *                         type: integer
+ *                       availableCapacity:
+ *                         type: integer
+ *                       benefits:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       restrictions:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                       isActive:
+ *                         type: boolean
+ *                       priority:
+ *                         type: integer
+ *       400:
+ *         description: ID de evento inválido
+ *       404:
+ *         description: Evento no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/:id/access-types', eventLimiter, [
+  ...eventIdValidation
+], eventController.getEventAccessTypes.bind(eventController));
+
 export default router;

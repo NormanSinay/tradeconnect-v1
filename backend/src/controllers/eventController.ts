@@ -1640,6 +1640,44 @@ export class EventController {
   }
 
   /**
+   * Obtener tipos de acceso para un evento
+   * NOTA: Los eventos virtuales no tienen tipos de acceso
+   */
+  async getEventAccessTypes(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const eventId = parseInt(id);
+
+      if (isNaN(eventId)) {
+        res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: 'ID de evento inválido',
+          error: 'INVALID_EVENT_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await eventService.getEventAccessTypes(eventId);
+
+      if (result.success) {
+        res.status(HTTP_STATUS.OK).json(result);
+      } else {
+        res.status(this.getStatusCodeFromError(result.error)).json(result);
+      }
+
+    } catch (error) {
+      logger.error('Error obteniendo tipos de acceso del evento:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
    * Método auxiliar para validaciones de negocio en actualización
    */
   private validateUpdateEventData(updateData: UpdateEventData, eventId: number): void {

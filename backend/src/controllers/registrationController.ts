@@ -747,6 +747,42 @@ export class RegistrationController {
   }
 
   /**
+   * Notifica que se seleccionó transferencia bancaria
+   */
+  async notifyBankTransfer(req: Request, res: Response): Promise<void> {
+    try {
+      const registrationId = parseInt(req.params.id);
+
+      if (isNaN(registrationId)) {
+        res.status(400).json({
+          success: false,
+          message: 'ID de inscripción inválido',
+          error: 'INVALID_REGISTRATION_ID',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await registrationService.notifyBankTransferSelected(registrationId);
+
+      if (result.success) {
+        res.status(200).json(result);
+      } else {
+        const statusCode = this.getStatusCodeFromError(result.error);
+        res.status(statusCode).json(result);
+      }
+    } catch (error) {
+      logger.error('Error notificando transferencia bancaria:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
    * Convierte códigos de error a códigos HTTP
    */
   private getStatusCodeFromError(error?: string): number {

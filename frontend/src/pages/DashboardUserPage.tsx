@@ -1,8 +1,11 @@
-import React, { useEffect, lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useUserDashboardState } from '@/hooks/useUserDashboardState';
+import EventRegistrationFlow from '@/components/ui/event-registration-flow';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useState, useEffect } from 'react';
+import { UserDashboardService, UserEvent } from '@/services/userDashboardService';
 
 // Lazy loading para componentes pesados
 const EventCatalogTab = lazy(() => import('@/components/dashboard/user/EventCatalogTab'));
@@ -27,7 +30,9 @@ import {
   CreditCard,
   Download,
   Eye,
-  User
+  User,
+  Menu,
+  X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -48,6 +53,13 @@ const DashboardUserPage: React.FC = React.memo(() => {
     formatHours
   } = useUserDashboardState();
 
+  // Estado para el flujo de registro de eventos
+  const [registrationFlowOpen, setRegistrationFlowOpen] = useState(false);
+  const [selectedEventForRegistration, setSelectedEventForRegistration] = useState<UserEvent | null>(null);
+
+  // Estado para el colapso del sidebar
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   // Verificar permisos de usuario regular y track analytics
   useEffect(() => {
     if (!permissions.canViewEvents) {
@@ -63,6 +75,34 @@ const DashboardUserPage: React.FC = React.memo(() => {
       dashboard: 'user'
     });
   }, [user, permissions.canViewEvents, loadDashboardData, trackPageView]);
+
+  // Check for return URL with event registration hash
+  useEffect(() => {
+    if (window.location.hash.startsWith('#register-event-')) {
+      const eventId = parseInt(window.location.hash.replace('#register-event-', ''));
+      if (eventId) {
+        // Load the event details and open registration flow
+        loadEventForRegistration(eventId);
+      }
+    }
+  }, []);
+
+  // Function to load event for registration
+  const loadEventForRegistration = async (eventId: number) => {
+    try {
+      const events = await UserDashboardService.getAvailableEvents();
+      const event = events.find(e => e.id === eventId);
+      if (event) {
+        setSelectedEventForRegistration(event);
+        setRegistrationFlowOpen(true);
+        // Clear the hash
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    } catch (error) {
+      console.error('Error loading event for registration:', error);
+      toast.error('Error al cargar el evento para registro');
+    }
+  };
 
 
   if (loading) {
@@ -80,33 +120,53 @@ const DashboardUserPage: React.FC = React.memo(() => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="mr-2"
+                title={sidebarCollapsed ? "Expandir menú" : "Colapsar menú"}
+              >
+                {sidebarCollapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
+              </Button>
               <h1 className="text-2xl font-bold text-[#6B1E22]">TradeConnect</h1>
               <Badge variant="secondary" className="text-xs bg-[#4CAF50] text-white">USER</Badge>
             </div>
 
-
-            <Button variant="outline" size="sm" onClick={() => {
-              useAuthStore.getState().logout();
-              window.location.href = '/login';
-            }}>
-              Cerrar Sesión
-            </Button>
+            <div className="flex items-center space-x-4">
+              {user && (
+                <span className="text-sm text-gray-700">
+                  <User className="w-4 h-4 inline mr-1" />
+                  {user.firstName} {user.lastName}
+                </span>
+              )}
+              <Button variant="outline" size="sm" onClick={() => {
+                useAuthStore.getState().logout();
+                window.location.href = '/login';
+              }}>
+                Cerrar Sesión
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="flex flex-1 pt-16">
         {/* Sidebar - Isla fija como en el diseño original */}
-        <aside className="fixed left-6 top-24 bottom-6 w-72 bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
+        <aside className={`fixed left-6 top-24 bottom-6 bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 transition-all duration-300 ${
+          sidebarCollapsed ? 'w-0 opacity-0 -left-80' : 'w-72 opacity-100'
+        }`}>
           <div className="h-full flex flex-col">
             {/* User Card */}
-            <div className="bg-gradient-to-br from-[#4CAF50]/5 to-[#4CAF50]/10 p-6 border-b border-gray-100">
+            <div className="bg-gradient-to-br from-[#6B1E22]/5 to-[#6B1E22]/10 p-6 border-b border-gray-100">
               <div className="text-center">
-                <div className="w-20 h-20 bg-[#4CAF50] text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
-                  U
+                <div className="w-20 h-20 bg-[#6B1E22] text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-lg">
+                  {user?.firstName?.[0]?.toUpperCase() || 'U'}
                 </div>
-                <h3 className="font-bold text-gray-900 mb-1">Usuario Regular</h3>
-                <p className="text-[#4CAF50] font-semibold">Usuario</p>
+                <h3 className="font-bold text-gray-900 mb-1">
+                  {user?.firstName} {user?.lastName}
+                </h3>
+                <p className="text-[#6B1E22] font-semibold text-sm">{user?.email}</p>
               </div>
             </div>
 
@@ -125,8 +185,8 @@ const DashboardUserPage: React.FC = React.memo(() => {
                       }}
                       className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all duration-200 ${
                         activeTab === item.id
-                          ? 'bg-[#4CAF50] text-white shadow-md'
-                          : 'text-gray-700 hover:bg-[#4CAF50]/10 hover:text-[#4CAF50]'
+                          ? 'bg-[#6B1E22] text-white shadow-md'
+                          : 'text-gray-700 hover:bg-[#6B1E22]/10 hover:text-[#6B1E22]'
                       }`}
                     >
                       <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -140,7 +200,9 @@ const DashboardUserPage: React.FC = React.memo(() => {
         </aside>
 
         {/* Scrollable Main Content */}
-        <main className="flex-1 ml-80 overflow-y-auto">
+        <main className={`flex-1 overflow-y-auto transition-all duration-300 ${
+          sidebarCollapsed ? 'ml-6' : 'ml-80'
+        }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {activeTab === 'overview' && (
               <motion.div
@@ -272,7 +334,13 @@ const DashboardUserPage: React.FC = React.memo(() => {
                     <span className="ml-3 text-gray-600">Cargando catálogo de eventos...</span>
                   </div>
                 }>
-                  <EventCatalogTab activeTab={activeTab} />
+                  <EventCatalogTab
+                    activeTab={activeTab}
+                    onRegisterEvent={(event) => {
+                      setSelectedEventForRegistration(event);
+                      setRegistrationFlowOpen(true);
+                    }}
+                  />
                 </Suspense>
               </motion.div>
             )}
@@ -363,6 +431,20 @@ const DashboardUserPage: React.FC = React.memo(() => {
           </div>
         </main>
       </div>
+
+      {/* Event Registration Flow */}
+      {selectedEventForRegistration && (
+        <EventRegistrationFlow
+          isOpen={registrationFlowOpen}
+          onClose={() => {
+            setRegistrationFlowOpen(false);
+            setSelectedEventForRegistration(null);
+            // Reload dashboard data to update stats
+            loadDashboardData();
+          }}
+          event={selectedEventForRegistration}
+        />
+      )}
     </div>
   );
 });

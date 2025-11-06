@@ -9,10 +9,14 @@
 
 import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
+import { Op } from 'sequelize';
 import { User } from '../models/User';
 import { Role } from '../models/Role';
 import { UserRole } from '../models/UserRole';
 import { AuditLog } from '../models/AuditLog';
+import { Registration } from '../models/Registration';
+import { Event } from '../models/Event';
+import { Certificate } from '../models/Certificate';
 import {
   AuthenticatedRequest,
   UserProfile,
@@ -945,13 +949,92 @@ export class UserController {
         return;
       }
 
-      // TODO: Implementar consultas reales a la base de datos
-      // Por ahora retornamos datos mock que coinciden con el frontend
+      const now = new Date();
+
+      // Obtener inscripciones activas (eventos que aún no han terminado)
+      const activeRegistrations = await Registration.count({
+        where: {
+          userId,
+          status: {
+            [Op.in]: ['PAGADO', 'CONFIRMADO']
+          }
+        },
+        include: [{
+          model: Event,
+          as: 'event',
+          required: true,
+          where: {
+            endDate: {
+              [Op.gte]: now
+            }
+          }
+        }]
+      });
+
+      // Obtener eventos completados (eventos que ya terminaron)
+      const completedRegistrations = await Registration.count({
+        where: {
+          userId,
+          status: {
+            [Op.in]: ['PAGADO', 'CONFIRMADO']
+          }
+        },
+        include: [{
+          model: Event,
+          as: 'event',
+          required: true,
+          where: {
+            endDate: {
+              [Op.lt]: now
+            }
+          }
+        }]
+      });
+
+      // Obtener certificados del usuario
+      const certificatesCount = await Certificate.count({
+        where: {
+          userId
+        }
+      });
+
+      // Calcular horas de formación (sumando duración de eventos completados)
+      const completedEvents = await Registration.findAll({
+        where: {
+          userId,
+          status: {
+            [Op.in]: ['PAGADO', 'CONFIRMADO']
+          }
+        },
+        include: [{
+          model: Event,
+          as: 'event',
+          required: true,
+          where: {
+            endDate: {
+              [Op.lt]: now
+            }
+          },
+          attributes: ['id', 'startDate', 'endDate']
+        }]
+      });
+
+      // Calcular horas totales (diferencia entre endDate y startDate)
+      const trainingHours = completedEvents.reduce((total, reg: any) => {
+        if (reg.event && reg.event.startDate && reg.event.endDate) {
+          const start = new Date(reg.event.startDate);
+          const end = new Date(reg.event.endDate);
+          const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+          return total + Math.round(hours);
+        }
+        return total;
+      }, 0);
+
       const stats = {
-        activeEvents: 3,
-        completedEvents: 8,
-        certificates: 6,
-        trainingHours: 42
+        activeEvents: activeRegistrations,
+        completedEvents: completedRegistrations,
+        certificates: certificatesCount,
+        trainingHours: trainingHours
       };
 
       res.status(HTTP_STATUS.OK).json({

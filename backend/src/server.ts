@@ -156,10 +156,19 @@ const jsonParserMiddleware = express.json({
     // Solo validar JSON para métodos que típicamente envían body JSON
     const methodsWithJsonBody = ['POST', 'PUT', 'PATCH'];
     if (methodsWithJsonBody.includes(req.method || '')) {
-      try {
-        JSON.parse(buf.toString());
-      } catch (error) {
-        throw new Error('Invalid JSON');
+      // Skip validation for specific endpoints that might send empty body
+      const skipValidationPaths = [
+        '/api/v1/user/events/',
+        '/api/v1/user/stats'
+      ];
+      const shouldSkip = skipValidationPaths.some(path => req.path.includes(path));
+
+      if (!shouldSkip && buf.length > 0) {
+        try {
+          JSON.parse(buf.toString());
+        } catch (error) {
+          throw new Error('Invalid JSON');
+        }
       }
     }
   }

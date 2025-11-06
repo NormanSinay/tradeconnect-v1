@@ -412,6 +412,114 @@ export class PaymentController {
 
   /**
    * @swagger
+   * /api/payments/gateways:
+   *   get:
+   *     tags: [Payments]
+   *     summary: Obtener gateways de pago disponibles
+   *     description: Retorna la lista de gateways de pago activos con su configuración
+   *     parameters:
+   *       - in: query
+   *         name: eventId
+   *         schema:
+   *           type: integer
+   *         description: ID del evento (opcional, para filtrar gateways disponibles por evento)
+   *     responses:
+   *       200:
+   *         description: Gateways obtenidos exitosamente
+   *       500:
+   *         description: Error interno del servidor
+   */
+  async getPaymentGateways(req: Request, res: Response): Promise<void> {
+    try {
+      const { eventId } = req.query;
+
+      // Definir los gateways disponibles con su configuración
+      const gateways = [
+        {
+          id: 'paypal',
+          name: 'paypal',
+          displayName: 'PayPal',
+          description: 'Pago seguro con PayPal',
+          logo: '/assets/gateways/paypal.svg',
+          fee: 2.9,
+          feeType: 'percentage' as const,
+          currency: 'USD',
+          isActive: true,
+          minAmount: 1,
+          maxAmount: 10000,
+          supportedCurrencies: ['USD', 'GTQ'],
+          requiresRedirect: true
+        },
+        {
+          id: 'stripe',
+          name: 'stripe',
+          displayName: 'Tarjeta de Crédito/Débito',
+          description: 'Pago con tarjeta vía Stripe',
+          logo: '/assets/gateways/stripe.svg',
+          fee: 2.9,
+          feeType: 'percentage' as const,
+          currency: 'USD',
+          isActive: true,
+          minAmount: 1,
+          maxAmount: 10000,
+          supportedCurrencies: ['USD', 'GTQ'],
+          requiresRedirect: false
+        },
+        {
+          id: 'neonet',
+          name: 'neonet',
+          displayName: 'NeoNet',
+          description: 'Gateway de pago local guatemalteco',
+          logo: '/assets/gateways/neonet.svg',
+          fee: 2.5,
+          feeType: 'percentage' as const,
+          currency: 'GTQ',
+          isActive: true,
+          minAmount: 10,
+          maxAmount: 50000,
+          supportedCurrencies: ['GTQ'],
+          requiresRedirect: true
+        },
+        {
+          id: 'bam',
+          name: 'bam',
+          displayName: 'BAM',
+          description: 'Banco Agromercantil de Guatemala',
+          logo: '/assets/gateways/bam.svg',
+          fee: 2.5,
+          feeType: 'percentage' as const,
+          currency: 'GTQ',
+          isActive: true,
+          minAmount: 10,
+          maxAmount: 50000,
+          supportedCurrencies: ['GTQ'],
+          requiresRedirect: true
+        }
+      ];
+
+      // Filtrar solo los gateways activos
+      const activeGateways = gateways.filter(gateway => gateway.isActive);
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: 'Gateways de pago obtenidos exitosamente',
+        data: activeGateways,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      logger.error('Error obteniendo gateways de pago:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * @swagger
    * /api/payments/paypal/create:
    *   post:
    *     tags: [Payments]

@@ -16,6 +16,7 @@ import {
   BeforeUpdate,
   HasMany,
   BelongsTo,
+  BelongsToMany,
   CreatedAt,
   UpdatedAt,
   DeletedAt,
@@ -35,6 +36,8 @@ import { EventRegistration } from './EventRegistration';
 import { EventMedia } from './EventMedia';
 import { EventDuplication } from './EventDuplication';
 import { EventTemplate } from './EventTemplate';
+import { Speaker } from './Speaker';
+import { SpeakerEvent } from './SpeakerEvent';
 
 /**
  * Atributos del modelo Evento
@@ -524,6 +527,9 @@ export class Event extends Model<EventAttributes, EventCreationAttributes> imple
 
   @HasMany(() => EventDuplication, 'duplicatedEventId')
   declare sourceDuplications: EventDuplication[];
+
+  @BelongsToMany(() => Speaker, () => SpeakerEvent)
+  declare speakers: Speaker[];
 
   // ====================================================================
   // HOOKS DE SEQUELIZE

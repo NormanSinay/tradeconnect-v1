@@ -474,7 +474,8 @@ export class Registration extends Model<RegistrationAttributes, RegistrationCrea
         where: {
           email: instance.email,
           eventId: instance.eventId,
-          id: { [Op.ne]: instance.id || 0 }
+          id: { [Op.ne]: instance.id || 0 },
+          status: { [Op.notIn]: ['CANCELADO', 'EXPIRADO', 'REEMBOLSADO'] }
         }
       });
       if (existing) {

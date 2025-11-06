@@ -1525,6 +1525,86 @@ router.get('/methods', authenticated, paymentController.getPaymentMethods);
 
 /**
  * @swagger
+ * /api/payments/gateways:
+ *   get:
+ *     tags: [Payments]
+ *     summary: Obtener gateways de pago disponibles
+ *     description: Retorna la lista de gateways de pago activos con su configuración y comisiones
+ *     parameters:
+ *       - in: query
+ *         name: eventId
+ *         schema:
+ *           type: integer
+ *         description: ID del evento (opcional, para filtrar gateways disponibles por evento)
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Gateways obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Gateways de pago obtenidos exitosamente"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "paypal"
+ *                       name:
+ *                         type: string
+ *                         example: "paypal"
+ *                       displayName:
+ *                         type: string
+ *                         example: "PayPal"
+ *                       description:
+ *                         type: string
+ *                         example: "Pago seguro con PayPal"
+ *                       logo:
+ *                         type: string
+ *                         example: "/assets/gateways/paypal.svg"
+ *                       fee:
+ *                         type: number
+ *                         example: 2.9
+ *                       feeType:
+ *                         type: string
+ *                         enum: [percentage, fixed]
+ *                         example: "percentage"
+ *                       currency:
+ *                         type: string
+ *                         example: "USD"
+ *                       isActive:
+ *                         type: boolean
+ *                         example: true
+ *                       minAmount:
+ *                         type: number
+ *                         example: 1
+ *                       maxAmount:
+ *                         type: number
+ *                         example: 10000
+ *                       supportedCurrencies:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         example: ["USD", "GTQ"]
+ *                       requiresRedirect:
+ *                         type: boolean
+ *                         example: true
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/gateways', paymentController.getPaymentGateways);
+
+/**
+ * @swagger
  * /api/payments/history:
  *   get:
  *     tags: [Payments]

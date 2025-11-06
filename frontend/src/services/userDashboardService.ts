@@ -72,12 +72,109 @@ export interface EvaluationData {
   comments?: string;
 }
 
+export interface AccessType {
+  id: number;
+  eventId: number;
+  name: string;
+  displayName: string;
+  description?: string;
+  price: number;
+  currency: string;
+  capacity?: number;
+  availableCapacity?: number;
+  benefits: string[];
+  restrictions: string[];
+  isActive: boolean;
+  priority: number;
+}
+
+export interface RegistrationData {
+  eventId: number;
+  accessTypeId?: number;
+  participantType: 'individual' | 'empresa';
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  nit?: string;
+  cui?: string;
+  companyName?: string;
+  position?: string;
+  customFields?: Record<string, any>;
+}
+
+export interface RegistrationResponse {
+  registrationId: number;
+  registrationCode: string;
+  status: string;
+  totalAmount: number;
+  reservationExpiresAt: Date;
+  capacityLockId?: number;
+  message: string;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  message?: string;
+  details?: Record<string, any>;
+}
+
+export interface PaymentGateway {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string;
+  logo?: string;
+  fee: number;
+  feeType: 'percentage' | 'fixed';
+  currency: string;
+  isActive: boolean;
+  minAmount?: number;
+  maxAmount?: number;
+  supportedCurrencies: string[];
+}
+
+export interface PaymentIntentData {
+  id: string;
+  transactionId: string;
+  registrationId: number;
+  gateway: string;
+  amount: number;
+  currency: string;
+  status: string;
+  redirectUrl?: string;
+  clientSecret?: string;
+  expiresAt: Date;
+}
+
+export interface PaymentStatusData {
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  transactionId: string;
+  amount: number;
+  currency: string;
+  gatewayTransactionId?: string;
+  errorMessage?: string;
+  completedAt?: Date;
+}
+
+export interface QRCodeResponse {
+  id: number;
+  qrCode: string;
+  qrData: string;
+  status: string;
+  registrationId: number;
+  eventId: number;
+  expiresAt?: Date;
+  generatedAt: Date;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data?: T;
   timestamp: string;
   error?: string;
+  details?: any;
 }
 
 /**
@@ -109,7 +206,9 @@ export class UserDashboardService {
     if (filters?.limit) queryParams.append('limit', filters.limit.toString());
     if (filters?.search) queryParams.append('search', filters.search);
 
-    const response = await fetch(`${this.BASE_URL}/events?${queryParams}`, {
+    const url = `${this.BASE_URL}/events?${queryParams}`;
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -310,5 +409,246 @@ export class UserDashboardService {
     }
 
     return response.blob();
+  }
+
+  // ====================================================================
+  // NUEVOS MÉTODOS PARA FLUJO DE REGISTRO MEJORADO
+  // ====================================================================
+
+  /**
+   * Obtener tipos de acceso para un evento
+   */
+  static async getEventAccessTypes(eventId: number): Promise<AccessType[]> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`/api/v1/events/${eventId}/access-types`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<AccessType[]> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo tipos de acceso');
+    }
+
+    return data.data || [];
+  }
+
+  /**
+   * Crear una inscripción individual
+   */
+  static async createRegistration(registrationData: RegistrationData): Promise<RegistrationResponse> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`/api/v1/registrations`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(registrationData),
+    });
+
+    const data: ApiResponse<RegistrationResponse> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error creando inscripción');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Validar un campo específico en tiempo real
+   */
+  static async validateField(
+    field: string,
+    value: string,
+    eventId?: number
+  ): Promise<ValidationResult> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`/api/v1/registrations/validate-affiliation`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ [field]: value }),
+    });
+
+    const data: ApiResponse<ValidationResult> = await response.json();
+
+    if (!response.ok) {
+      return {
+        isValid: false,
+        message: data.message || 'Error validando campo',
+      };
+    }
+
+    return data.data || { isValid: true };
+  }
+
+  /**
+   * Obtener gateways de pago disponibles
+   */
+  static async getPaymentGateways(eventId?: number): Promise<PaymentGateway[]> {
+    const { token } = useAuthStore.getState();
+
+    const url = eventId
+      ? `/api/v1/payments/gateways?eventId=${eventId}`
+      : `/api/v1/payments/gateways`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<PaymentGateway[]> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo gateways de pago');
+    }
+
+    return data.data || [];
+  }
+
+  /**
+   * Crear intento de pago
+   */
+  static async createPaymentIntent(
+    registrationId: number,
+    gateway: string
+  ): Promise<PaymentIntentData> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`/api/v1/payments/process`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({
+        registrationId,
+        gateway,
+      }),
+    });
+
+    const data: ApiResponse<PaymentIntentData> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error creando intento de pago');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Verificar estado de pago
+   */
+  static async checkPaymentStatus(transactionId: string): Promise<PaymentStatusData> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`/api/v1/payments/${transactionId}/status`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<PaymentStatusData> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error verificando estado de pago');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Obtener código QR de una inscripción
+   */
+  static async getRegistrationQR(registrationId: number): Promise<QRCodeResponse> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`/api/v1/qr/registration/${registrationId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<QRCodeResponse> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo código QR');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Generar código QR para una inscripción
+   */
+  static async generateQRCode(registrationId: number): Promise<QRCodeResponse> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`/api/v1/qr/generate`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ registrationId }),
+    });
+
+    const data: ApiResponse<QRCodeResponse> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error generando código QR');
+    }
+
+    return data.data!;
+  }
+
+  /**
+   * Obtener detalles de una inscripción
+   */
+  static async getRegistrationDetails(registrationId: number): Promise<any> {
+    const { token } = useAuthStore.getState();
+
+    const response = await fetch(`/api/v1/registrations/${registrationId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    const data: ApiResponse<any> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Error obteniendo detalles de inscripción');
+    }
+
+    return data.data!;
   }
 }

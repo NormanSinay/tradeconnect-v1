@@ -1876,6 +1876,80 @@ export class EventService {
   }
 
   /**
+   * Obtiene los tipos de acceso para un evento
+   * TODO: Implementar EventAccessTypeConfig para configuración específica del evento
+   */
+  async getEventAccessTypes(eventId: number): Promise<ApiResponse<any[]>> {
+    try {
+      // Primero verificar si el evento existe y obtener su información
+      const event = await Event.findByPk(eventId);
+
+      if (!event) {
+        return {
+          success: false,
+          message: 'Evento no encontrado',
+          error: 'EVENT_NOT_FOUND',
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Si el evento es virtual, no tiene tipos de acceso
+      if (event.isVirtual) {
+        return {
+          success: true,
+          message: 'Los eventos virtuales no tienen tipos de acceso',
+          data: [],
+          timestamp: new Date().toISOString()
+        };
+      }
+
+      // Solo eventos presenciales o híbridos tienen tipos de acceso
+      const { accessTypeService } = require('./accessTypeService');
+
+      // Por ahora, retornamos todos los tipos de acceso activos
+      // En el futuro, esto debería filtrar por configuración específica del evento
+      const accessTypesResult = await accessTypeService.getActiveAccessTypes();
+
+      if (!accessTypesResult.success) {
+        return accessTypesResult;
+      }
+
+      // Formatear los tipos de acceso para incluir información del evento
+      const formattedAccessTypes = accessTypesResult.data.map((accessType: any) => ({
+        id: accessType.id,
+        eventId: eventId,
+        name: accessType.name,
+        displayName: accessType.displayName,
+        description: accessType.description || '',
+        price: 0, // TODO: Obtener precio desde EventAccessTypeConfig
+        currency: 'GTQ',
+        capacity: null, // TODO: Obtener capacidad desde EventAccessTypeConfig
+        availableCapacity: null,
+        benefits: [], // TODO: Obtener beneficios desde EventAccessTypeConfig
+        restrictions: [], // TODO: Obtener restricciones desde EventAccessTypeConfig
+        isActive: accessType.status === 'ACTIVE',
+        priority: accessType.priority || 0
+      }));
+
+      return {
+        success: true,
+        message: 'Tipos de acceso del evento obtenidos exitosamente',
+        data: formattedAccessTypes,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      logger.error('Error obteniendo tipos de acceso del evento:', error);
+      return {
+        success: false,
+        message: 'Error interno del servidor',
+        error: 'INTERNAL_SERVER_ERROR',
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
    * Obtiene el event emitter para registro de listeners
    */
   getEventEmitter(): EventEmitter {

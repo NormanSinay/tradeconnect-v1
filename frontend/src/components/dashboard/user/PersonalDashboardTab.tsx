@@ -22,7 +22,8 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
         return UserDashboardService.getUserCertificates();
       }, 'Error cargando certificados');
 
-      setCertificates(certificatesData || []);
+      // Asegurar que siempre sea un array
+      setCertificates(Array.isArray(certificatesData) ? certificatesData : []);
     } catch (error) {
       console.error('Error loading certificates:', error);
       setCertificates([]);
@@ -86,9 +87,9 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
 
   // Estadísticas del usuario
   const userStats = {
-    totalCertificates: certificates.length,
-    issuedCertificates: certificates.filter(c => c.status === 'issued').length,
-    pendingCertificates: certificates.filter(c => c.status === 'pending').length,
+    totalCertificates: Array.isArray(certificates) ? certificates.length : 0,
+    issuedCertificates: Array.isArray(certificates) ? certificates.filter(c => c.status === 'issued').length : 0,
+    pendingCertificates: Array.isArray(certificates) ? certificates.filter(c => c.status === 'pending').length : 0,
     totalHours: 24 // Mock data - debería venir de la API
   };
 
@@ -218,7 +219,7 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 lg:flex-none"
+                        className="flex-1 lg:flex-none border-[#6B1E22] hover:bg-[#6B1E22] hover:text-white"
                         disabled={certificate.status !== 'issued'}
                       >
                         <Eye className="w-4 h-4 mr-2" />
@@ -227,7 +228,7 @@ const PersonalDashboardTab: React.FC<{ activeTab: string }> = ({ activeTab }) =>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 lg:flex-none"
+                        className="flex-1 lg:flex-none border-[#6B1E22] hover:bg-[#6B1E22] hover:text-white"
                         onClick={() => handleDownloadCertificate(certificate.id)}
                         disabled={certificate.status !== 'issued'}
                       >

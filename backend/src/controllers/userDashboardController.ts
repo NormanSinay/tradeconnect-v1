@@ -7,8 +7,8 @@
  * Archivo: backend/src/controllers/userDashboardController.ts
  */
 
-import { Request, Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../types/auth.types';
 import { successResponse, errorResponse } from '../utils/common.utils';
 import { Op } from 'sequelize';
 import { Event } from '../models/Event';
@@ -19,38 +19,67 @@ import { Registration } from '../models/Registration';
 import { User } from '../models/User';
 import { EventCategory } from '../models/EventCategory';
 import { EventType } from '../models/EventType';
+import { EventStatus } from '../models/EventStatus';
+import { Speaker } from '../models/Speaker';
+import { SpeakerEvent } from '../models/SpeakerEvent';
+
+// Mapeo de categorías en inglés a español
+const CATEGORY_TRANSLATIONS: Record<string, string> = {
+  'finance': 'Finanzas',
+  'education': 'Educación',
+  'marketing': 'Marketing',
+  'technology': 'Tecnología',
+  'innovation': 'Innovación',
+  'management': 'Administración',
+  'sales': 'Ventas',
+  'leadership': 'Liderazgo',
+  'hr': 'Recursos Humanos',
+  'business': 'Negocios',
+  'health': 'Salud',
+  'legal': 'Legal',
+  'general': 'General'
+};
 
 /**
  * Obtener eventos disponibles para el usuario
  */
-export const getAvailableEvents = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const getAvailableEvents = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   try {
-    const { category, modality, dateFrom, dateTo, page = 1, limit = 12 } = req.query;
+    const { category, modality, dateFrom, dateTo, page = 1, limit = 12, search } = req.query;
 
     // Construir filtros
     const where: any = {
-      isPublished: true,
-      status: 'open' // Solo eventos abiertos a inscripciones
+      published_at: {
+        [Op.not]: null // Solo eventos publicados
+      }
     };
 
     // Filtro por categoría
     if (category && category !== '') {
-      where['$EventCategory.name$'] = category;
+      where['$eventCategory.name$'] = category;
     }
 
     // Filtro por modalidad
     if (modality && modality !== '') {
-      where.modality = modality;
+      where.is_virtual = modality === 'virtual';
+    }
+
+    // Filtro por búsqueda
+    if (search && search !== '') {
+      where[Op.or] = [
+        { title: { [Op.iLike]: `%${search}%` } },
+        { description: { [Op.iLike]: `%${search}%` } }
+      ];
     }
 
     // Filtro por rango de fechas
     if (dateFrom || dateTo) {
-      where.startDate = {};
+      where.start_date = {};
       if (dateFrom) {
-        where.startDate[Op.gte] = new Date(dateFrom as string);
+        where.start_date[Op.gte] = new Date(dateFrom as string);
       }
       if (dateTo) {
-        where.startDate[Op.lte] = new Date(dateTo as string);
+        where.start_date[Op.lte] = new Date(dateTo as string);
       }
     }
 
@@ -69,29 +98,84 @@ export const getAvailableEvents = async (req: AuthRequest, res: Response): Promi
           model: EventType,
           as: 'eventType',
           attributes: ['name']
+        },
+        {
+          model: EventStatus,
+          as: 'eventStatus',
+          attributes: ['name', 'description']
+        },
+        {
+          model: Speaker,
+          as: 'speakers',
+          through: { attributes: [] },
+          attributes: ['id', 'firstName', 'lastName'],
+          required: false
         }
       ],
       limit: Number(limit),
       offset,
-      order: [['startDate', 'ASC']]
+      order: [['start_date', 'ASC']]
     });
 
     // Formatear eventos para el frontend
-    const formattedEvents = events.map((event: any) => ({
-      id: event.id,
-      title: event.title,
-      description: event.description,
-      date: event.startDate,
-      time: event.startTime,
-      location: event.location,
-      modality: event.modality,
-      price: event.price,
-      capacity: event.maxCapacity || 0,
-      registered: event.currentRegistrations || 0,
-      category: event.eventCategory?.name || 'Sin categoría',
-      image: event.imageUrl,
-      status: event.currentRegistrations >= event.maxCapacity ? 'full' : 'available'
-    }));
+    const formattedEvents = events.map((event: any) => {
+      const startDate = event.start_date ? new Date(event.start_date) : null;
+      const capacity = event.capacity || 0;
+      const registered = event.registered_count || 0;
+
+      // Determinar modalidad: usar is_virtual primero, luego eventType
+      let modality: 'virtual' | 'presencial' | 'hibrido' = 'presencial';
+
+      // Primero verificar eventType para detectar híbridos
+      if (event.eventType?.name) {
+        const typeName = event.eventType.name.toLowerCase();
+        if (typeName.includes('híbrido') || typeName.includes('hibrido') || typeName.includes('hybrid')) {
+          modality = 'hibrido';
+        } else if (event.is_virtual) {
+          modality = 'virtual';
+        } else {
+          modality = 'presencial';
+        }
+      } else {
+        // Si no hay eventType, usar is_virtual
+        modality = event.is_virtual ? 'virtual' : 'presencial';
+      }
+
+      // Determinar ubicación según modalidad
+      let location = event.location || 'Por definir';
+      if (modality === 'virtual') {
+        location = event.virtual_location || 'Plataforma virtual';
+      } else if (modality === 'hibrido') {
+        location = `${event.location || 'Presencial'} / ${event.virtual_location || 'Virtual'}`;
+      }
+
+      // Traducir categoría
+      const categoryName = event.eventCategory?.name || 'general';
+      const translatedCategory = CATEGORY_TRANSLATIONS[categoryName.toLowerCase()] || categoryName;
+
+      // Formatear speakers
+      const speakers = event.speakers?.map((speaker: any) => ({
+        id: speaker.id,
+        fullName: `${speaker.firstName || ''} ${speaker.lastName || ''}`.trim()
+      })) || [];
+
+      return {
+        id: event.id,
+        title: event.title,
+        description: event.description || event.short_description || '',
+        date: event.start_date,
+        time: startDate ? startDate.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' }) : '00:00',
+        location: location,
+        modality: modality,
+        price: event.price || event.min_price || 0,
+        capacity: capacity,
+        registered: registered,
+        category: translatedCategory,
+        image: event.metadata?.imageUrl || null,
+        status: registered >= capacity ? 'full' : 'available',
+        speakers: speakers
+      };
+    });
 
     return res.json(successResponse(formattedEvents, 'Eventos obtenidos exitosamente'));
   } catch (error: any) {
@@ -103,7 +187,7 @@ export const getAvailableEvents = async (req: AuthRequest, res: Response): Promi
 /**
  * Obtener inscripciones del usuario
  */
-export const getUserRegistrations = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const getUserRegistrations = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   try {
     const userId = req.user?.id;
 
@@ -111,16 +195,19 @@ export const getUserRegistrations = async (req: AuthRequest, res: Response): Pro
       return res.status(401).json(errorResponse('Usuario no autenticado', 'UNAUTHORIZED'));
     }
 
-    const registrations = await EventRegistration.findAll({
+    // Buscar en la tabla Registration (no EventRegistration)
+    const registrations = await Registration.findAll({
       where: { userId },
       include: [
         {
           model: Event,
           as: 'event',
+          required: true,
           include: [
             {
               model: EventCategory,
-              as: 'eventCategory'
+              as: 'eventCategory',
+              required: false
             }
           ]
         }
@@ -129,20 +216,57 @@ export const getUserRegistrations = async (req: AuthRequest, res: Response): Pro
     });
 
     // Formatear registraciones para el frontend
-    const formattedRegistrations = registrations.map((reg: any) => ({
-      id: reg.id,
-      eventTitle: reg.event?.title || 'Evento sin título',
-      eventDate: reg.event?.startDate,
-      eventTime: reg.event?.startTime,
-      location: reg.event?.location,
-      modality: reg.event?.modality,
-      status: reg.status,
-      paymentStatus: reg.paymentStatus || 'pending',
-      amount: reg.amount || 0,
-      registrationDate: reg.createdAt,
-      qrCode: reg.qrCode,
-      certificateUrl: reg.certificateUrl
-    }));
+    const formattedRegistrations = registrations.map((reg: any) => {
+      const event = reg.event;
+      const startDate = event.startDate ? new Date(event.startDate) : null;
+
+      // Determinar modalidad del evento
+      let modality: 'virtual' | 'presencial' | 'hibrido' = 'presencial';
+      if (event.eventType?.name) {
+        const typeName = event.eventType.name.toLowerCase();
+        if (typeName.includes('híbrido') || typeName.includes('hibrido') || typeName.includes('hybrid')) {
+          modality = 'hibrido';
+        } else if (event.isVirtual) {
+          modality = 'virtual';
+        }
+      } else if (event.isVirtual) {
+        modality = 'virtual';
+      }
+
+      // Mapear estados de Registration a los que espera el frontend
+      let status = 'pending';
+      if (reg.status === 'PAGADO' || reg.status === 'CONFIRMADO') {
+        status = 'confirmed';
+      } else if (reg.status === 'CANCELADO') {
+        status = 'cancelled';
+      } else if (reg.status === 'PENDIENTE_PAGO') {
+        status = 'pending';
+      }
+
+      // Mapear estado de pago
+      let paymentStatus = 'pending';
+      if (reg.status === 'PAGADO') {
+        paymentStatus = 'paid';
+      } else if (reg.status === 'REEMBOLSADO') {
+        paymentStatus = 'refunded';
+      }
+
+      return {
+        id: reg.id,
+        eventTitle: event.title || 'Evento sin título',
+        eventDate: event.startDate,
+        eventTime: startDate ? startDate.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' }) : '00:00',
+        location: event.location || event.virtualLocation || 'Por definir',
+        modality: modality,
+        status: status,
+        paymentStatus: paymentStatus,
+        amount: reg.finalPrice || 0,
+        registrationDate: reg.createdAt,
+        registrationCode: reg.registrationCode,
+        qrCode: null, // Se generará cuando el pago esté confirmado
+        certificateUrl: null
+      };
+    });
 
     return res.json(successResponse(formattedRegistrations, 'Inscripciones obtenidas exitosamente'));
   } catch (error: any) {
@@ -154,7 +278,7 @@ export const getUserRegistrations = async (req: AuthRequest, res: Response): Pro
 /**
  * Obtener certificados del usuario
  */
-export const getUserCertificates = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const getUserCertificates = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   try {
     const userId = req.user?.id;
 
@@ -196,7 +320,7 @@ export const getUserCertificates = async (req: AuthRequest, res: Response): Prom
 /**
  * Obtener códigos QR del usuario
  */
-export const getUserQrCodes = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const getUserQrCodes = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   try {
     const userId = req.user?.id;
 
@@ -248,7 +372,7 @@ export const getUserQrCodes = async (req: AuthRequest, res: Response): Promise<R
 /**
  * Obtener evaluaciones del usuario
  */
-export const getUserEvaluations = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const getUserEvaluations = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   try {
     const userId = req.user?.id;
 
@@ -269,7 +393,7 @@ export const getUserEvaluations = async (req: AuthRequest, res: Response): Promi
 /**
  * Inscribirse a un evento
  */
-export const registerForEvent = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const registerForEvent = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   try {
     const userId = req.user?.id;
     const eventId = parseInt(req.params.eventId);
@@ -297,22 +421,25 @@ export const registerForEvent = async (req: AuthRequest, res: Response): Promise
     const registration = await EventRegistration.create({
       userId,
       eventId,
-      status: 'pending',
-      paymentStatus: 'pending',
-      amount: event.price || 0,
-      registrationDate: new Date()
+      status: 'confirmed', // Cambiar a confirmado inmediatamente
+      paymentStatus: event.price > 0 ? 'pending' : 'paid', // Si es gratuito, marcar como pagado
+      paymentAmount: event.price || 0
     });
+
+    // Actualizar contador de registrados en el evento
+    await event.increment('registeredCount', { by: 1 });
+    await event.reload(); // Recargar para obtener el valor actualizado
 
     return res.status(201).json(successResponse({
       id: registration.id,
       eventTitle: event.title,
       eventDate: event.startDate,
-      eventTime: event.startTime,
+      eventTime: event.startDate, // Usar startDate como fallback
       location: event.location,
-      modality: event.modality,
+      modality: event.isVirtual ? 'virtual' : 'presencial', // Determinar basado en isVirtual
       status: registration.status,
       paymentStatus: registration.paymentStatus,
-      amount: registration.amount,
+      amount: registration.paymentAmount,
       registrationDate: registration.createdAt
     }, 'Inscripción realizada exitosamente'));
   } catch (error: any) {
@@ -324,7 +451,7 @@ export const registerForEvent = async (req: AuthRequest, res: Response): Promise
 /**
  * Enviar evaluación de evento
  */
-export const submitEvaluation = async (req: AuthRequest, res: Response): Promise<Response> => {
+export const submitEvaluation = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   try {
     const userId = req.user?.id;
     const evaluationId = parseInt(req.params.evaluationId);
@@ -345,7 +472,7 @@ export const submitEvaluation = async (req: AuthRequest, res: Response): Promise
 /**
  * Descargar código QR
  */
-export const downloadQrCode = async (req: AuthRequest, res: Response): Promise<any> => {
+export const downloadQrCode = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const userId = req.user?.id;
     const qrId = parseInt(req.params.qrId);
@@ -370,12 +497,9 @@ export const downloadQrCode = async (req: AuthRequest, res: Response): Promise<a
       return res.status(404).json(errorResponse('Código QR no encontrado', 'QR_NOT_FOUND'));
     }
 
-    // Incrementar contador de descargas
-    await qrCode.update({ downloadCount: (qrCode.downloadCount || 0) + 1 });
-
     // Retornar el QR code como blob/imagen
-    // Por ahora retornar el string del QR code
-    return res.json(successResponse({ qrCode: qrCode.qrCode }, 'Código QR obtenido exitosamente'));
+    // Por ahora retornar el hash del QR code
+    return res.json(successResponse({ qrHash: qrCode.qrHash, qrData: qrCode.qrData }, 'Código QR obtenido exitosamente'));
   } catch (error: any) {
     console.error('Error downloading QR code:', error);
     return res.status(500).json(errorResponse('Error descargando código QR', error.message));
@@ -385,7 +509,7 @@ export const downloadQrCode = async (req: AuthRequest, res: Response): Promise<a
 /**
  * Descargar certificado
  */
-export const downloadCertificate = async (req: AuthRequest, res: Response): Promise<any> => {
+export const downloadCertificate = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {
     const userId = req.user?.id;
     const certificateId = parseInt(req.params.certificateId);
@@ -404,7 +528,7 @@ export const downloadCertificate = async (req: AuthRequest, res: Response): Prom
 
     // Retornar URL de descarga
     return res.json(successResponse({
-      downloadUrl: certificate.downloadUrl,
+      pdfUrl: certificate.pdfUrl,
       certificateNumber: certificate.certificateNumber
     }, 'Certificado obtenido exitosamente'));
   } catch (error: any) {

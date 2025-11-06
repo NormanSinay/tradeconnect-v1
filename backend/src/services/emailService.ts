@@ -297,7 +297,7 @@ class EmailService {
   html: `
     <div style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 40px 0; color: #333;">
       <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
-        
+
         <div style="background: linear-gradient(90deg, #007BFF, #00C6FF); color: white; padding: 20px 30px; text-align: center;">
           <h1 style="margin: 0; font-size: 24px;">Verificación de Dos Factores</h1>
         </div>
@@ -337,6 +337,173 @@ class EmailService {
     } catch (error) {
       logger.error('Error sending 2FA OTP:', error);
       throw error;
+    }
+  }
+
+  async sendRegistrationConfirmation(to: string, data: {
+    firstName: string;
+    lastName: string;
+    eventTitle: string;
+    eventDate: string;
+    eventTime: string;
+    eventLocation: string;
+    registrationCode: string;
+    isPendingPayment: boolean;
+    paymentMethod?: string;
+    amount?: number;
+    isVirtual?: boolean;
+    virtualLink?: string;
+  }): Promise<void> {
+    try {
+      const isPending = data.isPendingPayment;
+      const isBankTransfer = data.paymentMethod === 'bank_transfer';
+
+      // Determinar qué ubicación mostrar según el estado del pago
+      let locationDisplay = data.eventLocation;
+      if (data.isVirtual && !isPending && data.virtualLink) {
+        // Solo mostrar el link de Zoom si el pago está confirmado
+        locationDisplay = `<a href="${data.virtualLink}" style="color: #6B1E22; text-decoration: underline;">${data.virtualLink}</a>`;
+      } else if (data.isVirtual && isPending) {
+        // Si es virtual pero el pago está pendiente, solo mostrar "Virtual"
+        locationDisplay = 'Virtual (el link se enviará una vez confirmado el pago)';
+      }
+
+      const mailOptions = {
+        from: process.env.SMTP_FROM || 'noreply@tradeconnect.gt',
+        to,
+        subject: isPending
+          ? `Inscripción Registrada - ${data.eventTitle}`
+          : `Confirmación de Inscripción - ${data.eventTitle}`,
+        html: `
+    <div style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 40px 0; color: #333;">
+      <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden;">
+
+        <div style="background: linear-gradient(90deg, #6B1E22, #8a2b30); color: white; padding: 20px 30px; text-align: center;">
+          <h1 style="margin: 0; font-size: 24px;">${isPending ? '¡Inscripción Registrada!' : '¡Inscripción Confirmada!'}</h1>
+        </div>
+
+        <div style="padding: 30px;">
+          <p style="font-size: 16px;">Hola <strong>${data.firstName} ${data.lastName}</strong>,</p>
+
+          ${isPending ? `
+            <p style="font-size: 15px; line-height: 1.6;">
+              Tu inscripción ha sido registrada exitosamente y está <strong style="color: #f0ad4e;">pendiente de pago</strong>.
+            </p>
+
+            ${isBankTransfer ? `
+              <div style="background-color: #fff3cd; border-left: 4px solid #f0ad4e; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                <p style="margin: 0; font-size: 14px; color: #856404;">
+                  <strong>⏳ Pendiente de confirmación</strong><br>
+                  Un ejecutivo se contactará contigo en las próximas 24 horas para proporcionarte los datos bancarios y completar el proceso de inscripción.
+                </p>
+              </div>
+            ` : `
+              <div style="background-color: #fff3cd; border-left: 4px solid #f0ad4e; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                <p style="margin: 0; font-size: 14px; color: #856404;">
+                  <strong>⚠️ Importante:</strong> Tu inscripción está pendiente de pago. Una vez completado el pago, recibirás tu código QR de acceso${data.isVirtual ? ' y el link de acceso al evento virtual' : ''}.
+                </p>
+              </div>
+            `}
+          ` : `
+            <p style="font-size: 15px; line-height: 1.6;">
+              ¡Gracias por tu inscripción! Tu pago ha sido procesado exitosamente y tu inscripción está <strong style="color: #28a745;">confirmada</strong>.
+            </p>
+
+            <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; border-radius: 4px;">
+              <p style="margin: 0; font-size: 14px; color: #155724;">
+                <strong>✓ Pago confirmado</strong><br>
+                Tu inscripción ha sido confirmada. ${data.isVirtual ? 'Puedes acceder al evento usando el link más abajo.' : 'Recibirás tu código QR de acceso próximamente.'}
+              </p>
+            </div>
+          `}
+
+          <div style="background-color: #f4f4f4; border-radius: 8px; padding: 20px; margin: 25px 0;">
+            <h3 style="margin-top: 0; color: #6B1E22; font-size: 18px;">Detalles del Evento</h3>
+            <table style="width: 100%; font-size: 14px;">
+              <tr>
+                <td style="padding: 8px 0; color: #666;"><strong>Evento:</strong></td>
+                <td style="padding: 8px 0;">${data.eventTitle}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;"><strong>Fecha:</strong></td>
+                <td style="padding: 8px 0;">${data.eventDate}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;"><strong>Hora:</strong></td>
+                <td style="padding: 8px 0;">${data.eventTime}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;"><strong>${data.isVirtual ? 'Acceso' : 'Ubicación'}:</strong></td>
+                <td style="padding: 8px 0;">${locationDisplay}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #666;"><strong>Código de Inscripción:</strong></td>
+                <td style="padding: 8px 0;"><strong>${data.registrationCode}</strong></td>
+              </tr>
+              ${data.amount ? `
+              <tr>
+                <td style="padding: 8px 0; color: #666;"><strong>Monto:</strong></td>
+                <td style="padding: 8px 0;">GTQ ${data.amount.toFixed(2)}</td>
+              </tr>
+              ` : ''}
+            </table>
+          </div>
+
+          ${isBankTransfer && isPending ? `
+            <div style="background-color: #e7f3ff; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h4 style="margin-top: 0; color: #004085; font-size: 16px;">Próximos pasos:</h4>
+              <ol style="margin: 0; padding-left: 20px; color: #004085;">
+                <li style="margin: 8px 0;">Un ejecutivo se contactará contigo en las próximas 24 horas</li>
+                <li style="margin: 8px 0;">Te proporcionaremos los datos bancarios para realizar el depósito o transferencia</li>
+                <li style="margin: 8px 0;">Una vez confirmado el pago, recibirás tu código QR de acceso${data.isVirtual ? ' y el link del evento' : ''}</li>
+              </ol>
+            </div>
+          ` : ''}
+
+          ${!isPending && data.isVirtual && data.virtualLink ? `
+            <div style="background-color: #e3f2fd; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+              <h4 style="margin-top: 0; color: #1565c0; font-size: 16px;">🎥 Acceso al Evento Virtual</h4>
+              <p style="color: #1976d2; margin: 15px 0;">Tu inscripción está confirmada. Únete al evento usando el siguiente enlace:</p>
+              <a href="${data.virtualLink}"
+                 style="background: #1976d2; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px;
+                        font-size: 16px; display: inline-block; font-weight: bold; margin: 10px 0;">
+                 🔗 Unirse al Evento
+              </a>
+              <p style="color: #666; font-size: 12px; margin-top: 15px;">
+                Guarda este enlace para acceder el día del evento
+              </p>
+            </div>
+          ` : ''}
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:5175'}/dashboard/user"
+               style="background: #6B1E22; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px;
+                      font-size: 16px; display: inline-block; font-weight: bold;">
+               Ver Mis Inscripciones
+            </a>
+          </div>
+
+          <p style="font-size: 14px; color: #555; line-height: 1.6;">
+            Guarda este correo para futuras referencias. Si tienes alguna pregunta, no dudes en contactarnos.
+          </p>
+        </div>
+
+        <div style="background: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #777;">
+          TradeConnect - Plataforma de Gestión de Eventos<br>
+          © ${new Date().getFullYear()} TradeConnect. Todos los derechos reservados.
+        </div>
+
+      </div>
+    </div>
+  `,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      logger.info(`Registration confirmation email sent to ${to} for event ${data.eventTitle}`);
+    } catch (error) {
+      logger.error('Error sending registration confirmation email:', error);
+      // No lanzar el error para no bloquear el flujo de inscripción
+      // Solo registramos el error
     }
   }
 

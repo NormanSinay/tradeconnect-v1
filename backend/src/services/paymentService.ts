@@ -10,6 +10,7 @@ import { Transaction, Op } from 'sequelize';
 import { logger } from '../utils/logger';
 import { Payment, PaymentMethod, Refund, PaymentReconciliation } from '../models';
 import { Registration } from '../models/Registration';
+import { Event } from '../models/Event';
 import {
   PaymentInitiationData,
   PaymentConfirmationData,
@@ -242,6 +243,15 @@ export class PaymentService {
             { status: 'CONFIRMADO' },
             { where: { id: payment.registrationId } }
           );
+
+          // Incrementar contador de participantes del evento
+          const registration = await Registration.findByPk(payment.registrationId);
+          if (registration) {
+            const event = await Event.findByPk(registration.eventId);
+            if (event) {
+              await event.increment('registeredCount', { by: 1 });
+            }
+          }
         }
 
         // Disparar evento correspondiente
