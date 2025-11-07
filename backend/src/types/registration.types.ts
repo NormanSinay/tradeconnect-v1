@@ -119,6 +119,8 @@ export interface RegistrationResponse {
   reservationExpiresAt?: Date;
   capacityLockId?: string;
   message: string;
+  registration?: any;
+  isExisting?: boolean;
 }
 
 /**

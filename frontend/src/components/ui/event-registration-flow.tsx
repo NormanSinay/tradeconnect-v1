@@ -210,24 +210,26 @@ const EventRegistrationFlow: React.FC<EventRegistrationFlowProps> = ({
       // Definir opciones de pago estáticas
       const gateways: PaymentGateway[] = [
         {
-          id: 1,
+          id: '1',
           name: 'card',
           displayName: 'Tarjeta de crédito/débito',
           description: 'Paga con tu tarjeta de crédito o débito',
           isActive: true,
           fee: 2.9,
           feeType: 'percentage',
-          currency: 'GTQ'
+          currency: 'GTQ',
+          supportedCurrencies: ['GTQ', 'USD']
         },
         {
-          id: 2,
+          id: '2',
           name: 'bank_transfer',
           displayName: 'Depósito o transferencia bancaria',
           description: 'Realizar pago por depósito o transferencia',
           isActive: true,
           fee: 0,
           feeType: 'fixed',
-          currency: 'GTQ'
+          currency: 'GTQ',
+          supportedCurrencies: ['GTQ']
         }
       ]
 

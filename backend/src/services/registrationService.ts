@@ -100,6 +100,12 @@ export class RegistrationService {
               success: true,
               message: 'Tienes una inscripción pendiente. Continúa con el pago.',
               data: {
+                registrationId: existingRegistration.id,
+                registrationCode: existingRegistration.registrationCode,
+                status: existingRegistration.status,
+                totalAmount: existingRegistration.finalPrice,
+                reservationExpiresAt: existingRegistration.reservationExpiresAt,
+                message: 'Tienes una inscripción pendiente. Continúa con el pago.',
                 registration: existingRegistration,
                 isExisting: true
               },
@@ -180,7 +186,7 @@ export class RegistrationService {
         basePrice: priceCalculation.basePrice,
         discountAmount: priceCalculation.discountAmount,
         finalPrice: priceCalculation.finalPrice,
-        reservationExpiresAt: isFreeEvent ? null : reservationExpiresAt,
+        reservationExpiresAt: isFreeEvent ? undefined : reservationExpiresAt,
         customFields: data.customFields
       });
 
@@ -259,7 +265,8 @@ export class RegistrationService {
           ? 'Inscripción confirmada exitosamente. Revisa tu correo para más detalles.'
           : event.isVirtual
           ? 'Inscripción creada exitosamente. Complete el pago para confirmar.'
-          : 'Inscripción creada exitosamente. Complete el pago antes de que expire la reserva.'
+          : 'Inscripción creada exitosamente. Complete el pago antes de que expire la reserva.',
+        registration: registration
       };
 
       return {
