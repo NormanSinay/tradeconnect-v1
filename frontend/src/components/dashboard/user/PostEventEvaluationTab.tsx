@@ -30,9 +30,10 @@ const PostEventEvaluationTab: React.FC<{ activeTab: string }> = ({ activeTab }) 
   const loadEvaluations = async () => {
     try {
       setLoading(true);
-      const evaluationsData = await withErrorHandling(async () => {
-        return UserDashboardService.getUserEvaluations();
-      }, 'Error cargando evaluaciones');
+      const evaluationsData = await withErrorHandling(
+        UserDashboardService.getUserEvaluations,
+        'Error cargando evaluaciones'
+      )();
 
       setEvaluations(evaluationsData || []);
     } catch (error) {
@@ -52,11 +53,11 @@ const PostEventEvaluationTab: React.FC<{ activeTab: string }> = ({ activeTab }) 
 
     setIsSubmitting(true);
     try {
-      const submit = withErrorHandling(async () => {
-        await UserDashboardService.submitEvaluation(selectedEvaluation.id, rating, comments);
-      }, 'Error enviando evaluación');
+      await withErrorHandling(
+        () => UserDashboardService.submitEvaluation(selectedEvaluation.id, rating, comments),
+        'Error enviando evaluación'
+      );
 
-      await submit();
       toast.success('Evaluación enviada exitosamente');
 
       // Recargar evaluaciones
@@ -111,7 +112,7 @@ const PostEventEvaluationTab: React.FC<{ activeTab: string }> = ({ activeTab }) 
     );
   }
 
-  const pendingEvaluations = evaluations.filter(e => e.status === 'pending').length;
+  const pendingEvaluations = Array.isArray(evaluations) ? evaluations.filter(e => e.status === 'pending').length : 0;
 
   return (
     <div className="space-y-6">
@@ -127,7 +128,7 @@ const PostEventEvaluationTab: React.FC<{ activeTab: string }> = ({ activeTab }) 
       )}
 
       {/* Lista de evaluaciones */}
-      {evaluations.length === 0 ? (
+      {(!Array.isArray(evaluations) || evaluations.length === 0) ? (
         <Card>
           <CardContent className="text-center py-12">
             <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -137,7 +138,7 @@ const PostEventEvaluationTab: React.FC<{ activeTab: string }> = ({ activeTab }) 
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {evaluations.map((evaluation, index) => (
+          {(Array.isArray(evaluations) ? evaluations : []).map((evaluation, index) => (
             <motion.div
               key={evaluation.id}
               initial={{ opacity: 0, y: 20 }}

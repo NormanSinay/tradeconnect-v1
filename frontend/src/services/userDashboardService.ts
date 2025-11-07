@@ -206,7 +206,7 @@ export class UserDashboardService {
     if (filters?.limit) queryParams.append('limit', filters.limit.toString());
     if (filters?.search) queryParams.append('search', filters.search);
 
-    const url = `${this.BASE_URL}/events?${queryParams}`;
+    const url = `${UserDashboardService.BASE_URL}/events?${queryParams}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -232,7 +232,7 @@ export class UserDashboardService {
   static async getUserRegistrations(): Promise<UserRegistration[]> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/registrations`, {
+    const response = await fetch(`${UserDashboardService.BASE_URL}/registrations`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -256,7 +256,7 @@ export class UserDashboardService {
   static async getUserCertificates(): Promise<UserCertificate[]> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/certificates`, {
+    const response = await fetch(`${UserDashboardService.BASE_URL}/certificates`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -280,7 +280,7 @@ export class UserDashboardService {
   static async getUserQrCodes(): Promise<QrCodeData[]> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/qr-codes`, {
+    const response = await fetch(`${UserDashboardService.BASE_URL}/qr-codes`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -304,7 +304,7 @@ export class UserDashboardService {
   static async getUserEvaluations(): Promise<EvaluationData[]> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/evaluations`, {
+    const response = await fetch(`${UserDashboardService.BASE_URL}/evaluations`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -328,7 +328,7 @@ export class UserDashboardService {
   static async submitEvaluation(evaluationId: number, rating: number, comments?: string): Promise<void> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/evaluations/${evaluationId}`, {
+    const response = await fetch(`${UserDashboardService.BASE_URL}/evaluations/${evaluationId}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -351,7 +351,7 @@ export class UserDashboardService {
   static async registerForEvent(eventId: number): Promise<UserRegistration> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/events/${eventId}/register`, {
+    const response = await fetch(`${UserDashboardService.BASE_URL}/events/${eventId}/register`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -375,7 +375,7 @@ export class UserDashboardService {
   static async downloadQrCode(qrId: number): Promise<Blob> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/qr-codes/${qrId}/download`, {
+    const response = await fetch(`${UserDashboardService.BASE_URL}/qr-codes/${qrId}/download`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -396,7 +396,7 @@ export class UserDashboardService {
   static async downloadCertificate(certificateId: number): Promise<Blob> {
     const { token } = useAuthStore.getState();
 
-    const response = await fetch(`${this.BASE_URL}/certificates/${certificateId}/download`, {
+    const response = await fetch(`${UserDashboardService.BASE_URL}/certificates/${certificateId}/download`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

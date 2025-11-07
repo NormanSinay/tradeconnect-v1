@@ -49,23 +49,29 @@ const EventCatalogTab: React.FC<EventCatalogTabProps> = ({ onRegisterEvent }) =>
 
   // Función para transformar UserEvent a BackendEvent
   const transformToBackendEvent = (userEvent: UserEvent): BackendEvent => {
+    // Crear fechas por defecto si no existen
+    const defaultStartDate = new Date();
+    defaultStartDate.setDate(defaultStartDate.getDate() + 7); // Una semana desde hoy
+    const defaultEndDate = new Date(defaultStartDate);
+    defaultEndDate.setHours(defaultStartDate.getHours() + 2); // 2 horas después
+
     return {
       id: userEvent.id,
-      title: userEvent.title,
-      description: userEvent.description,
-      shortDescription: userEvent.description,
-      startDate: userEvent.date,
-      endDate: userEvent.date, // No tenemos endDate separado
-      price: typeof userEvent.price === 'string' ? parseFloat(userEvent.price) : userEvent.price,
+      title: userEvent.title || 'Sin título',
+      description: userEvent.description || 'Sin descripción',
+      shortDescription: userEvent.description || 'Sin descripción',
+      startDate: userEvent.date || defaultStartDate.toISOString(),
+      endDate: userEvent.date || defaultEndDate.toISOString(),
+      price: typeof userEvent.price === 'string' ? parseFloat(userEvent.price) || 0 : userEvent.price || 0,
       currency: 'GTQ',
-      modality: userEvent.modality,
+      modality: userEvent.modality || 'presencial',
       isVirtual: userEvent.modality === 'virtual',
-      location: userEvent.modality !== 'virtual' ? userEvent.location : undefined,
-      virtualLocation: userEvent.modality === 'virtual' ? userEvent.location : undefined,
-      capacity: userEvent.capacity,
-      registeredCount: userEvent.registered,
+      location: userEvent.modality !== 'virtual' ? userEvent.location || 'Por definir' : undefined,
+      virtualLocation: userEvent.modality === 'virtual' ? userEvent.location || 'Plataforma virtual' : undefined,
+      capacity: userEvent.capacity || 0,
+      registeredCount: userEvent.registered || 0,
       eventType: { name: 'Capacitación', id: 1 },
-      eventCategory: { name: userEvent.category, id: 1 },
+      eventCategory: { name: userEvent.category || 'General', id: 1 },
       eventStatus: { name: 'published', id: 1 },
       image: userEvent.image,
       featured: false,
@@ -98,6 +104,11 @@ const EventCatalogTab: React.FC<EventCatalogTabProps> = ({ onRegisterEvent }) =>
       const transformedEvents = Array.isArray(eventsData)
         ? eventsData.map(transformToBackendEvent)
         : [];
+
+      console.log('EventCatalogTab - Events loaded:', transformedEvents.length);
+      if (transformedEvents.length > 0) {
+        console.log('EventCatalogTab - First event:', transformedEvents[0]);
+      }
 
       setEvents(transformedEvents);
       setTotalPages(Math.ceil(transformedEvents.length / 12));

@@ -328,7 +328,7 @@ export const getUserQrCodes = async (req: AuthenticatedRequest, res: Response): 
       return res.status(401).json(errorResponse('Usuario no autenticado', 'UNAUTHORIZED'));
     }
 
-    // Obtener QR codes con información del evento a través de EventRegistration
+    // Obtener QR codes con información del evento a través de Registration
     const qrCodes = await QRCode.findAll({
       include: [
         {
@@ -340,7 +340,7 @@ export const getUserQrCodes = async (req: AuthenticatedRequest, res: Response): 
             {
               model: Event,
               as: 'event',
-              attributes: ['title', 'startDate', 'startTime', 'location', 'modality']
+              attributes: ['title', 'startDate', 'endDate', 'location', 'isVirtual', 'virtualLocation']
             }
           ]
         }
@@ -349,18 +349,35 @@ export const getUserQrCodes = async (req: AuthenticatedRequest, res: Response): 
     });
 
     // Formatear QR codes para el frontend con datos reales
-    const formattedQrCodes = qrCodes.map((qr: any) => ({
-      id: qr.id,
-      eventTitle: qr.eventRegistration?.event?.title || 'Sin evento',
-      eventDate: qr.eventRegistration?.event?.startDate || null,
-      eventTime: qr.eventRegistration?.event?.startTime || '00:00',
-      location: qr.eventRegistration?.event?.location || 'Sin ubicación',
-      modality: qr.eventRegistration?.event?.modality || 'presencial',
-      qrCode: qr.qrHash, // Usar qrHash en lugar de qrCode
-      status: qr.status,
-      generatedDate: qr.createdAt,
-      downloadCount: 0 // Campo no existe en el modelo actual
-    }));
+    const formattedQrCodes = qrCodes.map((qr: any) => {
+      const event = qr.eventRegistration?.event;
+      const startDate = event?.startDate ? new Date(event.startDate) : null;
+
+      // Determinar modalidad
+      let modality: 'virtual' | 'presencial' | 'hibrido' = 'presencial';
+      if (event?.isVirtual) {
+        modality = 'virtual';
+      }
+
+      // Determinar ubicación
+      let location = event?.location || 'Por definir';
+      if (modality === 'virtual') {
+        location = event?.virtualLocation || 'Plataforma virtual';
+      }
+
+      return {
+        id: qr.id,
+        eventTitle: event?.title || 'Sin evento',
+        eventDate: event?.startDate || null,
+        eventTime: startDate ? startDate.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' }) : '00:00',
+        location: location,
+        modality: modality,
+        qrCode: qr.qrData || qr.qrHash, // Usar qrData o qrHash
+        status: qr.status || 'active',
+        generatedDate: qr.createdAt,
+        downloadCount: 0 // Campo no existe en el modelo actual
+      };
+    });
 
     return res.json(successResponse(formattedQrCodes, 'Códigos QR obtenidos exitosamente'));
   } catch (error: any) {

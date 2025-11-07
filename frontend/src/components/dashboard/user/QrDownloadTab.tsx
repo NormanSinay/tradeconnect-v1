@@ -28,9 +28,10 @@ const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
   const loadQrCodes = async () => {
     try {
       setLoading(true);
-      const qrCodesData = await withErrorHandling(async () => {
-        return UserDashboardService.getUserQrCodes();
-      }, 'Error cargando códigos QR');
+      const qrCodesData = await withErrorHandling(
+        UserDashboardService.getUserQrCodes,
+        'Error cargando códigos QR'
+      )();
 
       setQrCodes(qrCodesData || []);
     } catch (error) {
@@ -44,8 +45,12 @@ const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
   // Función para descargar código QR
   const handleDownloadQr = async (qrId: number) => {
     try {
-      const download = withErrorHandling(async () => {
-        const blob = await UserDashboardService.downloadQrCode(qrId);
+      const blob = await withErrorHandling(
+        UserDashboardService.downloadQrCode,
+        'Error descargando código QR'
+      )(qrId);
+
+      if (blob) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -54,10 +59,9 @@ const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-      }, 'Error descargando código QR');
 
-      await download();
-      toast.success('Código QR descargado exitosamente');
+        toast.success('Código QR descargado exitosamente');
+      }
     } catch (error) {
       console.error('Error downloading QR code:', error);
     }
@@ -116,8 +120,8 @@ const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
     );
   }
 
-  const activeQrs = qrCodes.filter(qr => qr.status === 'active').length;
-  const usedQrs = qrCodes.filter(qr => qr.status === 'used').length;
+  const activeQrs = Array.isArray(qrCodes) ? qrCodes.filter(qr => qr.status === 'active').length : 0;
+  const usedQrs = Array.isArray(qrCodes) ? qrCodes.filter(qr => qr.status === 'used').length : 0;
 
   return (
     <div className="space-y-6">
@@ -138,7 +142,7 @@ const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
               <QrCode className="w-8 h-8 text-[#4CAF50]" />
               <div>
                 <p className="text-sm text-gray-600">Total QR</p>
-                <p className="text-2xl font-bold">{qrCodes.length}</p>
+                <p className="text-2xl font-bold">{Array.isArray(qrCodes) ? qrCodes.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -170,7 +174,7 @@ const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
       </div>
 
       {/* Lista de códigos QR */}
-      {qrCodes.length === 0 ? (
+      {(!Array.isArray(qrCodes) || qrCodes.length === 0) ? (
         <Card>
           <CardContent className="text-center py-12">
             <QrCode className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -180,7 +184,7 @@ const QrDownloadTab: React.FC<{ activeTab: string }> = ({ activeTab }) => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {qrCodes.map((qrItem, index) => (
+          {(Array.isArray(qrCodes) ? qrCodes : []).map((qrItem, index) => (
             <motion.div
               key={qrItem.id}
               initial={{ opacity: 0, y: 20 }}
